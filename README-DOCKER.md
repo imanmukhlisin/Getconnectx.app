@@ -1,73 +1,100 @@
-# Docker Setup - Getconnectx.app
+# 🐳 Panduan Lengkap Docker + WSL 2 - Getconnectx.app
 
-Instruksi ini khusus untuk menjalankan aplikasi menggunakan infrastruktur Docker kustom yang telah disiapkan.
-
-## Prasyarat
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) sudah terinstall dan berjalan.
-- [WSL 2](https://learn.microsoft.com/en-us/windows/wsl/install) sudah teraktifkan (Wajib untuk Windows).
+Dokumen ini berisi panduan operasional lengkap untuk menjalankan proyek **ConnectX** menggunakan infrastruktur Docker di lingkungan Windows dengan **WSL 2**.
 
 ---
 
-## Langkah Instalasi & Menjalankan
+## 🛠️ 1. Persiapan Awal (Prerequisites)
+Pastikan komponen berikut sudah siap di komputer Anda:
+1.  **Docker Desktop for Windows**: Pastikan "WSL 2 based engine" tercentang di Settings.
+2.  **WSL 2 (Ubuntu)**: Pastikan distro Linux Anda terdaftar di Docker Desktop (Settings > Resources > WSL Integration).
+3.  **VS Code + Remote Development Extension**: Sangat disarankan untuk mengedit file langsung dari dalam WSL (`\\wsl$\...`) untuk performa terbaik.
 
-### 1. Build & Jalankan Container
-Buka terminal (PowerShell) di folder proyek, lalu jalankan:
+---
+
+## 🚀 2. Cara Menjalankan (Deployment)
+
+### Langkah A: Build & Start
+Jalankan perintah ini di PowerShell pada root proyek:
 ```powershell
 wsl docker compose up -d --build
 ```
-*Gunakan `wsl` di depan perintah jika Anda tidak memiliki `docker` di environment variabel PowerShell.*
+*Gunakan `wsl` di awal jika Anda menjalankan dari PowerShell/CMD.*
 
-### 2. Konfigurasi Aplikasi (Pertama Kali)
-Jalankan perintah ini di dalam container `app`:
+### Langkah B: Inisialisasi Aplikasi (Satu Kali Saja)
+Setelah container berjalan, jalankan ketiga perintah ini untuk sinkronisasi database dan library:
 ```powershell
-# Install library PHP
-wsl docker exec -it getconnectx-app composer install
+# 1. Sinkronisasi Library PHP
+wsl docker exec -it getconnectx-app composer update
 
-# Generate App Key (Jika belum ada di .env)
+# 2. Generate App Key (Jika belum ada di .env)
 wsl docker exec -it getconnectx-app php artisan key:generate
 
-# Jalankan Migrasi Database
+# 3. Migrasi Database
 wsl docker exec -it getconnectx-app php artisan migrate
 ```
 
 ---
 
-## Akses Layanan
-- **Aplikasi:** [http://localhost](http://localhost)
-- **Mailpit Dashboard:** [http://localhost:8025](http://localhost:8025)
-- **Database (PostgreSQL):** `localhost:5432`
+## 🔗 3. Akses Layanan
 
----
-
-## Perintah Umum
-
-| Tindakan | Perintah |
+| Layanan | URL / Alamat |
 | :--- | :--- |
-| Mematikan Container | `wsl docker compose down` |
-| Restart Container | `wsl docker compose restart` |
-| Melihat Log Aplikasi | `wsl docker compose logs -f app` |
-| Masuk ke Terminal Container | `wsl docker exec -it getconnectx-app bash` |
+| **Aplikasi (Nginx)** | [http://localhost](http://localhost) |
+| **Mailpit (Cek Email)** | [http://localhost:8025](http://localhost:8025) |
+| **Database (PostgreSQL)** | `localhost:5432` |
+| **User/Pass DB** | Ada di file `.env` (Default: `postgres`/`getconnectx2026`) |
 
 ---
 
-## Testing
-Untuk menjalankan unit test atau feature test Laravel di dalam Docker:
+## 💻 4. Perintah Operasional Penting
 
-### 1. Jalankan Semua Test
+### Mengelola Container
+- **Stop**: `wsl docker compose stop`
+- **Start (Tanpa Rebuild)**: `wsl docker compose start`
+- **Matikan & Hapus**: `wsl docker compose down`
+- **Restart**: `wsl docker compose restart`
+
+### Bekerja di Dalam Container
+Jika ingin menjalankan perintah `artisan` atau `composer` lainnya:
 ```powershell
-wsl docker exec -it getconnectx-app php artisan test
+wsl docker exec -it getconnectx-app bash
 ```
-
-### 2. Jalankan Test Spesifik
-```powershell
-wsl docker exec -it getconnectx-app php artisan test --filter NamaTest
-```
-
-> [!TIP]
-> Secara default, Laravel akan menggunakan database yang sama dengan development. Jika Anda ingin menggunakan database terpisah untuk testing (misal in-memory sqlite), atur di file `phpunit.xml`.
+Di dalam bash tersebut, Anda bisa langsung mengetik `php artisan ...` tanpa perlu `wsl docker exec` lagi.
 
 ---
 
-## ⚠️ Catatan Penting
-- **Line Endings (LF):** Pastikan file `Dockerfile`, `.env`, dan `docker-compose.yml` menggunakan format **LF** (bukan CRLF). Jika ada error bash, jalankan `wsl dos2unix <filename>` di WSL.
-- **Port 80:** Jika port 80 sudah digunakan aplikasi lain, Anda bisa mengubahnya di `docker-compose.yml` pada bagian service `web`.
+## 🧪 5. Testing API (Postman)
+Aplikasi ini sudah menggunakan **Laravel 11 API Scaffolding**.
+- **Base URL**: `http://localhost/api/v1`
+- **Endpoint Test**: `GET http://localhost/api/user` (Memerlukan token).
+
+---
+
+## ⚠️ 6. Troubleshooting & Tips (Penting!)
+
+### A. Masalah Line Endings (CRLF vs LF)
+Windows menggunakan `\r\n` sedangkan Linux (Docker) menggunakan `\n`. Jika Anda mendapat error `bash: ...: command not found`, pastikan file config (`.env`, `Dockerfile`, `docker-compose.yml`) menggunakan format **LF**.
+*   **Fix via WSL**: `wsl dos2unix <nama_file>`
+
+### B. Masalah Mount Volume / Folder Kosong
+Jika folder di dalam Docker terlihat kosong, pastikan path di `docker-compose.yml` menggunakan path absolut WSL:
+```yaml
+volumes:
+  - /mnt/d/CODEVITS/Getconnectx.app:/var/www
+```
+
+### C. Masalah Git "Unrelated Histories"
+Jika saat `git pull` muncul error ini, gunakan flag:
+```bash
+git pull origin develop --allow-unrelated-histories
+```
+Atau jika terlalu banyak konflik, lakukan **Selective Checkout** seperti yang kita lakukan sebelumnya.
+
+---
+
+## 📦 7. Versi PHP
+Saat ini proyek dikonfigurasi menggunakan **PHP 8.2-FPM**. Jika ingin mengganti versi:
+1. Ubah `FROM php:X.X-fpm` di file `Dockerfile`.
+2. Hapus container lama: `wsl docker compose down`.
+3. Build ulang: `wsl docker compose up -d --build`.

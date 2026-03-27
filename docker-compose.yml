@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
     working_dir: /var/www
     volumes:
-      - ./:/var/www
+      - /mnt/d/CODEVITS/Getconnectx.app:/var/www
     networks:
       - getconnectx
     depends_on:
@@ -25,8 +25,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./:/var/www
-      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+      - /mnt/d/CODEVITS/Getconnectx.app:/var/www
+      - /mnt/d/CODEVITS/Getconnectx.app/docker/nginx/conf.d/:/etc/nginx/conf.d/
     networks:
       - getconnectx
     depends_on:
