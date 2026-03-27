@@ -1,0 +1,256 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1\Auth;
+
+use App\Exceptions\WhatsAppDeliveryException;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\SendWhatsAppOtpRequest;
+use App\Http\Requests\Auth\VerifyEmailRequest;
+use App\Http\Requests\Auth\VerifyWhatsAppRequest;
+use App\Models\User;
+use App\Services\EmailVerificationService;
+use App\Services\OtpService;
+use App\Services\WhatsAppService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+class AuthController extends Controller
+{
+    public function __construct(
+        private readonly EmailVerificationService $emailService,
+        private readonly WhatsAppService          $whatsAppService,
+        private readonly OtpService               $otpService,
+    ) {}
+
+    // =========================================================================
+    //  STEP 1 – Register (Manual)
+    // =========================================================================
+
+    /**
+     * POST /api/v1/auth/register
+     *
+     * Membuat akun baru dengan tipe entitas yang ditentukan.
+     * Mengembalikan temporary Sanctum token untuk digunakan di step berikutnya.
+     */
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        $user = DB::transaction(function () use ($request) {
+            return User::create([
+                'entity_type'      => $request->entity_type,
+                'email'            => strtolower($request->email),
+                'password'         => $request->password, // auto-hashed via cast
+                'registration_step' => User::STEP_REGISTERED,
+                'is_active'        => false,
+            ]);
+        });
+
+        // Issue temporary registration token (expires in N minutes per config)
+        $token = $user->createToken(
+            'registration-token',
+            ['registration'],
+            now()->addMinutes((int) config('sanctum.registration_token_expiry', 60))
+        )->plainTextToken;
+
+        return $this->successResponse(
+            message : 'Registrasi berhasil. Silakan verifikasi email Anda.',
+            nextStep: 'NEED_EMAIL_OTP',
+            data    : ['user' => $user->registrationSummary()],
+            token   : $token,
+            status  : 201
+        );
+    }
+
+    // =========================================================================
+    //  STEP 2 – Send Email OTP
+    // =========================================================================
+
+    /**
+     * POST /api/v1/auth/email/send-otp
+     *
+     * Mengirim 6-digit OTP ke email user. Rate limit: max 3x per 10 menit.
+     */
+    public function sendEmailOtp(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if ($user->hasVerifiedEmail()) {
+            return $this->errorResponse('Email sudah diverifikasi.', 'EMAIL_ALREADY_VERIFIED', 409);
+        }
+
+        $this->emailService->sendOtp($user);
+
+        $user->update(['registration_step' => max($user->registration_step, User::STEP_EMAIL_OTP_SENT)]);
+
+        return $this->successResponse(
+            message : "OTP telah dikirim ke {$user->email}. Berlaku 10 menit.",
+            nextStep: 'NEED_EMAIL_VERIFICATION',
+        );
+    }
+
+    // =========================================================================
+    //  STEP 3 – Verify Email OTP
+    // =========================================================================
+
+    /**
+     * POST /api/v1/auth/verify-email
+     *
+     * Memverifikasi kode OTP email. Menandai email_verified_at dan advance step.
+     */
+    public function verifyEmail(VerifyEmailRequest $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if ($user->hasVerifiedEmail()) {
+            return $this->successResponse(
+                message : 'Email sudah diverifikasi sebelumnya.',
+                nextStep: 'NEED_WHATSAPP_VERIFICATION',
+                data    : ['user' => $user->registrationSummary()],
+            );
+        }
+
+        // Throws ValidationException if code is wrong/expired
+        $this->otpService->verify($user, 'email', $request->otp_code);
+
+        $user->update([
+            'email_verified_at'  => now(),
+            'registration_step'  => User::STEP_EMAIL_VERIFIED,
+        ]);
+
+        return $this->successResponse(
+            message : 'Email berhasil diverifikasi.',
+            nextStep: 'NEED_WHATSAPP_VERIFICATION',
+            data    : ['user' => $user->fresh()->registrationSummary()],
+        );
+    }
+
+    // =========================================================================
+    //  STEP 4 – Send WhatsApp OTP
+    // =========================================================================
+
+    /**
+     * POST /api/v1/auth/whatsapp/send-otp
+     *
+     * Menerima whatsapp_number (format internasional) dan mengirimkan OTP via WA.
+     */
+    public function sendWhatsAppOtp(SendWhatsAppOtpRequest $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if ($user->hasVerifiedWhatsApp()) {
+            return $this->errorResponse('WhatsApp sudah diverifikasi.', 'WHATSAPP_ALREADY_VERIFIED', 409);
+        }
+
+        try {
+            $this->whatsAppService->sendOtp($user, $request->whatsapp_number);
+        } catch (WhatsAppDeliveryException $e) {
+            return $this->errorResponse($e->getMessage(), 'WHATSAPP_DELIVERY_FAILED', 502);
+        }
+
+        $user->update([
+            'whatsapp_number'   => $request->whatsapp_number,
+            'registration_step' => max($user->registration_step, User::STEP_WHATSAPP_OTP_SENT),
+        ]);
+
+        return $this->successResponse(
+            message : "OTP telah dikirim ke WhatsApp {$request->whatsapp_number}. Berlaku 10 menit.",
+            nextStep: 'NEED_WHATSAPP_VERIFICATION',
+        );
+    }
+
+    // =========================================================================
+    //  STEP 5 – Verify WhatsApp OTP
+    // =========================================================================
+
+    /**
+     * POST /api/v1/auth/verify-whatsapp
+     *
+     * Memverifikasi OTP WhatsApp. Jika berhasil, akun diaktifkan (is_active: true)
+     * dan registration_step di-set ke 5.
+     */
+    public function verifyWhatsApp(VerifyWhatsAppRequest $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if ($user->hasVerifiedWhatsApp()) {
+            return $this->successResponse(
+                message : 'WhatsApp sudah diverifikasi. Registrasi selesai.',
+                nextStep: 'REGISTRATION_COMPLETE',
+                data    : ['user' => $user->registrationSummary()],
+            );
+        }
+
+        $this->otpService->verify($user, 'whatsapp', $request->otp_code);
+
+        DB::transaction(function () use ($user) {
+            $user->update([
+                'whatsapp_verified_at' => now(),
+                'registration_step'    => User::STEP_WHATSAPP_VERIFIED,
+                'is_active'            => true,
+            ]);
+
+            // Revoke all temporary registration tokens
+            $user->tokens()->where('name', 'registration-token')->delete();
+        });
+
+        // Issue permanent (full-access) token
+        $finalToken = $user->createToken('auth-token', ['*'])->plainTextToken;
+
+        Log::info('Registration completed', [
+            'user_id'     => $user->id,
+            'entity_type' => $user->entity_type,
+            'email'       => $user->email,
+        ]);
+
+        return $this->successResponse(
+            message : 'Registrasi selesai! Selamat bergabung di ConnectX.',
+            nextStep: 'REGISTRATION_COMPLETE',
+            data    : ['user' => $user->fresh()->registrationSummary()],
+            token   : $finalToken,
+        );
+    }
+
+    // =========================================================================
+    //  Helpers
+    // =========================================================================
+
+    private function successResponse(
+        string  $message,
+        string  $nextStep = 'REGISTRATION_COMPLETE',
+        array   $data     = [],
+        ?string $token    = null,
+        int     $status   = 200,
+    ): JsonResponse {
+        $payload = [
+            'status'    => 'success',
+            'message'   => $message,
+            'next_step' => $nextStep,
+            'data'      => $data,
+        ];
+
+        if ($token !== null) {
+            $payload['token'] = $token;
+            $payload['token_type'] = 'Bearer';
+        }
+
+        return response()->json($payload, $status);
+    }
+
+    private function errorResponse(
+        string $message,
+        string $code   = 'ERROR',
+        int    $status = 400,
+    ): JsonResponse {
+        return response()->json([
+            'status'  => 'error',
+            'message' => $message,
+            'code'    => $code,
+        ], $status);
+    }
+}

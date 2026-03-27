@@ -1,0 +1,67 @@
+<?php
+
+use App\Http\Controllers\Api\V1\Auth\AuthController;
+use App\Http\Controllers\Api\V1\Auth\OAuthController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| ConnectX API Routes – v1
+|--------------------------------------------------------------------------
+|
+| All routes are prefixed with /api (via bootstrap/app.php configuration).
+|
+| Sequential Registration Lock:
+|   Each authenticated step requires registration.progress:{N} middleware,
+|   ensuring strict linear ordering. If step N is not reached, the server
+|   returns 403 with the correct `next_step` hint.
+|
+*/
+
+Route::prefix('v1')->group(function () {
+
+    // ─── Public: Registration (No Auth Required) ──────────────────────────────
+    Route::prefix('auth')->group(function () {
+
+        // ── Step 1: Manual Register ──────────────────────────────────────────
+        Route::post('register', [AuthController::class, 'register'])
+            ->name('auth.register');
+
+        // ── OAuth: Redirect + Callback ────────────────────────────────────────
+        Route::prefix('oauth/{provider}')->group(function () {
+            Route::get('/', [OAuthController::class, 'redirect'])
+                ->name('auth.oauth.redirect');
+            Route::get('callback', [OAuthController::class, 'callback'])
+                ->name('auth.oauth.callback');
+        });
+    });
+
+    // ─── Authenticated: Registration Flow Steps ────────────────────────────────
+    // All routes below require a valid Sanctum token (issued at Step 1 or OAuth)
+    Route::prefix('auth')->middleware('auth:sanctum')->group(function () {
+
+        // ── Step 2: Send Email OTP ────────────────────────────────────────────
+        // Requires: registration_step >= 1 (just registered)
+        Route::post('email/send-otp', [AuthController::class, 'sendEmailOtp'])
+            ->middleware('registration.progress:1')
+            ->name('auth.email.send-otp');
+
+        // ── Step 3: Verify Email OTP ──────────────────────────────────────────
+        // Requires: registration_step >= 2 (OTP was sent)
+        Route::post('verify-email', [AuthController::class, 'verifyEmail'])
+            ->middleware('registration.progress:2')
+            ->name('auth.verify-email');
+
+        // ── Step 4: Send WhatsApp OTP ─────────────────────────────────────────
+        // Requires: registration_step >= 3 (email verified)
+        Route::post('whatsapp/send-otp', [AuthController::class, 'sendWhatsAppOtp'])
+            ->middleware('registration.progress:3')
+            ->name('auth.whatsapp.send-otp');
+
+        // ── Step 5: Verify WhatsApp OTP ───────────────────────────────────────
+        // Requires: registration_step >= 4 (WA OTP was sent)
+        Route::post('verify-whatsapp', [AuthController::class, 'verifyWhatsApp'])
+            ->middleware('registration.progress:4')
+            ->name('auth.verify-whatsapp');
+    });
+});
