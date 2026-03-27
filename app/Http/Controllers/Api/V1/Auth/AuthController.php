@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Exceptions\WhatsAppDeliveryException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginOtpSendRequest;
+use App\Http\Requests\Auth\LoginOtpVerifyRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\SendWhatsAppOtpRequest;
 use App\Http\Requests\Auth\VerifyEmailRequest;
@@ -213,6 +215,57 @@ class AuthController extends Controller
             nextStep: 'REGISTRATION_COMPLETE',
             data    : ['user' => $user->fresh()->registrationSummary()],
             token   : $finalToken,
+        );
+    }
+
+    // =========================================================================
+    //  LOGIN OTP
+    // =========================================================================
+
+    /**
+     * POST /api/v1/auth/login/otp/send
+     *
+     * Mengecek keberadaan user dan mengirimkan OTP jika valid.
+     */
+    public function loginOtpSend(LoginOtpSendRequest $request): JsonResponse
+    {
+        $user = User::where('email', strtolower($request->email))->first();
+
+        if (! $user->is_active) {
+            return $this->errorResponse(
+                'Akun belum aktif. Selesaikan registrasi atau verifikasi akun Anda.',
+                'INACTIVE_USER',
+                403
+            );
+        }
+
+        $this->emailService->sendOtp($user);
+
+        return $this->successResponse(
+            message : "Kode login telah dikirim ke {$user->email}.",
+            nextStep: 'NEED_LOGIN_VERIFICATION'
+        );
+    }
+
+    /**
+     * POST /api/v1/auth/login/otp/verify
+     *
+     * Memverifikasi kode OTP dan menerbitkan final token.
+     */
+    public function loginOtpVerify(LoginOtpVerifyRequest $request): JsonResponse
+    {
+        $user = User::where('email', strtolower($request->email))->first();
+
+        $this->otpService->verify($user, 'email', $request->otp_code);
+
+        // Issue permanent (full-access) token
+        $token = $user->createToken('auth-token', ['*'])->plainTextToken;
+
+        return $this->successResponse(
+            message : 'Login berhasil! Selamat datang kembali.',
+            nextStep: 'LOGIN_SUCCESS',
+            data    : ['user' => $user->registrationSummary()],
+            token   : $token
         );
     }
 

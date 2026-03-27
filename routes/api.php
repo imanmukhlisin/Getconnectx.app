@@ -27,6 +27,14 @@ Route::prefix('v1')->group(function () {
         Route::post('register', [AuthController::class, 'register'])
             ->name('auth.register');
 
+        // ── Login: OTP (Passwordless) ─────────────────────────────────────────
+        Route::prefix('login/otp')->group(function () {
+            Route::post('send', [AuthController::class, 'loginOtpSend'])
+                ->name('auth.login.otp.send');
+            Route::post('verify', [AuthController::class, 'loginOtpVerify'])
+                ->name('auth.login.otp.verify');
+        });
+
         // ── OAuth: Redirect + Callback ────────────────────────────────────────
         Route::prefix('oauth/{provider}')->group(function () {
             Route::get('/', [OAuthController::class, 'redirect'])
