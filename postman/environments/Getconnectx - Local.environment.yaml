@@ -1,0 +1,29 @@
+name: Getconnectx - Local
+values:
+  - key: baseUrl
+    value: 'http://localhost/api/v1'
+    enabled: true
+  - key: APP_NAME
+    value: Laravel
+    enabled: true
+  - key: APP_ENV
+    value: local
+    enabled: true
+  - key: DB_HOST
+    value: db
+    enabled: true
+  - key: SUPABASE_URL
+    value: 'https://mvrlrtjxnzrsskernrat.supabase.co'
+    enabled: true
+  - key: SUPABASE_ANON_KEY
+    value: sb_publishable_kChnvN8PBDKn60E73o-Syg_Z2Suu14H
+    enabled: true
+  - key: JWT_SECRET
+    value: K1XG2YZa8oLt1tA+ozWyPxuxJVg//7UKG+GEiAJD9R56yfOh2Ty5dhj0TjDBoyCxDc23ER5+NuYBqyuxTFfimA==
+    enabled: true
+  - key: LINKEDIN_CLIENT_ID
+    value: getconnect
+    enabled: true
+  - key: token
+    value: ''
+    enabled: true
