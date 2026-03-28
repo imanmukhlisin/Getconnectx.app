@@ -11,6 +11,9 @@ return [
     'whatsapp_delivery_failed' => 'Gagal mengirim OTP WhatsApp. Silakan coba lagi.',
     'whatsapp_verify_success' => 'WhatsApp telah terverifikasi. Registrasi selesai.',
     'registration_complete' => 'Selamat! Registrasi kamu selesai! Selamat bergabung di ConnectX.',
+    'login_success' => 'Login berhasil! Selamat datang kembali.',
+    'login_failed' => 'Email atau password salah. Silakan coba lagi.',
+    'inactive_user' => 'Akun Anda belum aktif. Selesaikan proses registrasi atau verifikasi terlebih dahulu.',
     
     // Exception Responses
     'validation_failed' => 'Terjadi kesalahan pada isian form. Silakan periksa kembali kolom yang diisi.',
@@ -26,6 +29,7 @@ return [
     'val_email_format' => 'Format email tidak valid (contoh yang benar: nama@email.com).',
     'val_email_max' => 'Email terlalu panjang (maksimal 255 karakter).',
     'val_email_unique' => 'Email ini sudah terdaftar. Silakan gunakan email lain atau login.',
+    'val_email_not_found' => 'Kami tidak menemukan akun dengan alamat email tersebut.',
     'val_password_required' => 'Password wajib diisi.',
     'val_password_confirmed' => 'Konfirmasi password tidak cocok dengan password yang diketik.',
     'val_password_min' => 'Password harus berisi minimal 8 karakter.',

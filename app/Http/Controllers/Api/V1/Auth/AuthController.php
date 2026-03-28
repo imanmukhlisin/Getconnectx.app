@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Exceptions\WhatsAppDeliveryException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginOtpSendRequest;
+use App\Http\Requests\Auth\LoginOtpVerifyRequest;
+use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\SendWhatsAppOtpRequest;
 use App\Http\Requests\Auth\VerifyEmailRequest;
@@ -15,6 +18,7 @@ use App\Services\WhatsAppService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
@@ -213,6 +217,87 @@ class AuthController extends Controller
             nextStep: 'REGISTRATION_COMPLETE',
             data    : ['user' => $user->fresh()->registrationSummary()],
             token   : $finalToken,
+        );
+    }
+
+    // =========================================================================
+    //  LOGIN OTP
+    // =========================================================================
+
+    /**
+     * POST /api/v1/auth/login/otp/send
+     */
+    public function loginOtpSend(LoginOtpSendRequest $request): JsonResponse
+    {
+        $user = User::where('email', strtolower($request->email))->first();
+
+        if (! $user->is_active) {
+            return $this->errorResponse(
+                __('messages.inactive_user'),
+                'INACTIVE_USER',
+                403
+            );
+        }
+
+        $this->emailService->sendOtp($user);
+
+        return $this->successResponse(
+            message : "Kode login telah dikirim ke {$user->email}.",
+            nextStep: 'NEED_LOGIN_VERIFICATION'
+        );
+    }
+
+    /**
+     * POST /api/v1/auth/login/otp/verify
+     */
+    public function loginOtpVerify(LoginOtpVerifyRequest $request): JsonResponse
+    {
+        $user = User::where('email', strtolower($request->email))->first();
+
+        $this->otpService->verify($user, 'email', $request->otp_code);
+
+        $token = $user->createToken('auth-token', ['*'])->plainTextToken;
+
+        return $this->successResponse(
+            message : 'Login berhasil! Selamat datang kembali.',
+            nextStep: 'LOGIN_SUCCESS',
+            data    : ['user' => $user->registrationSummary()],
+            token   : $token
+        );
+    }
+
+    // =========================================================================
+    //  LOGIN PASSWORD
+    // =========================================================================
+
+    /**
+     * POST /api/v1/auth/login/password
+     *
+     * Login tradisional menggunakan email dan password.
+     */
+    public function loginWithPassword(LoginRequest $request): JsonResponse
+    {
+        $user = User::where('email', strtolower($request->email))->first();
+
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            return $this->errorResponse(__('messages.login_failed'), 'INVALID_CREDENTIALS', 401);
+        }
+
+        if (! $user->is_active) {
+            return $this->errorResponse(
+                __('messages.inactive_user'),
+                'INACTIVE_USER',
+                403
+            );
+        }
+
+        $token = $user->createToken('auth-token', ['*'])->plainTextToken;
+
+        return $this->successResponse(
+            message : __('messages.login_success'),
+            nextStep: 'LOGIN_SUCCESS',
+            data    : ['user' => $user->registrationSummary()],
+            token   : $token
         );
     }
 
