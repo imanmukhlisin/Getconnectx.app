@@ -83,13 +83,13 @@ class OtpService
 
         if (! $otp) {
             throw ValidationException::withMessages([
-                'otp_code' => ['Upsss... OTP tidak ditemukan atau sudah kadaluarsa. Silahkan minta OTP baru.'],
+                'otp_code' => [__('messages.otp_not_found')],
             ]);
         }
 
         if (! hash_equals($otp->code, $inputCode)) {
             throw ValidationException::withMessages([
-                'otp_code' => ['Upsss... Kode OTP yang kamu masukkan salah nihh.'],
+                'otp_code' => [__('messages.otp_invalid')],
             ]);
         }
 
@@ -123,7 +123,7 @@ class OtpService
             && $latest->send_count >= $this->maxSends) {
             $retryAfter = $this->windowMinutes - (int) $minutesSinceWindow;
             throw new OtpRateLimitException(
-                "Terlalu banyak permintaan OTP. Coba lagi dalam {$retryAfter} menit.",
+                __('messages.otp_rate_limit_minute', ['minutes' => $retryAfter]),
                 $retryAfter
             );
         }

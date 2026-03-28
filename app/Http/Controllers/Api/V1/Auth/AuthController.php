@@ -55,7 +55,7 @@ class AuthController extends Controller
         )->plainTextToken;
 
         return $this->successResponse(
-            message : 'Registrasi berhasil. Silakan verifikasi email Anda.',
+            message : __('messages.registration_success'),
             nextStep: 'NEED_EMAIL_OTP',
             data    : ['user' => $user->registrationSummary()],
             token   : $token,
@@ -78,7 +78,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         if ($user->hasVerifiedEmail()) {
-            return $this->errorResponse('Email sudah diverifikasi.', 'EMAIL_ALREADY_VERIFIED', 409);
+            return $this->errorResponse(__('messages.email_already_verified'), 'EMAIL_ALREADY_VERIFIED', 409);
         }
 
         $this->emailService->sendOtp($user);
@@ -86,7 +86,7 @@ class AuthController extends Controller
         $user->update(['registration_step' => max($user->registration_step, User::STEP_EMAIL_OTP_SENT)]);
 
         return $this->successResponse(
-            message : "Kode Verifikasi OTP telah dikirim ke {$user->email}. Kode ini berlaku selama 10 menit.",
+            message : __('messages.email_otp_sent', ['email' => $user->email]),
             nextStep: 'NEED_EMAIL_VERIFICATION',
         );
     }
@@ -107,7 +107,7 @@ class AuthController extends Controller
 
         if ($user->hasVerifiedEmail()) {
             return $this->successResponse(
-                message : 'Email sudah diverifikasi sebelumnya.',
+                message : __('messages.email_already_verified'),
                 nextStep: 'NEED_WHATSAPP_VERIFICATION',
                 data    : ['user' => $user->registrationSummary()],
             );
@@ -122,7 +122,7 @@ class AuthController extends Controller
         ]);
 
         return $this->successResponse(
-            message : 'Email berhasil diverifikasi.',
+            message : __('messages.email_verify_success'),
             nextStep: 'NEED_WHATSAPP_VERIFICATION',
             data    : ['user' => $user->fresh()->registrationSummary()],
         );
@@ -143,13 +143,13 @@ class AuthController extends Controller
         $user = $request->user();
 
         if ($user->hasVerifiedWhatsApp()) {
-            return $this->errorResponse('WhatsApp sudah diverifikasi.', 'WHATSAPP_ALREADY_VERIFIED', 409);
+            return $this->errorResponse(__('messages.whatsapp_already_verified'), 'WHATSAPP_ALREADY_VERIFIED', 409);
         }
 
         try {
             $this->whatsAppService->sendOtp($user, $request->whatsapp_number);
         } catch (WhatsAppDeliveryException $e) {
-            return $this->errorResponse($e->getMessage(), 'WHATSAPP_DELIVERY_FAILED', 502);
+            return $this->errorResponse(__('messages.whatsapp_delivery_failed'), 'WHATSAPP_DELIVERY_FAILED', 502);
         }
 
         $user->update([
@@ -158,7 +158,7 @@ class AuthController extends Controller
         ]);
 
         return $this->successResponse(
-            message : "Kode Verifikasi OTP telah dikirim ke WhatsApp {$request->whatsapp_number}. Kode ini berlaku selama 10 menit.",
+            message : __('messages.whatsapp_otp_sent', ['number' => $request->whatsapp_number]),
             nextStep: 'NEED_WHATSAPP_VERIFICATION',
         );
     }
@@ -180,7 +180,7 @@ class AuthController extends Controller
 
         if ($user->hasVerifiedWhatsApp()) {
             return $this->successResponse(
-                message : 'WhatsApp sudah diverifikasi. Registrasi selesai.',
+                message : __('messages.whatsapp_verify_success'),
                 nextStep: 'REGISTRATION_COMPLETE',
                 data    : ['user' => $user->registrationSummary()],
             );
@@ -209,7 +209,7 @@ class AuthController extends Controller
         ]);
 
         return $this->successResponse(
-            message : 'Registrasi selesai! Selamat bergabung di ConnectX.',
+            message : __('messages.registration_complete'),
             nextStep: 'REGISTRATION_COMPLETE',
             data    : ['user' => $user->fresh()->registrationSummary()],
             token   : $finalToken,
