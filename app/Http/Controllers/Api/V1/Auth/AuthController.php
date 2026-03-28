@@ -86,7 +86,7 @@ class AuthController extends Controller
         $user->update(['registration_step' => max($user->registration_step, User::STEP_EMAIL_OTP_SENT)]);
 
         return $this->successResponse(
-            message : "OTP telah dikirim ke {$user->email}. Berlaku 10 menit.",
+            message : "Kode Verifikasi OTP telah dikirim ke {$user->email}. Kode ini berlaku selama 10 menit.",
             nextStep: 'NEED_EMAIL_VERIFICATION',
         );
     }
@@ -158,7 +158,7 @@ class AuthController extends Controller
         ]);
 
         return $this->successResponse(
-            message : "OTP telah dikirim ke WhatsApp {$request->whatsapp_number}. Berlaku 10 menit.",
+            message : "Kode Verifikasi OTP telah dikirim ke WhatsApp {$request->whatsapp_number}. Kode ini berlaku selama 10 menit.",
             nextStep: 'NEED_WHATSAPP_VERIFICATION',
         );
     }
