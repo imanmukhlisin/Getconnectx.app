@@ -12,6 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(\App\Http\Middleware\LocaleMiddleware::class);
         $middleware->alias([
             'registration.progress' => \App\Http\Middleware\RegistrationProgress::class,
         ]);
@@ -20,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\Illuminate\Validation\ValidationException $e, $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json([
-                    'message' => 'Terjadi kesalahan pada isian form. Silakan periksa kembali kolom yang diisi.',
+                    'message' => __('messages.validation_failed'),
                     'errors'  => $e->errors(),
                 ], 422);
             }

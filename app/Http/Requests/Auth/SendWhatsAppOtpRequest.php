@@ -27,8 +27,8 @@ class SendWhatsAppOtpRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'whatsapp_number.required' => 'Nomor WhatsApp wajib diisi.',
-            'whatsapp_number.regex'    => 'Nomor WhatsApp harus menggunakan format internasional, contoh: +6281234567890.',
+            'whatsapp_number.required' => __('messages.val_wa_number_required'),
+            'whatsapp_number.regex'    => __('messages.val_wa_number_regex'),
         ];
     }
 }

@@ -21,8 +21,8 @@ class VerifyWhatsAppRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'otp_code.required' => 'Kode OTP WhatsApp wajib diisi.',
-            'otp_code.digits'   => 'Kode OTP WhatsApp harus berupa 6 digit angka.',
+            'otp_code.required' => __('messages.val_otp_required'),
+            'otp_code.digits'   => __('messages.val_otp_digits'),
         ];
     }
 }
