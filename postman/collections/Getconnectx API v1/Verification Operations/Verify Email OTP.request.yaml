@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/verify-email"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "otp_code": "123456"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 1000
