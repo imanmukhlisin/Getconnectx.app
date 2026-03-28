@@ -83,13 +83,13 @@ class OtpService
 
         if (! $otp) {
             throw ValidationException::withMessages([
-                'otp_code' => ['OTP tidak ditemukan atau sudah kadaluarsa. Minta OTP baru.'],
+                'otp_code' => ['Upsss... OTP tidak ditemukan atau sudah kadaluarsa. Silahkan minta OTP baru.'],
             ]);
         }
 
         if (! hash_equals($otp->code, $inputCode)) {
             throw ValidationException::withMessages([
-                'otp_code' => ['Kode OTP tidak valid.'],
+                'otp_code' => ['Upsss... Kode OTP yang kamu masukkan salah nihh.'],
             ]);
         }
 

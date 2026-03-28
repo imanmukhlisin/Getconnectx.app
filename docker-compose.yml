@@ -11,7 +11,8 @@ services:
     restart: unless-stopped
     working_dir: /var/www
     volumes:
-      - /mnt/d/CODEVITS/Getconnectx.app:/var/www
+      # - /mnt/d/CODEVITS/Getconnectx.app:/var/www # Revision!
+      - .:/var/www  # Mengarah ke folder tempat file yml berada.
     networks:
       - getconnectx
     depends_on:
@@ -23,10 +24,14 @@ services:
     container_name: getconnectx-web
     restart: unless-stopped
     ports:
-      - "80:80"
+      # - "80:80"
+      - "${APP_PORT:-80}:80" # Default 80, tapi bisa diganti lewat .env
+    
     volumes:
-      - /mnt/d/CODEVITS/Getconnectx.app:/var/www
-      - /mnt/d/CODEVITS/Getconnectx.app/docker/nginx/conf.d/:/etc/nginx/conf.d/
+      # - /mnt/d/CODEVITS/Getconnectx.app:/var/www
+      # - /mnt/d/CODEVITS/Getconnectx.app/docker/nginx/conf.d/:/etc/nginx/conf.d/
+      - .:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/ # Path relatif ke folder docker
     networks:
       - getconnectx
     depends_on:
@@ -37,7 +42,8 @@ services:
     container_name: getconnectx-db
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      # - "5432:5432"
+      - "${DB_PORT:-5432}:5432" # Default 5432
     environment:
       POSTGRES_DB: ${DB_DATABASE}
       POSTGRES_USER: ${DB_USERNAME}
