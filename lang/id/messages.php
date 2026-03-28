@@ -3,20 +3,20 @@
 return [
     // Auth Responses
     'registration_success' => 'Registrasi berhasil. Silakan verifikasi email Anda.',
-    'email_already_verified' => 'Email sudah diverifikasi sebelumnya.',
+    'email_already_verified' => 'Email telah terverifikasi sebelumnya.',
     'email_otp_sent' => 'Kode Verifikasi OTP telah dikirim ke :email. Kode ini berlaku selama 10 menit.',
     'email_verify_success' => 'Email berhasil diverifikasi.',
-    'whatsapp_already_verified' => 'WhatsApp sudah diverifikasi sebelumnya.',
+    'whatsapp_already_verified' => 'WhatsApp telah terverifikasi sebelumnya.',
     'whatsapp_otp_sent' => 'Kode Verifikasi OTP telah dikirim ke WhatsApp :number. Kode ini berlaku selama 10 menit.',
     'whatsapp_delivery_failed' => 'Gagal mengirim OTP WhatsApp. Silakan coba lagi.',
-    'whatsapp_verify_success' => 'WhatsApp sudah diverifikasi. Registrasi selesai.',
-    'registration_complete' => 'Registrasi selesai! Selamat bergabung di ConnectX.',
+    'whatsapp_verify_success' => 'WhatsApp telah terverifikasi. Registrasi selesai.',
+    'registration_complete' => 'Selamat! Registrasi kamu selesai! Selamat bergabung di ConnectX.',
     
     // Exception Responses
-    'validation_failed' => 'Terjadi kesalahan pada isian form (Uppsss...). Silakan periksa kembali kolom yang diisi.',
-    'too_many_requests' => 'Terlalu banyak permintaan (Uppsss...). Silakan tunggu beberapa saat sebelum mencoba lagi.',
+    'validation_failed' => 'Terjadi kesalahan pada isian form. Silakan periksa kembali kolom yang diisi.',
+    'too_many_requests' => 'Terlalu banyak permintaan. Silakan tunggu beberapa saat sebelum mencoba lagi.',
     'otp_not_found' => 'Upsss... OTP tidak ditemukan atau sudah kadaluarsa. Silahkan minta OTP baru.',
-    'otp_invalid' => 'Upsss... Kode OTP yang kamu masukkan salah nihh.',
+    'otp_invalid' => 'Upsss... Kode OTP yang kamu masukkan salah, silahkan cek kembali.',
     'otp_rate_limit_minute' => 'Upsss... Terlalu banyak permintaan OTP. Coba lagi dalam :minutes menit.',
     
     // Validations (Register Request)
@@ -37,7 +37,7 @@ return [
     
     // Validations (Email & WhatsApp Verify)
     'val_otp_required' => 'Kode OTP wajib diisi.',
-    'val_otp_digits' => 'Kode OTP harus berupa 6 digit angka.',
+    'val_otp_digits' => 'Kode OTP harus berupa 6 digit angka, silahkan cek kembali.',
     'val_wa_number_required' => 'Nomor WhatsApp wajib diisi.',
     'val_wa_number_regex' => 'Nomor WhatsApp harus menggunakan format internasional, contoh: +6281234567890.',
 ];
