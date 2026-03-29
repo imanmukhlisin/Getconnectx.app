@@ -46,6 +46,11 @@ class User extends Authenticatable
         'oauth_id',
         'oauth_token',
         'avatar_url',
+        'username',
+        'position',
+        'role_category',
+        'commitment_level',
+        'startup_stage',
     ];
 
     /**
@@ -72,6 +77,11 @@ class User extends Authenticatable
     }
 
     // ─── Relationships ────────────────────────────────────────────────────────
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'user_tags');
+    }
 
     public function otpCodes()
     {
@@ -116,6 +126,11 @@ class User extends Authenticatable
             'whatsapp_verified_at'  => $this->whatsapp_verified_at,
             'registration_step'     => $this->registration_step,
             'is_active'             => $this->is_active,
+            'username'              => $this->username,
+            'position'              => $this->position,
+            'role_category'         => $this->role_category,
+            'commitment_level'      => $this->commitment_level,
+            'startup_stage'         => $this->startup_stage,
         ];
     }
 }

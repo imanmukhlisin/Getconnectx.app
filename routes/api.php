@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\OAuthController;
+use App\Http\Controllers\Api\V1\Profile\ProfileController;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -70,10 +72,21 @@ Route::prefix('v1')->group(function () {
             ->middleware('registration.progress:3')
             ->name('auth.whatsapp.send-otp');
 
-        // ── Step 5: Verify WhatsApp OTP ───────────────────────────────────────
-        // Requires: registration_step >= 4 (WA OTP was sent)
         Route::post('verify-whatsapp', [AuthController::class, 'verifyWhatsApp'])
             ->middleware('registration.progress:4')
             ->name('auth.verify-whatsapp');
     });
+
+    // ─── Authenticated: Profile & Onboarding ──────────────────────────────────
+    Route::prefix('profile')->middleware('auth:sanctum')->group(function () {
+        Route::get('/', [ProfileController::class, 'index'])
+            ->name('profile.index');
+        Route::get('tags', [ProfileController::class, 'tags'])
+            ->name('profile.tags');
+        Route::put('stage-a-identity', [ProfileController::class, 'updateStageA'])
+            ->name('profile.update.stage-a');
+        Route::put('stage-b-technical', [ProfileController::class, 'updateStageB'])
+            ->name('profile.update.stage-b');
+    });
 });
+
