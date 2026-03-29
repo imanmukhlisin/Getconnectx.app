@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginOtpSendRequest;
 use App\Http\Requests\Auth\LoginOtpVerifyRequest;
 use App\Http\Requests\Auth\LoginRequest;
+
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\SendWhatsAppOtpRequest;
 use App\Http\Requests\Auth\VerifyEmailRequest;
@@ -226,6 +227,7 @@ class AuthController extends Controller
 
     /**
      * POST /api/v1/auth/login/otp/send
+
      */
     public function loginOtpSend(LoginOtpSendRequest $request): JsonResponse
     {
@@ -249,12 +251,14 @@ class AuthController extends Controller
 
     /**
      * POST /api/v1/auth/login/otp/verify
+
      */
     public function loginOtpVerify(LoginOtpVerifyRequest $request): JsonResponse
     {
         $user = User::where('email', strtolower($request->email))->first();
 
         $this->otpService->verify($user, 'email', $request->otp_code);
+
 
         $token = $user->createToken('auth-token', ['*'])->plainTextToken;
 
@@ -275,7 +279,7 @@ class AuthController extends Controller
      *
      * Login tradisional menggunakan email dan password.
      */
-    public function loginWithPassword(LoginRequest $request): JsonResponse
+    public function loginWithPassword(\App\Http\Requests\Auth\LoginRequest $request): JsonResponse
     {
         $user = User::where('email', strtolower($request->email))->first();
 
@@ -301,8 +305,6 @@ class AuthController extends Controller
         );
     }
 
-    // =========================================================================
-    //  Helpers
     // =========================================================================
 
     private function successResponse(

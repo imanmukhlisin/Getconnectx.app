@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/login/otp/send"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "email": "test@example.com"
+    }
+order: 2000

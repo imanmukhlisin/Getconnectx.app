@@ -66,8 +66,18 @@ Di dalam bash tersebut, Anda bisa langsung mengetik `php artisan ...` tanpa perl
 
 ## 🧪 5. Testing API (Postman)
 Aplikasi ini sudah menggunakan **Laravel 11 API Scaffolding**.
+
+### Endpoint Registrasi (Bebas Akses)
 - **Base URL**: `http://localhost/api/v1`
-- **Endpoint Test**: `GET http://localhost/api/user` (Memerlukan token).
+- **POST `/auth/register`**: Daftar akun baru.
+
+### Endpoint Login OTP (Bebas Akses)
+- **POST `/auth/login/otp/send`**: Kirim OTP ke email (Body: `email`).
+- **POST `/auth/login/otp/verify`**: Verifikasi OTP & dapatkan Token (Body: `email`, `otp_code`).
+
+### Endpoint Terproteksi (Butuh Token)
+- **GET `/auth/email/send-otp`**: Dapatkan OTP email (Gunakan Bearer Token).
+- **GET `/api/user`**: Contoh ambil data user (Gunakan Bearer Token).
 
 ---
 

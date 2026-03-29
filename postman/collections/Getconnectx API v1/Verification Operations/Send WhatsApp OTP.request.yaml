@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/whatsapp/send-otp"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "whatsapp_number": "+6281234567890"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 2000
