@@ -41,12 +41,14 @@ Route::prefix('v1')->group(function () {
                 ->name('auth.login.otp.verify');
         });
 
-        // ── OAuth: Redirect + Callback ────────────────────────────────────────
+        // ── OAuth: Redirect + Callback + Native SDK Verify ───────────────────
         Route::prefix('oauth/{provider}')->group(function () {
             Route::get('/', [OAuthController::class, 'redirect'])
                 ->name('auth.oauth.redirect');
             Route::get('callback', [OAuthController::class, 'callback'])
                 ->name('auth.oauth.callback');
+            Route::post('verify-token', [OAuthController::class, 'verifyToken'])
+                ->name('auth.oauth.verify-token');
         });
     });
 
@@ -60,6 +62,10 @@ Route::prefix('v1')->group(function () {
             ->middleware('registration.progress:1')
             ->name('auth.email.send-otp');
 
+        Route::post('email/resend-otp', [AuthController::class, 'sendEmailOtp'])
+            ->middleware('registration.progress:1')
+            ->name('auth.email.resend-otp');
+
         // ── Step 3: Verify Email OTP ──────────────────────────────────────────
         // Requires: registration_step >= 2 (OTP was sent)
         Route::post('verify-email', [AuthController::class, 'verifyEmail'])
@@ -72,9 +78,17 @@ Route::prefix('v1')->group(function () {
             ->middleware('registration.progress:3')
             ->name('auth.whatsapp.send-otp');
 
+        Route::post('whatsapp/resend-otp', [AuthController::class, 'sendWhatsAppOtp'])
+            ->middleware('registration.progress:3')
+            ->name('auth.whatsapp.resend-otp');
+
         Route::post('verify-whatsapp', [AuthController::class, 'verifyWhatsApp'])
             ->middleware('registration.progress:4')
             ->name('auth.verify-whatsapp');
+
+        // ── Refresh Token ─────────────────────────────────────────────────────
+        Route::post('refresh', [AuthController::class, 'refreshToken'])
+            ->name('auth.refresh');
     });
 
     // ─── Authenticated: Profile & Onboarding ──────────────────────────────────
@@ -87,6 +101,8 @@ Route::prefix('v1')->group(function () {
             ->name('profile.update.stage-a');
         Route::put('stage-b-technical', [ProfileController::class, 'updateStageB'])
             ->name('profile.update.stage-b');
+        Route::put('fcm-token', [ProfileController::class, 'updateFcmToken'])
+            ->name('profile.update.fcm-token');
     });
 });
 

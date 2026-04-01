@@ -12,6 +12,14 @@ return [
     'whatsapp_verify_success' => 'WhatsApp has already been verified. Registration complete.',
     'registration_complete' => 'Registration complete! Welcome to ConnectX.',
     
+    // OAuth Responses
+    'oauth_provider_unsupported' => "Provider ':provider' is not supported. Use: :allowed.",
+    'oauth_login_cancelled' => "OAuth login was cancelled or an error occurred.",
+    'oauth_info_failed' => "Failed to get information from the OAuth provider.",
+    'oauth_token_invalid' => "The :provider token is invalid or has expired. Please login again via :provider.",
+    'oauth_login_success_new' => "Login via :provider successful. Please complete WhatsApp verification.",
+    'oauth_login_success_returning' => "Login via :provider successful. Welcome back!",
+
     // Exception Responses
     'validation_failed' => 'Oops... The given data was invalid. Please check the fields again.',
     'too_many_requests' => 'Oops... Too many requests. Please wait a moment before trying again.',
@@ -40,4 +48,5 @@ return [
     'val_otp_digits' => 'OTP code must be 6 numeric digits.',
     'val_wa_number_required' => 'WhatsApp number is required.',
     'val_wa_number_regex' => 'WhatsApp number must use an international format, e.g., +6281234567890.',
+    'val_provider_token_required' => 'The OAuth provider token is required.',
 ];

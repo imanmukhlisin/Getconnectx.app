@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1\Auth;
 
-use App\Exceptions\WhatsAppDeliveryException;
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Services\WhatsAppService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Laravel\Socialite\Facades\Socialite;
 use Throwable;
 
@@ -18,52 +17,46 @@ class OAuthController extends Controller
 {
     private const ALLOWED_PROVIDERS = ['google', 'apple', 'linkedin'];
 
-    public function __construct(
-        private readonly WhatsAppService $whatsAppService,
-    ) {}
-
-    // ─── Redirect to OAuth Provider ───────────────────────────────────────────
+    // =========================================================================
+    //  Redirect to OAuth Provider (Web Flow)
+    // =========================================================================
 
     /**
      * GET /api/v1/auth/oauth/{provider}
      *
-     * Redirect user ke halaman login provider OAuth.
+     * Redirect user ke halaman login provider OAuth (untuk web flow).
      */
     public function redirect(string $provider): JsonResponse|RedirectResponse
     {
         if (! $this->isProviderAllowed($provider)) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => "Provider '{$provider}' tidak didukung. Gunakan: " . implode(', ', self::ALLOWED_PROVIDERS),
-            ], 400);
+            return $this->providerNotSupportedResponse($provider);
         }
 
         return Socialite::driver($provider)->stateless()->redirect();
     }
 
-    // ─── Handle OAuth Callback ────────────────────────────────────────────────
+    // =========================================================================
+    //  Handle OAuth Callback (Web Flow)
+    // =========================================================================
 
     /**
      * GET /api/v1/auth/oauth/{provider}/callback
      *
-     * Proses callback dari provider OAuth.
+     * Proses callback dari provider OAuth (web flow).
      * - Email otomatis terverifikasi (skip Step 2 & 3)
      * - User langsung lompat ke Step 4 (WhatsApp OTP)
      */
     public function callback(string $provider, Request $request): JsonResponse
     {
         if (! $this->isProviderAllowed($provider)) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => "Provider '{$provider}' tidak didukung.",
-            ], 400);
+            return $this->providerNotSupportedResponse($provider);
         }
 
-        // Handle OAuth errors
+        // Handle OAuth errors from provider
         if ($request->has('error')) {
             return response()->json([
                 'status'  => 'error',
-                'message' => 'OAuth login dibatalkan atau terjadi kesalahan.',
+                'message' => __('messages.oauth_login_cancelled'),
                 'detail'  => $request->get('error_description'),
             ], 400);
         }
@@ -74,71 +67,193 @@ class OAuthController extends Controller
             Log::error("OAuth callback failed for {$provider}", ['error' => $e->getMessage()]);
             return response()->json([
                 'status'  => 'error',
-                'message' => 'Gagal mendapatkan informasi dari provider OAuth.',
+                'message' => __('messages.oauth_info_failed'),
             ], 422);
         }
 
-        $user = DB::transaction(function () use ($provider, $oauthUser) {
-            // Try to find existing user by OAuth ID or email
+        return $this->processOAuthUser($provider, $oauthUser, $request->fcm_token);
+    }
+
+    // =========================================================================
+    //  Verify Native SDK Token (Mobile/Native Flow)
+    // =========================================================================
+
+    /**
+     * POST /api/v1/auth/oauth/{provider}/verify-token
+     *
+     * Menerima token dari SDK Native (Google Sign-In, Apple Sign In,
+     * LinkedIn SDK) dan memverifikasinya melalui Socialite.
+     *
+     * Request Body:
+     *   - provider_token (string, required): Token/ID Token dari SDK native.
+     *
+     * Flow:
+     *   1. Flutter/FE mendapatkan token dari SDK native provider.
+     *   2. FE mengirim token tersebut ke endpoint ini via POST.
+     *   3. BE memvalidasi token via Socialite::userFromToken().
+     *   4. BE membuat/memperbarui akun user → skip email verification.
+     *   5. BE mengembalikan registration token untuk lanjut ke verifikasi WA.
+     */
+    public function verifyToken(string $provider, Request $request): JsonResponse
+    {
+        if (! $this->isProviderAllowed($provider)) {
+            return $this->providerNotSupportedResponse($provider);
+        }
+
+        // Validate request body
+        $validator = Validator::make($request->all(), [
+            'provider_token' => 'required|string',
+        ], [
+            'provider_token.required' => __('messages.val_provider_token_required'),
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Validasi gagal.',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            $oauthUser = Socialite::driver($provider)
+                ->stateless()
+                ->userFromToken($request->provider_token);
+        } catch (Throwable $e) {
+            Log::error("OAuth native token verification failed for {$provider}", [
+                'error' => $e->getMessage(),
+            ]);
+            return response()->json([
+                'status'  => 'error',
+                'message' => __('messages.oauth_token_invalid', ['provider' => $provider]),
+                'code'    => 'INVALID_PROVIDER_TOKEN',
+            ], 401);
+        }
+
+        return $this->processOAuthUser($provider, $oauthUser, $request->fcm_token);
+    }
+
+    // =========================================================================
+    //  Shared Logic: Process OAuth User
+    // =========================================================================
+
+    /**
+     * Proses data user dari OAuth (digunakan oleh callback & verifyToken).
+     *
+     * - Jika user sudah ada (by oauth_id atau email) → update & link akun.
+     * - Jika user baru → buat akun baru, email otomatis terverifikasi.
+     * - Jika user sudah fully active → langsung kasih auth-token penuh.
+     * - Jika user belum selesai registrasi → kasih registration-token sementara.
+     */
+    private function processOAuthUser(string $provider, $oauthUser, ?string $fcmToken = null): JsonResponse
+    {
+        $user = DB::transaction(function () use ($provider, $oauthUser, $fcmToken) {
+            // Cari user berdasarkan OAuth ID atau email
             $user = User::where('oauth_provider', $provider)
                         ->where('oauth_id', $oauthUser->getId())
                         ->first()
                 ?? User::where('email', strtolower($oauthUser->getEmail()))->first();
 
             if ($user) {
-                // Update OAuth info if linking
-                $user->update([
-                    'oauth_provider'   => $provider,
-                    'oauth_id'         => $oauthUser->getId(),
-                    'oauth_token'      => $oauthUser->token,
+                // User sudah ada → update/link OAuth info & fcm token jika ada
+                $updateData = [
+                    'oauth_provider'    => $provider,
+                    'oauth_id'          => $oauthUser->getId(),
+                    'oauth_token'       => $oauthUser->token,
                     'email_verified_at' => $user->email_verified_at ?? now(),
                     'registration_step' => max($user->registration_step, User::STEP_EMAIL_VERIFIED),
-                ]);
+                ];
+                
+                if ($fcmToken) {
+                    $updateData['fcm_token'] = $fcmToken;
+                }
+                
+                $user->update($updateData);
             } else {
-                // New user via OAuth – entity_type defaults to 'talent'
-                // User can change this later in the onboarding flow
+                // New user via OAuth
                 $user = User::create([
-                    'entity_type'      => 'talent',
-                    'name'             => $oauthUser->getName(),
-                    'email'            => strtolower($oauthUser->getEmail()),
-                    'password'         => null, // OAuth user, no password
-                    'avatar_url'       => $oauthUser->getAvatar(),
-                    'oauth_provider'   => $provider,
-                    'oauth_id'         => $oauthUser->getId(),
-                    'oauth_token'      => $oauthUser->token,
-                    'email_verified_at' => now(), // Auto-verified
+                    'entity_type'       => null,
+                    'name'              => $oauthUser->getName(),
+                    'email'             => strtolower($oauthUser->getEmail()),
+                    'password'          => null,
+                    'avatar_url'        => $oauthUser->getAvatar(),
+                    'oauth_provider'    => $provider,
+                    'oauth_id'          => $oauthUser->getId(),
+                    'oauth_token'       => $oauthUser->token,
+                    'fcm_token'         => $fcmToken,
+                    'email_verified_at' => now(),
                     'registration_step' => User::STEP_EMAIL_VERIFIED,
-                    'is_active'        => false,
+                    'is_active'         => false,
                 ]);
             }
 
             return $user;
         });
 
-        // Issue temporary registration token scoped to registration
+        // Jika user sudah fully active (returning user login via OAuth)
+        // → langsung berikan full auth-token, tidak perlu registrasi lagi
+        if ($user->isRegistrationComplete()) {
+            $fullToken = $user->createToken('auth-token', ['*'])->plainTextToken;
+
+            Log::info("OAuth login (returning user) via {$provider}", [
+                'user_id' => $user->id,
+                'email'   => $user->email,
+            ]);
+
+            return response()->json([
+                'status'     => 'success',
+                'message'    => __('messages.oauth_login_success_returning', ['provider' => $provider]),
+                'next_step'  => 'LOGIN_SUCCESS',
+                'token'      => $fullToken,
+                'token_type' => 'Bearer',
+                'data'       => [
+                    'user'           => $user->registrationSummary(),
+                    'oauth_provider' => $provider,
+                ],
+            ]);
+        }
+
+        // User baru atau belum selesai registrasi → berikan registration token sementara
         $token = $user->createToken(
             'registration-token',
             ['registration'],
             now()->addMinutes((int) config('sanctum.registration_token_expiry', 60))
         )->plainTextToken;
 
+        Log::info("OAuth registration via {$provider}", [
+            'user_id' => $user->id,
+            'email'   => $user->email,
+            'step'    => $user->registration_step,
+        ]);
+
         return response()->json([
-            'status'    => 'success',
-            'message'   => "Login via {$provider} berhasil. Silakan lengkapi verifikasi WhatsApp.",
-            'next_step' => 'NEED_WHATSAPP_VERIFICATION',
-            'token'     => $token,
+            'status'     => 'success',
+            'message'    => __('messages.oauth_login_success_new', ['provider' => $provider]),
+            'next_step'  => 'NEED_WHATSAPP_VERIFICATION',
+            'token'      => $token,
             'token_type' => 'Bearer',
-            'data'      => [
+            'data'       => [
                 'user'           => $user->registrationSummary(),
                 'oauth_provider' => $provider,
             ],
         ]);
     }
 
-    // ─── Helpers ──────────────────────────────────────────────────────────────
+    // =========================================================================
+    //  Helpers
+    // =========================================================================
 
     private function isProviderAllowed(string $provider): bool
     {
         return in_array(strtolower($provider), self::ALLOWED_PROVIDERS, true);
+    }
+
+    private function providerNotSupportedResponse(string $provider): JsonResponse
+    {
+        return response()->json([
+            'status'  => 'error',
+            'message' => __('messages.oauth_provider_unsupported', ['provider' => $provider, 'allowed' => implode(', ', self::ALLOWED_PROVIDERS)]),
+            'code'    => 'UNSUPPORTED_PROVIDER',
+        ], 400);
     }
 }

@@ -9,4 +9,4 @@ body:
         "password": "password",
         "entity_type": "individual"
     }
-order: 1000
+order: 1000 
