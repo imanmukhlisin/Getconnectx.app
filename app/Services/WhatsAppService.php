@@ -59,6 +59,7 @@ class WhatsAppService
             $response = match ($this->provider) {
                 'fonnte'  => $this->sendViaFonnte($to, $message),
                 'twilio'  => $this->sendViaTwilio($to, $message),
+                'webhook' => $this->sendViaWebhook($to, $message),
                 default   => throw new WhatsAppDeliveryException("Provider '{$this->provider}' tidak didukung."),
             };
 
@@ -87,6 +88,15 @@ class WhatsAppService
         ])->post($this->apiUrl, [
             'target'  => $to,
             'message' => $message,
+        ]);
+    }
+
+    private function sendViaWebhook(string $to, string $message)
+    {
+        return Http::post($this->apiUrl, [
+            'target'  => $to,
+            'message' => $message,
+            'provider' => 'webhook_test'
         ]);
     }
 
