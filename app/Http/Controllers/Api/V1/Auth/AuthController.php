@@ -47,6 +47,7 @@ class AuthController extends Controller
                 'entity_type'      => $request->entity_type,
                 'email'            => strtolower($request->email),
                 'password'         => $request->password, // auto-hashed via cast
+                'fcm_token'        => $request->fcm_token,
                 'registration_step' => User::STEP_REGISTERED,
                 'is_active'        => false,
             ]);
@@ -302,6 +303,33 @@ class AuthController extends Controller
             nextStep: 'LOGIN_SUCCESS',
             data    : ['user' => $user->registrationSummary()],
             token   : $token
+        );
+    }
+
+    // =========================================================================
+    //  TOKEN REFRESH
+    // =========================================================================
+
+    /**
+     * POST /api/v1/auth/refresh
+     *
+     * Memperbarui token Sanctum yang kedaluwarsa secara otomatis
+     */
+    public function refreshToken(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Cabut (revoke) token yang sedang digunakan untuk request ini
+        $request->user()->currentAccessToken()->delete();
+
+        // Buat token baru
+        $newToken = $user->createToken('auth-token', ['*'])->plainTextToken;
+
+        return $this->successResponse(
+            message : 'Token berhasil diperbarui.',
+            nextStep: 'TOKEN_REFRESHED',
+            data    : ['user' => $user->registrationSummary()],
+            token   : $newToken
         );
     }
 

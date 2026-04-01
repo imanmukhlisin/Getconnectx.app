@@ -15,6 +15,14 @@ return [
     'login_failed' => 'Email atau password salah. Silakan coba lagi.',
     'inactive_user' => 'Akun Anda belum aktif. Selesaikan proses registrasi atau verifikasi terlebih dahulu.',
     
+    // OAuth Responses
+    'oauth_provider_unsupported' => "Provider ':provider' tidak didukung. Gunakan: :allowed.",
+    'oauth_login_cancelled' => 'OAuth login dibatalkan atau terjadi kesalahan.',
+    'oauth_info_failed' => 'Gagal mendapatkan informasi dari provider OAuth.',
+    'oauth_token_invalid' => 'Token :provider tidak valid atau sudah kedaluwarsa. Silakan login ulang melalui :provider.',
+    'oauth_login_success_new' => 'Login via :provider berhasil. Silakan lengkapi verifikasi WhatsApp.',
+    'oauth_login_success_returning' => 'Login via :provider berhasil. Selamat datang kembali!',
+
     // Exception Responses
     'validation_failed' => 'Terjadi kesalahan pada isian form. Silakan periksa kembali kolom yang diisi.',
     'too_many_requests' => 'Terlalu banyak permintaan. Silakan tunggu beberapa saat sebelum mencoba lagi.',
@@ -44,4 +52,5 @@ return [
     'val_otp_digits' => 'Kode OTP harus berupa 6 digit angka, silahkan cek kembali.',
     'val_wa_number_required' => 'Nomor WhatsApp wajib diisi.',
     'val_wa_number_regex' => 'Nomor WhatsApp harus menggunakan format internasional, contoh: +6281234567890.',
+    'val_provider_token_required' => 'Token dari provider OAuth wajib disertakan.',
 ];

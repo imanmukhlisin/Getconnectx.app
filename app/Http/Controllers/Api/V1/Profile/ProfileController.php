@@ -99,4 +99,25 @@ class ProfileController extends Controller
             'data'      => ['user' => $user->fresh()->load('tags')],
         ]);
     }
+
+    /**
+     * PUT /api/v1/profile/fcm-token
+     *
+     * Perbarui FCM Token milik user ini untuk Push Notification.
+     * Dipanggil oleh Flutter setiap kali mendapatkan update token dari Firebase.
+     */
+    public function updateFcmToken(Request $request): JsonResponse
+    {
+        $request->validate([
+            'fcm_token' => 'required|string',
+        ]);
+
+        $user = $request->user();
+        $user->update(['fcm_token' => $request->fcm_token]);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'FCM Token berhasil diperbarui.',
+        ]);
+    }
 }
