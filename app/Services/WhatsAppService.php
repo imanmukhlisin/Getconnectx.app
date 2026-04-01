@@ -110,6 +110,6 @@ class WhatsAppService
     private function buildMessage(string $code): string
     {
         $expiry = config('otp.expiry_minutes', 10);
-        return "Kode verifikasi ConnectX Anda adalah: *{$code}*\n\nBerlaku selama {$expiry} menit. Jangan bagikan kode ini kepada siapapun.";
+        return __('messages.wa_otp_message', ['code' => $code, 'expiry' => $expiry]);
     }
 }

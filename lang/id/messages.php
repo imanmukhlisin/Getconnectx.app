@@ -53,4 +53,7 @@ return [
     'val_wa_number_required' => 'Nomor WhatsApp wajib diisi.',
     'val_wa_number_regex' => 'Nomor WhatsApp harus menggunakan format internasional, contoh: +6281234567890.',
     'val_provider_token_required' => 'Token dari provider OAuth wajib disertakan.',
+    
+    // WhatsApp Delivery Content
+    'wa_otp_message' => "Kode verifikasi ConnectX Anda adalah: *:code*\n\nBerlaku selama :expiry menit. Jangan bagikan kode ini kepada siapapun.",
 ];

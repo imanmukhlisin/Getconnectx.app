@@ -49,4 +49,7 @@ return [
     'val_wa_number_required' => 'WhatsApp number is required.',
     'val_wa_number_regex' => 'WhatsApp number must use an international format, e.g., +6281234567890.',
     'val_provider_token_required' => 'The OAuth provider token is required.',
+    
+    // WhatsApp Delivery Content
+    'wa_otp_message' => "Your ConnectX verification code is: *:code*\n\nValid for :expiry minutes. Do not share this code with anyone.",
 ];
