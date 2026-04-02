@@ -32,7 +32,10 @@ class OAuthController extends Controller
             return $this->providerNotSupportedResponse($provider);
         }
 
-        return Socialite::driver($provider)->stateless()->redirect();
+        $driverName = $provider === 'linkedin' ? 'linkedin-openid' : $provider;
+        return Socialite::driver($driverName)
+            ->stateless()
+            ->redirect();
     }
 
     // =========================================================================
@@ -62,7 +65,8 @@ class OAuthController extends Controller
         }
 
         try {
-            $oauthUser = Socialite::driver($provider)->stateless()->user();
+            $driverName = $provider === 'linkedin' ? 'linkedin-openid' : $provider;
+            $oauthUser = Socialite::driver($driverName)->stateless()->user();
         } catch (Throwable $e) {
             Log::error("OAuth callback failed for {$provider}", ['error' => $e->getMessage()]);
             return response()->json([
@@ -116,7 +120,9 @@ class OAuthController extends Controller
         }
 
         try {
-            $oauthUser = Socialite::driver($provider)
+            $driverName = $provider === 'linkedin' ? 'linkedin-openid' : $provider;
+
+            $oauthUser = Socialite::driver($driverName)
                 ->stateless()
                 ->userFromToken($request->provider_token);
         } catch (Throwable $e) {
