@@ -234,6 +234,10 @@ class AuthController extends Controller
     {
         $user = User::where('email', strtolower($request->email))->first();
 
+        if (! $user) {
+            return $this->errorResponse(__('messages.val_email_not_found'), 'USER_NOT_FOUND', 404);
+        }
+
         if (! $user->is_active) {
             return $this->errorResponse(
                 __('messages.inactive_user'),
@@ -257,6 +261,10 @@ class AuthController extends Controller
     public function loginOtpVerify(LoginOtpVerifyRequest $request): JsonResponse
     {
         $user = User::where('email', strtolower($request->email))->first();
+
+        if (! $user) {
+            return $this->errorResponse(__('messages.val_email_not_found'), 'USER_NOT_FOUND', 404);
+        }
 
         $this->otpService->verify($user, 'email', $request->otp_code);
 

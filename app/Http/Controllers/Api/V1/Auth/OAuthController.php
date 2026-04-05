@@ -153,14 +153,26 @@ class OAuthController extends Controller
      */
     private function processOAuthUser(string $provider, $oauthUser, ?string $fcmToken = null): JsonResponse
     {
-        $user = DB::transaction(function () use ($provider, $oauthUser, $fcmToken) {
-            // Cari user berdasarkan OAuth ID atau email
-            $user = User::where('oauth_provider', $provider)
-                        ->where('oauth_id', $oauthUser->getId())
-                        ->first()
-                ?? User::where('email', strtolower($oauthUser->getEmail()))->first();
+        try {
+            $user = DB::transaction(function () use ($provider, $oauthUser, $fcmToken) {
+                $email = $oauthUser->getEmail() ? strtolower($oauthUser->getEmail()) : null;
 
-            if ($user) {
+                // 1. Cari user berdasarkan OAuth ID terlebih dahulu
+                $user = User::where('oauth_provider', $provider)
+                            ->where('oauth_id', $oauthUser->getId())
+                            ->first();
+
+                // 2. Jika tidak ada by ID tapi email tersedia, coba cari by email
+                if (! $user && $email) {
+                    $user = User::where('email', $email)->first();
+                }
+
+                // 3. Jika benar-benar user baru tapi tidak ada email dari provider (ex: Apple Sign-In hide email)
+                if (! $user && ! $email) {
+                    throw new \InvalidArgumentException("Email not provided by {$provider}");
+                }
+
+                if ($user) {
                 // User sudah ada → update/link OAuth info & fcm token jika ada
                 $updateData = [
                     'oauth_provider'    => $provider,
@@ -175,49 +187,44 @@ class OAuthController extends Controller
                 }
                 
                 $user->update($updateData);
-            } else {
-                // New user via OAuth
-                $user = User::create([
-                    'entity_type'       => null,
-                    'name'              => $oauthUser->getName(),
-                    'email'             => strtolower($oauthUser->getEmail()),
-                    'password'          => null,
-                    'avatar_url'        => $oauthUser->getAvatar(),
-                    'oauth_provider'    => $provider,
-                    'oauth_id'          => $oauthUser->getId(),
-                    'oauth_token'       => $oauthUser->token,
-                    'fcm_token'         => $fcmToken,
-                    'email_verified_at' => now(),
-                    'registration_step' => User::STEP_EMAIL_VERIFIED,
-                    'is_active'         => false,
+                } else {
+                    // New user via OAuth
+                    $user = User::create([
+                        'entity_type'       => null,
+                        'name'              => $oauthUser->getName() ?? 'User',
+                        'email'             => $email,
+                        'password'          => null,
+                        'avatar_url'        => $oauthUser->getAvatar(),
+                        'oauth_provider'    => $provider,
+                        'oauth_id'          => $oauthUser->getId(),
+                        'oauth_token'       => $oauthUser->token,
+                        'fcm_token'         => $fcmToken,
+                        'email_verified_at' => now(),
+                        'registration_step' => User::STEP_EMAIL_VERIFIED,
+                        'is_active'         => false,
+                    ]);
+                }
+
+                return $user;
+            });
+
+            // Evaluasi Next Step dan terbitkan token API (Sanctum) di luar transaksi DB 
+            // agar token creation tidak menghalangi write-lock DB.
+            if ($user->is_active) {
+                $fullToken = $user->createToken('auth-token', ['*'])->plainTextToken;
+
+                return response()->json([
+                    'status'     => 'success',
+                    'message'    => __('messages.oauth_login_success_returning', ['provider' => $provider]),
+                    'next_step'  => 'LOGIN_SUCCESS',
+                    'token'      => $fullToken,
+                    'token_type' => 'Bearer',
+                    'data'       => [
+                        'user'           => $user->registrationSummary(),
+                        'oauth_provider' => $provider,
+                    ],
                 ]);
             }
-
-            return $user;
-        });
-
-        // Jika user sudah fully active (returning user login via OAuth)
-        // → langsung berikan full auth-token, tidak perlu registrasi lagi
-        if ($user->isRegistrationComplete()) {
-            $fullToken = $user->createToken('auth-token', ['*'])->plainTextToken;
-
-            Log::info("OAuth login (returning user) via {$provider}", [
-                'user_id' => $user->id,
-                'email'   => $user->email,
-            ]);
-
-            return response()->json([
-                'status'     => 'success',
-                'message'    => __('messages.oauth_login_success_returning', ['provider' => $provider]),
-                'next_step'  => 'LOGIN_SUCCESS',
-                'token'      => $fullToken,
-                'token_type' => 'Bearer',
-                'data'       => [
-                    'user'           => $user->registrationSummary(),
-                    'oauth_provider' => $provider,
-                ],
-            ]);
-        }
 
         // User baru atau belum selesai registrasi → berikan registration token sementara
         $token = $user->createToken(
@@ -232,17 +239,30 @@ class OAuthController extends Controller
             'step'    => $user->registration_step,
         ]);
 
-        return response()->json([
-            'status'     => 'success',
-            'message'    => __('messages.oauth_login_success_new', ['provider' => $provider]),
-            'next_step'  => 'NEED_WHATSAPP_VERIFICATION',
-            'token'      => $token,
-            'token_type' => 'Bearer',
-            'data'       => [
-                'user'           => $user->registrationSummary(),
-                'oauth_provider' => $provider,
-            ],
-        ]);
+            return response()->json([
+                'status'     => 'success',
+                'message'    => __('messages.oauth_login_success_new', ['provider' => $provider]),
+                'next_step'  => 'NEED_WHATSAPP_VERIFICATION',
+                'token'      => $token,
+                'token_type' => 'Bearer',
+                'data'       => [
+                    'user'           => $user->registrationSummary(),
+                    'oauth_provider' => $provider,
+                ],
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Email wajib diberikan oleh provider OAuth (Privacy Settings).',
+                'code'    => 'OAUTH_EMAIL_REQUIRED',
+            ], 422);
+        } catch (Throwable $e) {
+            Log::error("OAuth internal error for {$provider}", ['error' => $e->getMessage()]);
+            return response()->json([
+                'status'  => 'error',
+                'message' => __('messages.oauth_info_failed'),
+            ], 500);
+        }
     }
 
     // =========================================================================
