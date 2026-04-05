@@ -59,6 +59,7 @@ class WhatsAppService
             $response = match ($this->provider) {
                 'fonnte'  => $this->sendViaFonnte($to, $message),
                 'twilio'  => $this->sendViaTwilio($to, $message),
+                'webhook' => $this->sendViaWebhook($to, $message),
                 default   => throw new WhatsAppDeliveryException("Provider '{$this->provider}' tidak didukung."),
             };
 
@@ -90,6 +91,15 @@ class WhatsAppService
         ]);
     }
 
+    private function sendViaWebhook(string $to, string $message)
+    {
+        return Http::post($this->apiUrl, [
+            'target'  => $to,
+            'message' => $message,
+            'provider' => 'webhook_test'
+        ]);
+    }
+
     private function sendViaTwilio(string $to, string $message)
     {
         // Twilio uses Basic Auth with Account SID + Auth Token
@@ -110,6 +120,6 @@ class WhatsAppService
     private function buildMessage(string $code): string
     {
         $expiry = config('otp.expiry_minutes', 10);
-        return "Kode verifikasi ConnectX Anda adalah: *{$code}*\n\nBerlaku selama {$expiry} menit. Jangan bagikan kode ini kepada siapapun.";
+        return __('messages.wa_otp_message', ['code' => $code, 'expiry' => $expiry]);
     }
 }

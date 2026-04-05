@@ -53,4 +53,11 @@ return [
         'redirect' => env('LINKEDIN_REDIRECT_URI'),
     ],
 
+    // Driver baru untuk OAuth2 + OpenID Connect (wajib sejak Agustus 2023)
+    'linkedin-openid' => [
+        'client_id' => env('LINKEDIN_CLIENT_ID'),
+        'client_secret' => env('LINKEDIN_CLIENT_SECRET'),
+        'redirect' => env('LINKEDIN_REDIRECT_URI'),
+    ],
+
 ];
