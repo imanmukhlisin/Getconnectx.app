@@ -16,34 +16,17 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Binding path.public untuk kompatibilitas Vercel serverless.
-        // Tanpa binding ini, Laravel tidak dapat menemukan direktori public
-        // karena working directory di Vercel berbeda dari struktur standar.
         $this->app->bind('path.public', function () {
             return base_path('public');
         });
 
-        // Override storage path ke /tmp jika storage default tidak writable.
-        // Di Vercel, /var/task/ adalah read-only filesystem — hanya /tmp yang writable.
-        // Pengecekan langsung via is_writable() lebih robust daripada cek env var.
-        $defaultStorage = base_path('storage');
-        if (!is_writable($defaultStorage) && is_writable('/tmp')) {
-            $tmpStorage = env('APP_STORAGE_PATH', '/tmp/storage');
-
-            // Buat semua direktori yang diperlukan Laravel di /tmp
-            foreach ([
-                '/framework/cache/data',
-                '/framework/sessions',
-                '/framework/views',
-                '/framework/testing',
-                '/logs',
-                '/app/public',
-            ] as $dir) {
-                $path = $tmpStorage . $dir;
-                if (!is_dir($path)) {
-                    mkdir($path, 0755, true);
-                }
-            }
-
+        // Override storage path jika APP_STORAGE_PATH di-set oleh api/index.php.
+        // CATATAN: is_writable() TIDAK bisa dipakai karena di Vercel,
+        // filesystem /var/task/ punya permission bits writable tapi sebenarnya
+        // read-only (EROFS). Kita pakai getenv() yang di-set eksplisit
+        // sebelum Laravel boot melalui putenv() di api/index.php.
+        $tmpStorage = getenv('APP_STORAGE_PATH');
+        if ($tmpStorage) {
             $this->app->useStoragePath($tmpStorage);
         }
     }
