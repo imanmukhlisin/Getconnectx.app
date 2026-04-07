@@ -4,7 +4,7 @@
   "buildCommand": "echo 'Skipping build - handled by vercel-php runtime'",
   "outputDirectory": "public",
   "functions": {
-    "api/index.php": {
+    "php/index.php": {
       "runtime": "vercel-php@0.9.0"
     }
   },
@@ -43,7 +43,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/api/index.php"
+      "dest": "/php/index.php"
     }
   ]
 }
