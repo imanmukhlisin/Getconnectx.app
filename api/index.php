@@ -3,27 +3,20 @@
 /**
  * Vercel Serverless PHP Entry Point (Bridge)
  *
- * File ini berfungsi sebagai jembatan (bridge) antara runtime Vercel
- * dan entry point standar Laravel. Vercel akan mengeksekusi file ini,
- * kemudian Laravel akan menangani request melalui public/index.php.
+ * Set semua path ke /tmp SEBELUM Laravel boot agar config/view.php
+ * dan config/session.php membaca path yang writable sejak awal.
  */
 
-// Fix path untuk storage dan public di lingkungan Vercel read-only.
-// Variabel ini bisa di-override via Environment Variables di dashboard Vercel.
-if (!isset($_ENV['APP_STORAGE_PATH'])) {
-    // Di Vercel, /tmp adalah satu-satunya direktori yang writable.
-    $_ENV['APP_STORAGE_PATH'] = '/tmp/storage';
-}
+// Semua direktori yang perlu Laravel untuk bisa write
+$tmpBase = '/tmp/laravel';
 
-// Pastikan direktori storage yang diperlukan ada di /tmp
-$storagePath = $_ENV['APP_STORAGE_PATH'];
 $dirs = [
-    $storagePath . '/framework/cache/data',
-    $storagePath . '/framework/sessions',
-    $storagePath . '/framework/views',
-    $storagePath . '/framework/testing',
-    $storagePath . '/logs',
-    $storagePath . '/app/public',
+    $tmpBase . '/framework/cache/data',
+    $tmpBase . '/framework/sessions',
+    $tmpBase . '/framework/views',
+    $tmpBase . '/framework/testing',
+    $tmpBase . '/logs',
+    $tmpBase . '/app/public',
 ];
 
 foreach ($dirs as $dir) {
@@ -32,5 +25,13 @@ foreach ($dirs as $dir) {
     }
 }
 
-// Arahkan ke entry point utama Laravel.
+// Set env vars SEBELUM Laravel load config
+// Sehingga config/view.php dan path lainnya langsung pakai /tmp
+putenv("APP_STORAGE_PATH={$tmpBase}");
+$_ENV['APP_STORAGE_PATH'] = $tmpBase;
+
+putenv("VIEW_COMPILED_PATH={$tmpBase}/framework/views");
+$_ENV['VIEW_COMPILED_PATH'] = "{$tmpBase}/framework/views";
+
+// Arahkan ke entry point utama Laravel
 require __DIR__ . '/../public/index.php';
