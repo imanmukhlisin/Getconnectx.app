@@ -1,15 +1,6 @@
 <?php
 
-/**
- * Vercel Serverless PHP Entry Point (Bridge)
- *
- * Set semua path ke /tmp SEBELUM Laravel boot agar config/view.php
- * dan config/session.php membaca path yang writable sejak awal.
- */
-
-// Semua direktori yang perlu Laravel untuk bisa write
 $tmpBase = '/tmp/laravel';
-
 $dirs = [
     $tmpBase . '/framework/cache/data',
     $tmpBase . '/framework/sessions',
@@ -18,20 +9,26 @@ $dirs = [
     $tmpBase . '/logs',
     $tmpBase . '/app/public',
 ];
-
 foreach ($dirs as $dir) {
-    if (!is_dir($dir)) {
-        mkdir($dir, 0755, true);
-    }
+    if (!is_dir($dir)) mkdir($dir, 0755, true);
 }
 
-// Set env vars SEBELUM Laravel load config
-// Sehingga config/view.php dan path lainnya langsung pakai /tmp
 putenv("APP_STORAGE_PATH={$tmpBase}");
 $_ENV['APP_STORAGE_PATH'] = $tmpBase;
-
 putenv("VIEW_COMPILED_PATH={$tmpBase}/framework/views");
 $_ENV['VIEW_COMPILED_PATH'] = "{$tmpBase}/framework/views";
 
-// Arahkan ke entry point utama Laravel
+// DEBUG ENDPOINT — Hapus setelah selesai diagnosa
+if (($_SERVER['REQUEST_URI'] ?? '') === '/_debug') {
+    header('Content-Type: application/json');
+    echo json_encode([
+        'REQUEST_URI'    => $_SERVER['REQUEST_URI'] ?? null,
+        'SCRIPT_NAME'    => $_SERVER['SCRIPT_NAME'] ?? null,
+        'PATH_INFO'      => $_SERVER['PATH_INFO'] ?? null,
+        'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'] ?? null,
+        'HTTP_HOST'      => $_SERVER['HTTP_HOST'] ?? null,
+    ], JSON_PRETTY_PRINT);
+    exit;
+}
+
 require __DIR__ . '/../public/index.php';
