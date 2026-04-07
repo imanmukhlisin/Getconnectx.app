@@ -1,8 +1,7 @@
 {
   "version": 2,
   "framework": null,
-  "buildCommand": "composer install --no-dev --optimize-autoloader --no-interaction",
-  "installCommand": "composer install --no-dev --optimize-autoloader --no-interaction",
+  "buildCommand": "echo 'Skipping build - handled by vercel-php runtime'",
   "outputDirectory": "public",
   "functions": {
     "api/index.php": {
