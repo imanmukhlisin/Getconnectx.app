@@ -22,11 +22,29 @@ class AppServiceProvider extends ServiceProvider
             return base_path('public');
         });
 
-        // Override storage path ke /tmp jika berjalan di Vercel.
-        // /tmp adalah satu-satunya direktori yang writable di lingkungan Vercel.
-        if (!empty($_ENV['VERCEL']) || !empty(getenv('VERCEL'))) {
-            $storagePath = env('APP_STORAGE_PATH', '/tmp/storage');
-            $this->app->useStoragePath($storagePath);
+        // Override storage path ke /tmp jika storage default tidak writable.
+        // Di Vercel, /var/task/ adalah read-only filesystem — hanya /tmp yang writable.
+        // Pengecekan langsung via is_writable() lebih robust daripada cek env var.
+        $defaultStorage = base_path('storage');
+        if (!is_writable($defaultStorage) && is_writable('/tmp')) {
+            $tmpStorage = env('APP_STORAGE_PATH', '/tmp/storage');
+
+            // Buat semua direktori yang diperlukan Laravel di /tmp
+            foreach ([
+                '/framework/cache/data',
+                '/framework/sessions',
+                '/framework/views',
+                '/framework/testing',
+                '/logs',
+                '/app/public',
+            ] as $dir) {
+                $path = $tmpStorage . $dir;
+                if (!is_dir($path)) {
+                    mkdir($path, 0755, true);
+                }
+            }
+
+            $this->app->useStoragePath($tmpStorage);
         }
     }
 
