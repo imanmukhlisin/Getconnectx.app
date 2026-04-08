@@ -18,17 +18,11 @@ $_ENV['APP_STORAGE_PATH'] = $tmpBase;
 putenv("VIEW_COMPILED_PATH={$tmpBase}/framework/views");
 $_ENV['VIEW_COMPILED_PATH'] = "{$tmpBase}/framework/views";
 
-// DEBUG ENDPOINT — Hapus setelah selesai diagnosa
-if (($_SERVER['REQUEST_URI'] ?? '') === '/_debug') {
-    header('Content-Type: application/json');
-    echo json_encode([
-        'REQUEST_URI'    => $_SERVER['REQUEST_URI'] ?? null,
-        'SCRIPT_NAME'    => $_SERVER['SCRIPT_NAME'] ?? null,
-        'PATH_INFO'      => $_SERVER['PATH_INFO'] ?? null,
-        'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'] ?? null,
-        'HTTP_HOST'      => $_SERVER['HTTP_HOST'] ?? null,
-    ], JSON_PRETTY_PRINT);
-    exit;
+// FIX: Vercel secara otomatis memotong prefix '/api' dari URL jika diarahkan ke folder api/.
+// Akibatnya '/api/v1/auth/register' menjadi '/v1/auth/register', sehingga Laravel melempar 404.
+// Kita kembalikan prefix '/api' jika URI dimulai dengan '/v1/'.
+if (isset($_SERVER['REQUEST_URI']) && str_starts_with($_SERVER['REQUEST_URI'], '/v1/')) {
+    $_SERVER['REQUEST_URI'] = '/api' . $_SERVER['REQUEST_URI'];
 }
 
 require __DIR__ . '/../public/index.php';
