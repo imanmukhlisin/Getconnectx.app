@@ -2,7 +2,7 @@
 
 Dokumen ini menjelaskan detail arsitektur deployment proyek ConnectX ke Vercel (Serverless). Vercel memiliki keterbatasan tersendiri karena sifatnya yang stateless dan menggunakan serverless function (AWS Lambda), sehingga diperlukan beberapa penyesuaian (hacks) khusus agar Laravel 11 dapat berjalan mulus.
 
-> PENTING DIBACA OLEH SELURUH BACKEND TEAM: Segala macam file caching, session lokal, atau upload storage internal harus dihindari karena Vercel menggunakan Read-Only File System (EROFS).
+> PENTING DIBACA : Segala macam file caching, session lokal, atau upload storage internal harus dihindari karena Vercel menggunakan Read-Only File System (EROFS).
 
 ---
 
@@ -50,4 +50,4 @@ Supaya tidak terjadi crash *(Error 500 / Data Hilang)* ketika API masuk Vercel:
 2. **JANGAN ADA `Storage::put('local')`**
    Harap hanya menggunakan Cloud/Object Storage seperti `AWS S3`, `Supabase Storage`, atau sejenisnya. Segala script upload *(terkait Koperasi / Profile Picture ConnectX)* wajib diarahkah ke external bucket.
 3. **MIGRATION JANGAN LUPA DARI LOKAL**
-   Karena *Database Connection* mengarah ke Supabase, kalian tidak bisa menjalankan `php artisan migrate` di Dashboard Vercel Console. Jalankan migrasi dari terminal laptop lokal salah satu programmer kalian yang menggunakan environment yang sama.
+   Karena *Database Connection* mengarah ke Supabase, kalian tidak bisa menjalankan `php artisan migrate` di Dashboard Vercel Console. Jalankan migrasi dari terminal laptop lokal karena menggunakan environment yang sama.
