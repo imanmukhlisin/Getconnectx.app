@@ -7,6 +7,16 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## 🚀 Setup & Vercel Deployment Guide
+
+Bagi teman-teman developer Backend tim ConnectX, proyek ini telah dimodifikasi agar **kompatibel 100% dijalankan pada Ekosistem Serverless Vercel**. 
+
+Vercel **sangat berbeda dengan VPS Biasa**. Harap membaca file panduan teknis yang telah disusun untuk meminimalisir Error 500 terkait limitasi Read-Only (EROFS), Session, cache, maupun routing conflict.
+
+👉 **PENTING: [BACA PANDUAN ARSITEKTUR & SETUP VERCEL DI SINI (VERCEL_DEPLOYMENT_GUIDE.md)](./VERCEL_DEPLOYMENT_GUIDE.md)** 👈
+
+---
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
