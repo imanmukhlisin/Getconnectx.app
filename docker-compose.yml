@@ -28,7 +28,7 @@ services:
       - "${APP_PORT:-80}:80" # Default 80, tapi bisa diganti lewat .env
     
     volumes:
-      # - /mnt/d/CODEVITS/Getconnectx.app:/var/www
+      - ./:/var/www
       # - /mnt/d/CODEVITS/Getconnectx.app/docker/nginx/conf.d/:/etc/nginx/conf.d/
       - .:/var/www
       - ./docker/nginx/conf.d/:/etc/nginx/conf.d/ # Path relatif ke folder docker
