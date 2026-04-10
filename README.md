@@ -17,6 +17,19 @@ Vercel **sangat berbeda dengan VPS Biasa**. Harap membaca file panduan teknis ya
 
 ---
 
+## ✨ Key Features (v1)
+
+- **Auth System**: Passwordless Login (OTP WhatsApp & Email), Social Login (Google, Apple, LinkedIn).
+- **Sequential Registration**: Flow pendaftaran 5 tahap yang aman.
+- **Real-time Chat**: 1-on-1 chatting menggunakan **Supabase Realtime Broadcast**.
+- **Supabase Integration**: Data tersimpan aman di PostgreSQL (Supabase Cloud).
+
+Untuk detail teknis endpoint, silakan baca **[README-API.md](./README-API.md)**.
+
+---
+
+---
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

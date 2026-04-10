@@ -296,3 +296,72 @@ wsl docker exec getconnectx-app php artisan config:clear
 |:--------|:----|
 | **API (Nginx)** | http://localhost |
 | **Mailpit (Email Testing)** | http://localhost:8025 |
+| **Chat Interface (Web)** | http://localhost/chat |
+
+---
+
+## 💬 Chat System (Real-time)
+
+Sistem chat ConnectX menggunakan **Supabase Realtime (Broadcast)** untuk pengiriman pesan instan tanpa beban server berat.
+
+### 1. Daftar Percakapan (Conversations)
+
+#### ▶ Ambil Daftar Chat Saya
+```
+GET /chats
+Authorization: Bearer {token}
+```
+**Response (200):** Menampilkan daftar user yang sedang/pernah chat dengan Anda beserta pesan terakhir.
+
+#### ▶ Mulai Chat Baru / Cari Sesi Chat
+```
+POST /chats
+Authorization: Bearer {token}
+```
+**Request Body:**
+```json
+{ "user_id": "{uuid-target-user}" }
+```
+
+---
+
+### 2. Pesan (Messages)
+
+#### ▶ Kirim Pesan
+```
+POST /chats/{conversation_id}/messages
+Authorization: Bearer {token}
+```
+**Request Body:**
+```json
+{ 
+    "content": "Halo, apakah Anda tersedia untuk koding bareng?",
+    "type": "text" 
+}
+```
+
+#### ▶ Ambil Riwayat Pesan
+```
+GET /chats/{conversation_id}/messages
+Authorization: Bearer {token}
+```
+
+---
+
+### ⚡ Integrasi Real-time (Supabase)
+
+Untuk aplikasi (Frontend/Mobile) agar bisa menerima pesan secara instan (real-time):
+
+1.  Gunakan **Supabase JS Client**.
+2.  Subscribe ke channel: `chat_{conversation_id}`.
+3.  Listen untuk event: `message`.
+4.  Payload akan berisi data pesan baru yang dikirim.
+
+Contoh (JS):
+```javascript
+const channel = supabase.channel(`chat_${id}`)
+  .on('broadcast', { event: 'message' }, ({ payload }) => {
+    console.log("Pesan baru masuk:", payload);
+  })
+  .subscribe()
+```

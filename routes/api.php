@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\OAuthController;
 use App\Http\Controllers\Api\V1\Profile\ProfileController;
+use App\Http\Controllers\Api\V1\Chat\MessageController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -103,6 +104,18 @@ Route::prefix('v1')->group(function () {
             ->name('profile.update.stage-b');
         Route::put('fcm-token', [ProfileController::class, 'updateFcmToken'])
             ->name('profile.update.fcm-token');
+    });
+
+    // ─── Authenticated: Chat System ───────────────────────────────────────────
+    Route::prefix('chats')->middleware('auth:sanctum')->group(function () {
+        Route::get('/', [MessageController::class, 'index'])
+            ->name('chats.index');
+        Route::post('/', [MessageController::class, 'storeConversation'])
+            ->name('chats.store');
+        Route::get('{conversation}/messages', [MessageController::class, 'messages'])
+            ->name('chats.messages');
+        Route::post('{conversation}/messages', [MessageController::class, 'sendMessage'])
+            ->name('chats.messages.send');
     });
 });
 

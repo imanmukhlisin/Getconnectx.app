@@ -89,6 +89,12 @@ class User extends Authenticatable
         return $this->hasMany(OtpCode::class);
     }
 
+    public function conversations()
+    {
+        return $this->belongsToMany(Conversation::class, 'conversation_participants')
+                    ->withTimestamps();
+    }
+
     // ─── Helper Methods ───────────────────────────────────────────────────────
 
     public function hasVerifiedEmail(): bool
