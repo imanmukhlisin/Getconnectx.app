@@ -29,11 +29,7 @@ class User extends Authenticatable
         self::STEP_WHATSAPP_VERIFIED => 'REGISTRATION_COMPLETE',
     ];
 
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $fillable = [
-        'entity_type',
         'name',
         'email',
         'password',
@@ -52,6 +48,7 @@ class User extends Authenticatable
         'role_category',
         'commitment_level',
         'startup_stage',
+        'is_onboarded',
     ];
 
     /**
@@ -74,6 +71,7 @@ class User extends Authenticatable
             'is_active'            => 'boolean',
             'registration_step'    => 'integer',
             'password'             => 'hashed',
+            'is_onboarded'         => 'boolean',
         ];
     }
 
@@ -126,13 +124,13 @@ class User extends Authenticatable
     {
         return [
             'id'                    => $this->id,
-            'entity_type'           => $this->entity_type,
             'email'                 => $this->email,
             'email_verified_at'     => $this->email_verified_at,
             'whatsapp_number'       => $this->whatsapp_number,
             'whatsapp_verified_at'  => $this->whatsapp_verified_at,
             'registration_step'     => $this->registration_step,
             'is_active'             => $this->is_active,
+            'is_onboarded'          => $this->is_onboarded,
 
         ];
     }

@@ -15,7 +15,7 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'entity_type'           => ['nullable', 'string', 'in:talent,startup'],
+
             'fcm_token'             => ['nullable', 'string'],
             'email'                 => ['required', 'email:rfc,dns', 'max:255', 'unique:users,email'],
             'password'              => [
@@ -34,8 +34,6 @@ class RegisterRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'entity_type.in'         => __('messages.val_entity_type_in'),
-            
             'email.required'         => __('messages.val_email_required'),
             'email.email'            => __('messages.val_email_format'),
             'email.max'              => __('messages.val_email_max'),

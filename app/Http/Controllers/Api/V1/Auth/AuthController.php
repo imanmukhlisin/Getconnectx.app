@@ -44,7 +44,7 @@ class AuthController extends Controller
     {
         $user = DB::transaction(function () use ($request) {
             return User::create([
-                'entity_type'      => $request->entity_type,
+
                 'email'            => strtolower($request->email),
                 'password'         => $request->password, // auto-hashed via cast
                 'fcm_token'        => $request->fcm_token,
@@ -210,7 +210,7 @@ class AuthController extends Controller
 
         Log::info('Registration completed', [
             'user_id'     => $user->id,
-            'entity_type' => $user->entity_type,
+
             'email'       => $user->email,
         ]);
 

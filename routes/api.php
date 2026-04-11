@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\OAuthController;
 use App\Http\Controllers\Api\V1\Profile\ProfileController;
 use App\Http\Controllers\Api\V1\Chat\MessageController;
+use App\Http\Controllers\Api\V1\OnboardingController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -98,12 +99,17 @@ Route::prefix('v1')->group(function () {
             ->name('profile.index');
         Route::get('tags', [ProfileController::class, 'tags'])
             ->name('profile.tags');
-        Route::put('stage-a-identity', [ProfileController::class, 'updateStageA'])
-            ->name('profile.update.stage-a');
-        Route::put('stage-b-technical', [ProfileController::class, 'updateStageB'])
-            ->name('profile.update.stage-b');
         Route::put('fcm-token', [ProfileController::class, 'updateFcmToken'])
             ->name('profile.update.fcm-token');
+    });
+
+    // ─── Authenticated: Dynamic Onboarding Engine ─────────────────────────────
+    Route::prefix('onboarding')->middleware('auth:sanctum')->group(function () {
+        Route::post('sessions', [OnboardingController::class, 'start'])->name('onboarding.sessions.start');
+        Route::get('sessions/{session}/current', [OnboardingController::class, 'current'])->name('onboarding.sessions.current');
+        Route::post('sessions/{session}/answer', [OnboardingController::class, 'answer'])->name('onboarding.sessions.answer');
+        Route::post('sessions/{session}/back', [OnboardingController::class, 'back'])->name('onboarding.sessions.back');
+        Route::get('sessions/{session}', [OnboardingController::class, 'show'])->name('onboarding.sessions.show');
     });
 
     // ─── Authenticated: Chat System ───────────────────────────────────────────

@@ -17,14 +17,14 @@ class RegisterTest extends TestCase
     protected function getValidPayload(): array
     {
         return [
-            'entity_type'           => 'talent',
+
             'email'                 => 'hello' . uniqid() . '@gmail.com',
             'password'              => 'C0nn3ctX!_Test_2026_SecurePwd',
             'password_confirmation' => 'C0nn3ctX!_Test_2026_SecurePwd',
         ];
     }
 
-    public function test_user_can_register_successfully_as_talent()
+    public function test_user_can_register_successfully()
     {
         $payload = $this->getValidPayload();
 
@@ -38,7 +38,7 @@ class RegisterTest extends TestCase
                      'data' => [
                          'user' => [
                              'id',
-                             'entity_type',
+
                              'email',
                              'registration_step',
                              'is_active',
@@ -47,12 +47,11 @@ class RegisterTest extends TestCase
                      'token',
                      'token_type'
                  ])
-                 ->assertJsonPath('next_step', 'NEED_EMAIL_OTP')
-                 ->assertJsonPath('data.user.entity_type', 'talent');
+                 ->assertJsonPath('next_step', 'NEED_EMAIL_OTP');
 
         $this->assertDatabaseHas('users', [
             'email' => $payload['email'],
-            'entity_type' => 'talent',
+
             'registration_step' => User::STEP_REGISTERED,
             'is_active' => false,
         ]);
@@ -62,45 +61,6 @@ class RegisterTest extends TestCase
         ]);
     }
 
-    public function test_user_can_register_successfully_as_startup()
-    {
-        $payload = array_merge($this->getValidPayload(), [
-            'entity_type' => 'startup',
-        ]);
-
-        $response = $this->postJson('/api/v1/auth/register', $payload);
-
-        $response->assertStatus(201)
-                 ->assertJsonPath('data.user.entity_type', 'startup');
-        
-        $this->assertDatabaseHas('users', [
-            'email' => $payload['email'],
-            'entity_type' => 'startup',
-        ]);
-    }
-
-    public function test_registration_requires_entity_type()
-    {
-        $payload = $this->getValidPayload();
-        unset($payload['entity_type']);
-
-        $response = $this->postJson('/api/v1/auth/register', $payload);
-
-        $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['entity_type']);
-    }
-
-    public function test_registration_entity_type_must_be_talent_or_startup()
-    {
-        $payload = array_merge($this->getValidPayload(), [
-            'entity_type' => 'admin',
-        ]);
-
-        $response = $this->postJson('/api/v1/auth/register', $payload);
-
-        $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['entity_type']);
-    }
 
     public function test_registration_requires_email()
     {

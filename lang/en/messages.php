@@ -28,9 +28,7 @@ return [
     'otp_rate_limit_minute' => 'Oops... Too many OTP requests. Please try again in :minutes minutes.',
     
     // Validations (Register Request)
-    'val_entity_type_required' => 'Entity type is required (talent or startup).',
-    'val_entity_type_in' => 'Entity type must be either "talent" or "startup".',
-    'val_email_required' => 'Email address is required.',
+'val_email_required' => 'Email address is required.',
     'val_email_format' => 'Invalid email format (e.g., name@email.com).',
     'val_email_max' => 'Email is too long (maximum 255 characters).',
     'val_email_unique' => 'This email is already registered. Please use another email or login.',

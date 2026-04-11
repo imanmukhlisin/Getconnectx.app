@@ -190,7 +190,7 @@ class OAuthController extends Controller
                 } else {
                     // New user via OAuth
                     $user = User::create([
-                        'entity_type'       => null,
+
                         'name'              => $oauthUser->getName() ?? 'User',
                         'email'             => $email,
                         'password'          => null,

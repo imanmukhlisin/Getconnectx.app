@@ -31,9 +31,7 @@ return [
     'otp_rate_limit_minute' => 'Upsss... Terlalu banyak permintaan OTP. Coba lagi dalam :minutes menit.',
     
     // Validations (Register Request)
-    'val_entity_type_required' => 'Tipe entitas wajib dipilih (talent atau startup).',
-    'val_entity_type_in' => 'Tipe entitas hanya boleh "talent" atau "startup".',
-    'val_email_required' => 'Alamat email wajib diisi.',
+'val_email_required' => 'Alamat email wajib diisi.',
     'val_email_format' => 'Format email tidak valid (contoh yang benar: nama@email.com).',
     'val_email_max' => 'Email terlalu panjang (maksimal 255 karakter).',
     'val_email_unique' => 'Email ini sudah terdaftar. Silakan gunakan email lain atau login.',

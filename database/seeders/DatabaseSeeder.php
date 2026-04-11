@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             TagSeeder::class,
+            OnboardingSeeder::class,
         ]);
 
         // User::factory()->create([

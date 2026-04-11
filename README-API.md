@@ -41,14 +41,14 @@ POST /auth/register
 **Request Body:**
 ```json
 {
-    "entity_type": "talent",
+
     "email": "user@example.com",
     "password": "PasswordKuat123!",
     "password_confirmation": "PasswordKuat123!"
 }
 ```
 
-> `entity_type` hanya boleh: `talent` atau `startup`
+
 > Password wajib: min 8 karakter, huruf besar+kecil, angka, dan simbol.
 
 **Response (201):**
