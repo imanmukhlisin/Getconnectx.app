@@ -70,6 +70,7 @@ Core Engine (Mesin Utamanya) sudah dibangun dan stabil untuk menopang *Dynamic F
 2.  **API Endpoints Dinamis:** Seluruh 5 Endpoint API (`start`, `current`, `answer`, `back`, `state`) sudah dibuat dan dites berhasil menjalankan logika formulir bercabang (Branching Logic).
 3.  **Hapus Profil Kaku Lama:** Penyatuan sistem; menghapus API profil lama (`stage-a-identity`, `stage-b`) dan mencabut field `entity_type` secara tuntas dari fitur Pendaftaran Registrasi (`auth/register`).
 4.  **Integrasi Output ke Tabel `users`:** Ketika sesi Onboarding mencapai batas akhir form, mesin otomatis merangkum semua jawaban dan merubah flag profil utama menjadi `is_onboarded = true`.
+5.  **Mekanisme Direct Upload Media (Google Cloud Storage):** Pembuatan Endpoint `/api/v1/media/upload-url` sudah berhasil dibuat. Backend tidak perlu lagi mengangkut file berat (zero payload), melainkan hanya mengeluarkan *Pre-signed URL* berumur 10 menit. File *Pitch Deck* langsung terbang dari Frontend menuju Google Cloud.
 
 ### 🚧 PR (Pekerjaan Rumah) Kedepannya
 
@@ -79,9 +80,6 @@ Ada beberapa elemen non-sistem (sifatnya injeksi data atau fitur sekunder luar m
 *   **Status Saat Ini:** Data Seeder yang sekarang (`OnboardingSeeder.php`) hanya berupa baris Data Dummy untuk sekadar *membuktikan jika *Branching Logic* (Founder vs Startup) berjalan baik. *(Masih banyak isian kuesioner asli yang absen.)*
 *   **Actionable:** Backend wajib ngetik / nginput satu-satu sisa data pertanyaan kontrak asli ke Seeder / Database. Contohnya: *Date of Birth*, *City Dropdown*, *Gender*, *Tagging Skill Frontend/Backend/UIUX*, dll. Supaya saat Frontend manggil API, soal yang keluar udah "soal beneran".
 
-**B. Mekanisme Endpoint Upload File** *(Medium Priority)*
-*   **Konteks:** Kita butuh tipe pertanyaan `file_upload` (kayak upload Foto Profil / Pitch Deck). 
-*   **Actionable:** Standar industri adalah: Frontend menembak file fisiknya bukan ke endpoint `/answer`, melainkan ke Endpoint khusus (Contoh: `/api/v1/media/upload` yang dikirim ke Claudeflare R2 ). Sesudah dapet teks link URL-nya dari awan, teks itulah yang mereka kirim ke JSON `answer`. API Media Upload ini harus dipastikan kelak udah ter-develop di backend.
 
 **C. Bangun Admin Panel (Admin Dashboard)** *(Phase 2)*
 *   **Konteks:** Kita butuh cara rapi buat merawat, menambah, atau menghapus form kedepannya tanpa nyentuh teks kode IDE. Apalagi jika kita harus nambah list profesi di Dropdown Skill/Talent.

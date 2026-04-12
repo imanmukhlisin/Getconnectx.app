@@ -113,3 +113,54 @@ Sistem tamat! Jawaban tadi dimasak dari JSON menjadi Kolom fisikal SQL `role_cat
 *   **Mundur 1 Langkah:** `POST {{base_url}}/api/v1/onboarding/sessions/{{session_id}}/back`
 *   **Muat Ulang Form Posisi Terakhir (Resume):** `GET {{base_url}}/api/v1/onboarding/sessions/{{session_id}}/current`
 *   **Narik File Transkrip Keseluruhan Session Selesai:** `GET {{base_url}}/api/v1/onboarding/sessions/{{session_id}}`
+
+---
+
+## 5. Menguji Fitur Direct Upload Media (Google Cloud Storage)
+Kalo lo sampe di pertanyaan yang butuh ngunggah Dokumen/Gambar (Misal: Upload Pitch Deck), lo **GGAK BOLEH** ngirim file fisik ke API `/answer`. Lo harus minta tiket penerbangan file-nya dulu ke API Media kita!
+
+### Fase 1: Minta Surat Ijin/Tiket
+Backend cuma ngeluarin URL Unik (Pre-signed URL) yang kadaluarsa dalam 10 menit.
+*   **Method:** `POST`
+*   **URL:** `{{base_url}}/api/v1/media/upload-url`
+*   **Body (raw JSON):**
+```json
+{
+  "file_name": "pitch_deck_startup_keren.pdf",
+  "mime_type": "application/pdf"
+}
+```
+
+*Contoh Balasan Sukses:*
+```json
+{
+  "upload_url": "https://storage.googleapis.com/connect-bucket/uploads/uuid-panjang-pitch_deck_startup_keren.pdf?X-Goog-Algorithm=...SignaturePanjang...",
+  "file_url": "https://storage.googleapis.com/connect-bucket/uploads/uuid-panjang-pitch_deck_startup_keren.pdf",
+  "path": "uploads/uuid-panjang-pitch_deck_startup_keren.pdf",
+  "expires_in": "10 Minutes"
+}
+```
+
+### Fase 2: Tembak Filenya Langsung Ke Google!
+Untuk nyobain ini di Postman:
+1. Bikin Tab Request baru di Postman.
+2. Ganti method jadi **`PUT`**.
+3. Di kolom URL, *Paste* link yang ada di nilai `"upload_url"` kepanjangan tadi.
+4. Buka tab **Headers** -> tambahkan **`Content-Type`** valuenya **`application/pdf`** (Wajib 100% sama dengan *mime_type* yang lo minta di awal).
+5. Buka tab **Body** -> pilih **`binary`** -> pilih file PDF beneran dari HP/Komputer lo.
+6. Pencet Send. Kalo balesannya `200 OK` tanpa tulisan apa-apa, artinya **SUKSES MASUK GCS!**
+
+### Fase 3: Setor Jawaban ke Onboarding
+Kalo Fase 2 udah sukses, lo baru balik nge-hajar Endpoint `/answer` buat ngirim letak URL filenya:
+*   **Method:** `POST`
+*   **URL:** `{{base_url}}/api/v1/onboarding/sessions/{{session_id}}/answer`
+*   **Body (raw JSON):**
+```json
+{
+  "step_id": "step_nama_halaman_pitchdeck",
+  "answers": {
+    "q_pitch_deck": "https://storage.googleapis.com/connect-bucket/uploads/uuid-panjang-pitch_deck_startup_keren.pdf"
+  }
+}
+```
+Mulus, Ringan, Server Laravel Nggak Jebol!🚀

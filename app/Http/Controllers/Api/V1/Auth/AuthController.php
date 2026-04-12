@@ -28,6 +28,7 @@ class AuthController extends Controller
         private readonly EmailVerificationService $emailService,
         private readonly WhatsAppService          $whatsAppService,
         private readonly OtpService               $otpService,
+        private readonly \App\Services\SupabaseAuthService $supabaseAuth,
     ) {}
 
     // =========================================================================
@@ -205,8 +206,12 @@ class AuthController extends Controller
             $user->tokens()->where('name', 'registration-token')->delete();
         });
 
+        // Sinkronisasi ke Supabase Auth (auth.users)
+        $this->supabaseAuth->syncUserToSupabase($user);
+
         // Issue permanent (full-access) token
         $finalToken = $user->createToken('auth-token', ['*'])->plainTextToken;
+        $supabaseToken = $this->supabaseAuth->generateSupabaseToken($user);
 
         Log::info('Registration completed', [
             'user_id'     => $user->id,
@@ -219,6 +224,7 @@ class AuthController extends Controller
             nextStep: 'REGISTRATION_COMPLETE',
             data    : ['user' => $user->fresh()->registrationSummary()],
             token   : $finalToken,
+            extra   : ['supabase_token' => $supabaseToken]
         );
     }
 
@@ -263,8 +269,11 @@ class AuthController extends Controller
 
         $this->otpService->verify($user, 'email', $request->otp_code);
 
+        // Sinkronisasi ke Supabase Auth (untuk jaga-jaga kalau belum ada)
+        $this->supabaseAuth->syncUserToSupabase($user);
 
         $token = $user->createToken('auth-token', ['*'])->plainTextToken;
+        $supabaseToken = $this->supabaseAuth->generateSupabaseToken($user);
 
         $nextStep = $user->is_active ? 'LOGIN_SUCCESS' : $user->nextStep();
 
@@ -272,7 +281,8 @@ class AuthController extends Controller
             message : 'Login berhasil! Selamat datang kembali.',
             nextStep: $nextStep,
             data    : ['user' => $user->registrationSummary()],
-            token   : $token
+            token   : $token,
+            extra   : ['supabase_token' => $supabaseToken]
         );
     }
 
@@ -296,7 +306,11 @@ class AuthController extends Controller
         // Inactive users can login to finish registration
 
 
+        // Sinkronisasi ke Supabase Auth
+        $this->supabaseAuth->syncUserToSupabase($user);
+
         $token = $user->createToken('auth-token', ['*'])->plainTextToken;
+        $supabaseToken = $this->supabaseAuth->generateSupabaseToken($user);
 
         $nextStep = $user->is_active ? 'LOGIN_SUCCESS' : $user->nextStep();
 
@@ -304,7 +318,8 @@ class AuthController extends Controller
             message : __('messages.login_success'),
             nextStep: $nextStep,
             data    : ['user' => $user->registrationSummary()],
-            token   : $token
+            token   : $token,
+            extra   : ['supabase_token' => $supabaseToken]
         );
     }
 
@@ -343,6 +358,7 @@ class AuthController extends Controller
         array   $data     = [],
         ?string $token    = null,
         int     $status   = 200,
+        array   $extra    = [],
     ): JsonResponse {
         $payload = [
             'status'    => 'success',
@@ -354,6 +370,10 @@ class AuthController extends Controller
         if ($token !== null) {
             $payload['token'] = $token;
             $payload['token_type'] = 'Bearer';
+        }
+
+        if (!empty($extra)) {
+            $payload = array_merge($payload, $extra);
         }
 
         return response()->json($payload, $status);

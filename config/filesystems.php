@@ -61,7 +61,7 @@ return [
         'gcs' => [
             'driver' => 'gcs',
             'key_file_path' => env('GOOGLE_CLOUD_KEY_FILE', null), // path ke JSON key file
-            'key_file' => [], // array kredensial (jika pake environment json string dsb opsional)
+            'key_file' => env('GOOGLE_CLOUD_KEY_JSON') ? json_decode(env('GOOGLE_CLOUD_KEY_JSON'), true) : [], // array kredensial dari JSON string (Vercel-friendly)
             'project_id' => env('GOOGLE_CLOUD_PROJECT_ID', 'your-project-id'),
             'bucket' => env('GOOGLE_CLOUD_STORAGE_BUCKET', 'your-bucket'),
             'path_prefix' => env('GOOGLE_CLOUD_STORAGE_PATH_PREFIX', ''), 

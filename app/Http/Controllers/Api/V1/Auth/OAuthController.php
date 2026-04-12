@@ -17,6 +17,10 @@ class OAuthController extends Controller
 {
     private const ALLOWED_PROVIDERS = ['google', 'apple', 'linkedin'];
 
+    public function __construct(
+        private readonly \App\Services\SupabaseAuthService $supabaseAuth
+    ) {}
+
     // =========================================================================
     //  Redirect to OAuth Provider (Web Flow)
     // =========================================================================
@@ -210,13 +214,18 @@ class OAuthController extends Controller
             // Evaluasi Next Step dan terbitkan token API (Sanctum) di luar transaksi DB 
             // agar token creation tidak menghalangi write-lock DB.
             if ($user->is_active) {
+                // Sinkronisasi ke Supabase
+                $this->supabaseAuth->syncUserToSupabase($user);
+                
                 $fullToken = $user->createToken('auth-token', ['*'])->plainTextToken;
+                $supabaseToken = $this->supabaseAuth->generateSupabaseToken($user);
 
                 return response()->json([
                     'status'     => 'success',
                     'message'    => __('messages.oauth_login_success_returning', ['provider' => $provider]),
                     'next_step'  => 'LOGIN_SUCCESS',
                     'token'      => $fullToken,
+                    'supabase_token' => $supabaseToken,
                     'token_type' => 'Bearer',
                     'data'       => [
                         'user'           => $user->registrationSummary(),
