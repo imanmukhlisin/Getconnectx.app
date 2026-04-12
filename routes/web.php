@@ -21,3 +21,7 @@ Route::get('/dashboard', function () {
 Route::get('/chat', function () {
     return view('chat.index');
 })->name('chat');
+
+Route::get('/onboarding', function () {
+    return view('auth.onboarding');
+})->name('onboarding');

@@ -238,13 +238,8 @@ class AuthController extends Controller
             return $this->errorResponse(__('messages.val_email_not_found'), 'USER_NOT_FOUND', 404);
         }
 
-        if (! $user->is_active) {
-            return $this->errorResponse(
-                __('messages.inactive_user'),
-                'INACTIVE_USER',
-                403
-            );
-        }
+        // Inactive users can login to finish registration
+
 
         $this->emailService->sendOtp($user);
 
@@ -271,9 +266,11 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth-token', ['*'])->plainTextToken;
 
+        $nextStep = $user->is_active ? 'LOGIN_SUCCESS' : $user->nextStep();
+
         return $this->successResponse(
             message : 'Login berhasil! Selamat datang kembali.',
-            nextStep: 'LOGIN_SUCCESS',
+            nextStep: $nextStep,
             data    : ['user' => $user->registrationSummary()],
             token   : $token
         );
@@ -296,19 +293,16 @@ class AuthController extends Controller
             return $this->errorResponse(__('messages.login_failed'), 'INVALID_CREDENTIALS', 401);
         }
 
-        if (! $user->is_active) {
-            return $this->errorResponse(
-                __('messages.inactive_user'),
-                'INACTIVE_USER',
-                403
-            );
-        }
+        // Inactive users can login to finish registration
+
 
         $token = $user->createToken('auth-token', ['*'])->plainTextToken;
 
+        $nextStep = $user->is_active ? 'LOGIN_SUCCESS' : $user->nextStep();
+
         return $this->successResponse(
             message : __('messages.login_success'),
-            nextStep: 'LOGIN_SUCCESS',
+            nextStep: $nextStep,
             data    : ['user' => $user->registrationSummary()],
             token   : $token
         );

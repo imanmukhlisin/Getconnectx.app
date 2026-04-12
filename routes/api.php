@@ -94,7 +94,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // ─── Authenticated: Profile & Onboarding ──────────────────────────────────
-    Route::prefix('profile')->middleware('auth:sanctum')->group(function () {
+    Route::prefix('profile')->middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
         Route::get('/', [ProfileController::class, 'index'])
             ->name('profile.index');
         Route::get('tags', [ProfileController::class, 'tags'])
@@ -113,15 +113,24 @@ Route::prefix('v1')->group(function () {
     });
 
     // ─── Authenticated: Chat System ───────────────────────────────────────────
-    Route::prefix('chats')->middleware('auth:sanctum')->group(function () {
+    Route::prefix('conversations')->middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
         Route::get('/', [MessageController::class, 'index'])
-            ->name('chats.index');
+            ->name('conversations.index');
         Route::post('/', [MessageController::class, 'storeConversation'])
-            ->name('chats.store');
+            ->name('conversations.store');
+        
         Route::get('{conversation}/messages', [MessageController::class, 'messages'])
-            ->name('chats.messages');
+            ->name('conversations.messages');
         Route::post('{conversation}/messages', [MessageController::class, 'sendMessage'])
-            ->name('chats.messages.send');
+            ->name('conversations.messages.send');
+
+        // New requirements from image
+        Route::get('{conversation}/media', [MessageController::class, 'media'])
+            ->name('conversations.media');
+        Route::post('{conversation}/media', [MessageController::class, 'sendMedia'])
+            ->name('conversations.media.send');
+        Route::post('{conversation}/typing', [MessageController::class, 'signalTyping'])
+            ->name('conversations.typing');
     });
 });
 

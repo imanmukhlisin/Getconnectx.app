@@ -36,7 +36,7 @@
 
         function saveTokenAndRedirect(token) {
             localStorage.setItem('token', token);
-            window.location.href = '/dashboard';
+            window.location.href = '/onboarding';
         }
 
         document.getElementById('loginPasswordForm').addEventListener('submit', async function(e) {

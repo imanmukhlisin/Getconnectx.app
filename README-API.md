@@ -300,22 +300,22 @@ wsl docker exec getconnectx-app php artisan config:clear
 
 ---
 
-## 💬 Chat System (Real-time)
+## 💬 Conversation System (Real-time)
 
-Sistem chat ConnectX menggunakan **Supabase Realtime (Broadcast)** untuk pengiriman pesan instan tanpa beban server berat.
+Sistem chat ConnectX menggunakan **Supabase Realtime (Broadcast)** untuk pengiriman pesan instan.
 
 ### 1. Daftar Percakapan (Conversations)
 
-#### ▶ Ambil Daftar Chat Saya
+#### ▶ Ambil Daftar Percakapan
 ```
-GET /chats
+GET /conversations
 Authorization: Bearer {token}
 ```
-**Response (200):** Menampilkan daftar user yang sedang/pernah chat dengan Anda beserta pesan terakhir.
+**Response (200):** Menampilkan daftar percakapan aktif.
 
-#### ▶ Mulai Chat Baru / Cari Sesi Chat
+#### ▶ Mulai Percakapan Baru
 ```
-POST /chats
+POST /conversations
 Authorization: Bearer {token}
 ```
 **Request Body:**
@@ -325,26 +325,52 @@ Authorization: Bearer {token}
 
 ---
 
-### 2. Pesan (Messages)
+### 2. Pesan & Media (Messages)
 
-#### ▶ Kirim Pesan
+#### ▶ Kirim Pesan Teks
 ```
-POST /chats/{conversation_id}/messages
+POST /conversations/{conversation_id}/messages
 Authorization: Bearer {token}
 ```
 **Request Body:**
 ```json
-{ 
-    "content": "Halo, apakah Anda tersedia untuk koding bareng?",
-    "type": "text" 
-}
+{ "content": "Halo!", "type": "text" }
+```
+
+#### ▶ Kirim Media (Gambar)
+```
+POST /conversations/{conversation_id}/media
+Authorization: Bearer {token}
+```
+**Form Data:** `file` (image)
+
+#### ▶ Signal Typing (Heartbeat)
+```
+POST /conversations/{conversation_id}/typing
+Authorization: Bearer {token}
 ```
 
 #### ▶ Ambil Riwayat Pesan
 ```
-GET /chats/{conversation_id}/messages
-Authorization: Bearer {token}
+GET /conversations/{conversation_id}/messages
 ```
+
+---
+
+## 📋 Dynamic Onboarding Engine
+
+Digunakan setelah verifikasi inti selesai untuk melengkapi profil user secara dinamis.
+
+#### ▶ Start Onboarding Session
+```
+POST /onboarding/sessions
+```
+
+#### ▶ Kirim Jawaban
+```
+POST /onboarding/sessions/{session_id}/answer
+```
+**Body:** `{ "step_id": "...", "answers": { "field": "value" } }`
 
 ---
 

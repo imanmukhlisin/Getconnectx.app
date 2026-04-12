@@ -120,4 +120,77 @@ class MessageController extends Controller
             'data'   => $message->load('sender:id,name,avatar_url'),
         ], 201);
     }
+
+    /**
+     * Get shared media (images/files) for a specific conversation.
+     */
+    public function media(Request $request, Conversation $conversation)
+    {
+        if (!$conversation->participants()->where('user_id', $request->user()->id)->exists()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $mediaList = $conversation->messages()
+            ->whereIn('type', ['image', 'file'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(50);
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $mediaList,
+        ]);
+    }
+
+    /**
+     * Send media message (image upload).
+     */
+    public function sendMedia(Request $request, Conversation $conversation)
+    {
+        $request->validate([
+            'file' => 'required|image|max:10240', // Max 10MB
+        ]);
+
+        if (!$conversation->participants()->where('user_id', $request->user()->id)->exists()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $path = $request->file('file')->store('chat-media', 'public');
+        $url = asset('storage/' . $path);
+
+        $message = DB::transaction(function () use ($request, $conversation, $url) {
+            $msg = $conversation->messages()->create([
+                'sender_id' => $request->user()->id,
+                'content'   => $url,
+                'type'      => 'image',
+            ]);
+
+            $conversation->update(['last_message_at' => now()]);
+
+            return $msg;
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $message->load('sender:id,name,avatar_url'),
+        ], 201);
+    }
+
+    /**
+     * Signal that the user is typing (for real-time heartbeats).
+     */
+    public function signalTyping(Request $request, Conversation $conversation)
+    {
+        if (!$conversation->participants()->where('user_id', $request->user()->id)->exists()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Technically this just verifies the user has access.
+        // The real-time broadcast can be triggered here if using Laravel Reverb/Pusher,
+        // or the client can just broadcast via Supabase directly.
+        // We'll return a success to confirm the "Heartbeat" intent was received.
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Typing signal received.',
+        ]);
+    }
 }
