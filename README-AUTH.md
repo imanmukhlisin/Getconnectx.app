@@ -156,10 +156,12 @@ Authorization: Bearer {registration-token}
     "next_step": "REGISTRATION_COMPLETE",
     "data": { "user": { ... } },
     "token": "2|xxxxxxx",
-    "token_type": "Bearer"
+    "token_type": "Bearer",
+    "supabase_token": "eyJhbGciOiJIUzI1NiI..." 
 }
 ```
-> Token yang dihasilkan di Step 5 adalah **Full-Access Token** yang bisa digunakan untuk semua endpoint terproteksi.
+> Token yang dihasilkan di Step 5 adalah **Full-Access Token** (Sanctum) yang bisa digunakan untuk semua endpoint terproteksi API Laravel.
+> **supabase_token** adalah JWT khusus yang digunakan oleh Frontend untuk mengakses SDK Supabase (Realtime/RLS).
 
 ---
 
@@ -187,7 +189,8 @@ POST /auth/login/password
     "next_step": "LOGIN_SUCCESS",
     "data": { "user": { ... } },
     "token": "3|xxxxxxx",
-    "token_type": "Bearer"
+    "token_type": "Bearer",
+    "supabase_token": "eyJhbGciOiJIUzI1NiI..."
 }
 ```
 
@@ -300,22 +303,53 @@ wsl docker exec getconnectx-app php artisan config:clear
 
 ---
 
-## 💬 Chat System (Real-time)
+## 📸 Media & Files (GCS Direct Upload)
 
-Sistem chat ConnectX menggunakan **Supabase Realtime (Broadcast)** untuk pengiriman pesan instan tanpa beban server berat.
+Sistem menggunakan **Direct-to-Cloud Upload** untuk efisiensi. Backend hanya memberikan "Tiket" (Pre-signed URL), lalu Frontend mengupload file langsung ke Google Cloud Storage.
+
+#### ▶ Request Upload URL
+```
+POST /media/upload-url
+Authorization: Bearer {token}
+```
+**Request Body:**
+```json
+{
+    "file_name": "profile.jpg",
+    "content_type": "image/jpeg"
+}
+```
+**Response (200):**
+```json
+{
+    "status": "success",
+    "data": {
+        "upload_url": "https://storage.googleapis.com/...",
+        "file_path": "uploads/a1868ae5.../profile.jpg",
+        "expires_at": "2026-04-12T..."
+    }
+}
+```
+> **Cara Pakai:** Frontend melakukan `PUT` request ke `upload_url` dengan body berupa file binary dan header `Content-Type` yang sesuai. Setelah sukses, simpan `file_path` untuk dikirim ke API Update Profile.
+
+---
+
+## 💬 Conversation System (Real-time)
+
+Sistem chat ConnectX menggunakan **Supabase Realtime (Broadcast)** untuk pengiriman pesan instan.
 
 ### 1. Daftar Percakapan (Conversations)
 
-#### ▶ Ambil Daftar Chat Saya
+#### ▶ Ambil Daftar Percakapan
 ```
-GET /chats
+GET /conversations
 Authorization: Bearer {token}
 ```
-**Response (200):** Menampilkan daftar user yang sedang/pernah chat dengan Anda beserta pesan terakhir.
+**Response (200):** Menampilkan daftar percakapan aktif.
 
-#### ▶ Mulai Chat Baru / Cari Sesi Chat
+#### ▶ Mulai Percakapan Baru
 ```
-POST /chats
+POST /conversations
 Authorization: Bearer {token}
 ```
 **Request Body:**
@@ -325,26 +359,52 @@ Authorization: Bearer {token}
 
 ---
 
-### 2. Pesan (Messages)
+### 2. Pesan & Media (Messages)
 
-#### ▶ Kirim Pesan
+#### ▶ Kirim Pesan Teks
 ```
-POST /chats/{conversation_id}/messages
+POST /conversations/{conversation_id}/messages
 Authorization: Bearer {token}
 ```
 **Request Body:**
 ```json
-{ 
-    "content": "Halo, apakah Anda tersedia untuk koding bareng?",
-    "type": "text" 
-}
+{ "content": "Halo!", "type": "text" }
+```
+
+#### ▶ Kirim Media (Gambar)
+```
+POST /conversations/{conversation_id}/media
+Authorization: Bearer {token}
+```
+**Form Data:** `file` (image)
+
+#### ▶ Signal Typing (Heartbeat)
+```
+POST /conversations/{conversation_id}/typing
+Authorization: Bearer {token}
 ```
 
 #### ▶ Ambil Riwayat Pesan
 ```
-GET /chats/{conversation_id}/messages
-Authorization: Bearer {token}
+GET /conversations/{conversation_id}/messages
 ```
+
+---
+
+## 📋 Dynamic Onboarding Engine
+
+Digunakan setelah verifikasi inti selesai untuk melengkapi profil user secara dinamis.
+
+#### ▶ Start Onboarding Session
+```
+POST /onboarding/sessions
+```
+
+#### ▶ Kirim Jawaban
+```
+POST /onboarding/sessions/{session_id}/answer
+```
+**Body:** `{ "step_id": "...", "answers": { "field": "value" } }`
 
 ---
 
@@ -353,9 +413,15 @@ Authorization: Bearer {token}
 Untuk aplikasi (Frontend/Mobile) agar bisa menerima pesan secara instan (real-time):
 
 1.  Gunakan **Supabase JS Client**.
-2.  Subscribe ke channel: `chat_{conversation_id}`.
-3.  Listen untuk event: `message`.
-4.  Payload akan berisi data pesan baru yang dikirim.
+2.  Inisialisasi session menggunakan `supabase_token` yang didapat dari API Login:
+    ```javascript
+    await supabase.auth.setSession({
+      access_token: response.supabase_token,
+      refresh_token: response.supabase_token
+    });
+    ```
+3.  Subscribe ke channel: `chat_{conversation_id}`.
+4.  Listen untuk event: `message`.
 
 Contoh (JS):
 ```javascript

@@ -27,3 +27,4 @@ yarn-error.log
 /database/database.sqlite
 /database/database.sqlite-journal
 /docker/.env
+/storage/service-account.json

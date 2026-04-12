@@ -68,11 +68,73 @@ class OnboardingEngineService
     }
 
     /**
+     * Memvalidasi jawaban secara dinamis berdasarkan aturan pertanyaan dari database.
+     * Akan melemparkan ValidationException jika ada yang tidak sesuai standar Frontend.
+     */
+    private function validateAnswers(string $stepId, array $answers): void
+    {
+        $step = OnboardingStep::with('questions')->findOrFail($stepId);
+        $errors = [];
+
+        foreach ($step->questions as $question) {
+            $value = $answers[$question->id] ?? null;
+
+            // 1. Pengecekan Aturan Wajib (Required)
+            if ($question->required) {
+                if ($value === null || $value === '' || (is_array($value) && empty($value))) {
+                    $errors[$question->id][] = "Bagian '{$question->label}' wajib untuk diisi.";
+                    continue; // Skip hitungan aturan lanjut kalau datanya udah pasti kosong
+                }
+            }
+
+            // Jika jawaban tidak diisi dan statusnya opsional, biarkan lolos.
+            if ($value === null || $value === '' || (is_array($value) && empty($value))) {
+                continue;
+            }
+
+            // 2. Pengecekan Ekstra (JSON Validation Rule: Length / Count Selection)
+            if (!empty($question->validation)) {
+                $rules = is_string($question->validation) ? json_decode($question->validation, true) : $question->validation;
+                
+                if (is_array($rules)) {
+                    if (!is_array($value)) {
+                        // Jika input tipe biasa (Teks/Nomor) -> Kita cek panjang string nya
+                        $strValue = (string) $value;
+                        if (isset($rules['min_length']) && mb_strlen($strValue) < $rules['min_length']) {
+                            $errors[$question->id][] = "'{$question->label}' terlalu pendek (Minimum {$rules['min_length']} huruf).";
+                        }
+                        if (isset($rules['max_length']) && mb_strlen($strValue) > $rules['max_length']) {
+                            $errors[$question->id][] = "'{$question->label}' terlalu panjang (Maksimum {$rules['max_length']} huruf).";
+                        }
+                    } else {
+                        // Jika input array (Multi-Select/Chips) -> Kita cek jumlah pilihan kotanya
+                        $count = count($value);
+                        if (isset($rules['min_selections']) && $count < $rules['min_selections']) {
+                            $errors[$question->id][] = "Anda harus mencentang minimum {$rules['min_selections']} buah pada pilihan '{$question->label}'.";
+                        }
+                        if (isset($rules['max_selections']) && $count > $rules['max_selections']) {
+                            $errors[$question->id][] = "Anda mencentang terlalu banyak! Maksimum {$rules['max_selections']} buah pada pilihan '{$question->label}'.";
+                        }
+                    }
+                }
+            }
+        }
+
+        // Kalau ada satu saja yang melanggar hukum form, Gagalkan dengan status code 422!
+        if (!empty($errors)) {
+            throw \Illuminate\Validation\ValidationException::withMessages($errors);
+        }
+    }
+
+    /**
      * Memproses jawaban dari frontend dan menghitung langkah berikutnya.
      */
     public function processAnswer(OnboardingSession $session, string $stepId, array $answers): array
     {
-        // Simpan jawaban
+        // 1. Tembok Pengaman Penangkis Hacker / Manipulasi Bypass Postman API.
+        $this->validateAnswers($stepId, $answers);
+
+        // 2. Simpan jawaban Murni.
         foreach ($answers as $questionId => $value) {
             OnboardingResponse::updateOrCreate(
                 [

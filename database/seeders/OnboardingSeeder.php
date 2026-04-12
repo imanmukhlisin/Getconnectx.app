@@ -55,7 +55,7 @@ class OnboardingSeeder extends Seeder
             'section' => 'Mari bangun profil umum Anda', 'title' => 'Siapa nama Anda?', 'created_at' => now(), 'updated_at' => now()
         ]);
         DB::table('onboarding_questions')->insert([
-            ['id' => 'q_first_name', 'step_id' => 'step_personal_name', 'order_index' => 1, 'type' => 'text', 'label' => 'Nama Depan', 'required' => true, 'validation' => json_encode(['min_length' => 1, 'max_length' => 50]), 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 'q_first_name', 'step_id' => 'step_personal_name', 'order_index' => 1, 'type' => 'text', 'label' => 'Nama Depan', 'helper_text' => null, 'required' => true, 'validation' => json_encode(['min_length' => 1, 'max_length' => 50]), 'created_at' => now(), 'updated_at' => now()],
             // Perhatikan kolom validation null disini karena sifatnya opsional
             ['id' => 'q_last_name', 'step_id' => 'step_personal_name', 'order_index' => 2, 'type' => 'text', 'label' => 'Nama Belakang', 'helper_text' => 'Opsional', 'required' => false, 'validation' => null, 'created_at' => now(), 'updated_at' => now()]
         ]);

@@ -4,12 +4,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default Filesystem Disk
+    | Disk Penyimpanan Default Sistem
     |--------------------------------------------------------------------------
     |
-    | Here you may specify the default filesystem disk that should be used
-    | by the framework. The "local" disk, as well as a variety of cloud
-    | based disks are available to your application for file storage.
+    | Di sini bebas menentukan disk storage mana yang jadi andalan utama
+    | buat aplikasi ini. Tersedia tipe "local" (simpan offline di server internal)
+    | atau pake cloud system (kayak s3/gcs) buat nafas panjang aplikasi.
     |
     */
 
@@ -17,14 +17,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Filesystem Disks
+    | Daftar Disk Penyimpanan
     |--------------------------------------------------------------------------
     |
-    | Below you may configure as many filesystem disks as necessary, and you
-    | may even configure multiple disks for the same driver. Examples for
-    | most supported storage drivers are configured here for reference.
-    |
-    | Supported drivers: "local", "ftp", "sftp", "s3"
+    | Bagian ini buat meracik ragam tempat penyimpanan sesuai kebutuhan.
+    | Bahkan bisa bikin lebih dari satu disk dengan fungsi yang sama (misal 2 AWS S3).
+    | Driver yang didukung framework ini: "local", "ftp", "sftp", "s3", dan "gcs".
     |
     */
 
@@ -60,16 +58,31 @@ return [
             'report' => false,
         ],
 
+        'gcs' => [
+            'driver' => 'gcs',
+            'key_file_path' => env('GOOGLE_CLOUD_KEY_FILE', null), // path ke JSON key file
+            'key_file' => env('GOOGLE_CLOUD_KEY_JSON') ? json_decode(env('GOOGLE_CLOUD_KEY_JSON'), true) : [], // array kredensial dari JSON string (Vercel-friendly)
+            'project_id' => env('GOOGLE_CLOUD_PROJECT_ID', 'your-project-id'),
+            'bucket' => env('GOOGLE_CLOUD_STORAGE_BUCKET', 'your-bucket'),
+            'path_prefix' => env('GOOGLE_CLOUD_STORAGE_PATH_PREFIX', ''), 
+            'storage_api_uri' => null, // opsional: uri endpoint 
+            'apiEndpoint' => null, // opsional: endpoint string
+            'visibility' => 'public', // atau 'private'
+            'visibility_handler' => null, // class yang mengatur url visibility private/public
+            'throw' => false,
+        ],
+
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Symbolic Links
+    | Tautan Simbolis (Symbolic Links)
     |--------------------------------------------------------------------------
     |
-    | Here you may configure the symbolic links that will be created when the
-    | `storage:link` Artisan command is executed. The array keys should be
-    | the locations of the links and the values should be their targets.
+    | Di sini digunakan untuk mengatur tautan penghubung (shortcut) yang bakal dibuat otomatis 
+    | kalo jalanin perintah `php artisan storage:link`. 
+    | Kuncinya (key) adalah lokasi umum/publik, sedangkan nilainya (value) 
+    | adalah folder asli tempat file disimpen.
     |
     */
 

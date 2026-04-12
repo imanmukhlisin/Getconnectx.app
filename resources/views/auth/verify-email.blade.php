@@ -73,7 +73,7 @@
                 
                 if (response.ok) {
                     alert('Email berhasil diverifikasi!');
-                    window.location.href = '/verify-whatsapp';
+                    window.location.href = '/onboarding';
                 } else {
                     alert('Gagal: ' + (data.message || JSON.stringify(data)));
                 }
