@@ -81,18 +81,7 @@ class OnboardingSeeder extends Seeder
             ['id' => 'q_remote_pref', 'step_id' => 'step_personal_location', 'order_index' => 3, 'type' => 'dropdown', 'label' => 'Preferensi Remote', 'required' => true, 'validation' => null, 'created_at' => now(), 'updated_at' => now()]
         ]);
         
-        // Inject atribut khusus depends_on sesuai standar Frontend (Logika form intra-halaman)
-        // Preferensi hanya muncul kalo user pencet "Ya" di pertanyaan terbuka untuk remote
-        DB::table('onboarding_questions')->where('id', 'q_remote_pref')->update([
-            'depends_on' => json_encode(['question_id' => 'q_open_remote', 'operator' => 'equals', 'value' => 'yes'])
-        ]);
-        DB::table('onboarding_options')->insert([
-            ['id' => 'opt_rem_yes', 'question_id' => 'q_open_remote', 'order_index' => 1, 'label' => 'Ya', 'value' => 'yes', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'opt_rem_no', 'question_id' => 'q_open_remote', 'order_index' => 2, 'label' => 'Tidak', 'value' => 'no', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'opt_rp_1', 'question_id' => 'q_remote_pref', 'order_index' => 1, 'label' => 'Hybrid', 'value' => 'hybrid', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'opt_rp_2', 'question_id' => 'q_remote_pref', 'order_index' => 2, 'label' => 'Hanya Remote', 'value' => 'remote_only', 'created_at' => now(), 'updated_at' => now()],
-        ]);
-
+        
         // Langkah 4: Jenis Kelamin
         DB::table('onboarding_steps')->insert([
             'id' => 'step_personal_gender', 'flow_id' => 'flow_common', 'order_index' => 4,
@@ -105,7 +94,19 @@ class OnboardingSeeder extends Seeder
             ['id' => 'opt_gen_m', 'question_id' => 'q_gender', 'order_index' => 1, 'label' => 'Pria', 'value' => 'male', 'created_at' => now(), 'updated_at' => now()],
             ['id' => 'opt_gen_f', 'question_id' => 'q_gender', 'order_index' => 2, 'label' => 'Wanita', 'value' => 'female', 'created_at' => now(), 'updated_at' => now()],
         ]);
-
+        
+        // Inject atribut khusus depends_on sesuai standar Frontend (Logika form intra-halaman)
+        // Preferensi hanya muncul kalo user pencet "Ya" di pertanyaan terbuka untuk remote
+        DB::table('onboarding_questions')->where('id', 'q_remote_pref')->update([
+            'depends_on' => json_encode(['question_id' => 'q_open_remote', 'operator' => 'equals', 'value' => 'yes'])
+        ]);
+        DB::table('onboarding_options')->insert([
+            ['id' => 'opt_rem_yes', 'question_id' => 'q_open_remote', 'order_index' => 1, 'label' => 'Ya', 'value' => 'yes', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 'opt_rem_no', 'question_id' => 'q_open_remote', 'order_index' => 2, 'label' => 'Tidak', 'value' => 'no', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 'opt_rp_1', 'question_id' => 'q_remote_pref', 'order_index' => 1, 'label' => 'Hybrid', 'value' => 'hybrid', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 'opt_rp_2', 'question_id' => 'q_remote_pref', 'order_index' => 2, 'label' => 'Hanya Remote', 'value' => 'remote_only', 'created_at' => now(), 'updated_at' => now()],
+        ]);
+        
         // Langkah 5: TITIK PERSIMPANGAN JALUR (Branching Point)
         // Di halaman inilah nasib routing user ditentukan berdasarkan pilihan akun mereka.
         DB::table('onboarding_steps')->insert([
