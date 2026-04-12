@@ -24,7 +24,7 @@ Vercel **sangat berbeda dengan VPS Biasa**. Harap membaca file panduan teknis ya
 - **Real-time Chat**: 1-on-1 chatting menggunakan **Supabase Realtime Broadcast**.
 - **Supabase Integration**: Data tersimpan aman di PostgreSQL (Supabase Cloud).
 
-Untuk detail teknis endpoint, silakan baca **[README-API.md](./README-API.md)**.
+Untuk detail teknis endpoint, silakan baca **[README-API.md](./README-AUTH.md)**.
 
 ---
 
