@@ -112,6 +112,12 @@ Route::prefix('v1')->group(function () {
         Route::get('sessions/{session}', [OnboardingController::class, 'show'])->name('onboarding.sessions.show');
     });
 
+    // ─── Authenticated: Media Upload ──────────────────────────────────────────
+    Route::prefix('media')->middleware('auth:sanctum')->group(function () {
+        Route::post('upload-url', [\App\Http\Controllers\Api\V1\MediaController::class, 'generateUploadUrl'])
+            ->name('media.upload-url');
+    });
+
     // ─── Authenticated: Chat System ───────────────────────────────────────────
     Route::prefix('conversations')->middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
         Route::get('/', [MessageController::class, 'index'])
