@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use App\Models\Tag;
 
 class TagSeeder extends Seeder
 {
@@ -12,8 +13,11 @@ class TagSeeder extends Seeder
      */
     public function run(): void
     {
+        // Cleanup existing tags to avoid confusion and duplication
+        DB::statement('TRUNCATE TABLE tags RESTART IDENTITY CASCADE');
+
         $industries = [
-            'AIL', 'Fintech', 'Healthtech', 'EdTech', 'Web3', 'SaaS', 'Marketplace', 'Gaming',
+            'AI/ML', 'Fintech', 'Healthtech', 'EdTech', 'Web3', 'SaaS', 'Marketplace', 'Gaming',
             'Climate Tech', 'AgriTech', 'LegalTech', 'InsurTech', 'PropTech', 'FoodTech',
             'Logistics', 'E-Commerce', 'Media', 'Entertainment', 'Travel', 'Social', 'HRTech',
             'Cybersecurity', 'IoT', 'Robotics', 'Biotech', 'SpaceTech', 'Fashion', 'Sports',
@@ -36,15 +40,17 @@ class TagSeeder extends Seeder
         ];
 
         foreach ($industries as $industry) {
-            \App\Models\Tag::updateOrCreate(
-                ['name' => $industry, 'type' => 'industry']
-            );
+            Tag::create([
+                'name' => $industry,
+                'type' => 'industry'
+            ]);
         }
 
         foreach ($skills as $skill) {
-            \App\Models\Tag::updateOrCreate(
-                ['name' => $skill, 'type' => 'skill']
-            );
+            Tag::create([
+                'name' => $skill,
+                'type' => 'skill'
+            ]);
         }
     }
 }
