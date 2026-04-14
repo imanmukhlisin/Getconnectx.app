@@ -27,9 +27,8 @@ Ini tombol *Start* balapannya.
   }
 }
 ```
-*(Asumsi: Misal string "Dimas" kurang dari `min_length` atau jika di-set sengaja kosong)*
-*(Asumsi: Misal string "Dimas" lebih dari `max_length` lebih dari 50 karakter)*
-*(Note: jika cuma "Dimas" doang yang dikirim, maka akan ditolak karena `q_last_name` tidak diisi)*
+*(Asumsi: Misal string "D" kurang dari `min_length` yaitu 3 karakter, atau jika di-set sengaja kosong)*
+*(Note: `q_last_name` boleh kosong karena terset `required: false` di database)*
 
 **BOOM! DITOLAK (Status `422 Unprocessable Entity`):**
 ```json
@@ -37,9 +36,7 @@ Ini tombol *Start* balapannya.
     "message": "The given data was invalid.",
     "errors": {
         "q_first_name": [
-            "Tulisan 'Nama Depan' terlalu pendek (Minimal 3 karakter).",
-            "Tulisan 'Nama Depan' terlalu panjang (Maksimum 50 karakter)."
-            "Tulisan 'Hanya q_first_name dan q_last_name yang diisi'"
+            "'Nama Depan' terlalu pendek (Minimum 3 huruf)."
         ]
     }
 }
