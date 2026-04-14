@@ -308,15 +308,12 @@ class OnboardingEngineService
             $action = $this->getValue($responses['q_use_connectx']->value);
             if ($action === 'startup') {
                 $updateData['role_category'] = 'Startup';
-            } else {
-                $builderType = $responses->has('q_builder_type') ? $this->getValue($responses['q_builder_type']->value) : '';
-                if ($builderType === 'founder') {
-                    $updateData['role_category'] = 'Founder';
-                } elseif ($builderType === 'co_founder') {
-                    $updateData['role_category'] = 'Co-Founder';
-                } else {
-                    $updateData['role_category'] = 'Team Member';
-                }
+            } elseif ($action === 'founder') {
+                $updateData['role_category'] = 'Founder';
+            } elseif ($action === 'cofounder') {
+                $updateData['role_category'] = 'Co-Founder';
+            } elseif ($action === 'team') {
+                $updateData['role_category'] = 'Team Member';
             }
         }
 
@@ -324,8 +321,8 @@ class OnboardingEngineService
             $updateData['commitment_level'] = $this->getValue($responses['q_availability']->value);
         }
 
-        if ($responses->has('q_startup_stage')) {
-            $updateData['startup_stage'] = $this->getValue($responses['q_startup_stage']->value);
+        if ($responses->has('q_ff_stage')) {
+            $updateData['startup_stage'] = $this->getValue($responses['q_ff_stage']->value);
         }
 
         $updateData['is_onboarded'] = true;
@@ -335,22 +332,29 @@ class OnboardingEngineService
         }
 
         // Sinkronisasi Many-to-Many Tags (Industri dan Keahlian/Skill)
-        if ($responses->has('q_industries')) {
-            $tagIds = $responses['q_industries']->value; // array dari tag IDs
-            if (is_array($tagIds)) {
-                $syncTags = array_merge($syncTags, $tagIds);
-            }
+        $tagNames = [];
+
+        if ($responses->has('q_industry')) {
+            $names = $responses['q_industry']->value;
+            if (is_array($names)) $tagNames = array_merge($tagNames, $names);
         }
 
-        if ($responses->has('q_skills')) {
-            $tagIds = $responses['q_skills']->value;
-            if (is_array($tagIds)) {
-                $syncTags = array_merge($syncTags, $tagIds);
-            }
+        if ($responses->has('q_ff_ind')) {
+            $names = $responses['q_ff_ind']->value;
+            if (is_array($names)) $tagNames = array_merge($tagNames, $names);
         }
 
-        if (!empty($syncTags)) {
-            $user->tags()->sync($syncTags);
+        if ($responses->has('q_flow_e_skill')) {
+            $names = $responses['q_flow_e_skill']->value;
+            if (is_array($names)) $tagNames = array_merge($tagNames, $names);
+        }
+
+        if (!empty($tagNames)) {
+            // Dapatkan tag IDs dari database berdasarkan nama karena form nyimpan 'name'
+            $tagIds = \App\Models\Tag::whereIn('name', $tagNames)->pluck('id')->toArray();
+            if (!empty($tagIds)) {
+                $user->tags()->sync($tagIds);
+            }
         }
     }
 

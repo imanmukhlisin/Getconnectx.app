@@ -118,18 +118,47 @@ class OnboardingSeeder extends Seeder
             'section' => 'Minat & Ketersediaan', 'title' => 'Industri yang diminati?', 'created_at' => now(), 'updated_at' => now()
         ]);
         DB::table('onboarding_questions')->insert([
-            // Tipe soal Chip ini diatur validasi dari BE biar FE tahu max diselect cuma 5 biji.
-            ['id' => 'q_industry', 'step_id' => 'step_bld_industry', 'order_index' => 1, 'type' => 'multi_select_chip', 'label' => 'Pilih Industri (Maks 5)', 'required' => true, 'validation' => json_encode(['max_selections' => 5]), 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'q_availability', 'step_id' => 'step_bld_industry', 'order_index' => 2, 'type' => 'dropdown', 'label' => 'Ketersediaan Kerja', 'required' => true, 'validation' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'q_relocate', 'step_id' => 'step_bld_industry', 'order_index' => 3, 'type' => 'single_select_card', 'label' => 'Bersedia pindah domisili (Relocate)?', 'required' => true, 'validation' => null, 'created_at' => now(), 'updated_at' => now()]
-        ]);
-        DB::table('onboarding_options')->insert([
-            ['id' => 'opt_ind_1', 'question_id' => 'q_industry', 'order_index' => 1, 'label' => "Fintech", 'value' => 'fintech', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'opt_ind_2', 'question_id' => 'q_industry', 'order_index' => 2, 'label' => "EdEdu", 'value' => 'edtech', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'opt_av_1', 'question_id' => 'q_availability', 'order_index' => 1, 'label' => "Full-time", 'value' => 'fulltime', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'opt_av_2', 'question_id' => 'q_availability', 'order_index' => 2, 'label' => "Part-time", 'value' => 'parttime', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'opt_rl_1', 'question_id' => 'q_relocate', 'order_index' => 1, 'label' => "Ya", 'value' => 'yes', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'opt_rl_2', 'question_id' => 'q_relocate', 'order_index' => 2, 'label' => "Tidak", 'value' => 'no', 'created_at' => now(), 'updated_at' => now()],
+            // Flow Common
+            $q('q_first_name', 'step_personal_name', 1, 'text', 'Nama Depan', true, json_encode(['min_length' => 1, 'max_length' => 50])),
+            $q('q_last_name', 'step_personal_name', 2, 'text', 'Nama Belakang', false),
+            $q('q_dob', 'step_personal_dob', 1, 'date', 'Tanggal Lahir'),
+            $q('q_location', 'step_personal_location', 1, 'searchable_dropdown', 'Pilih Kota/Negara'),
+            $q('q_open_remote', 'step_personal_location', 2, 'single_select_card', 'Terbuka untuk remote?'),
+            $q('q_remote_pref', 'step_personal_location', 3, 'dropdown', 'Preferensi Remote', true, null, json_encode(['question_id' => 'q_open_remote', 'operator' => 'equals', 'value' => 'yes'])),
+            $q('q_gender', 'step_personal_gender', 1, 'single_select_card', 'Jenis Kelamin'),
+            $q('q_use_connectx', 'step_role_selection', 1, 'single_select_card', 'Pilih Tujuan Anda'),
+            // Flow Builder Common
+            $q('q_startup_exp', 'step_bld_exp', 1, 'single_select_radio', 'Pilih pengalaman'),
+            $q('q_industry', 'step_bld_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', true, json_encode(['max_selections' => 5])),
+            $q('q_availability', 'step_bld_industry', 2, 'dropdown', 'Tingkat Komitmen'),
+            $q('q_relocate', 'step_bld_industry', 3, 'single_select_card', 'Bersedia pindah domisili (Relocate)?'),
+            $q('q_role_desc', 'step_bld_role', 1, 'dropdown', 'Peran Pekerjaan Utama'),
+            $q('q_role_years', 'step_bld_role', 2, 'number', 'Jumlah Tahun Pengalaman'),
+            $q('q_linkedin', 'step_bld_role', 3, 'url', 'URL LinkedIn', false),
+            $q('q_founder_intent', 'step_founder_intent', 1, 'single_select_card', 'Tujuan Anda Merekrut'),
+            // Flow A
+            $q('q_flow_a_type', 'step_flow_a', 1, 'multi_select_chip', 'Tipe Karakter Co-Founder'),
+            // Flow B
+            $q('q_flow_b_role', 'step_flow_b', 1, 'multi_select_chip', 'Pilih Kualifikasi Pekerjaan'),
+            // Flow C
+            $q('q_flow_c_cf_type', 'step_flow_c', 1, 'multi_select_chip', 'Tipe Karakter Co-Founder'),
+            $q('q_flow_c_tm_role', 'step_flow_c', 2, 'multi_select_chip', 'Pilih Kualifikasi Anggota Pekerjaan'),
+            // Flow D
+            $q('q_flow_d_type', 'step_flow_d', 1, 'single_select_card', 'Anda tipe co-founder yang seperti apa?'),
+            $q('q_flow_d_equity', 'step_flow_d', 2, 'text', 'Ekspektasi Tunai vs Ekuitas (%)'),
+            $q('q_flow_d_salary_type', 'step_flow_d', 3, 'dropdown', 'Jenis Gaji Minimum'),
+            $q('q_flow_d_nominal', 'step_flow_d', 4, 'currency_amount', 'Mata Uang & Nominal (IDR/USD)'),
+            // Flow E
+            $q('q_flow_e_skill', 'step_flow_e', 1, 'multi_select_chip', 'Apa keahlian (skillset) Anda?'),
+            $q('q_flow_e_equity', 'step_flow_e', 2, 'text', 'Ekspektasi Bonus/Ekuitas (Jika Ada)'),
+            $q('q_flow_e_nominal', 'step_flow_e', 3, 'currency_amount', 'Gaji Minimum Spesifik'),
+            // Flow F
+            $q('q_ff_name', 'step_flow_f', 1, 'text', 'Nama Merk/Startup Anda'),
+            $q('q_ff_stage', 'step_flow_f', 2, 'dropdown', 'Tahapan Saat Ini Berada'),
+            $q('q_ff_look', 'step_flow_f', 3, 'single_select_card', 'Apa tujuan yang Anda cari di Platform Ini?'),
+            $q('q_ff_ind', 'step_flow_f', 4, 'multi_select_chip', 'Sektor Industri Startup'),
+            $q('q_ff_role', 'step_flow_f', 5, 'multi_select_chip', 'Tipe Co-Founder / Peran yang sedang Lowong'),
+            $q('q_ff_offer', 'step_flow_f', 6, 'text', 'Sistem Penawaran (Gaji/Ekuitas)'),
         ]);
 
         // ═══════════════════════════════════════════════════════
