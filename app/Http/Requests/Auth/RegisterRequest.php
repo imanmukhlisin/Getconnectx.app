@@ -17,6 +17,8 @@ class RegisterRequest extends FormRequest
         return [
 
             'fcm_token'             => ['nullable', 'string'],
+            'latitude'              => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude'             => ['nullable', 'numeric', 'between:-180,180'],
             'email'                 => ['required', 'email:rfc,dns', 'max:255', 'unique:users,email'],
             'password'              => [
                 'required',

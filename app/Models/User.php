@@ -49,6 +49,7 @@ class User extends Authenticatable
         'commitment_level',
         'startup_stage',
         'is_onboarded',
+        'location',
     ];
 
     /**
