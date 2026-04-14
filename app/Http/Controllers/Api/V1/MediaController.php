@@ -32,7 +32,10 @@ class MediaController extends Controller
         try {
             // Kita keluarkan tiket ijin dari backend untuk Frontend
             // Berlaku 10 menit, Method WAJIB PUT, dan Content-Type disesuaikan.
-            $uploadUrl = Storage::disk('gcs')->temporaryUrl(
+            /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+            $disk = Storage::disk('gcs');
+
+            $uploadUrl = $disk->temporaryUrl(
                 $path,
                 now()->addMinutes(10),
                 [
