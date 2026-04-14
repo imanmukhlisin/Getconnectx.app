@@ -37,9 +37,10 @@ class OAuthController extends Controller
         }
 
         $driverName = $provider === 'linkedin' ? 'linkedin-openid' : $provider;
-        return Socialite::driver($driverName)
-            ->stateless()
-            ->redirect();
+        /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
+        $driver = Socialite::driver($driverName);
+        
+        return $driver->stateless()->redirect();
     }
 
     // =========================================================================
@@ -70,7 +71,9 @@ class OAuthController extends Controller
 
         try {
             $driverName = $provider === 'linkedin' ? 'linkedin-openid' : $provider;
-            $oauthUser = Socialite::driver($driverName)->stateless()->user();
+            /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
+            $driver = Socialite::driver($driverName);
+            $oauthUser = $driver->stateless()->user();
         } catch (Throwable $e) {
             Log::error("OAuth callback failed for {$provider}", ['error' => $e->getMessage()]);
             return response()->json([
@@ -126,9 +129,9 @@ class OAuthController extends Controller
         try {
             $driverName = $provider === 'linkedin' ? 'linkedin-openid' : $provider;
 
-            $oauthUser = Socialite::driver($driverName)
-                ->stateless()
-                ->userFromToken($request->provider_token);
+            /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
+            $driver = Socialite::driver($driverName);
+            $oauthUser = $driver->stateless()->userFromToken($request->provider_token);
         } catch (Throwable $e) {
             Log::error("OAuth native token verification failed for {$provider}", [
                 'error' => $e->getMessage(),
