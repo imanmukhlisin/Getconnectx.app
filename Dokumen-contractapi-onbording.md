@@ -387,14 +387,14 @@ Response-to-profile mapping is stored BE-side.
 
 ---
 
-## Open Questions for FE/BE meeting
+## FE Implementation Guidelines (Agreements)
 
-1. Do we need FE to cache the flow definition, or fetch per step? (recommend fetch per step)
-2. How does "auto-advance" work for single-select cards? (FE auto-POST on tap)
-3. `searchable_dropdown` for industries — options paginated or all loaded?
-4. Where does "data diri" flow start — after signup/verification or before?
-5. Should users be allowed to skip optional steps?
-6. Localization baked into options (EN/ID) or just English first?
+1. **Fetching Flow:** FE must NOT cache the flow. Always fetch per step (`POST /answer` returns the next exact step) because the backend branching logic is dynamic and can change on the fly.
+2. **Auto-advance:** For `single_select_card` or `single_select_radio`, FE can optionally auto-execute the `POST /answer` on tap for a smoother UX (no need to press "continue").
+3. **Searchable Dropdowns:** For options like Industries and Skills, **no pagination is needed**. Options are all loaded at once via the API (~90 items) and filtered locally (client-side search) on the frontend device.
+4. **Flow Entry Point:** The "Data Diri" onboarding flow automatically triggers immediately right after a successful OTP verification / Signup.
+5. **Optional Steps:** If a question has `required: false`, simply allow the user to click "Continue" without forcing an input. No explicit "Skip" button is needed.
+6. **Localization (Language):** For MVP V1, text is served exactly as authored in the Database (currently a mix of ID/EN). FE does not need to implement client-side localizations for dynamic onboarding content.
 
 ---
 
