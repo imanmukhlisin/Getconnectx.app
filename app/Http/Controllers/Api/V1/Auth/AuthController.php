@@ -305,7 +305,7 @@ class AuthController extends Controller
      *
      * Login tradisional menggunakan email dan password.
      */
-    public function loginWithPassword(\App\Http\Requests\Auth\LoginRequest $request): JsonResponse
+    public function loginWithPassword(LoginRequest $request): JsonResponse
     {
         $user = User::where('email', strtolower($request->email))->first();
 
