@@ -72,16 +72,22 @@ Core Engine (Mesin Utamanya) sudah dibangun dan stabil untuk menopang *Dynamic F
 4.  **Integrasi Output ke Tabel `users`:** Ketika sesi Onboarding mencapai batas akhir form, mesin otomatis merangkum semua jawaban dan merubah flag profil utama menjadi `is_onboarded = true`.
 5.  **Mekanisme Direct Upload Media (Google Cloud Storage):** Pembuatan Endpoint `/api/v1/media/upload-url` sudah berhasil dibuat. Backend tidak perlu lagi mengangkut file berat (zero payload), melainkan hanya mengeluarkan *Pre-signed URL* berumur 10 menit. File *Pitch Deck* langsung terbang dari Frontend menuju Google Cloud.
 
+### ✅ SUDAH Selesai (Phase 1.5 — Data Professionalization)
+
+6.  **Penyuntikan Data Profesional ke Database (Data Seeder)** ✅
+    *   `TagSeeder.php` & `OnboardingSeeder.php` telah di-refaktor total dari dummy data menjadi dataset standar industri startup.
+    *   **Industri (33 tags):** AI/ML, Fintech, Healthtech, EdTech, Web3, SaaS, Marketplace, Gaming, Climate Tech, AgriTech, LegalTech, InsurTech, PropTech, FoodTech, Logistics, E-Commerce, Media, Entertainment, Travel, Social, HRTech, Cybersecurity, IoT, Robotics, Biotech, SpaceTech, Fashion, Sports, Automotive, Energy, Construction, Telecom, GovTec
+    *   **Skills (59 tags):** Technical (AI/ML, Full-Stack, Frontend, Backend, dll), Product (PM, UI/UX, Graphic Design), Marketing (Digital Marketing, SEO/SEM, Content Creation, dll), Operations (Supply Chain, Project Management, Strategy), Finance (Accounting, Fundraising, Investor Relations), HR (Talent Acquisition, People Ops), dan lainnya.
+    *   **Commitment Level (4 opsi):** Full-time, Part-time, Side Project, Open to Discussion
+    *   **Startup Stage (3 opsi):** Idea, MVP, Live
+    *   **Sinkronisasi Matchmaking:** Nilai (`value`) di `onboarding_options` untuk industri & skill **identik** dengan `name` di tabel `tags`, memungkinkan Weighted Matchmaking langsung query via `user_tags`.
+    *   **Total data:** 92 master tags, 8 flows, 15 steps, 33 questions, 238 options, 8 transitions.
+
 ### 🚧 PR (Pekerjaan Rumah) Kedepannya
 
-Ada beberapa elemen non-sistem (sifatnya injeksi data atau fitur sekunder luar mesin) yang harus kita catet:
+Ada beberapa elemen non-sistem (sifatnya fitur sekunder luar mesin) yang harus kita catet:
 
-**A. Penyuntikan Data Asli ke Database (Data Seeder)** *(High Priority)*
-*   **Status Saat Ini:** Data Seeder yang sekarang (`OnboardingSeeder.php`) hanya berupa baris Data Dummy untuk sekadar *membuktikan jika *Branching Logic* (Founder vs Startup) berjalan baik. *(Masih banyak isian kuesioner asli yang absen.)*
-*   **Actionable:** Backend wajib ngetik / nginput satu-satu sisa data pertanyaan kontrak asli ke Seeder / Database. Contohnya: *Date of Birth*, *City Dropdown*, *Gender*, *Tagging Skill Frontend/Backend/UIUX*, dll. Supaya saat Frontend manggil API, soal yang keluar udah "soal beneran".
-
-
-**C. Bangun Admin Panel (Admin Dashboard)** *(Phase 2)*
+**A. Bangun Admin Panel (Admin Dashboard)** *(Phase 2)*
 *   **Konteks:** Kita butuh cara rapi buat merawat, menambah, atau menghapus form kedepannya tanpa nyentuh teks kode IDE. Apalagi jika kita harus nambah list profesi di Dropdown Skill/Talent.
 *   **Actionable:** (Ditunda ke Sprint Depan), membangun Web UI (Semacam admin CMS). Di web ini ada halaman CRUD API khusus untuk melakukan "Insert/Update Data" langsung menuju tabel rahasia `onboarding_questions` dan `onboarding_options`. Sehingga manajemen data talent/startups bisa dikontrol langsung oleh Admin Aplikasi kapan saja via tombol di layar.
 
