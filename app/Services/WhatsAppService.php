@@ -57,10 +57,11 @@ class WhatsAppService
     {
         try {
             $response = match ($this->provider) {
-                'fonnte'  => $this->sendViaFonnte($to, $message),
-                'twilio'  => $this->sendViaTwilio($to, $message),
-                'webhook' => $this->sendViaWebhook($to, $message),
-                default   => throw new WhatsAppDeliveryException("Provider '{$this->provider}' tidak didukung."),
+                'fonnte'   => $this->sendViaFonnte($to, $message),
+                'twilio'   => $this->sendViaTwilio($to, $message),
+                'webhook'  => $this->sendViaWebhook($to, $message),
+                'wasender' => $this->sendViaWasender($to, $message),
+                default    => throw new WhatsAppDeliveryException("Provider '{$this->provider}' tidak didukung."),
             };
 
             if (! $response->successful()) {
@@ -115,6 +116,19 @@ class WhatsAppService
                 'To'   => "whatsapp:{$to}",
                 'Body' => $message,
             ]);
+    }
+
+    private function sendViaWasender(string $to, string $message)
+    {
+        // WASenderApi Implementation based on User's API specification
+        $url = $this->apiUrl ?: 'https://wasenderapi.com/api/send-message';
+        
+        return Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->apiToken,
+        ])->post($url, [
+            'to'   => $to,
+            'text' => $message,
+        ]);
     }
 
     private function buildMessage(string $code): string
