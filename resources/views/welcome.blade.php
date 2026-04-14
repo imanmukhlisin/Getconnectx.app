@@ -6,20 +6,19 @@
     <title>Welcome - ConnectX</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #8b5cf6;
-            --secondary: #3b82f6;
-            --bg-color: #030305;
-            --text-color: #f8fafc;
+            --bg-color: #f8fafc; /* Minimalist White */
+            --text-color: #0f172a;
+            --accent: #2563eb;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
@@ -33,202 +32,248 @@
             position: relative;
         }
 
-        /* --- Antigravity Background Objects --- */
-        .orb {
+        /* --- Global Mouse Spotlight --- */
+        .spotlight {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+            /* Efek lampu senter kebiruan ngikutin kursor */
+            background: radial-gradient(circle 800px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(219, 234, 254, 0.4), transparent 80%);
+            transition: background 0.1s ease;
+        }
+
+        /* --- 3D Parallax Grid --- */
+        .grid-bg {
             position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.6;
-            animation: float 20s infinite ease-in-out alternate;
+            width: 200vw;
+            height: 200vh;
+            top: -50%;
+            left: -50%;
+            background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+            background-size: 50px 50px;
             z-index: 0;
+            /* Grid miring yang ngikutin koordinat mouse */
+            transform: perspective(600px) rotateX(var(--grid-rx, 0deg)) rotateY(var(--grid-ry, 0deg));
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        .orb-1 {
-            width: 400px;
-            height: 400px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            top: -100px;
-            left: -100px;
-            animation-duration: 25s;
-        }
-
-        .orb-2 {
-            width: 300px;
-            height: 300px;
-            background: linear-gradient(135deg, #ec4899, var(--primary));
-            bottom: -50px;
-            right: 10%;
-            animation-duration: 18s;
-            animation-delay: -5s;
-        }
-
-        .orb-3 {
-            width: 200px;
-            height: 200px;
-            background: linear-gradient(135deg, #06b6d4, var(--secondary));
-            top: 40%;
-            left: 50%;
-            animation-duration: 22s;
-            animation-delay: -10s;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0) translateX(0) scale(1); }
-            33% { transform: translateY(-30px) translateX(50px) scale(1.1); }
-            66% { transform: translateY(20px) translateX(-30px) scale(0.9); }
-            100% { transform: translateY(0px) translateX(0) scale(1); }
-        }
-
-        /* --- Glassmorphism Container --- */
-        .glass-container {
+        /* --- Main Title Container --- */
+        .container {
             position: relative;
             z-index: 10;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            padding: 3rem 4rem;
             text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            max-width: 500px;
-            width: 90%;
-            animation: fadeUp 1s ease-out;
+            padding: 4rem;
+            animation: fadeIn 1s ease-out;
         }
 
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
 
-        .logo {
-            font-size: 3.5rem;
-            font-weight: 800;
+        h1 {
+            font-size: 6rem;
+            font-weight: 900;
+            letter-spacing: -4px;
+            color: #000;
             margin-bottom: 0.5rem;
-            background: linear-gradient(to right, #fff, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -1px;
-        }
-
-        .subtitle {
-            font-size: 1.1rem;
-            font-weight: 300;
-            color: #94a3b8;
-            margin-bottom: 2.5rem;
-        }
-
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .btn {
-            text-decoration: none;
-            padding: 1rem 2rem;
-            border-radius: 9999px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
             position: relative;
-            overflow: hidden;
-            display: inline-flex;
+            display: inline-block;
+        }
+
+        /* Efek teks X-Ray ngikutin mouse saat hover di atas teks */
+        h1::before {
+            content: "ConnectX";
+            position: absolute;
+            top: 0; left: 0;
+            color: transparent;
+            -webkit-text-stroke: 2px var(--accent);
+            clip-path: circle(0% at var(--mouse-local-x, 50%) var(--mouse-local-y, 50%));
+            transition: clip-path 0.1s;
+            pointer-events: none;
+        }
+
+        .container:hover h1::before {
+            clip-path: circle(120px at var(--mouse-local-x) var(--mouse-local-y));
+        }
+
+        p.subtitle {
+            font-size: 1.3rem;
+            color: #64748b;
+            margin-bottom: 3.5rem;
+            font-weight: 300;
+            letter-spacing: -0.5px;
+        }
+
+        /* --- Insane Mouse Hover Buttons --- */
+        .buttons {
+            display: flex;
+            gap: 2rem;
             justify-content: center;
             align-items: center;
         }
 
+        /* Area sensitif (Membesarkan area hover supaya ditarik magnet dari jauh) */
+        .btn-wrapper {
+            position: relative;
+            padding: 30px; 
+        }
+
+        .btn {
+            position: relative;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 180px;
+            height: 60px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            overflow: hidden;
+            /* Efek goyang (magnet) */
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+        }
+
+        /* Primary: Hitam murni ke Gradien Biru */
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            box-shadow: 0 10px 20px -10px rgba(139, 92, 246, 0.5);
+            background-color: #0f172a;
+            color: #fff;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary .btn-fill {
+            background: linear-gradient(135deg, #1d4ed8, #60a5fa);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 25px -10px rgba(139, 92, 246, 0.7);
-        }
-
+        /* Secondary: Putih Bersih ke Abu-abu halus */
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
+            background-color: #fff;
+            color: #0f172a;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
+        .btn-secondary .btn-fill {
+            background: #f1f5f9;
         }
 
-        /* Particles container (Optional small touch) */
-        .stars {
+        /* Animasi Percikan Lingkaran dari arah Cursor (Liquid Fill) */
+        .btn-fill {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            top: var(--btn-y);
+            left: var(--btn-x);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            z-index: 0;
             pointer-events: none;
-            background-image: 
-                radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)),
-                radial-gradient(1px 1px at 40px 70px, #ffffff, rgba(0,0,0,0)),
-                radial-gradient(1px 1px at 50px 160px, #ffffff, rgba(0,0,0,0)),
-                radial-gradient(1px 1px at 90px 40px, #ffffff, rgba(0,0,0,0)),
-                radial-gradient(1px 1px at 130px 80px, #ffffff, rgba(0,0,0,0)),
-                radial-gradient(1px 1px at 160px 120px, #ffffff, rgba(0,0,0,0));
-            background-repeat: repeat;
-            background-size: 200px 200px;
-            opacity: 0.3;
-            animation: twinkle 10s infinite linear;
         }
 
-        @keyframes twinkle {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-200px); }
+        .btn:hover .btn-fill {
+            transform: translate(-50%, -50%) scale(1);
         }
 
-        @media (min-width: 640px) {
-            .action-buttons {
-                flex-direction: row;
-                justify-content: center;
-            }
-            .btn {
-                width: 160px;
-            }
+        .btn span {
+            position: relative;
+            z-index: 1;
+            transition: color 0.3s ease;
         }
+
     </style>
 </head>
 <body>
+    <div class="grid-bg" id="gridBg"></div>
+    <div class="spotlight" id="spotlight"></div>
 
-    <!-- Antigravity Space Background -->
-    <div class="stars"></div>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-
-    <!-- Main Content -->
-    <div class="glass-container">
-        <h1 class="logo">ConnectX</h1>
+    <div class="container" id="mainContainer">
+        <h1>ConnectX</h1>
         <p class="subtitle">Experience the Gravity of Connection</p>
-        
-        <div class="action-buttons">
-            <a href="/login" class="btn btn-primary">Login</a>
-            <a href="/register" class="btn btn-secondary">Register</a>
+
+        <div class="buttons">
+            <!-- Magnetic Auth Buttons -->
+            <div class="btn-wrapper" onmousemove="magnetEffect(event, this)" onmouseleave="resetMagnet(this)">
+                <a href="/login" class="btn btn-primary" onmousemove="btnFillEffect(event, this)">
+                    <div class="btn-fill"></div>
+                    <span>Login</span>
+                </a>
+            </div>
+
+            <div class="btn-wrapper" onmousemove="magnetEffect(event, this)" onmouseleave="resetMagnet(this)">
+                <a href="/register" class="btn btn-secondary" onmousemove="btnFillEffect(event, this)">
+                    <div class="btn-fill"></div>
+                    <span>Register</span>
+                </a>
+            </div>
         </div>
     </div>
 
     <script>
-        // Check if token exists, redirect to dashboard if yes
-        const token = localStorage.getItem('token');
-        if (token) {
-            // Animasi exit sekilas sebelum redirect
-            document.querySelector('.glass-container').style.opacity = '0';
-            document.querySelector('.glass-container').style.transform = 'translateY(-20px)';
-            document.querySelector('.glass-container').style.transition = 'all 0.4s ease';
+        /* --- 1. Global Background Parallax & Spotlight --- */
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+
+            // Update posisi lampu spotlight kebiruan
+            document.documentElement.style.setProperty('--mouse-x', `${x}px`);
+            document.documentElement.style.setProperty('--mouse-y', `${y}px`);
+
+            // Miringkan Grid menyesuaikan titik pandang mouse (Parallax)
+            const rx = (y / h - 0.5) * 8; // Max 4 deg rotation
+            const ry = (0.5 - x / w) * 8; 
+            document.documentElement.style.setProperty('--grid-rx', `${rx}deg`);
+            document.documentElement.style.setProperty('--grid-ry', `${ry}deg`);
+        });
+
+        /* --- 2. X-Ray Text Reveal Effect --- */
+        const container = document.getElementById('mainContainer');
+        container.addEventListener('mousemove', (e) => {
+            const rect = container.getBoundingClientRect();
+            document.documentElement.style.setProperty('--mouse-local-x', `${e.clientX - rect.left}px`);
+            document.documentElement.style.setProperty('--mouse-local-y', `${e.clientY - rect.top}px`);
+        });
+
+        /* --- 3. Magnetic Button Effect (Ditarik sebelum disentuh) --- */
+        function magnetEffect(e, wrapper) {
+            const btn = wrapper.querySelector('.btn');
+            const rect = wrapper.getBoundingClientRect();
             
-            setTimeout(() => {
-                window.location.href = '/dashboard';
-            }, 400);
+            // Hitung jarak cursor dari TENGAN tombol
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            
+            // Tombol bergeser kecil ke arah kursor
+            btn.style.transform = `translate(${x * 0.4}px, ${y * 0.4}px)`;
+        }
+
+        function resetMagnet(wrapper) {
+            const btn = wrapper.querySelector('.btn');
+            btn.style.transform = `translate(0px, 0px)`;
+        }
+
+        /* --- 4. Tombol Fluid Fill ngikutin titik klik/hover --- */
+        function btnFillEffect(e, btn) {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Lempar variabel X, Y ke CSS supaya animasi bulatannya membesar dari posisi cursor itu!
+            btn.style.setProperty('--btn-x', `${x}px`);
+            btn.style.setProperty('--btn-y', `${y}px`);
+        }
+
+        /* --- JWT Redirect Logic --- */
+        if (localStorage.getItem('token')) {
+            document.body.style.opacity = '0';
+            setTimeout(() => { window.location.href = '/dashboard'; }, 400);
         }
     </script>
 </body>
