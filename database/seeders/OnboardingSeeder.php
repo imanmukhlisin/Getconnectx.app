@@ -33,38 +33,90 @@ class OnboardingSeeder extends Seeder
         // 2. STEPS
         // ═══════════════════════════════════════════════════════
         DB::table('onboarding_steps')->insert([
-            // Flow Common
-            ['id' => 'step_personal_name', 'flow_id' => 'flow_common', 'order_index' => 1, 'section' => 'Mari bangun profil umum Anda', 'title' => 'Siapa nama Anda?', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'step_personal_dob', 'flow_id' => 'flow_common', 'order_index' => 2, 'section' => 'Data Diri', 'title' => 'Kapan tanggal lahir Anda?', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'step_personal_location', 'flow_id' => 'flow_common', 'order_index' => 3, 'section' => 'Data Diri', 'title' => 'Di mana lokasi Anda saat ini?', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'step_personal_gender', 'flow_id' => 'flow_common', 'order_index' => 4, 'section' => 'Data Diri', 'title' => 'Jenis Kelamin', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'step_role_selection', 'flow_id' => 'flow_common', 'order_index' => 5, 'section' => 'Tipe Akun', 'title' => 'Bagaimana Anda ingin menggunakan ConnectX?', 'created_at' => $now, 'updated_at' => $now],
-            // Flow Builder Common
-            ['id' => 'step_bld_exp', 'flow_id' => 'flow_builder_common', 'order_index' => 1, 'section' => 'Profil Builder', 'title' => 'Pengalaman startup sebelumnya?', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'step_bld_industry', 'flow_id' => 'flow_builder_common', 'order_index' => 2, 'section' => 'Minat & Ketersediaan', 'title' => 'Industri yang diminati?', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'step_bld_role', 'flow_id' => 'flow_builder_common', 'order_index' => 3, 'section' => 'Keahlian Profesional', 'title' => 'Peran apa yang menggambarkan diri Anda?', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'step_founder_intent', 'flow_id' => 'flow_builder_common', 'order_index' => 4, 'section' => 'Tujuan Founder', 'title' => 'Apa yang Anda cari?', 'created_at' => $now, 'updated_at' => $now],
-            // Sub-Flows
-            ['id' => 'step_flow_a', 'flow_id' => 'flow_a', 'order_index' => 1, 'section' => 'Mencari Rekan Founder', 'title' => 'Co-founder tipe apa yang Anda butuhkan?', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'step_flow_b', 'flow_id' => 'flow_b', 'order_index' => 1, 'section' => 'Membangun Anggota Tim', 'title' => 'Peran apa yang Anda butuhkan saat ini?', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'step_flow_c', 'flow_id' => 'flow_c', 'order_index' => 1, 'section' => 'Mencari Tim Besar', 'title' => 'Tentukan Kebutuhan Formasi Tim Pembangun', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'step_flow_d', 'flow_id' => 'flow_d', 'order_index' => 1, 'section' => 'Ingin Menjadi Co-Founder', 'title' => 'Detail Ekspektasi Bayaran Anda', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'step_flow_e', 'flow_id' => 'flow_e', 'order_index' => 1, 'section' => 'Ingin Bergabung Sebagai Tim', 'title' => 'Detail Keahlian dan Ekspektasi', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'step_flow_f', 'flow_id' => 'flow_f', 'order_index' => 1, 'section' => 'Profil Startup', 'title' => 'Ceritakan tentang perjalanan startup Anda', 'created_at' => $now, 'updated_at' => $now],
+            'id' => 'step_personal_dob', 'flow_id' => 'flow_common', 'order_index' => 2,
+            'section' => 'Data Diri', 'title' => 'Kapan tanggal lahir Anda?', 'created_at' => now(), 'updated_at' => now()
+        ]);
+        DB::table('onboarding_questions')->insert([
+            ['id' => 'q_dob', 'step_id' => 'step_personal_dob', 'order_index' => 1, 'type' => 'date', 'label' => 'Tanggal Lahir', 'required' => true, 'validation' => null, 'created_at' => now(), 'updated_at' => now()]
         ]);
 
-        // ═══════════════════════════════════════════════════════
-        // 3. QUESTIONS — setiap row punya key identik untuk PostgreSQL batch insert
-        // ═══════════════════════════════════════════════════════
-        $q = function ($id, $step, $order, $type, $label, $required = true, $validation = null, $depends = null) use ($now) {
-            return [
-                'id' => $id, 'step_id' => $step, 'order_index' => $order, 'type' => $type,
-                'label' => $label, 'helper_text' => null, 'required' => $required,
-                'validation' => $validation, 'depends_on' => $depends,
-                'created_at' => $now, 'updated_at' => $now,
-            ];
-        };
+        // Langkah 3: Lokasi & Ketersediaan Remote
+        DB::table('onboarding_steps')->insert([
+            'id' => 'step_personal_location', 'flow_id' => 'flow_common', 'order_index' => 3,
+            'section' => 'Data Diri', 'title' => 'Di mana lokasi Anda saat ini?', 'created_at' => now(), 'updated_at' => now()
+        ]);
+        DB::table('onboarding_questions')->insert([
+            ['id' => 'q_location', 'step_id' => 'step_personal_location', 'order_index' => 1, 'type' => 'searchable_dropdown', 'label' => 'Pilih Kota/Negara', 'required' => true, 'validation' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 'q_open_remote', 'step_id' => 'step_personal_location', 'order_index' => 2, 'type' => 'single_select_card', 'label' => 'Terbuka untuk remote?', 'required' => true, 'validation' => null, 'created_at' => now(), 'updated_at' => now()],
+            // Pertanyaan ini akan bergantung pada jawaban q_open_remote yang disimpan di depends_on
+            ['id' => 'q_remote_pref', 'step_id' => 'step_personal_location', 'order_index' => 3, 'type' => 'dropdown', 'label' => 'Preferensi Remote', 'required' => true, 'validation' => null, 'created_at' => now(), 'updated_at' => now()]
+        ]);
+        
+        // Inject atribut khusus depends_on sesuai standar Frontend (Logika form intra-halaman)
+        // Preferensi hanya muncul kalo user pencet "Ya" di pertanyaan terbuka untuk remote
+        DB::table('onboarding_questions')->where('id', 'q_remote_pref')->update([
+            'depends_on' => json_encode(['question_id' => 'q_open_remote', 'operator' => 'equals', 'value' => 'yes'])
+        ]);
+        DB::table('onboarding_options')->insert([
+            ['id' => 'opt_rem_yes', 'question_id' => 'q_open_remote', 'order_index' => 1, 'label' => 'Ya', 'value' => 'yes', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 'opt_rem_no', 'question_id' => 'q_open_remote', 'order_index' => 2, 'label' => 'Tidak', 'value' => 'no', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 'opt_rp_1', 'question_id' => 'q_remote_pref', 'order_index' => 1, 'label' => 'Hybrid', 'value' => 'hybrid', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 'opt_rp_2', 'question_id' => 'q_remote_pref', 'order_index' => 2, 'label' => 'Hanya Remote', 'value' => 'remote_only', 'created_at' => now(), 'updated_at' => now()],
+        ]);
 
+        // Langkah 4: Jenis Kelamin
+        DB::table('onboarding_steps')->insert([
+            'id' => 'step_personal_gender', 'flow_id' => 'flow_common', 'order_index' => 4,
+            'section' => 'Data Diri', 'title' => 'Jenis Kelamin', 'created_at' => now(), 'updated_at' => now()
+        ]);
+        DB::table('onboarding_questions')->insert([
+            ['id' => 'q_gender', 'step_id' => 'step_personal_gender', 'order_index' => 1, 'type' => 'single_select_card', 'label' => 'Jenis Kelamin', 'required' => true, 'validation' => null, 'created_at' => now(), 'updated_at' => now()]
+        ]);
+        DB::table('onboarding_options')->insert([
+            ['id' => 'opt_gen_m', 'question_id' => 'q_gender', 'order_index' => 1, 'label' => 'Pria', 'value' => 'male', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 'opt_gen_f', 'question_id' => 'q_gender', 'order_index' => 2, 'label' => 'Wanita', 'value' => 'female', 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        // Langkah 5: TITIK PERSIMPANGAN JALUR (Branching Point)
+        // Di halaman inilah nasib routing user ditentukan berdasarkan pilihan akun mereka.
+        DB::table('onboarding_steps')->insert([
+            'id' => 'step_role_selection', 'flow_id' => 'flow_common', 'order_index' => 5,
+            'section' => 'Tipe Akun', 'title' => 'Bagaimana Anda ingin menggunakan ConnectX?', 'created_at' => now(), 'updated_at' => now()
+        ]);
+        DB::table('onboarding_questions')->insert([
+            ['id' => 'q_use_connectx', 'step_id' => 'step_role_selection', 'order_index' => 1, 'type' => 'single_select_card', 'label' => 'Pilih Tujuan Anda', 'required' => true, 'validation' => null, 'created_at' => now(), 'updated_at' => now()]
+        ]);
+        // Demi mencegah loop redundan, pilihan builder langsung dipecah 3: Founder, Co-Founder, Team. 
+        // Sedangkan startup dibiarkan misah sendiri.
+        DB::table('onboarding_options')->insert([
+            ['id' => 'opt_bld_founder', 'question_id' => 'q_use_connectx', 'order_index' => 1, 'label' => "Founder", 'value' => 'founder', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 'opt_bld_cofounder', 'question_id' => 'q_use_connectx', 'order_index' => 2, 'label' => "Co-Founder (Join a startup)", 'value' => 'cofounder', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 'opt_bld_team', 'question_id' => 'q_use_connectx', 'order_index' => 3, 'label' => "Team Member (Join a startup)", 'value' => 'team', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 'opt_startup', 'question_id' => 'q_use_connectx', 'order_index' => 4, 'label' => "I represent a Startup", 'value' => 'startup', 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+
+        // ==========================================
+        // 3. FLOW_BUILDER_COMMON (LANGKAH UMUM PARA TALENT)
+        // ==========================================
+        // Jika user memilih 3 opsi atas (Founder/Cofounder/Team), mereka wajib masuk kesini dulu.
+        DB::table('onboarding_steps')->insert([
+            'id' => 'step_bld_exp', 'flow_id' => 'flow_builder_common', 'order_index' => 1,
+            'section' => 'Profil Builder', 'title' => 'Pengalaman startup sebelumnya?', 'created_at' => now(), 'updated_at' => now()
+        ]);
+        DB::table('onboarding_questions')->insert([
+            ['id' => 'q_startup_exp', 'step_id' => 'step_bld_exp', 'order_index' => 1, 'type' => 'single_select_radio', 'label' => 'Pilih pengalaman', 'required' => true, 'validation' => null, 'created_at' => now(), 'updated_at' => now()]
+        ]);
+        DB::table('onboarding_options')->insert([
+            ['id' => 'opt_exp_1', 'question_id' => 'q_startup_exp', 'order_index' => 1, 'label' => "Pernah Membangun/Pendiri", 'value' => 'founder_exp', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 'opt_exp_2', 'question_id' => 'q_startup_exp', 'order_index' => 2, 'label' => "Pernah Bekerja di Startup", 'value' => 'employee_exp', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 'opt_exp_3', 'question_id' => 'q_startup_exp', 'order_index' => 3, 'label' => "Belum ada pengalaman", 'value' => 'no_exp', 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        DB::table('onboarding_steps')->insert([
+            'id' => 'step_bld_industry', 'flow_id' => 'flow_builder_common', 'order_index' => 2,
+            'section' => 'Minat & Ketersediaan', 'title' => 'Industri yang diminati?', 'created_at' => now(), 'updated_at' => now()
+        ]);
         DB::table('onboarding_questions')->insert([
             // Flow Common
             $q('q_first_name', 'step_personal_name', 1, 'text', 'Nama Depan', true, json_encode(['min_length' => 1, 'max_length' => 50])),
@@ -104,7 +156,7 @@ class OnboardingSeeder extends Seeder
             $q('q_ff_name', 'step_flow_f', 1, 'text', 'Nama Merk/Startup Anda'),
             $q('q_ff_stage', 'step_flow_f', 2, 'dropdown', 'Tahapan Saat Ini Berada'),
             $q('q_ff_look', 'step_flow_f', 3, 'single_select_card', 'Apa tujuan yang Anda cari di Platform Ini?'),
-            $q('q_ff_ind', 'step_flow_f', 4, 'multi_select_chip', 'Sektor Industri Startup', true, json_encode(['max_selections' => 5])),
+            $q('q_ff_ind', 'step_flow_f', 4, 'multi_select_chip', 'Sektor Industri Startup'),
             $q('q_ff_role', 'step_flow_f', 5, 'multi_select_chip', 'Tipe Co-Founder / Peran yang sedang Lowong'),
             $q('q_ff_offer', 'step_flow_f', 6, 'text', 'Sistem Penawaran (Gaji/Ekuitas)'),
         ]);

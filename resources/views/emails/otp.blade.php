@@ -26,19 +26,23 @@
         <p>Verifikasi Email</p>
     </div>
     <div class="body">
-        <p class="greeting">Halo, <strong>{{ $user->name ?? $user->email }}</strong> 👋</p>
-        <p style="color:#4b5563;font-size:14px;">Gunakan kode berikut untuk memverifikasi alamat email Anda di ConnectX:</p>
+        <p class="greeting" style="font-size:18px;">Dear <strong>{{ $user->name ?? $user->email }}</strong>,</p>
+        <p style="color:#4b5563;font-size:16px; margin-bottom: 8px;">Kode verifikasi (OTP) Anda adalah:</p>
 
         <div class="code-box">
             <div class="code">{{ $code }}</div>
-            <div class="label">⏱ Berlaku selama {{ config('otp.expiry_minutes', 10) }} menit</div>
         </div>
 
-        <div class="note">
-            ⚠️ Jangan bagikan kode ini kepada siapapun, termasuk tim ConnectX.
-        </div>
+        <p style="color:#4b5563;font-size:16px; line-height: 1.5; margin-bottom: 24px;">
+            Demi keamanan, jangan berikan kode ini kepada siapapun,<br>
+            termasuk pihak yang mengaku sebagai ConnectX. Kode ini hanya<br>
+            berlaku selama <strong>{{ config('otp.expiry_minutes', 10) }} menit</strong>.
+        </p>
 
-        <p style="color:#4b5563;font-size:14px;">Jika Anda tidak merasa mendaftar di ConnectX, abaikan email ini.</p>
+        <p style="color:#4b5563;font-size:16px; line-height: 1.5;">
+            Jika Anda tidak meminta kode ini,<br>
+            silakan abaikan email ini.
+        </p>
     </div>
     <div class="footer">
         © {{ date('Y') }} ConnectX. All rights reserved.
