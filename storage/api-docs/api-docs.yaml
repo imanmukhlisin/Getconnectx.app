@@ -1,0 +1,311 @@
+openapi: 3.0.0
+info:
+  title: ConnectX Full API
+  version: 1.0.0
+  description: "Dokumentasi interaktif ConnectX. Gunakan tombol 'Authorize' di kanan untuk memasukkan Token Anda (dengan format `Bearer <token_anda>`). Anda disarankan menguji API secara berurutan: Auth -> Onboarding -> Profile -> Matchmaking -> Chat."
+servers:
+  - url: /api/v1
+    description: Current Server (Dynamic Origin)
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum
+
+paths:
+  # ==========================================
+  # 1. AUTHENTICATION & REGISTRATION
+  # ==========================================
+  /auth/register:
+    post:
+      summary: 1️⃣ Step 1 - Manual Register
+      tags: [1. Registration & Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, password_confirmation]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "C0nnectX!Secure99$"
+                password_confirmation:
+                  type: string
+                  format: password
+                  example: "C0nnectX!Secure99$"
+                fcm_token:
+                  type: string
+                  example: "eXk_l..."
+      responses:
+        '201':
+          description: Mengembalikan Registration Token.
+
+  /auth/email/send-otp:
+    post:
+      summary: 2️⃣ Step 2 - Send Email OTP
+      tags: [1. Registration & Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OTP Terkirim.
+
+  /auth/verify-email:
+    post:
+      summary: 3️⃣ Step 3 - Verify Email OTP
+      tags: [1. Registration & Auth]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [otp_code]
+              properties:
+                otp_code:
+                  type: string
+                  example: "123456"
+      responses:
+        '200':
+          description: Berhasil verifikasi email.
+
+  /auth/whatsapp/send-otp:
+    post:
+      summary: 4️⃣ Step 4 - Send WA OTP
+      tags: [1. Registration & Auth]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [whatsapp_number]
+              properties:
+                whatsapp_number:
+                  type: string
+                  example: "+62812345678"
+      responses:
+        '200':
+          description: OTP WA Terkirim.
+
+  /auth/verify-whatsapp:
+    post:
+      summary: 5️⃣ Step 5 - Verify WA OTP
+      tags: [1. Registration & Auth]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [otp_code]
+              properties:
+                otp_code:
+                  type: string
+                  example: "123456"
+      responses:
+        '200':
+          description: Selesai! Mengembalikan Token Permanen (Siap untuk Onboarding).
+
+  /auth/login/password:
+    post:
+      summary: 🔑 Login (Password)
+      tags: [1. Registration & Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login sukses.
+          
+  # ==========================================
+  # 2. ONBOARDING ENGINE
+  # ==========================================
+  /onboarding/sessions:
+    post:
+      summary: 1️⃣ Start Onboarding Session
+      tags: [2. Onboarding Engine]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Session ID berhasil di-generate.
+
+  /onboarding/sessions/{sessionId}/current:
+    get:
+      summary: 2️⃣ Get Current Question
+      tags: [2. Onboarding Engine]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+            example: "123e4567-e89b-12d3..."
+      responses:
+        '200':
+          description: Mengembalikan data Pertanyaan (Question) untuk step saat ini.
+
+  /onboarding/sessions/{sessionId}/answer:
+    post:
+      summary: 3️⃣ Submit Answer
+      tags: [2. Onboarding Engine]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+            example: "123e4567-e89b-12d3..."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value:
+                  type: array
+                  items:
+                    type: string
+                  example: ["PHP", "Laravel"]
+      responses:
+        '200':
+          description: Jawaban disimpan, sistem mengkalkulasi Next Step/Question.
+
+  /onboarding/sessions/{sessionId}/back:
+    post:
+      summary: ⏪ Navigate Back
+      tags: [2. Onboarding Engine]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Kembali ke pertanyaan sebelumnya.
+
+  /onboarding/sessions/{sessionId}:
+    get:
+      summary: 🏁 Show End Result Onboarding
+      tags: [2. Onboarding Engine]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Mengembalikan evaluasi skor akhir pendaftaran dari sesi onboarding tersebut.
+
+  # ==========================================
+  # 3. PROFILE MANAGEMENT
+  # ==========================================
+  /profile:
+    get:
+      summary: 👤 Get My Profile
+      tags: [3. Profile]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Data profile detail.
+
+  # ==========================================
+  # 4. MATCHMAKING SYSTEM
+  # ==========================================
+  /matches:
+    get:
+      summary: 📝 Get Match List
+      tags: [4. Matchmaking System]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Mengembalikan daftar mutual match.
+
+  /matches/like:
+    post:
+      summary: ❤️ Send a Swipe (Like)
+      tags: [4. Matchmaking System]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [to_user_id]
+              properties:
+                to_user_id:
+                  type: string
+                  example: "0c1b7a2d..."
+      responses:
+        '200':
+          description: Like sent atau Mutual Match!
+
+  /matches/{matchId}/analysis:
+    get:
+      summary: 🧠 Get Analytical Detail of Match
+      tags: [4. Matchmaking System]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: matchId
+          required: true
+          schema:
+            type: string
+            example: "mtc_890a2b"
+      responses:
+        '200':
+          description: JSON Struktur analitik Job Queue.
+
+  # ==========================================
+  # 5. CHAT SYSTEM
+  # ==========================================
+  /conversations:
+    get:
+      summary: 💬 List Semua Chat Room
+      tags: [5. Chat System]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Daftar Chat Room yang telah terbentuk.
