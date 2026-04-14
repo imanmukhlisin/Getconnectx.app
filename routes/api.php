@@ -118,6 +118,16 @@ Route::prefix('v1')->group(function () {
             ->name('media.upload-url');
     });
 
+    // ─── Authenticated: Matchmaking System ────────────────────────────────────
+    Route::prefix('matches')->middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\V1\MatchmakingController::class, 'index'])
+            ->name('matches.index');
+        Route::get('{match}/analysis', [\App\Http\Controllers\Api\V1\MatchmakingController::class, 'analysis'])
+            ->name('matches.analysis');
+        Route::post('like', [\App\Http\Controllers\Api\V1\MatchmakingController::class, 'like'])
+            ->name('matches.like');
+    });
+
     // ─── Authenticated: Chat System ───────────────────────────────────────────
     Route::prefix('conversations')->middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
         Route::get('/', [MessageController::class, 'index'])
