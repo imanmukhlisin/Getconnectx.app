@@ -356,6 +356,10 @@ class OnboardingEngineService
                 $user->tags()->sync($tagIds);
             }
         }
+
+        // Cache Invalidation for Feed: When user's profile changes (role, stages, tags),
+        // we must clear their discovery feed cache so new compatibility scores apply.
+        app(\App\Services\FeedService::class)->invalidateUserFeedCache($user->id);
     }
 
     private function getValue($jsonValue)

@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\V1\Auth\OAuthController;
 use App\Http\Controllers\Api\V1\Profile\ProfileController;
 use App\Http\Controllers\Api\V1\Chat\MessageController;
 use App\Http\Controllers\Api\V1\OnboardingController;
+use App\Http\Controllers\Api\V1\Discovery\FeedController;
+use App\Http\Controllers\Api\V1\Discovery\SwipeController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -133,6 +135,17 @@ Route::prefix('v1')->group(function () {
             ->name('matches.analysis');
         Route::post('like', [\App\Http\Controllers\Api\V1\MatchmakingController::class, 'like'])
             ->name('matches.like');
+    });
+
+    // ─── Authenticated: Discovery — Feed ─────────────────────────────────────
+    Route::prefix('feed')->middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
+        Route::get('/', [FeedController::class, 'index'])->name('feed.index');
+    });
+
+    // ─── Authenticated: Discovery — Swipe ────────────────────────────────────
+    Route::prefix('swipe')->middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
+        Route::post('connect', [SwipeController::class, 'connect'])->name('swipe.connect');
+        Route::post('skip',    [SwipeController::class, 'skip'])->name('swipe.skip');
     });
 
     // ─── Authenticated: Chat System ───────────────────────────────────────────

@@ -193,9 +193,9 @@ return [
                 ],
                 */
 
-                /* Open API 3.0 support
-                'passport' => [ // Unique name of security
-                    'type' => 'oauth2', // The type of the security scheme. Valid values are "basic", "apiKey" or "oauth2".
+                /* Open API 3.0 — Passport (disabled, using Sanctum instead)
+                'passport' => [
+                    'type' => 'oauth2',
                     'description' => 'Laravel passport oauth2 security.',
                     'in' => 'header',
                     'scheme' => 'https',
@@ -208,13 +208,15 @@ return [
                         ],
                     ],
                 ],
-                'sanctum' => [ // Unique name of security
-                    'type' => 'apiKey', // Valid values are "basic", "apiKey" or "oauth2".
-                    'description' => 'Enter token in format (Bearer <token>)',
-                    'name' => 'Authorization', // The name of the header or query parameter to be used.
-                    'in' => 'header', // The location of the API key. Valid values are "query" or "header".
-                ],
                 */
+
+                // Open API 3.0 — Sanctum Bearer Token
+                'sanctum' => [
+                    'type' => 'apiKey',
+                    'description' => 'Enter token in format: Bearer {your-token}',
+                    'name' => 'Authorization',
+                    'in' => 'header',
+                ],
             ],
             'security' => [
                 /*

@@ -9,7 +9,7 @@
 
 ## 🚀 Setup & Vercel Deployment Guide
 
-Bagi teman-teman developer Backend tim ConnectX, proyek ini telah dimodifikasi agar **kompatibel 100% dijalankan pada Ekosistem Serverless Vercel**. 
+Bagi teman-teman developer Backend tim ConnectX, proyek ini telah dimodifikasi agar **kompatibel 100% dijalankan pada Ekosistem Serverless Vercel**.
 
 Vercel **sangat berbeda dengan VPS Biasa**. Harap membaca file panduan teknis yang telah disusun untuk meminimalisir Error 500 terkait limitasi Read-Only (EROFS), Session, cache, maupun routing conflict.
 
@@ -17,14 +17,18 @@ Vercel **sangat berbeda dengan VPS Biasa**. Harap membaca file panduan teknis ya
 
 ---
 
-## ✨ Key Features (v1)
+## ✨ Key Features (Core)
 
 - **Auth System**: Passwordless Login (OTP WhatsApp & Email), Social Login (Google, Apple, LinkedIn).
-- **Sequential Registration**: Flow pendaftaran 5 tahap yang aman.
-- **Real-time Chat**: 1-on-1 chatting menggunakan **Supabase Realtime Broadcast**.
+- **Sequential Registration**: Flow pendaftaran 5 tahap yang aman (Onboarding Engine).
+- **Matchmaking & Discovery**: Sistem algoritma *Feed* berbasis lokasi Geo (Haversine), kesesuaian Tag/Skill, dan kecocokan *Role*. Mendukung aksi *Swipe Right* (Connect) & *Swipe Left* (Skip) secara transaksional.
+- **Automated Match Analysis**: Sistem *background queue* yang membuat analisis kecocokan (AI json-based) otomatis tiap ada mutual-match.
+- **Real-time Chat**: 1-on-1 chatting menggunakan **Supabase Realtime Broadcast**, terhubung langsung dengan mutual-matches.
 - **Supabase Integration**: Data tersimpan aman di PostgreSQL (Supabase Cloud).
+- **OpenAPI Docs**: Terintegrasi penuh dengan Swagger (L5-Swagger) melaui PHP 8 Attributes.
 
-Untuk detail teknis endpoint, silakan baca **[README-API.md](./README-AUTH.md)**.
+Untuk detail teknis endpoint otentikasi awal, silakan baca **[README-AUTH.md](./README-AUTH.md)**.
+Untuk testing API Sandbox interaktif, buka `http://localhost/api/documentation` *(atau URL Vercel kamu `/api/documentation`)*.
 
 ---
 

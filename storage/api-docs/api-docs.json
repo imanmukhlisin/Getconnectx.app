@@ -1,0 +1,436 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "ConnectX API",
+        "description": "ConnectX — Startup Networking & Matchmaking Platform. All endpoints require a Sanctum Bearer token unless marked public.",
+        "contact": {
+            "email": "developer@connectx.app"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "L5_SWAGGER_CONST_HOST",
+            "description": "API Server"
+        }
+    ],
+    "paths": {
+        "/api/v1/feed": {
+            "get": {
+                "tags": [
+                    "Discovery"
+                ],
+                "summary": "Get discovery feed",
+                "description": "Returns a paginated, compatibility-scored list of users for the authenticated user to discover. Excludes already-swiped, already-matched, and self entries. Results are cached for 5 minutes.",
+                "operationId": "96910fe98bcfb37e453f3948fddf4aab",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "industry",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "fintech"
+                        }
+                    },
+                    {
+                        "name": "role",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "founder",
+                                "co-founder",
+                                "builder",
+                                "engineer",
+                                "designer",
+                                "marketer",
+                                "investor",
+                                "advisor",
+                                "operator"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "availability",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "full-time",
+                                "part-time",
+                                "weekends",
+                                "flexible"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "stage",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "idea",
+                                "mvp",
+                                "early-traction",
+                                "growth",
+                                "scaling"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "radius",
+                        "in": "query",
+                        "description": "Radius in km",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "default": 50,
+                            "maximum": 500,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Feed fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/FeedItem"
+                                                    }
+                                                },
+                                                "first_page_url": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/api/v1/feed?page=1"
+                                                },
+                                                "from": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "last_page_url": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/api/v1/feed?page=12"
+                                                },
+                                                "next_page_url": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/api/v1/feed?page=2"
+                                                },
+                                                "path": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/api/v1/feed"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "prev_page_url": {
+                                                    "type": "string",
+                                                    "nullable": true,
+                                                    "default": null
+                                                },
+                                                "to": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 120
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Registration not complete"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/swipe/connect": {
+            "post": {
+                "tags": [
+                    "Discovery"
+                ],
+                "summary": "Swipe right — connect with a user",
+                "description": "Records a connect (swipe-right) action. If the target user has already swiped right on the authenticated user, a mutual match is created along with a conversation and an async match-analysis job is dispatched.",
+                "operationId": "548ffabdaff6570f0090494a19316497",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SwipeConnectRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Swipe recorded",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "It's a Match!"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "isMatch": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "matchId": {
+                                                    "type": "string",
+                                                    "example": "mtc_01HXYZ",
+                                                    "nullable": true
+                                                },
+                                                "conversationId": {
+                                                    "type": "string",
+                                                    "format": "uuid",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Business logic error (e.g. self-swipe)"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Registration not complete"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/swipe/skip": {
+            "post": {
+                "tags": [
+                    "Discovery"
+                ],
+                "summary": "Swipe left — skip a user",
+                "description": "Records a skip (swipe-left) action. The target user will no longer appear in the feed. This action is idempotent.",
+                "operationId": "f700bd367dfb4f33e8415596261ac501",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SwipeConnectRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Skip recorded",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User skipped."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Business logic error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Registration not complete"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "FeedItem": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Budi Santoso"
+                    },
+                    "username": {
+                        "type": "string",
+                        "example": "budisan",
+                        "nullable": true
+                    },
+                    "avatar_url": {
+                        "type": "string",
+                        "example": "https://cdn.example.com/avatars/budi.jpg",
+                        "nullable": true
+                    },
+                    "position": {
+                        "type": "string",
+                        "example": "CTO at StealthAI",
+                        "nullable": true
+                    },
+                    "role_category": {
+                        "type": "string",
+                        "example": "builder",
+                        "nullable": true
+                    },
+                    "startup_stage": {
+                        "type": "string",
+                        "example": "mvp",
+                        "nullable": true
+                    },
+                    "commitment_level": {
+                        "type": "string",
+                        "example": "full-time",
+                        "nullable": true
+                    },
+                    "distance_km": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 12.5,
+                        "nullable": true
+                    },
+                    "compatibility_score": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 78.5
+                    }
+                },
+                "type": "object"
+            },
+            "SwipeConnectRequest": {
+                "required": [
+                    "to_user_id"
+                ],
+                "properties": {
+                    "to_user_id": {
+                        "description": "UUID of the user to swipe on",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "apiKey",
+                "description": "Enter token in format: Bearer {your-token}",
+                "name": "Authorization",
+                "in": "header"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Discovery",
+            "description": "Discovery"
+        }
+    ]
+}

@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Log;
 
 class SupabaseAuthService
 {
-    protected string $url;
-    protected string $serviceRoleKey;
-    protected string $jwtSecret;
+    protected ?string $url;
+    protected ?string $serviceRoleKey;
+    protected ?string $jwtSecret;
 
     public function __construct()
     {
