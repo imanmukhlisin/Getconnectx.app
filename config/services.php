@@ -66,4 +66,9 @@ return [
         'jwt_secret' => env('SUPABASE_JWT_SECRET'),
     ],
 
+    'brevo' => [
+        'api_key' => env('BREVO_API_KEY'),
+        'otp_template_id' => (int) env('BREVO_OTP_TEMPLATE_ID', 3),
+    ],
+
 ];
