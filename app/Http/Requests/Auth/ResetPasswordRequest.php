@@ -39,6 +39,7 @@ class ResetPasswordRequest extends FormRequest
             'token.min'                      => 'Token reset tidak valid.',
             'password.required'              => 'Password baru wajib diisi.',
             'password.confirmed'             => 'Konfirmasi password tidak cocok.',
+            'password.uncompromised'         => 'Password tersebut telah muncul dalam kebocoran data (data leak) publik. Demi keamanan Anda, silakan pilih password yang berbeda.',
             'password_confirmation.required' => 'Konfirmasi password wajib diisi.',
         ];
     }
