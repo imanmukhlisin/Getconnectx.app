@@ -12,7 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->geometry('location', subtype: 'point')->nullable()->after('fcm_token');
+            // Store coordinates as decimal columns (no PostGIS dependency)
+            // decimal(10,7) supports ±999.9999999 — more than enough for lat/lng
+            $table->decimal('latitude', 10, 7)->nullable()->after('fcm_token');
+            $table->decimal('longitude', 10, 7)->nullable()->after('latitude');
+
+            // Composite index for faster Haversine distance queries
+            $table->index(['latitude', 'longitude'], 'users_location_index');
         });
     }
 
@@ -22,7 +28,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('location');
+            $table->dropIndex('users_location_index');
+            $table->dropColumn(['latitude', 'longitude']);
         });
     }
 };

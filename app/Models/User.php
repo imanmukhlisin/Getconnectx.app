@@ -49,7 +49,8 @@ class User extends Authenticatable
         'commitment_level',
         'startup_stage',
         'is_onboarded',
-        'location',
+        'latitude',
+        'longitude',
     ];
 
     /**
@@ -92,6 +93,79 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Conversation::class, 'conversation_participants')
                     ->withTimestamps();
+    }
+
+    // ─── Location Scopes (Haversine Formula) ─────────────────────────────────
+
+    /**
+     * Scope: tambahkan kolom 'distance_km' ke query berdasarkan titik referensi.
+     *
+     * Usage: User::withDistance(-6.2, 106.8)->orderBy('distance_km')->get()
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  float  $latitude   Latitude titik referensi
+     * @param  float  $longitude  Longitude titik referensi
+     */
+    public function scopeWithDistance($query, float $latitude, float $longitude)
+    {
+        $haversine = sprintf(
+            '(6371 * acos(cos(radians(%F)) * cos(radians(latitude)) * cos(radians(longitude) - radians(%F)) + sin(radians(%F)) * sin(radians(latitude))))',
+            $latitude, $longitude, $latitude
+        );
+
+        return $query
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->selectRaw("{$haversine} AS distance_km");
+    }
+
+    /**
+     * Scope: filter user dalam radius tertentu (km) dan urutkan dari terdekat.
+     *
+     * Usage: User::nearby(-6.2, 106.8, 50)->get()  // within 50km
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  float  $latitude   Latitude titik referensi
+     * @param  float  $longitude  Longitude titik referensi
+     * @param  float  $radiusKm   Radius maksimum dalam kilometer (default: 50)
+     */
+    public function scopeNearby($query, float $latitude, float $longitude, float $radiusKm = 50)
+    {
+        $haversine = sprintf(
+            '(6371 * acos(cos(radians(%F)) * cos(radians(latitude)) * cos(radians(longitude) - radians(%F)) + sin(radians(%F)) * sin(radians(latitude))))',
+            $latitude, $longitude, $latitude
+        );
+
+        return $query
+            ->select('*')
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->selectRaw("{$haversine} AS distance_km")
+            ->havingRaw("{$haversine} <= ?", [$radiusKm])
+            ->orderByRaw("{$haversine} ASC");
+    }
+
+    /**
+     * Hitung jarak (km) dari user ini ke titik koordinat tertentu.
+     *
+     * Usage: $user->distanceTo(-6.2, 106.8) // returns float km
+     */
+    public function distanceTo(float $latitude, float $longitude): ?float
+    {
+        if ($this->latitude === null || $this->longitude === null) {
+            return null;
+        }
+
+        // Haversine formula in PHP
+        $earthRadiusKm = 6371;
+        $dLat = deg2rad($latitude - $this->latitude);
+        $dLng = deg2rad($longitude - $this->longitude);
+
+        $a = sin($dLat / 2) ** 2
+           + cos(deg2rad($this->latitude)) * cos(deg2rad($latitude))
+           * sin($dLng / 2) ** 2;
+
+        return $earthRadiusKm * 2 * atan2(sqrt($a), sqrt(1 - $a));
     }
 
     // ─── Helper Methods ───────────────────────────────────────────────────────

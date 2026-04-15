@@ -44,21 +44,12 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = DB::transaction(function () use ($request) {
-            $location = null;
-            if ($request->filled('latitude') && $request->filled('longitude')) {
-                // Konversi coordinate ke PostGIS geometry point (SRID 4326)
-                $location = DB::raw(sprintf(
-                    "ST_SetSRID(ST_MakePoint(%F, %F), 4326)",
-                    $request->longitude,
-                    $request->latitude
-                ));
-            }
-
             return User::create([
                 'email'            => strtolower($request->email),
                 'password'         => $request->password, // auto-hashed via cast
                 'fcm_token'        => $request->fcm_token,
-                'location'         => $location,
+                'latitude'         => $request->latitude,
+                'longitude'        => $request->longitude,
                 'registration_step' => User::STEP_REGISTERED,
                 'is_active'        => false,
             ]);
