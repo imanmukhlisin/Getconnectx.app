@@ -26,6 +26,9 @@ Route::get('/onboarding', function () {
     return view('auth.onboarding');
 })->name('onboarding');
 
-Route::get('/reset-password/{token}', function (string $token) {
-    return view('auth.reset-password', ['token' => $token]);
+Route::get('/reset-password/{token}', function (string $token, \Illuminate\Http\Request $request) {
+    return view('auth.reset-password', [
+        'token' => $token,
+        'email' => $request->query('email', ''),
+    ]);
 })->name('password.reset');

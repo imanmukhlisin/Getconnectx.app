@@ -44,7 +44,7 @@ class PasswordResetService
 
         // Build the reset URL — page served by this Laravel app
         $baseUrl = config('services.brevo.frontend_url', config('app.url'));
-        $resetUrl = "{$baseUrl}/reset-password/{$token}";
+        $resetUrl = "{$baseUrl}/reset-password/{$token}?email=" . urlencode($user->email);
 
         // Send via Brevo template ID 4
         $templateId = config('services.brevo.forgot_password_template_id', 4);
