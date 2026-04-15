@@ -327,7 +327,7 @@
 </div>
 
 <script>
-    const API = '{{ url("/api/v1/auth") }}';
+    const API = '/api/v1/auth';
     const TOKEN = '{{ $token }}';
 
     const pw = document.getElementById('pw');
