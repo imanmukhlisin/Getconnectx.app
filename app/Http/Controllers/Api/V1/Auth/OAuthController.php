@@ -51,38 +51,45 @@ class OAuthController extends Controller
      * GET /api/v1/auth/oauth/{provider}/callback
      *
      * Proses callback dari provider OAuth (web flow).
-     * - Email otomatis terverifikasi (skip Step 2 & 3)
-     * - User langsung lompat ke Step 4 (WhatsApp OTP)
+     * Jika request berasal dari mobile bridge (terutama LinkedIn),
+     * kita akan lempar redirect 'connectx://...' ke app beserta token-nya.
      */
-    public function callback(string $provider, Request $request): JsonResponse
+    public function callback(string $provider, Request $request): JsonResponse|RedirectResponse
     {
         if (! $this->isProviderAllowed($provider)) {
             return $this->providerNotSupportedResponse($provider);
         }
 
+        // URL fallback untuk mobile jika terjadi error
+        $appCallbackUrl = env(strtoupper($provider) . '_APP_CALLBACK_URL', 'connectx://auth/callback');
+
         // Handle OAuth errors from provider
         if ($request->has('error')) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => __('messages.oauth_login_cancelled'),
-                'detail'  => $request->get('error_description'),
-            ], 400);
+            return redirect()->away($appCallbackUrl . '?error=oauth_cancelled&message=' . urlencode($request->get('error_description') ?? 'Login cancelled'));
         }
 
         try {
             $driverName = $provider === 'linkedin' ? 'linkedin-openid' : $provider;
+            
             /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
             $driver = Socialite::driver($driverName);
             $oauthUser = $driver->stateless()->user();
         } catch (Throwable $e) {
             Log::error("OAuth callback failed for {$provider}", ['error' => $e->getMessage()]);
-            return response()->json([
-                'status'  => 'error',
-                'message' => __('messages.oauth_info_failed'),
-            ], 422);
+            return redirect()->away($appCallbackUrl . '?error=oauth_failed&message=' . urlencode('Gagal mendapatkan data dari ' . $provider));
         }
 
-        return $this->processOAuthUser($provider, $oauthUser, $request->fcm_token);
+        $jsonResponse = $this->processOAuthUser($provider, $oauthUser, $request->fcm_token);
+        
+        // Ekstrak token dari hasil JSON untuk diumpankan ke mobile
+        $data = $jsonResponse->getData();
+        if (isset($data->status) && $data->status === 'success' && isset($data->token)) {
+            // Redirect ke Mobile App via Custom Scheme (Deep Link)
+            return redirect()->away($appCallbackUrl . '?token=' . urlencode($data->token) . '&next_step=' . urlencode($data->next_step));
+        }
+
+        // Fallback jika proses pembuatan user gagal (harapannya tidak pernah terjadi)
+        return redirect()->away($appCallbackUrl . '?error=server_error&message=' . urlencode('Gagal memproses user'));
     }
 
     // =========================================================================
