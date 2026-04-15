@@ -25,3 +25,7 @@ Route::get('/chat', function () {
 Route::get('/onboarding', function () {
     return view('auth.onboarding');
 })->name('onboarding');
+
+Route::get('/reset-password/{token}', function (string $token) {
+    return view('auth.reset-password', ['token' => $token]);
+})->name('password.reset');

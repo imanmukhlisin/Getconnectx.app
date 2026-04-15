@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Auth\AuthController;
+use App\Http\Controllers\Api\V1\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V1\Auth\OAuthController;
 use App\Http\Controllers\Api\V1\Profile\ProfileController;
 use App\Http\Controllers\Api\V1\Chat\MessageController;
@@ -52,6 +53,12 @@ Route::prefix('v1')->group(function () {
             Route::post('verify-token', [OAuthController::class, 'verifyToken'])
                 ->name('auth.oauth.verify-token');
         });
+
+        // ── Forgot / Reset Password ──────────────────────────────────────────
+        Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLink'])
+            ->name('auth.forgot-password');
+        Route::post('reset-password', [ForgotPasswordController::class, 'resetPassword'])
+            ->name('auth.reset-password');
     });
 
     // ─── Authenticated: Registration Flow Steps ────────────────────────────────

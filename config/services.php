@@ -69,6 +69,8 @@ return [
     'brevo' => [
         'api_key' => env('BREVO_API_KEY'),
         'otp_template_id' => (int) env('BREVO_OTP_TEMPLATE_ID', 3),
+        'forgot_password_template_id' => (int) env('BREVO_FORGOT_PASSWORD_TEMPLATE_ID', 4),
+        'frontend_url' => env('FRONTEND_URL', 'https://getconnectxapp.vercel.app'),
     ],
 
 ];
