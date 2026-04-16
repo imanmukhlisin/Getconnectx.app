@@ -34,9 +34,9 @@ class AdminPanelProvider extends PanelProvider
             ->authGuard('admin')
             ->brandLogo('/images/logo.png')
             ->brandLogoHeight('3rem')
-            ->extraStylesheets([
-                '/css/admin-custom.css',
-            ])
+// ->extraStylesheets([
+            //     '/css/admin-custom.css',
+            // ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->pages([
                 Pages\Dashboard::class,
