@@ -54,12 +54,14 @@ class TagResource extends Resource
                     ->label('Nama Tag')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\BadgeColumn::make('type')
+                Tables\Columns\TextColumn::make('type')
                     ->label('Kategori')
-                    ->colors([
-                        'info'    => 'skill',
-                        'success' => 'industry',
-                    ])
+                    ->badge()
+                    ->color(fn ($state) => match ($state) {
+                        'skill'    => 'info',
+                        'industry' => 'success',
+                        default    => 'gray',
+                    })
                     ->formatStateUsing(fn ($state) => match ($state) {
                         'skill'    => '🔧 Skill',
                         'industry' => '🏭 Industri',

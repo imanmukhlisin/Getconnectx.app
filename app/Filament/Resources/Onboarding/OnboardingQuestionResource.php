@@ -162,14 +162,16 @@ class OnboardingQuestionResource extends Resource
                     ->formatStateUsing(fn ($state) => is_array($state) ? ($state['id'] ?? '-') : $state)
                     ->searchable()
                     ->limit(40),
-                Tables\Columns\BadgeColumn::make('type')
+                Tables\Columns\TextColumn::make('type')
                     ->label('Tipe')
-                    ->colors([
-                        'info'    => 'text',
-                        'success' => 'select',
-                        'warning' => 'multi_select',
-                        'gray'    => 'tag_selector',
-                    ]),
+                    ->badge()
+                    ->color(fn ($state) => match ($state) {
+                        'text'         => 'info',
+                        'select'       => 'success',
+                        'multi_select' => 'warning',
+                        'tag_selector' => 'gray',
+                        default        => 'gray',
+                    }),
                 Tables\Columns\IconColumn::make('required')
                     ->label('Wajib?')
                     ->boolean(),
