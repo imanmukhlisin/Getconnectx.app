@@ -27,9 +27,4 @@ $_ENV['VIEW_COMPILED_PATH'] = "{$tmpBase}/framework/views";
 $_SERVER['SCRIPT_NAME'] = '/index.php';
 $_SERVER['PHP_SELF'] = '/index.php' . ($_SERVER['PATH_INFO'] ?? '');
 
-// FIX: Force HTTPS on Vercel so Filament/Livewire generate correct asset URLs
-$_SERVER['HTTPS'] = 'on';
-putenv("APP_URL=https://getconnectxapp.vercel.app");
-$_ENV['APP_URL'] = 'https://getconnectxapp.vercel.app';
-
 require __DIR__ . '/../public/index.php';

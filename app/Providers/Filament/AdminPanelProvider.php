@@ -28,23 +28,16 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->registration()
-            ->passwordReset()
-            ->brandLogo(asset('images/logo.png'))
-            ->brandLogoHeight('3rem')
             ->colors([
                 'primary' => Color::Orange,
             ])
             ->authGuard('admin')
-            ->extraStylesheets([
-                asset('css/admin-custom.css'),
-            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->pages([
                 Pages\Dashboard::class,
             ])
             ->widgets([
-                StatsOverviewWidget::class,
+                Widgets\AccountWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

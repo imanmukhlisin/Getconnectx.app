@@ -12,7 +12,7 @@ class StatsOverviewWidget extends BaseWidget
 {
     protected static ?int $sort = 1;
 
-    protected int | string | array $columnSpan = 'full';
+    protected $columnSpan = 'full';
 
     // Auto refresh setiap 60 detik
     protected static ?string $pollingInterval = '60s';
