@@ -36,6 +36,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Fix for Vercel: Explicitly register the Livewire component that throws ComponentNotFoundException
+        \Livewire\Livewire::component('app.filament.resources.onboarding.onboarding-option-resource.pages.create-onboarding-option', \App\Filament\Resources\Onboarding\OnboardingOptionResource\Pages\CreateOnboardingOption::class);
+        
+        \URL::forceScheme('https');
     }
 }
