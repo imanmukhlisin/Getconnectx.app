@@ -38,6 +38,14 @@
       "dest": "/public/robots.txt"
     },
     {
+      "src": "^/livewire/(.*)$",
+      "dest": "/api/index.php"
+    },
+    {
+      "src": "^/vendor/(.*)$",
+      "dest": "/public/vendor/$1"
+    },
+    {
       "src": "^/storage/(.*)$",
       "dest": "/public/storage/$1"
     },

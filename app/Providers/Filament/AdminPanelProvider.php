@@ -29,7 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->registration()
             ->passwordReset()
-            ->brandLogo(asset('storage/logo.png'))
+            ->brandLogo(asset('images/logo.png'))
             ->brandLogoHeight('3rem')
             ->colors([
                 'primary' => Color::Orange, // ConnectX generic theme color
