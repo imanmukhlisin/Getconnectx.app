@@ -18,6 +18,10 @@ $_ENV['APP_STORAGE_PATH'] = $tmpBase;
 putenv("VIEW_COMPILED_PATH={$tmpBase}/framework/views");
 $_ENV['VIEW_COMPILED_PATH'] = "{$tmpBase}/framework/views";
 
+// FIX: Pastikan Livewire/Filament menulis komponen cache-nya di folder /tmp
+putenv("LIVEWIRE_MANIFEST_PATH={$tmpBase}/livewire-components.php");
+$_ENV['LIVEWIRE_MANIFEST_PATH'] = "{$tmpBase}/livewire-components.php";
+
 // FIX: Vercel-PHP runtime mengatur SCRIPT_NAME ke '/api/index.php'.
 // Framework (Symfony HttpFoundation) menggunakan direktori dari SCRIPT_NAME
 // sebagai "Base Path" (yaitu '/api'). Base path ini kemudian dipotong otomatis dari REQUEST_URI.
