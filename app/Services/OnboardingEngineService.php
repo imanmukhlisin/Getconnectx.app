@@ -16,10 +16,15 @@ class OnboardingEngineService
      */
     public function startSession(User $user): OnboardingSession
     {
-        // Batalkan sesi yang sudah ada dan masih berjalan (jika ada)
-        OnboardingSession::where('user_id', $user->id)
+        // Cek apakah ada sesi yang masih in_progress → kembalikan saja
+        $existingSession = OnboardingSession::where('user_id', $user->id)
             ->where('status', 'in_progress')
-            ->update(['status' => 'cancelled']);
+            ->latest()
+            ->first();
+
+        if ($existingSession) {
+            return $existingSession;
+        }
 
         $entryFlow = OnboardingFlow::where('is_entry', true)->firstOrFail();
         $firstStep = $entryFlow->steps()->orderBy('order_index')->firstOrFail();
@@ -29,6 +34,7 @@ class OnboardingEngineService
             'user_id' => $user->id,
             'current_step_id' => $firstStep->id,
             'status' => 'in_progress',
+            'started_at' => now(),
         ]);
 
         return $session;
@@ -36,6 +42,7 @@ class OnboardingEngineService
 
     /**
      * Mengambil data langkah secara menyeluruh berserta relasinya (questions & options).
+     * Output format sudah sesuai dengan API Contract yang disepakati dengan FE.
      */
     public function getCurrentStep(OnboardingSession $session): array
     {
@@ -48,8 +55,9 @@ class OnboardingEngineService
             }
         ])->firstOrFail();
 
-        // Menghitung progress (versi simplifikasi linear, karena kalkulasi jarak graf sangat kompleks)
+        // Menghitung progress
         $progress = $this->calculateProgress($session);
+        $sectionProgress = $this->calculateSectionProgress($step);
 
         // Translasi On-the-fly untuk Server Driven UI berdasarkan Locale
         $locale = app()->getLocale();
@@ -60,19 +68,47 @@ class OnboardingEngineService
             return $field;
         };
 
-        $mappedQuestions = $step->questions->map(function ($q) use ($gT) {
-            $qArr = $q->toArray();
-            $qArr['label'] = $gT($q->label);
-            $qArr['sub_label'] = $gT($q->sub_label);
-            $qArr['helper_text'] = $gT($q->helper_text);
-            $qArr['placeholder'] = $gT($q->placeholder);
-            
+        // Ambil jawaban yang sudah ada untuk step ini (prefill pada resume/back)
+        $existingAnswers = OnboardingResponse::where('session_id', $session->id)
+            ->where('step_id', $step->id)
+            ->pluck('value', 'question_id')
+            ->toArray();
+
+        $mappedQuestions = $step->questions->map(function ($q) use ($gT, $existingAnswers) {
+            $qArr = [
+                'id' => $q->id,
+                'type' => $q->type,
+                'label' => $gT($q->label),
+                'sub_label' => $gT($q->sub_label),
+                'helper_text' => $gT($q->helper_text),
+                'placeholder' => $gT($q->placeholder),
+                'required' => $q->required,
+                'validation' => $q->validation,
+                'depends_on' => $q->depends_on,
+                'meta' => $q->meta,
+            ];
+
+            // Sertakan jawaban sebelumnya jika ada (untuk resume/back)
+            if (isset($existingAnswers[$q->id])) {
+                $val = $existingAnswers[$q->id];
+                // Jika value array dengan 1 elemen dan bukan multi-select, flatten
+                if (is_array($val) && count($val) === 1 && !str_contains($q->type, 'multi')) {
+                    $qArr['previous_answer'] = $val[0];
+                } else {
+                    $qArr['previous_answer'] = $val;
+                }
+            }
+
             if ($q->relationLoaded('options') && $q->options->isNotEmpty()) {
                 $qArr['options'] = $q->options->map(function ($opt) use ($gT) {
-                    $optArr = $opt->toArray();
-                    $optArr['label'] = $gT($opt->label);
-                    $optArr['sub_label'] = $gT($opt->sub_label);
-                    return $optArr;
+                    return [
+                        'id' => $opt->id,
+                        'label' => $gT($opt->label),
+                        'sub_label' => $gT($opt->sub_label),
+                        'value' => $opt->value,
+                        'icon' => $opt->icon,
+                        'group' => $opt->group_name,
+                    ];
                 })->toArray();
             } else {
                 $qArr['options'] = [];
@@ -84,35 +120,76 @@ class OnboardingEngineService
             'id' => $step->id,
             'flow_key' => $step->flow_id,
             'section' => $step->section,
+            'section_progress' => $sectionProgress,
+            'overall_progress' => $progress,
             'title' => $gT($step->title),
             'subtitle' => $gT($step->subtitle),
-            'overall_progress' => $progress,
             'questions' => $mappedQuestions,
             'cta' => [
-                'label' => $gT($step->cta_label) ?? 'Continue',
+                'label' => (function ($v) { return !empty($v) ? $v : 'Continue'; })($gT($step->cta_label)),
                 'enabled_when' => 'valid'
             ],
-            'can_go_back' => $step->can_go_back
+            'can_go_back' => $step->can_go_back,
+            'auto_advance' => $step->auto_advance,
         ];
+    }
+
+    /**
+     * Menghitung section_progress berdasarkan posisi step di flow (e.g. "2/4")
+     */
+    private function calculateSectionProgress(OnboardingStep $step): string
+    {
+        $sameSection = OnboardingStep::where('flow_id', $step->flow_id)
+            ->where('section', $step->section)
+            ->orderBy('order_index')
+            ->pluck('id')
+            ->toArray();
+
+        $position = array_search($step->id, $sameSection);
+        $position = ($position !== false) ? $position + 1 : 1;
+        $total = count($sameSection);
+
+        return "{$position}/{$total}";
     }
 
     /**
      * Memvalidasi jawaban secara dinamis berdasarkan aturan pertanyaan dari database.
      * Akan melemparkan ValidationException jika ada yang tidak sesuai standar Frontend.
+     * Pesan error dilokalisasi berdasarkan Accept-Language header (id/en).
      */
     private function validateAnswers(string $stepId, array $answers): void
     {
         $step = OnboardingStep::with('questions')->findOrFail($stepId);
         $errors = [];
+        $locale = app()->getLocale();
 
         foreach ($step->questions as $question) {
             $value = $answers[$question->id] ?? null;
+            $labelText = is_array($question->label) ? ($question->label[$locale] ?? $question->label['en'] ?? '') : $question->label;
+
+            // Cek depends_on: jika pertanyaan ini bergantung pada jawaban lain
+            // dan kondisinya tidak terpenuhi, skip validasi (pertanyaan hidden)
+            if (!empty($question->depends_on)) {
+                $depQuestionId = $question->depends_on['question_id'] ?? null;
+                $depOperator = $question->depends_on['operator'] ?? 'equals';
+                $depValue = $question->depends_on['value'] ?? null;
+
+                if ($depQuestionId) {
+                    $depAnswer = $answers[$depQuestionId] ?? null;
+                    $shouldShow = $this->evaluateDependsOn($depAnswer, $depOperator, $depValue);
+                    if (!$shouldShow) {
+                        continue; // Pertanyaan ini tersembunyi, skip validasi
+                    }
+                }
+            }
 
             // 1. Pengecekan Aturan Wajib (Required)
             if ($question->required) {
                 if ($value === null || $value === '' || (is_array($value) && empty($value))) {
-                    $errors[$question->id][] = "Bagian '{$question->label}' wajib untuk diisi.";
-                    continue; // Skip hitungan aturan lanjut kalau datanya udah pasti kosong
+                    $errors[$question->id][] = $locale === 'id'
+                        ? "'{$labelText}' wajib untuk diisi."
+                        : "'{$labelText}' is required.";
+                    continue;
                 }
             }
 
@@ -127,31 +204,58 @@ class OnboardingEngineService
                 
                 if (is_array($rules)) {
                     if (!is_array($value)) {
-                        // Jika input tipe biasa (Teks/Nomor) -> Kita cek panjang string nya
+                        // Jika input tipe biasa (Teks/Nomor) → Cek panjang string
                         $strValue = (string) $value;
                         if (isset($rules['min_length']) && mb_strlen($strValue) < $rules['min_length']) {
-                            $errors[$question->id][] = "'{$question->label}' terlalu pendek (Minimum {$rules['min_length']} huruf).";
+                            $errors[$question->id][] = $locale === 'id'
+                                ? "'{$labelText}' terlalu pendek (Minimum {$rules['min_length']} huruf)."
+                                : "'{$labelText}' is too short (Minimum {$rules['min_length']} characters).";
                         }
                         if (isset($rules['max_length']) && mb_strlen($strValue) > $rules['max_length']) {
-                            $errors[$question->id][] = "'{$question->label}' terlalu panjang (Maksimum {$rules['max_length']} huruf).";
+                            $errors[$question->id][] = $locale === 'id'
+                                ? "'{$labelText}' terlalu panjang (Maksimum {$rules['max_length']} huruf)."
+                                : "'{$labelText}' is too long (Maximum {$rules['max_length']} characters).";
                         }
                     } else {
-                        // Jika input array (Multi-Select/Chips) -> Kita cek jumlah pilihan kotanya
+                        // Jika input array (Multi-Select/Chips) → Cek jumlah pilihan
                         $count = count($value);
                         if (isset($rules['min_selections']) && $count < $rules['min_selections']) {
-                            $errors[$question->id][] = "Anda harus mencentang minimum {$rules['min_selections']} buah pada pilihan '{$question->label}'.";
+                            $errors[$question->id][] = $locale === 'id'
+                                ? "Anda harus mencentang minimum {$rules['min_selections']} buah pada pilihan '{$labelText}'."
+                                : "You must select at least {$rules['min_selections']} items for '{$labelText}'.";
                         }
                         if (isset($rules['max_selections']) && $count > $rules['max_selections']) {
-                            $errors[$question->id][] = "Anda mencentang terlalu banyak! Maksimum {$rules['max_selections']} buah pada pilihan '{$question->label}'.";
+                            $errors[$question->id][] = $locale === 'id'
+                                ? "Anda mencentang terlalu banyak! Maksimum {$rules['max_selections']} buah pada pilihan '{$labelText}'."
+                                : "Too many selections! Maximum {$rules['max_selections']} items for '{$labelText}'.";
                         }
                     }
                 }
             }
         }
 
-        // Kalau ada satu saja yang melanggar hukum form, Gagalkan dengan status code 422!
+        // Kalau ada satu saja yang melanggar, Gagalkan dengan status code 422!
         if (!empty($errors)) {
             throw \Illuminate\Validation\ValidationException::withMessages($errors);
+        }
+    }
+
+    /**
+     * Evaluasi depends_on condition within a step (for conditional rendering).
+     */
+    private function evaluateDependsOn($actualValue, string $operator, $expectedValue): bool
+    {
+        if ($actualValue === null) return false;
+
+        switch ($operator) {
+            case 'equals':
+                return $actualValue == $expectedValue;
+            case 'not_equals':
+                return $actualValue != $expectedValue;
+            case 'in':
+                return is_array($expectedValue) ? in_array($actualValue, $expectedValue) : $actualValue == $expectedValue;
+            default:
+                return false;
         }
     }
 
@@ -160,10 +264,10 @@ class OnboardingEngineService
      */
     public function processAnswer(OnboardingSession $session, string $stepId, array $answers): array
     {
-        // 1. Tembok Pengaman Penangkis Hacker / Manipulasi Bypass Postman API.
+        // 1. Tembok Pengaman: Validasi input berdasarkan aturan pertanyaan
         $this->validateAnswers($stepId, $answers);
 
-        // 2. Simpan jawaban Murni.
+        // 2. Simpan jawaban (upsert per question_id agar tidak duplikat saat back-and-forth)
         foreach ($answers as $questionId => $value) {
             OnboardingResponse::updateOrCreate(
                 [
@@ -172,7 +276,8 @@ class OnboardingEngineService
                     'question_id' => $questionId
                 ],
                 [
-                    'value' => is_array($value) ? $value : [$value], // memastikan struktur JSON konsisten
+                    'value' => is_array($value) ? $value : [$value],
+                    'answered_at' => now(),
                 ]
             );
         }
@@ -270,9 +375,19 @@ class OnboardingEngineService
             case 'not_equals':
                 return $actualValue != $expectedValue;
             case 'in':
-                return is_array($actualValue) && in_array($expectedValue, $actualValue);
+                if (is_array($actualValue)) {
+                    return !empty(array_intersect((array) $expectedValue, $actualValue));
+                }
+                return in_array($actualValue, (array) $expectedValue);
+            case 'not_in':
+                if (is_array($actualValue)) {
+                    return empty(array_intersect((array) $expectedValue, $actualValue));
+                }
+                return !in_array($actualValue, (array) $expectedValue);
             case 'contains':
                 return is_array($actualValue) && in_array($expectedValue, $actualValue);
+            case 'exists':
+                return $actualValue !== null && $actualValue !== '' && $actualValue !== [];
             default:
                 return false;
         }
@@ -280,8 +395,9 @@ class OnboardingEngineService
 
     public function goBack(OnboardingSession $session): ?array
     {
-        // Cara termudah untuk kembali ke langkah sebelumnya adalah dengan mengecek jawaban terakhir.
+        // Cari jawaban terakhir yang dimiliki sebelum step saat ini
         $lastResponse = OnboardingResponse::where('session_id', $session->id)
+            ->where('step_id', '!=', $session->current_step_id)
             ->orderBy('answered_at', 'desc')
             ->first();
 
@@ -291,27 +407,34 @@ class OnboardingEngineService
 
         $previousStepId = $lastResponse->step_id;
 
-        // Menghapus rekapan jawaban di langkah yang sedang berjalan, seolah-olah "dibatalkan"
+        // Hapus jawaban step saat ini (karena dibatalkan user)
         OnboardingResponse::where('session_id', $session->id)
             ->where('step_id', $session->current_step_id)
             ->delete();
 
         $session->update(['current_step_id' => $previousStepId]);
 
+        // Cek apakah masih ada step yang bisa di-back lagi setelah ini
+        $canGoBackFurther = OnboardingResponse::where('session_id', $session->id)
+            ->where('step_id', '!=', $previousStepId)
+            ->exists();
+
         return [
-            'next_step' => $this->getCurrentStep($session),
+            'current_step' => $this->getCurrentStep($session),
             'progress' => $this->calculateProgress($session),
-            'can_go_back' => true,
+            'can_go_back' => $canGoBackFurther,
         ];
     }
 
     private function calculateProgress(OnboardingSession $session): array
     {
-        // Mockup Progress (Progres semu). Dibuat statis dengan asumsi 12 langkah berdasarkan Data Kontrak.
-        $answeredSteps = OnboardingResponse::where('session_id', $session->id)->distinct('step_id')->count('step_id');
+        $answeredSteps = OnboardingResponse::where('session_id', $session->id)
+            ->distinct('step_id')
+            ->count('step_id');
+
         return [
             'current' => $answeredSteps + 1,
-            'total' => 12 // Hardcoded sementara berdasarkan gambaran API Contract loo
+            'total' => 12 // Estimasi statis berdasarkan gambaran API Contract
         ];
     }
 
