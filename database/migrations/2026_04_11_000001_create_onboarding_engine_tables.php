@@ -24,9 +24,9 @@ return new class extends Migration
             $table->foreign('flow_id')->references('id')->on('onboarding_flows')->onDelete('cascade');
             $table->integer('order_index');
             $table->string('section')->nullable();
-            $table->string('title');
-            $table->string('subtitle')->nullable();
-            $table->string('cta_label')->default('Continue');
+            $table->jsonb('title');
+            $table->jsonb('subtitle')->nullable();
+            $table->jsonb('cta_label')->nullable();
             $table->boolean('auto_advance')->default(false);
             $table->boolean('can_go_back')->default(true);
             $table->timestamps();
@@ -39,10 +39,10 @@ return new class extends Migration
             $table->foreign('step_id')->references('id')->on('onboarding_steps')->onDelete('cascade');
             $table->integer('order_index');
             $table->string('type');
-            $table->string('label');
-            $table->string('sub_label')->nullable();
-            $table->string('helper_text')->nullable();
-            $table->string('placeholder')->nullable();
+            $table->jsonb('label');
+            $table->jsonb('sub_label')->nullable();
+            $table->jsonb('helper_text')->nullable();
+            $table->jsonb('placeholder')->nullable();
             $table->boolean('required')->default(false);
             $table->jsonb('validation')->nullable();
             $table->jsonb('depends_on')->nullable();
@@ -56,8 +56,8 @@ return new class extends Migration
             $table->string('question_id');
             $table->foreign('question_id')->references('id')->on('onboarding_questions')->onDelete('cascade');
             $table->integer('order_index');
-            $table->string('label');
-            $table->string('sub_label')->nullable();
+            $table->jsonb('label');
+            $table->jsonb('sub_label')->nullable();
             $table->string('value');
             $table->string('icon')->nullable();
             $table->string('group_name')->nullable();

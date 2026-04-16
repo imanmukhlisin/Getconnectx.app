@@ -27,6 +27,8 @@ class OnboardingOption extends Model
 
     protected $casts = [
         'order_index' => 'integer',
+        'label' => 'array',
+        'sub_label' => 'array',
     ];
 
     public function question()

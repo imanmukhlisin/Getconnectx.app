@@ -30,6 +30,9 @@ class OnboardingStep extends Model
         'auto_advance' => 'boolean',
         'can_go_back' => 'boolean',
         'order_index' => 'integer',
+        'title' => 'array',
+        'subtitle' => 'array',
+        'cta_label' => 'array',
     ];
 
     public function flow()

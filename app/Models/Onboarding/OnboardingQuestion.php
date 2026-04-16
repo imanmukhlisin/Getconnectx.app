@@ -35,6 +35,10 @@ class OnboardingQuestion extends Model
         'validation' => 'array',
         'depends_on' => 'array',
         'meta' => 'array',
+        'label' => 'array',
+        'sub_label' => 'array',
+        'helper_text' => 'array',
+        'placeholder' => 'array',
     ];
 
     public function step()
