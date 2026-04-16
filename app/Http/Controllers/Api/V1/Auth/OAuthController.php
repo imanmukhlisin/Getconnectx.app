@@ -84,8 +84,16 @@ class OAuthController extends Controller
         // Ekstrak token dari hasil JSON untuk diumpankan ke mobile
         $data = $jsonResponse->getData();
         if (isset($data->status) && $data->status === 'success' && isset($data->token)) {
+            // Rakit URL Deep Link
+            $redirectUrl = $appCallbackUrl . '?token=' . urlencode($data->token) . '&next_step=' . urlencode($data->next_step);
+            
+            // Sertakan supabase_token jika ada (user sudah aktif/full login)
+            if (isset($data->supabase_token)) {
+                $redirectUrl .= '&supabase_token=' . urlencode($data->supabase_token);
+            }
+
             // Redirect ke Mobile App via Custom Scheme (Deep Link)
-            return redirect()->away($appCallbackUrl . '?token=' . urlencode($data->token) . '&next_step=' . urlencode($data->next_step));
+            return redirect()->away($redirectUrl);
         }
 
         // Fallback jika proses pembuatan user gagal (harapannya tidak pernah terjadi)
