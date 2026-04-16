@@ -10,7 +10,9 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class StatsOverviewWidget extends BaseWidget
 {
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 1;
+
+    protected int | string | array $columnSpan = 'full';
 
     // Auto refresh setiap 60 detik
     protected static ?string $pollingInterval = '60s';
