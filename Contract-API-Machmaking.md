@@ -3,24 +3,27 @@
 Dokumen ini berisi panduan dan kontrak API lengkap untuk menguji fitur Matchmaking di dalam aplikasi menggunakan Postman.
 
 ## 🔑 Base Setup
+
 - **Base URL:** `http://localhost/api/v1` (Bila Docker) atau `http://localhost:8000/api/v1` (Bila PHP Artisan Local)
 - **Headers Wajib:**
-  ```text
-  Accept: application/json
-  Content-Type: application/json
-  Authorization: Bearer {token_sanctum}
-  ```
-> **Catatan:** Endpoint ini dilindungi oleh otorisasi. Pastikan User Anda sudah lolos verifikasi tahap akhir (memiliki token aktif).
+    ```text
+    Accept: application/json
+    Content-Type: application/json
+    Authorization: Bearer {token_sanctum}
+    ```
+    > **Catatan:** Endpoint ini dilindungi oleh otorisasi. Pastikan User Anda sudah lolos verifikasi tahap akhir (memiliki token aktif).
 
 ---
 
 ## 1. 💌 Swipe Right (Like User)
+
 Endpoint ini digunakan ketika Anda (User aktif) menyukai (swipe right) profil orang lain.
 
 - **Method:** `POST`
 - **Endpoint:** `/matches/like`
 
 ### Request Body (JSON)
+
 ```json
 {
     "to_user_id": "uuid-dari-user-target"
@@ -28,7 +31,9 @@ Endpoint ini digunakan ketika Anda (User aktif) menyukai (swipe right) profil or
 ```
 
 ### Response Sukses - Belum Mutual (HTTP 200 OK)
+
 Jika target User masih belum memberikan "Like" balik:
+
 ```json
 {
     "status": "success",
@@ -42,7 +47,9 @@ Jika target User masih belum memberikan "Like" balik:
 ```
 
 ### Response Sukses - It's a Mutual Match! (HTTP 200 OK)
+
 Jika terjadi kecocokan (Target user sebelumnya ternyata sudah me-like akun Anda):
+
 ```json
 {
     "status": "success",
@@ -58,12 +65,14 @@ Jika terjadi kecocokan (Target user sebelumnya ternyata sudah me-like akun Anda)
 ---
 
 ## 2. 📋 Get Match List & Likes Summary
+
 Endpoint ini dipanggil untuk mengisi halaman beranda Match. Ia akan mengeluarkan "Riwayat Teman Match Anda" sekaligus menghitung "Berapa banyak orang yang ngelike kamu diam-diam".
 
 - **Method:** `GET`
 - **Endpoint:** `/matches`
 
 ### Response (HTTP 200 OK)
+
 ```json
 {
     "status": "success",
@@ -87,19 +96,23 @@ Endpoint ini dipanggil untuk mengisi halaman beranda Match. Ia akan mengeluarkan
     }
 }
 ```
+
 > **Info:** Field `fitSummary` secara otomatis akan mengeluarkan object JSON Skor Kecocokan jika Background Job (Queue) sudah beres menghitung perhitungan AI-nya.
 
 ---
 
 ## 3. 🔍 Get Match Analysis Detail
-Bila tampilan *User Interface* butuh penjabaran detail alasan "Mengapa Match Ini Dinyatakan Cocok 90%", panggil endpoint ini. Note: Ini adalah hasil gawean dari background job.
+
+Bila tampilan _User Interface_ butuh penjabaran detail alasan "Mengapa Match Ini Dinyatakan Cocok 90%", panggil endpoint ini. Note: Ini adalah hasil gawean dari background job.
 
 - **Method:** `GET`
 - **Endpoint:** `/matches/{match_id}/analysis`
 - **Contoh request:** `/matches/mtc_83b320d0f41/analysis`
 
 ### Response Menggantung / Sedang Dihitung (HTTP 404 Not Found)
+
 Bila queue lambat dan masih proses:
+
 ```json
 {
     "message": "Analysis is still generating."
@@ -107,6 +120,7 @@ Bila queue lambat dan masih proses:
 ```
 
 ### Response Sukses (HTTP 200 OK)
+
 ```json
 {
     "status": "success",
@@ -118,19 +132,21 @@ Bila queue lambat dan masih proses:
     }
 }
 ```
-*(Kustomisasi Key-Value yang ada di dalam `data` ini akan sepenuhnya bergantung bentuk JSON yang dikelurkan algoritma Analysis Queue)*
+
+_(Kustomisasi Key-Value yang ada di dalam `data` ini akan sepenuhnya bergantung bentuk JSON yang dikelurkan algoritma Analysis Queue)_
 
 ---
 
 ## 🚀 Skenario Wajib Pengetesan di Postman (Simulasi Tinder)
 
 Buatlah urutan tes di Postman Anda seperti ini:
+
 1. **Siapkan 2 Token Login** untuk Akun (A) dan Akun (B).
 2. Dari Akun A, tembak `/matches/like`, kirim Body JSON `to_user_id` milik Akun B.
-   *(Ekspektasi: Muncul "Like sent" dan is_mutual: false)*
+   _(Ekspektasi: Muncul "Like sent" dan is_mutual: false)_
 3. Ganti Token Auth menjadi milik **Akun B**. Tembak endpoint `/matches/like`, lalu arahkan `to_user_id` milik Akun A.
-   *(Ekspektasi: Muncul "It's a Match!" dan kalian mendapat `match_id`)*
+   _(Ekspektasi: Muncul "It's a Match!" dan kalian mendapat `match_id`)_
 4. Dengan token siapapun (A atau B), jalan ke endpoint `/matches` (GET).
-   *(Ekspektasi: Data match tadi muncul di dalam array data)*
+   _(Ekspektasi: Data match tadi muncul di dalam array data)_
 5. Tes fitur proteksi sekuritas: Copy `match_id` yang terbentuk, lalu buka tab Postman baru untuk endpoint `GET /matches/nomor_match/analysis`. Pakaikan token **Akun C** (Akun asing).
-   *(Ekspektasi: Harus muncul error HTTP 403 / "Unauthorized access to this match" untuk menguji data tidak bocor)*
+   _(Ekspektasi: Harus muncul error HTTP 403 / "Unauthorized access to this match" untuk menguji data tidak bocor)_

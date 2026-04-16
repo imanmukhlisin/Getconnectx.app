@@ -1,163 +1,167 @@
-# Panduan Ngetes API di Postman (Live Action 6 Flow & Validasi)
+# Panduan Ngetes API Onboarding (Live Action 6 Flow)
 
-Berikut adalah panduan tembak API rahasia lu lewat Postman, menggunakan data **asli 6-Flow** yang berada di `OnboardingSeeder`.  
+Dokumen ini adalah panduan lengkap untuk mengetes **Dynamic Onboarding Engine** sesuai dengan `OnboardingSeeder` dan `Dokumen-contractapi-onbording.md`.
 
-**Persiapan Awal:**  
-Pastikan lo udah dapet `Bearer Token` dari proses *Login/Verify WhatsApp* (atau copy manual token dari DB).  
-
-### Step 1: Tarik Nafas, Buka Sesi Baru
-Ini tombol *Start* balapannya.  
-*   **Method:** `POST`
-*   **URL:** `{{base_url}}/api/v1/onboarding/sessions`
-*   **Response:** Lo bakal dapet string `session_id` (Misal: `ses_abc123`). Bawa tiket ini kemanapun lo jalan.
+## 🔑 Persiapan
+- **Base URL:** `{{base_url}}/api/v1`
+- **Auth:** `Bearer Token` (Dapatkan dari Login atau OTP Verify).
 
 ---
 
-### Step 2: Pengujian Nembus Tembok Pengaman (Test PR #2 Server Validation)
+## 🏎️ Step 1: Start Onboarding Session
+Mulai sesi baru untuk mendapatkan `session_id`.
+- **Method:** `POST`
+- **URL:** `/onboarding/sessions`
+- **Response:** `{ "session_id": "ses_abc123", ... }`
 
+---
 
-*   **Method:** `POST`
-*   **URL:** `{{base_url}}/api/v1/onboarding/sessions/{{session_id}}/answer`
-*   **Body (raw JSON):**
+## 📍 Step 2: Jalur Umum (Flow Common)
+Isi data diri dasar sebelum masuk ke percabangan peran.
+
+### 2.1 Nama Lengkap (`step_personal_name`)
 ```json
 {
   "step_id": "step_personal_name",
   "answers": {
-    "q_first_name": "Dimas",
+    "q_first_name": "Antigravity",
+    "q_last_name": "AI"
   }
 }
 ```
-*(Asumsi: Misal string "D" kurang dari `min_length` yaitu 3 karakter, atau jika di-set sengaja kosong)*
-*(Note: `q_last_name` boleh kosong karena terset `required: false` di database)*
 
-**BOOM! DITOLAK (Status `422 Unprocessable Entity`):**
+### 2.2 Tanggal Lahir (`step_personal_dob`)
 ```json
 {
-    "message": "The given data was invalid.",
-    "errors": {
-        "q_first_name": [
-            "'Nama Depan' terlalu pendek (Minimum 3 huruf)."
-        ]
-    }
+  "step_id": "step_personal_dob",
+  "answers": {
+    "q_dob": "1995-05-20"
+  }
 }
 ```
 
----
+### 2.3 Lokasi (`step_personal_location`)
+```json
+{
+  "step_id": "step_personal_location",
+  "answers": {
+    "q_location": "jakarta",
+    "q_open_remote": "yes",
+    "q_remote_pref": "hybrid"
+  }
+}
+```
+> **Note:** `q_remote_pref` hanya wajib dikirim jika `q_open_remote` bernilai `yes`.
 
-### Step 3: Jalan Benar menuju Persimpangan Tipe Akun (Flow Common)
-Minta maaf, benerin jawabannya lalu lanjut isi semua step: Nama, Lokasi, Ketersediaan. Begitu nyampe di `step_role_selection` (Milih Peran):
-
-*   **Method:** `POST`
-*   **URL:** `{{base_url}}/api/v1/onboarding/sessions/{{session_id}}/answer`
-*   **Body (raw JSON):**
+### 2.4 Gender & Role Selection
+Pilih peran Anda untuk menentukan arah flow selanjutnya.
+```json
+{
+  "step_id": "step_personal_gender",
+  "answers": {
+    "q_gender": "male"
+  }
+}
+```
+*Kemudian dilanjut ke:*
 ```json
 {
   "step_id": "step_role_selection",
   "answers": {
-    "q_use_connectx": "startup"
+    "q_use_connectx": "founder" 
   }
 }
 ```
-> **Magic Engine:** Otak Engine lo bakal ngeliat oh orang ini isinya `"startup"`, transisi nomor 1 nangkep ini. *Wushh...* Tiba-tiba balasan "next_step" lo bakal mendadak memunculkan pertanyaan tentang *Ceritakan tentang perjalanan startup Anda* (`step_flow_f`). 
+**Value `q_use_connectx` menentukan branching:**
+- `startup` -> Langsung ke **Flow F (Profil Startup)**.
+- `founder`, `cofounder`, `team` -> Masuk ke **Flow Builder Common**.
 
 ---
 
-### Step 4: Nyentuh Garis Finish (Di Flow F: Profil Startup)
-Meskipun lo tadinya masuk pake *Flow Common*, sekarang lo lagi berdiri di tanah *Flow F*. Kita isi *Chip Array*-nya sekaligus diuji validasinya (Misal lo nekat pilih 6 Industri padahal aturannya form lo maksimal 5).
+## 🏗️ Step 3: Jalur Builder (Flow Builder Common)
+Hanya untuk peran Founder, Co-Founder, atau Team Member.
 
-*   **Method:** `POST`
-*   **URL:** `{{base_url}}/api/v1/onboarding/sessions/{{session_id}}/answer`
-*   **Body (raw JSON):**
+### 3.1 Pengalaman & Industri (`step_bld_exp` & `step_bld_industry`)
+```json
+{
+  "step_id": "step_bld_industry",
+  "answers": {
+    "q_industry": ["AI/ML", "Fintech"],
+    "q_availability": "full_time",
+    "q_relocate": "yes"
+  }
+}
+```
+
+### 3.2 Role Detail (`step_bld_role`)
+```json
+{
+  "step_id": "step_bld_role",
+  "answers": {
+    "q_role_desc": "cto",
+    "q_role_years": 5,
+    "q_linkedin": "https://linkedin.com/in/user"
+  }
+}
+```
+
+---
+
+## 🚦 Step 4: Branching Spesifik (Flow A - F)
+Berdasarkan jawaban di langkah sebelumnya, Anda akan diarahkan ke salah satu flow berikut:
+
+### Contoh Flow F: Startup Profile (`step_flow_f`)
+Dipicu jika `q_use_connectx` = `startup`.
 ```json
 {
   "step_id": "step_flow_f",
   "answers": {
-    "q_ff_name": "Warung Masa Depan Indo",
+    "q_ff_name": "ConnectX Tech",
     "q_ff_stage": "mvp",
-    "q_ff_look": "team",
-    "q_ff_ind": ["fintech", "edtech", "healthtech", "agritech", "legaltech", "proptech"],
-    "q_ff_role": ["cto"],
-    "q_ff_offer": "Bagi hasil 20%"
+    "q_ff_look": "cofounder",
+    "q_ff_ind": ["SaaS", "AI/ML"],
+    "q_ff_role": ["ceo", "cmo"],
+    "q_ff_offer": "Salary + 5% Equity"
   }
 }
 ```
-**DITOLAK KARENA MARUK INDUSTRI (Status `422`):**
+
+### Contoh Flow A: Founder mencari Co-Founder (`step_flow_a`)
+Dipicu jika `founder` memilih `q_founder_intent` = `cofounder`.
 ```json
 {
-    "message": "The given data was invalid.",
-    "errors": {
-        "q_ff_ind": [
-            "Anda mencentang terlalu banyak! Maksimum 5 buah pada pilihan 'Sektor Industri Startup'."
-        ]
-    }
+  "step_id": "step_flow_a",
+  "answers": {
+    "q_flow_a_type": ["tech", "business"]
+  }
 }
 ```
 
-Kurangin satu industri, lalu tembak ulang, dan... **YAS!!**
+---
+
+## 🏁 Step 5: Finish & Redirect
+Jika langkah terakhir sudah terpenuhi, API akan menjawab:
 ```json
 {
   "next_step": null,
   "completed": true,
-  "profile_id": 16,
+  "profile_id": "uuid-anda",
   "redirect_to": "/home"
 }
 ```
-Sistem tamat! Jawaban tadi dimasak dari JSON menjadi Kolom fisikal SQL `role_category` (Startup), dan `startup_stage` (mvp) untuk `user` terkait berkat peracikan di `mapResponsesToProfile()`.
 
 ---
 
-### Step Tambahan (Cheat Menu Frontend):
-*   **Mundur 1 Langkah:** `POST {{base_url}}/api/v1/onboarding/sessions/{{session_id}}/back`
-*   **Muat Ulang Form Posisi Terakhir (Resume):** `GET {{base_url}}/api/v1/onboarding/sessions/{{session_id}}/current`
-*   **Narik File Transkrip Keseluruhan Session Selesai:** `GET {{base_url}}/api/v1/onboarding/sessions/{{session_id}}`
+## 🛠️ Fitur Tambahan (Control Session)
+- **Mundur Langkah:** `POST /onboarding/sessions/{{session_id}}/back`
+- **Resume (Ambil posisi terakhir):** `GET /onboarding/sessions/{{session_id}}/current`
+- **Status Lengkap:** `GET /onboarding/sessions/{{session_id}}`
 
 ---
 
-## 5. Menguji Fitur Direct Upload Media (Google Cloud Storage)
-Kalo lo sampe di pertanyaan yang butuh ngunggah Dokumen/Gambar (Misal: Upload Pitch Deck), lo **GGAK BOLEH** ngirim file fisik ke API `/answer`. Lo harus minta tiket penerbangan file-nya dulu ke API Media kita!
+## 📂 Penanganan Media (Upload GCS)
+Jika ada pertanyaan yang membutuhkan file (misal: Pitch Deck), gunakan flow pre-signed URL:
 
-### Fase 1: Minta Surat Ijin/Tiket
-Backend cuma ngeluarin URL Unik (Pre-signed URL) yang kadaluarsa dalam 10 menit.
-*   **Method:** `POST`
-*   **URL:** `{{base_url}}/api/v1/media/upload-url`
-*   **Body (raw JSON):**
-```json
-{
-  "file_name": "pitch_deck_startup_keren.pdf",
-  "mime_type": "application/pdf"
-}
-```
-
-*Contoh Balasan Sukses:*
-```json
-{
-  "upload_url": "https://storage.googleapis.com/connect-bucket/uploads/uuid-panjang-pitch_deck_startup_keren.pdf?X-Goog-Algorithm=...SignaturePanjang...",
-  "file_url": "https://storage.googleapis.com/connect-bucket/uploads/uuid-panjang-pitch_deck_startup_keren.pdf",
-  "path": "uploads/uuid-panjang-pitch_deck_startup_keren.pdf",
-  "expires_in": "10 Minutes"
-}
-```
-
-### Fase 2: Tembak Filenya Langsung Ke Google!
-Untuk nyobain ini di Postman:
-1. Bikin Tab Request baru di Postman.
-2. Ganti method jadi **`PUT`**.
-3. Di kolom URL, *Paste* link yang ada di nilai `"upload_url"` kepanjangan tadi.
-4. Buka tab **Headers** -> tambahkan **`Content-Type`** valuenya **`application/pdf`** (Wajib 100% sama dengan *mime_type* yang lo minta di awal).
-5. Buka tab **Body** -> pilih **`binary`** -> pilih file PDF beneran dari HP/Komputer lo.
-6. Pencet Send. Kalo balesannya `200 OK` tanpa tulisan apa-apa, artinya **SUKSES MASUK GCS!**
-
-### Fase 3: Setor Jawaban ke Onboarding
-Kalo Fase 2 udah sukses, lo baru balik nge-hajar Endpoint `/answer` buat ngirim letak URL filenya:
-*   **Method:** `POST`
-*   **URL:** `{{base_url}}/api/v1/onboarding/sessions/{{session_id}}/answer`
-*   **Body (raw JSON):**
-```json
-{
-  "step_id": "step_nama_halaman_pitchdeck",
-  "answers": {
-    "q_pitch_deck": "https://storage.googleapis.com/connect-bucket/uploads/uuid-panjang-pitch_deck_startup_keren.pdf"
-  }
-}
-```
-Mulus, Ringan, Server Laravel Nggak Jebol!🚀
+1. **Get Upload URL**: `POST /media/upload-url` dengan body `{"file_name": "test.pdf", "mime_type": "application/pdf"}`.
+2. **PUT to GCS**: Tembak file fisik ke `upload_url` menggunakan method `PUT` dan header `Content-Type`.
+3. **Submit Answer**: Kirim nilai `file_url` ke endpoint `/answer`.
