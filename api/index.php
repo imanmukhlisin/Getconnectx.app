@@ -36,4 +36,16 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROT
     $_SERVER['HTTPS'] = 'on';
 }
 
-require __DIR__ . '/../public/index.php';
+try {
+    require __DIR__ . '/../public/index.php';
+} catch (\Throwable $e) {
+    header('Content-Type: application/json');
+    http_response_code(500);
+    echo json_encode([
+        'error_message' => $e->getMessage(),
+        'error_file' => $e->getFile(),
+        'error_line' => $e->getLine(),
+        'stack_trace_top' => array_slice(explode("\n", $e->getTraceAsString()), 0, 5)
+    ], JSON_PRETTY_PRINT);
+    exit;
+}
