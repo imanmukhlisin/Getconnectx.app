@@ -27,4 +27,9 @@ $_ENV['VIEW_COMPILED_PATH'] = "{$tmpBase}/framework/views";
 $_SERVER['SCRIPT_NAME'] = '/index.php';
 $_SERVER['PHP_SELF'] = '/index.php' . ($_SERVER['PATH_INFO'] ?? '');
 
+// FIX: Force HTTPS on Vercel to ensure assets use https://
+if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+    $_SERVER['HTTPS'] = 'on';
+}
+
 require __DIR__ . '/../public/index.php';
