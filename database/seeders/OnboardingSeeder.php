@@ -114,16 +114,118 @@ class OnboardingSeeder extends Seeder
         $o = function ($id, $qid, $order, $labelId, $labelEn, $value) use ($now) {
             return [
                 'id' => $id, 'question_id' => $qid, 'order_index' => $order,
-                'label' => json_encode(['id' => $labelId, 'en' => $labelEn]), 'value' => $value,
+                'label' => json_encode(['id' => $labelId, 'en' => $labelEn]),
+                'value' => $value,
+                'group_name' => null, // Konsisten dengan $oWithGroup untuk batch insert
                 'created_at' => $now, 'updated_at' => $now,
             ];
         };
         $opts = [];
 
-        // --- Location ---
-        $opts[] = $o('opt_loc_1', 'q_location', 1, 'Jakarta, Indonesia', 'Jakarta, Indonesia', 'jakarta');
-        $opts[] = $o('opt_loc_2', 'q_location', 2, 'Bandung, Indonesia', 'Bandung, Indonesia', 'bandung');
-        $opts[] = $o('opt_loc_3', 'q_location', 3, 'Singapore', 'Singapore', 'singapore');
+        // ═══════════════════════════════════════════════════════
+        // LOCATION — 60+ Global Startup Hub Cities
+        // Dikelompokkan by region (field group_name) sehingga FE
+        // bisa render section header di searchable_dropdown.
+        // Value = slug lowercase, unik, URL-safe.
+        // FE melakukan client-side search/filter dari daftar ini.
+        // ═══════════════════════════════════════════════════════
+        $locations = [
+            // Southeast Asia
+            ['Jakarta, Indonesia',       'jakarta',        'Asia Tenggara'],
+            ['Bandung, Indonesia',        'bandung',        'Asia Tenggara'],
+            ['Surabaya, Indonesia',       'surabaya',       'Asia Tenggara'],
+            ['Bali, Indonesia',           'bali',           'Asia Tenggara'],
+            ['Yogyakarta, Indonesia',     'yogyakarta',     'Asia Tenggara'],
+            ['Medan, Indonesia',          'medan',          'Asia Tenggara'],
+            ['Singapore',                 'singapore',      'Asia Tenggara'],
+            ['Kuala Lumpur, Malaysia',    'kuala_lumpur',   'Asia Tenggara'],
+            ['Penang, Malaysia',          'penang',         'Asia Tenggara'],
+            ['Bangkok, Thailand',         'bangkok',        'Asia Tenggara'],
+            ['Ho Chi Minh City, Vietnam', 'ho_chi_minh',   'Asia Tenggara'],
+            ['Hanoi, Vietnam',            'hanoi',          'Asia Tenggara'],
+            ['Manila, Philippines',       'manila',         'Asia Tenggara'],
+            ['Cebu, Philippines',         'cebu',           'Asia Tenggara'],
+            ['Yangon, Myanmar',           'yangon',         'Asia Tenggara'],
+            ['Phnom Penh, Cambodia',      'phnom_penh',     'Asia Tenggara'],
+
+            // South Asia
+            ['Bangalore, India',          'bangalore',      'Asia Selatan'],
+            ['Mumbai, India',             'mumbai',         'Asia Selatan'],
+            ['Delhi, India',              'delhi',          'Asia Selatan'],
+            ['Hyderabad, India',          'hyderabad',      'Asia Selatan'],
+            ['Chennai, India',            'chennai',        'Asia Selatan'],
+            ['Pune, India',               'pune',           'Asia Selatan'],
+            ['Karachi, Pakistan',         'karachi',        'Asia Selatan'],
+            ['Colombo, Sri Lanka',        'colombo',        'Asia Selatan'],
+            ['Dhaka, Bangladesh',         'dhaka',          'Asia Selatan'],
+
+            // East Asia
+            ['Tokyo, Japan',              'tokyo',          'Asia Timur'],
+            ['Osaka, Japan',              'osaka',          'Asia Timur'],
+            ['Seoul, South Korea',        'seoul',          'Asia Timur'],
+            ['Beijing, China',            'beijing',        'Asia Timur'],
+            ['Shanghai, China',           'shanghai',       'Asia Timur'],
+            ['Shenzhen, China',           'shenzhen',       'Asia Timur'],
+            ['Hong Kong',                 'hong_kong',      'Asia Timur'],
+            ['Taipei, Taiwan',            'taipei',         'Asia Timur'],
+
+            // Middle East
+            ['Dubai, UAE',                'dubai',          'Timur Tengah'],
+            ['Abu Dhabi, UAE',            'abu_dhabi',      'Timur Tengah'],
+            ['Riyadh, Saudi Arabia',      'riyadh',         'Timur Tengah'],
+            ['Tel Aviv, Israel',          'tel_aviv',       'Timur Tengah'],
+            ['Amman, Jordan',             'amman',          'Timur Tengah'],
+
+            // Europe
+            ['London, UK',                'london',         'Eropa'],
+            ['Berlin, Germany',           'berlin',         'Eropa'],
+            ['Amsterdam, Netherlands',    'amsterdam',      'Eropa'],
+            ['Paris, France',             'paris',          'Eropa'],
+            ['Stockholm, Sweden',         'stockholm',      'Eropa'],
+            ['Zurich, Switzerland',       'zurich',         'Eropa'],
+            ['Lisbon, Portugal',          'lisbon',         'Eropa'],
+            ['Barcelona, Spain',          'barcelona',      'Eropa'],
+            ['Warsaw, Poland',            'warsaw',         'Eropa'],
+            ['Tallinn, Estonia',          'tallinn',        'Eropa'],
+
+            // Americas
+            ['San Francisco, USA',        'san_francisco',  'Amerika'],
+            ['New York, USA',             'new_york',       'Amerika'],
+            ['Austin, USA',               'austin',         'Amerika'],
+            ['Seattle, USA',              'seattle',        'Amerika'],
+            ['Miami, USA',                'miami',          'Amerika'],
+            ['Toronto, Canada',           'toronto',        'Amerika'],
+            ['Vancouver, Canada',         'vancouver',      'Amerika'],
+            ['São Paulo, Brazil',         'sao_paulo',      'Amerika'],
+            ['Mexico City, Mexico',       'mexico_city',    'Amerika'],
+            ['Buenos Aires, Argentina',   'buenos_aires',   'Amerika'],
+
+            // Africa & Oceania
+            ['Lagos, Nigeria',            'lagos',          'Afrika & Oseania'],
+            ['Nairobi, Kenya',            'nairobi',        'Afrika & Oseania'],
+            ['Cairo, Egypt',              'cairo',          'Afrika & Oseania'],
+            ['Johannesburg, South Africa','johannesburg',   'Afrika & Oseania'],
+            ['Sydney, Australia',         'sydney',         'Afrika & Oseania'],
+            ['Melbourne, Australia',      'melbourne',      'Afrika & Oseania'],
+            ['Auckland, New Zealand',     'auckland',       'Afrika & Oseania'],
+
+            // Special / Remote
+            ['Remote (Mana Saja)',        'remote',         'Remote'],
+        ];
+
+        $oWithGroup = function ($id, $qid, $order, $label, $value, $group) use ($now) {
+            return [
+                'id' => $id, 'question_id' => $qid, 'order_index' => $order,
+                'label' => json_encode(['id' => $label, 'en' => $label]),
+                'value' => $value,
+                'group_name' => $group,
+                'created_at' => $now, 'updated_at' => $now,
+            ];
+        };
+
+        foreach ($locations as $i => [$label, $value, $group]) {
+            $opts[] = $oWithGroup('opt_loc_' . ($i + 1), 'q_location', $i + 1, $label, $value, $group);
+        }
 
         // --- Remote ---
         $opts[] = $o('opt_rem_yes', 'q_open_remote', 1, 'Ya', 'Yes', 'yes');
