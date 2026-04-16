@@ -32,11 +32,18 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Orange,
             ])
             ->authGuard('admin')
+            ->brandLogo('/images/logo.png')
+            ->brandLogoHeight('3rem')
+            ->extraStylesheets([
+                '/css/admin-custom.css',
+            ])
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->pages([
                 Pages\Dashboard::class,
             ])
             ->widgets([
                 Widgets\AccountWidget::class,
+                \App\Filament\Widgets\StatsOverviewWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
