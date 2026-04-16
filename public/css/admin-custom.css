@@ -1,0 +1,273 @@
+/* ================================================================
+   ConnectX Admin Panel – Custom Theme
+   Brand: Orange (#f97316) | Dark sidebar | Premium feel
+   ================================================================ */
+
+/* ── Google Font: Inter ─────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ── Global ─────────────────────────────────────────────────── */
+body, html {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+    background-color: #f8fafc;
+}
+
+/* ── Sidebar: Dark gradient ──────────────────────────────────── */
+.fi-sidebar {
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%) !important;
+    border-right: none !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Sidebar brand logo area */
+.fi-sidebar-header {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    padding: 1.25rem 1.5rem !important;
+    border-bottom: none !important;
+}
+
+.fi-sidebar-header .fi-logo {
+    filter: brightness(0) invert(1);
+}
+
+/* Sidebar nav group labels */
+.fi-sidebar-group-label {
+    color: rgba(255, 255, 255, 0.45) !important;
+    font-size: 0.65rem !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    font-weight: 600 !important;
+}
+
+/* Sidebar nav items */
+.fi-sidebar-item-button {
+    color: rgba(255, 255, 255, 0.75) !important;
+    border-radius: 0.5rem !important;
+    margin: 0.1rem 0.75rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.fi-sidebar-item-button:hover {
+    background: rgba(249, 115, 22, 0.2) !important;
+    color: #f97316 !important;
+    transform: translateX(3px);
+}
+
+.fi-sidebar-item-button.fi-active,
+.fi-sidebar-item-button[aria-current="page"] {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4) !important;
+}
+
+/* Sidebar icons */
+.fi-sidebar-item-icon {
+    color: inherit !important;
+}
+
+/* ── Topbar ──────────────────────────────────────────────────── */
+.fi-topbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(12px) !important;
+    border-bottom: 1px solid rgba(241, 245, 249, 1) !important;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ── Main content area ───────────────────────────────────────── */
+.fi-main {
+    background: #f1f5f9 !important;
+}
+
+.fi-page-header {
+    background: transparent !important;
+}
+
+/* Page title */
+.fi-page-header h1 {
+    font-size: 1.75rem !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    letter-spacing: -0.02em !important;
+}
+
+/* ── Stat cards – gradient per color ─────────────────────────── */
+.fi-stats-overview-stat {
+    border-radius: 1rem !important;
+    border: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    overflow: hidden !important;
+    position: relative;
+}
+
+.fi-stats-overview-stat:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Info card (Total Users) – blue gradient */
+.fi-stats-overview-stat-color-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+    color: white !important;
+}
+
+/* Success card (Verified) – green gradient */
+.fi-stats-overview-stat-color-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+}
+
+/* Warning card (Connections) – orange gradient */
+.fi-stats-overview-stat-color-warning {
+    background: linear-gradient(135deg, #f97316 0%, #c2410c 100%) !important;
+    color: white !important;
+}
+
+/* Danger card (Matches) – pink gradient */
+.fi-stats-overview-stat-color-danger {
+    background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%) !important;
+    color: white !important;
+}
+
+/* Gray card (Tags) – slate gradient */
+.fi-stats-overview-stat-color-gray {
+    background: linear-gradient(135deg, #64748b 0%, #334155 100%) !important;
+    color: white !important;
+}
+
+/* Stat value number */
+.fi-stats-overview-stat-value {
+    color: white !important;
+    font-weight: 800 !important;
+    font-size: 2rem !important;
+}
+
+/* Stat label */
+.fi-stats-overview-stat-label {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 500 !important;
+    font-size: 0.8rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* Stat description */
+.fi-stats-overview-stat-description {
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-size: 0.75rem !important;
+}
+
+.fi-stats-overview-stat-description-icon {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* ── Tables ──────────────────────────────────────────────────── */
+.fi-ta-table {
+    background: white !important;
+    border-radius: 1rem !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06) !important;
+    border: none !important;
+}
+
+.fi-ta-header-cell {
+    background: #f8fafc !important;
+    color: #64748b !important;
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+}
+
+.fi-ta-row:hover td {
+    background: #fef9f5 !important;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+.fi-btn-primary {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    border: none !important;
+    border-radius: 0.6rem !important;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.35) !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+}
+
+.fi-btn-primary:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(249, 115, 22, 0.45) !important;
+}
+
+/* ── Form sections ────────────────────────────────────────────── */
+.fi-section {
+    border-radius: 1rem !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    background: white !important;
+}
+
+.fi-section-header {
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.fi-section-header-heading {
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    font-size: 0.9rem !important;
+}
+
+/* ── Form inputs ──────────────────────────────────────────────── */
+.fi-input {
+    border-color: #e2e8f0 !important;
+    border-radius: 0.6rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.fi-input:focus {
+    border-color: #f97316 !important;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15) !important;
+}
+
+/* ── Breadcrumbs ──────────────────────────────────────────────── */
+.fi-breadcrumbs {
+    font-size: 0.8rem !important;
+    color: #94a3b8 !important;
+}
+
+/* ── Select dropdown badge ────────────────────────────────────── */
+.fi-badge {
+    border-radius: 999px !important;
+    font-weight: 600 !important;
+    font-size: 0.7rem !important;
+}
+
+/* ── Modal ────────────────────────────────────────────────────── */
+.fi-modal-window {
+    border-radius: 1.25rem !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* ── Scrollbar custom ────────────────────────────────────────── */
+.fi-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.fi-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fi-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 99px;
+}
+
+/* ── Responsive mobile sidebar ─────────────────────────────── */
+@media (max-width: 1023px) {
+    .fi-sidebar {
+        box-shadow: none !important;
+    }
+}
