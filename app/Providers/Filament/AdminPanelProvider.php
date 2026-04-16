@@ -25,8 +25,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('')
-            ->domain(env('FILAMENT_DOMAIN', 'getconnectxapp-admin.vercel.app'))
+            ->path('admin')
             ->login()
             ->registration()
             ->passwordReset()
