@@ -44,7 +44,6 @@ class AdminPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
             ])
             ->widgets([
-                Widgets\AccountWidget::class,
                 \App\Filament\Widgets\StatsOverviewWidget::class,
             ])
             ->middleware([
