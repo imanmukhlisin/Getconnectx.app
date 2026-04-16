@@ -102,35 +102,45 @@ class OnboardingOptionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('question.label')
-                    ->label('Pertanyaan')
-                    ->formatStateUsing(fn ($state) => is_array($state) ? ($state['id'] ?? '-') : $state)
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->limit(20),
+                Tables\Columns\TextColumn::make('question_id')
+                    ->label('Pertanyaan (ID)')
                     ->searchable()
-                    ->limit(30),
+                    ->limit(20)
+                    ->badge()
+                    ->color('info'),
                 Tables\Columns\TextColumn::make('order_index')
                     ->label('Urutan')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('label')
-                    ->label('Teks Pilihan (ID)')
+                    ->label('Label (ID)')
                     ->formatStateUsing(fn ($state) => is_array($state) ? ($state['id'] ?? '-') : $state)
-                    ->searchable(),
+                    ->limit(30),
                 Tables\Columns\TextColumn::make('value')
                     ->label('Value')
-                    ->searchable()
                     ->badge()
-                    ->color('gray'),
-                Tables\Columns\TextColumn::make('icon')
-                    ->label('Ikon'),
+                    ->color('gray')
+                    ->limit(20),
                 Tables\Columns\TextColumn::make('group_name')
                     ->label('Grup')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('order_index')
+            ->paginationPageOptions([10, 25])
+            ->defaultPaginationPageOption(10)
             ->filters([
                 Tables\Filters\SelectFilter::make('question_id')
                     ->label('Filter Pertanyaan')
-                    ->relationship('question', 'id'),
+                    ->options(fn () => \App\Models\Onboarding\OnboardingQuestion::query()
+                        ->orderBy('step_id')
+                        ->pluck('id', 'id')
+                        ->toArray()
+                    )
+                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('Edit'),

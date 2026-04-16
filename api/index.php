@@ -36,6 +36,12 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROT
     $_SERVER['HTTPS'] = 'on';
 }
 
+// FIX: Enable gzip compression to avoid Vercel's 6MB response payload limit
+// Filament admin pages can be large; this reduces payload by ~70%
+if (isset($_SERVER['HTTP_ACCEPT_ENCODING']) && str_contains($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) {
+    ob_start('ob_gzhandler');
+}
+
 try {
     require __DIR__ . '/../public/index.php';
 } catch (\Throwable $e) {
