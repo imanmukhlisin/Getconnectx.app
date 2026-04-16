@@ -51,16 +51,45 @@ class OnboardingEngineService
         // Menghitung progress (versi simplifikasi linear, karena kalkulasi jarak graf sangat kompleks)
         $progress = $this->calculateProgress($session);
 
+        // Translasi On-the-fly untuk Server Driven UI berdasarkan Locale
+        $locale = app()->getLocale();
+        $gT = function ($field) use ($locale) {
+            if (is_array($field)) {
+                return $field[$locale] ?? $field['en'] ?? reset($field);
+            }
+            return $field;
+        };
+
+        $mappedQuestions = $step->questions->map(function ($q) use ($gT) {
+            $qArr = $q->toArray();
+            $qArr['label'] = $gT($q->label);
+            $qArr['sub_label'] = $gT($q->sub_label);
+            $qArr['helper_text'] = $gT($q->helper_text);
+            $qArr['placeholder'] = $gT($q->placeholder);
+            
+            if ($q->relationLoaded('options') && $q->options->isNotEmpty()) {
+                $qArr['options'] = $q->options->map(function ($opt) use ($gT) {
+                    $optArr = $opt->toArray();
+                    $optArr['label'] = $gT($opt->label);
+                    $optArr['sub_label'] = $gT($opt->sub_label);
+                    return $optArr;
+                })->toArray();
+            } else {
+                $qArr['options'] = [];
+            }
+            return $qArr;
+        });
+
         return [
             'id' => $step->id,
             'flow_key' => $step->flow_id,
             'section' => $step->section,
-            'title' => $step->title,
-            'subtitle' => $step->subtitle,
+            'title' => $gT($step->title),
+            'subtitle' => $gT($step->subtitle),
             'overall_progress' => $progress,
-            'questions' => $step->questions,
+            'questions' => $mappedQuestions,
             'cta' => [
-                'label' => $step->cta_label,
+                'label' => $gT($step->cta_label) ?? 'Continue',
                 'enabled_when' => 'valid'
             ],
             'can_go_back' => $step->can_go_back
