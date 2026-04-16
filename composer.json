@@ -3,11 +3,16 @@
     "name": "connectx/backend",
     "type": "project",
     "description": "ConnectX Backend - Initial Registration Flow (Laravel 11 + Supabase)",
-    "keywords": ["laravel", "connectx", "supabase"],
+    "keywords": [
+        "laravel",
+        "connectx",
+        "supabase"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.2",
         "darkaonline/l5-swagger": "^11.0",
+        "filament/filament": "^3.2",
         "firebase/php-jwt": "*",
         "guzzlehttp/guzzle": "^7.9",
         "kreait/laravel-firebase": "^6.2",
@@ -56,7 +61,8 @@
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php artisan filament:upgrade"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
