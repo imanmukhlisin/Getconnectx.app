@@ -531,12 +531,14 @@ class OnboardingEngineService
         }
 
         // ── LinkedIn (multiple possible question IDs) ──
+        $linkedinUrlToSync = null;
         $linkedinQuestions = ['q_fdr_cf_linkedin','q_fdr_tm_linkedin','q_fdr_bt_linkedin','q_cf_linkedin','q_tm_linkedin','q_su_linkedin'];
         foreach ($linkedinQuestions as $qid) {
             if ($responses->has($qid)) {
                 $val = $this->getValue($responses[$qid]->value);
                 if (!empty($val)) {
                     $updateData['linkedin_url'] = $val;
+                    $linkedinUrlToSync = $val;
                     break;
                 }
             }
@@ -608,6 +610,11 @@ class OnboardingEngineService
             app(\App\Services\FeedService::class)->invalidateUserFeedCache($user->id);
         } catch (\Throwable $e) {
             // FeedService may not exist yet — silently ignore
+        }
+
+        // ── Dispatch LinkedIn Background Scraper (Serverless/Webhook strategy) ──
+        if (!empty($linkedinUrlToSync)) {
+            app(\App\Services\LinkedInScraperService::class)->triggerScrapeAsync($linkedinUrlToSync);
         }
     }
 

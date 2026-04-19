@@ -73,4 +73,8 @@ return [
         'frontend_url' => env('FRONTEND_URL', 'https://getconnectxapp.vercel.app'),
     ],
 
+    'apify' => [
+        'token' => env('APIFY_TOKEN'),
+    ],
+
 ];

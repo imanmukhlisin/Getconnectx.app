@@ -170,3 +170,9 @@ Route::prefix('v1')->group(function () {
     });
 });
 
+// ─── Webhooks ───────────────────────────────────────────────────────────────
+Route::prefix('v1/webhooks')->group(function () {
+    Route::post('apify/linkedin', [\App\Http\Controllers\Api\V1\WebhookController::class, 'apifyLinkedIn'])
+        ->name('webhooks.apify.linkedin');
+});
+

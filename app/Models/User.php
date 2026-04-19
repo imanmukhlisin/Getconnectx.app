@@ -51,6 +51,18 @@ class User extends Authenticatable
         'is_onboarded',
         'latitude',
         'longitude',
+        'date_of_birth',
+        'gender',
+        'primary_role',
+        'years_experience',
+        'startup_experience',
+        'cofounder_type',
+        'linkedin_url',
+        'linkedin_data',
+        'startup_name',
+        'startup_tagline',
+        'open_to_remote',
+        'willing_to_relocate',
     ];
 
     /**
