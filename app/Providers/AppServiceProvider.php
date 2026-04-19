@@ -33,9 +33,69 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap any application services.
+     *
+     * VERCEL FIX: Karena Vercel serverless tidak bisa menulis cache dan tidak
+     * support artisan livewire:discover, semua Filament page di-register manual.
+     * Ini memastikan Livewire bisa resolve komponen tanpa auto-discovery.
      */
     public function boot(): void
     {
-        //
+        \URL::forceScheme('https');
+
+        // ── Onboarding Option Resource ────────────────────────────────────────
+        \Livewire\Livewire::component(
+            'app.filament.resources.onboarding.onboarding-option-resource.pages.create-onboarding-option',
+            \App\Filament\Resources\Onboarding\OnboardingOptionResource\Pages\CreateOnboardingOption::class
+        );
+        \Livewire\Livewire::component(
+            'app.filament.resources.onboarding.onboarding-option-resource.pages.edit-onboarding-option',
+            \App\Filament\Resources\Onboarding\OnboardingOptionResource\Pages\EditOnboardingOption::class
+        );
+        \Livewire\Livewire::component(
+            'app.filament.resources.onboarding.onboarding-option-resource.pages.list-onboarding-options',
+            \App\Filament\Resources\Onboarding\OnboardingOptionResource\Pages\ListOnboardingOptions::class
+        );
+
+        // ── Onboarding Question Resource ──────────────────────────────────────
+        \Livewire\Livewire::component(
+            'app.filament.resources.onboarding.onboarding-question-resource.pages.create-onboarding-question',
+            \App\Filament\Resources\Onboarding\OnboardingQuestionResource\Pages\CreateOnboardingQuestion::class
+        );
+        \Livewire\Livewire::component(
+            'app.filament.resources.onboarding.onboarding-question-resource.pages.edit-onboarding-question',
+            \App\Filament\Resources\Onboarding\OnboardingQuestionResource\Pages\EditOnboardingQuestion::class
+        );
+        \Livewire\Livewire::component(
+            'app.filament.resources.onboarding.onboarding-question-resource.pages.list-onboarding-questions',
+            \App\Filament\Resources\Onboarding\OnboardingQuestionResource\Pages\ListOnboardingQuestions::class
+        );
+
+        // ── Onboarding Step Resource ──────────────────────────────────────────
+        \Livewire\Livewire::component(
+            'app.filament.resources.onboarding.onboarding-step-resource.pages.create-onboarding-step',
+            \App\Filament\Resources\Onboarding\OnboardingStepResource\Pages\CreateOnboardingStep::class
+        );
+        \Livewire\Livewire::component(
+            'app.filament.resources.onboarding.onboarding-step-resource.pages.edit-onboarding-step',
+            \App\Filament\Resources\Onboarding\OnboardingStepResource\Pages\EditOnboardingStep::class
+        );
+        \Livewire\Livewire::component(
+            'app.filament.resources.onboarding.onboarding-step-resource.pages.list-onboarding-steps',
+            \App\Filament\Resources\Onboarding\OnboardingStepResource\Pages\ListOnboardingSteps::class
+        );
+
+        // ── Tag Resource ──────────────────────────────────────────────────────
+        \Livewire\Livewire::component(
+            'app.filament.resources.tag-resource.pages.create-tag',
+            \App\Filament\Resources\TagResource\Pages\CreateTag::class
+        );
+        \Livewire\Livewire::component(
+            'app.filament.resources.tag-resource.pages.edit-tag',
+            \App\Filament\Resources\TagResource\Pages\EditTag::class
+        );
+        \Livewire\Livewire::component(
+            'app.filament.resources.tag-resource.pages.list-tags',
+            \App\Filament\Resources\TagResource\Pages\ListTags::class
+        );
     }
 }
