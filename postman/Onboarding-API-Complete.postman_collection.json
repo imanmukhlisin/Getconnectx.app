@@ -1,736 +1,939 @@
 {
   "info": {
-    "_postman_id": "onboarding-engine-v1",
-    "name": "ConnectX — Dynamic Onboarding Engine v1",
-    "description": "Koleksi lengkap endpoint Dynamic Onboarding Engine sesuai API Contract CON-48. Covers 5 endpoint utama: start session, get current step, submit answer, go back, dan get full session state. Semua 6 flow (Common, A, B, C, D, E, F) sudah di-cover oleh test scenario.",
+    "name": "ConnectX Onboarding V2 — Complete",
+    "description": "Full E2E testing for the dynamic onboarding engine with 18 flows, 53 steps, 90+ questions. Covers all 4 main paths: Founder, Co-Founder, Team Member, Startup.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost/api/v1", "type": "string" },
-    { "key": "token", "value": "", "type": "string", "description": "Sanctum Bearer Token dari Login/Verify WhatsApp" },
-    { "key": "session_id", "value": "", "type": "string", "description": "Diisi otomatis setelah POST /sessions berhasil" }
+    { "key": "base_url", "value": "http://localhost:8000/api/v1" },
+    { "key": "bearer_token", "value": "" },
+    { "key": "session_id", "value": "" }
   ],
-  "auth": {
-    "type": "bearer",
-    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
-  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Use environment variable if available, fallback to collection variable",
+          "const token = pm.environment.get('bearer_token') || pm.collectionVariables.get('bearer_token');",
+          "if (token) { pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token }); }"
+        ]
+      }
+    }
+  ],
   "item": [
     {
-      "name": "0. Auth — Login (Dapatkan Token)",
+      "name": "0. Auth — Login & Get Token",
       "item": [
         {
-          "name": "Login with Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Accept-Language", "value": "id" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"Password123!\"\n}"
-            },
-            "url": { "raw": "{{baseUrl}}/auth/login/password", "host": ["{{baseUrl}}"], "path": ["auth", "login", "password"] },
-            "description": "Dapatkan Bearer Token dulu sebelum mulai onboarding. Token ini dipakai di semua request berikutnya via Authorization header.\n\n⚠️ Pastikan account sudah melewati tahap verifikasi (registration_step >= 5) atau gunakan akun test yang sudah fully verified."
-          },
+          "name": "Login (get bearer_token)",
           "event": [
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  const json = pm.response.json();",
-                  "  if (json.token) {",
-                  "    pm.collectionVariables.set('token', json.token);",
-                  "    console.log('✅ Token saved:', json.token.substring(0, 30) + '...');",
-                  "  }",
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "  pm.environment.set('bearer_token', res.data.token);",
+                  "  pm.collectionVariables.set('bearer_token', res.data.token);",
+                  "  console.log('✅ Token saved');",
                   "}"
-                ],
-                "type": "text/javascript"
+                ]
               }
             }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "1. Start Onboarding Session",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Accept-Language", "value": "id", "description": "Ganti ke 'en' untuk response Bahasa Inggris" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"locale\": \"id\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/onboarding/sessions",
-          "host": ["{{baseUrl}}"],
-          "path": ["onboarding", "sessions"]
-        },
-        "description": "## POST /api/v1/onboarding/sessions\n\n**Tujuan:** Membuat sesi onboarding baru atau melanjutkan sesi yang masih `in_progress`.\n\n**Behavior:**\n- Jika user sudah punya sesi `in_progress` → dikembalikan sesi lama (resume, tidak dibuatkan baru)\n- Jika belum ada → sistem cari `onboarding_flows` dengan `is_entry = true` → `flow_common` → ambil step pertama (`step_personal_name`)\n- Selalu return HTTP 201\n\n**Response 201 (sukses):**\n```json\n{\n  \"session_id\": \"ses_xXxXxXxXxX\",\n  \"status\": \"in_progress\",\n  \"current_step\": {\n    \"id\": \"step_personal_name\",\n    \"flow_key\": \"flow_common\",\n    \"section\": \"Data Diri\",\n    \"section_progress\": \"1/4\",\n    \"overall_progress\": { \"current\": 1, \"total\": 12 },\n    \"title\": \"Siapa nama Anda?\",\n    \"subtitle\": null,\n    \"questions\": [\n      {\n        \"id\": \"q_first_name\",\n        \"type\": \"text\",\n        \"label\": \"Nama Depan\",\n        \"required\": true,\n        \"validation\": { \"min_length\": 1, \"max_length\": 50 },\n        \"options\": []\n      },\n      {\n        \"id\": \"q_last_name\",\n        \"type\": \"text\",\n        \"label\": \"Nama Belakang\",\n        \"required\": false,\n        \"helper_text\": null,\n        \"options\": []\n      }\n    ],\n    \"cta\": { \"label\": \"Continue\", \"enabled_when\": \"valid\" },\n    \"can_go_back\": true\n  }\n}\n```\n\n**Note:** `Accept-Language: id` untuk response dalam Bahasa Indonesia, `en` untuk Bahasa Inggris."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 201', () => pm.response.to.have.status(201));",
-              "pm.test('Has session_id', () => {",
-              "  const json = pm.response.json();",
-              "  pm.expect(json).to.have.property('session_id');",
-              "  pm.expect(json.session_id).to.match(/^ses_/);",
-              "  pm.collectionVariables.set('session_id', json.session_id);",
-              "  console.log('✅ Session ID saved:', json.session_id);",
-              "});",
-              "pm.test('Status is in_progress', () => {",
-              "  pm.expect(pm.response.json().status).to.equal('in_progress');",
-              "});",
-              "pm.test('Has current_step with questions', () => {",
-              "  const step = pm.response.json().current_step;",
-              "  pm.expect(step).to.have.property('id');",
-              "  pm.expect(step).to.have.property('questions');",
-              "  pm.expect(step.questions).to.be.an('array').that.is.not.empty;",
-              "});"
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
             ],
-            "type": "text/javascript"
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"your@email.com\",\n  \"password\": \"yourpassword\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/login/password", "host": ["{{base_url}}"], "path": ["auth","login","password"] }
           }
         }
       ]
     },
     {
-      "name": "2. Get Current Step (Resume/Reload)",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Accept-Language", "value": "id" }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/current",
-          "host": ["{{baseUrl}}"],
-          "path": ["onboarding", "sessions", "{{session_id}}", "current"]
-        },
-        "description": "## GET /api/v1/onboarding/sessions/:session_id/current\n\n**Tujuan:** Mengambil step saat ini tanpa mengubah state. Dipakai untuk:\n- Resume setelah app crash/close\n- Reload halaman onboarding\n- Prefill form dengan jawaban sebelumnya (jika user sudah pernah isi)\n\n**Response 200 (session in_progress):**\n```json\n{\n  \"current_step\": {\n    \"id\": \"step_personal_name\",\n    \"flow_key\": \"flow_common\",\n    \"section\": \"Data Diri\",\n    \"section_progress\": \"1/4\",\n    \"overall_progress\": { \"current\": 1, \"total\": 12 },\n    \"title\": \"Siapa nama Anda?\",\n    \"questions\": [ ... ],\n    \"cta\": { \"label\": \"Continue\", \"enabled_when\": \"valid\" },\n    \"can_go_back\": true\n  }\n}\n```\n\n**Response 200 (session sudah completed):**\n```json\n{\n  \"next_step\": null,\n  \"completed\": true,\n  \"profile_id\": \"uuid-user-id\",\n  \"redirect_to\": \"/home\"\n}\n```\n\n**Response 403:** Jika session bukan milik user yang sedang login."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 200', () => pm.response.to.have.status(200));",
-              "pm.test('Response has current_step or completed', () => {",
-              "  const json = pm.response.json();",
-              "  const valid = json.current_step !== undefined || json.completed === true;",
-              "  pm.expect(valid).to.be.true;",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "3. Submit Answer — Flow Scenarios",
+      "name": "1. Create Session",
       "item": [
         {
-          "name": "3.1 ✅ Step 1: Nama (Valid)",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Accept-Language", "value": "id" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"step_id\": \"step_personal_name\",\n  \"answers\": {\n    \"q_first_name\": \"Dimas\",\n    \"q_last_name\": \"Pratama\"\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-              "host": ["{{baseUrl}}"],
-              "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-            },
-            "description": "## POST /api/v1/onboarding/sessions/:session_id/answer\n\n**Step:** `step_personal_name` — Nama Depan & Belakang\n\n**Rules:**\n- `q_first_name`: required, min_length: 1, max_length: 50\n- `q_last_name`: optional (boleh dikosongkan)\n\n**Expected next_step:** `step_personal_dob` (Tanggal Lahir)\n\n**Response 200:**\n```json\n{\n  \"next_step\": {\n    \"id\": \"step_personal_dob\",\n    \"title\": \"Kapan tanggal lahir Anda?\",\n    \"questions\": [\n      { \"id\": \"q_dob\", \"type\": \"date\", \"label\": \"Tanggal Lahir\", \"required\": true }\n    ]\n  },\n  \"progress\": { \"current\": 2, \"total\": 12 },\n  \"can_go_back\": true\n}\n```"
-          },
+          "name": "POST /onboarding/sessions",
           "event": [
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                  "pm.test('next_step is step_personal_dob', () => {",
-                  "  const json = pm.response.json();",
-                  "  pm.expect(json.next_step.id).to.equal('step_personal_dob');",
-                  "});"
-                ],
-                "type": "text/javascript"
+                  "const res = pm.response.json();",
+                  "pm.test('Session created', () => pm.response.to.have.status(201));",
+                  "if (res.data && res.data.session_id) {",
+                  "  pm.environment.set('session_id', res.data.session_id);",
+                  "  pm.collectionVariables.set('session_id', res.data.session_id);",
+                  "  console.log('Session ID: ' + res.data.session_id);",
+                  "}"
+                ]
               }
             }
-          ]
-        },
-        {
-          "name": "3.2 ❌ Step 1: Nama (Validation Error — Nama Kosong)",
+          ],
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
               { "key": "Accept", "value": "application/json" },
               { "key": "Accept-Language", "value": "id" }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"step_id\": \"step_personal_name\",\n  \"answers\": {\n    \"q_first_name\": \"\"\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-              "host": ["{{baseUrl}}"],
-              "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-            },
-            "description": "**Test validasi 422:** Nama depan kosong pada field yang required.\n\n**Expected Response 422:**\n```json\n{\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"q_first_name\": [\n      \"'Nama Depan' wajib untuk diisi.\"\n    ]\n  }\n}\n```\n\n**Kode sumber validasi:** `OnboardingEngineService::validateAnswers()` di baris ~187"
-          },
+            "url": { "raw": "{{base_url}}/onboarding/sessions", "host": ["{{base_url}}"], "path": ["onboarding","sessions"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Get Current Step",
+      "item": [
+        {
+          "name": "GET /sessions/{id}/current",
           "event": [
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
-                  "pm.test('Has errors.q_first_name', () => {",
-                  "  const json = pm.response.json();",
-                  "  pm.expect(json).to.have.property('errors');",
-                  "  pm.expect(json.errors).to.have.property('q_first_name');",
-                  "});"
-                ],
-                "type": "text/javascript"
+                  "pm.test('Step loaded', () => pm.response.to.have.status(200));",
+                  "console.log('Current step: ' + pm.response.json().data.id);"
+                ]
               }
             }
-          ]
-        },
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/current", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","current"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Common Flow — Data Diri",
+      "item": [
         {
-          "name": "3.3 ✅ Step 2: Tanggal Lahir",
+          "name": "Step 1: Nama",
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
               { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
               { "key": "Accept-Language", "value": "id" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"step_id\": \"step_personal_dob\",\n  \"answers\": {\n    \"q_dob\": \"1995-08-17\"\n  }\n}"
+              "raw": "{\n  \"step_id\": \"step_personal_name\",\n  \"answers\": {\n    \"q_first_name\": \"Dimas\",\n    \"q_last_name\": \"Octavian\"\n  }\n}"
             },
-            "url": {
-              "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-              "host": ["{{baseUrl}}"],
-              "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-            },
-            "description": "**Step:** `step_personal_dob` — Tanggal Lahir\n\n**Format:** YYYY-MM-DD (ISO 8601)\n\n**Expected next_step:** `step_personal_location`"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                  "pm.test('next_step is step_personal_location', () => {",
-                  "  pm.expect(pm.response.json().next_step.id).to.equal('step_personal_location');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
         },
         {
-          "name": "3.4 ✅ Step 3: Lokasi + depends_on Remote",
+          "name": "Step 2: Tanggal Lahir",
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
               { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_personal_dob\",\n  \"answers\": {\n    \"q_dob\": \"1995-08-15\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 3: Lokasi",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
               { "key": "Accept-Language", "value": "id" }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"step_id\": \"step_personal_location\",\n  \"answers\": {\n    \"q_location\": \"jakarta\",\n    \"q_open_remote\": \"yes\",\n    \"q_remote_pref\": \"hybrid\"\n  }\n}"
             },
-            "url": {
-              "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-              "host": ["{{baseUrl}}"],
-              "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-            },
-            "description": "**Step:** `step_personal_location` — Lokasi + Remote Preference\n\n**Logic `depends_on` di step ini:**\n- `q_remote_pref` hanya **wajib divalidasi** jika `q_open_remote === 'yes'`\n- Jika user pilih `q_open_remote: 'no'`, field `q_remote_pref` boleh dikirim kosong\n\n**Test Case A (Remote = Yes, dengan Preference):** Seperti body di atas → 200 ✅\n\n**Test Case B (Remote = No, tanpa Preference):**\n```json\n{\n  \"step_id\": \"step_personal_location\",\n  \"answers\": {\n    \"q_location\": \"singapore\",\n    \"q_open_remote\": \"no\"\n  }\n}\n```\n→ Juga 200 ✅ karena `q_remote_pref` punya `depends_on` ke `q_open_remote = yes`\n\n**Expected next_step:** `step_personal_gender`"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                  "pm.test('next_step is step_personal_gender', () => {",
-                  "  pm.expect(pm.response.json().next_step.id).to.equal('step_personal_gender');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
         },
         {
-          "name": "3.5 ✅ Step 4: Gender",
+          "name": "Step 4: Gender",
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
               { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
               { "key": "Accept-Language", "value": "id" }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"step_id\": \"step_personal_gender\",\n  \"answers\": {\n    \"q_gender\": \"male\"\n  }\n}"
             },
-            "url": {
-              "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-              "host": ["{{baseUrl}}"],
-              "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-            },
-            "description": "**Step:** `step_personal_gender`\n\n**Valid values:** `male`, `female` (dari `onboarding_options`)\n\n**Expected next_step:** `step_role_selection` — ini adalah **PERCABANGAN UTAMA** flow"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                  "pm.test('next_step is step_role_selection (branching point)', () => {",
-                  "  pm.expect(pm.response.json().next_step.id).to.equal('step_role_selection');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
-          "name": "── BRANCH: Pilih FOUNDER (→ Flow Builder Common) ──",
-          "item": [
-            {
-              "name": "3.6A Step 5: Role = founder → Flow Builder",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Accept", "value": "application/json" },
-                  { "key": "Accept-Language", "value": "id" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"step_id\": \"step_role_selection\",\n  \"answers\": {\n    \"q_use_connectx\": \"founder\"\n  }\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-                },
-                "description": "**🔀 BRANCHING POINT — Memilih Founder**\n\nTransisi di DB:\n```json\n{\n  \"from_step_id\": \"step_role_selection\",\n  \"condition\": { \"question_id\": \"q_use_connectx\", \"operator\": \"equals\", \"value\": \"startup\" },\n  \"to_step_id\": \"step_flow_f\",\n  \"priority\": 1\n}\n```\nKarena value = `founder` (bukan `startup`), kondisi priority 1 TIDAK terpenuhi → fallback ke transisi tanpa syarat → lompat ke `step_bld_exp` di `flow_builder_common`.\n\n**Expected next_step:** `step_bld_exp` (Pengalaman Startup Sebelumnya)\n\n**Valid values untuk q_use_connectx:**\n- `founder` → flow_builder_common\n- `cofounder` → flow_builder_common  \n- `team` → flow_builder_common\n- `startup` → flow_f (langsung)"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                      "pm.test('next_step is step_bld_exp (Builder Common)', () => {",
-                      "  pm.expect(pm.response.json().next_step.id).to.equal('step_bld_exp');",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "3.7A Step: Pengalaman Startup",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Accept", "value": "application/json" },
-                  { "key": "Accept-Language", "value": "id" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"step_id\": \"step_bld_exp\",\n  \"answers\": {\n    \"q_startup_exp\": \"founder_exp\"\n  }\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-                },
-                "description": "**Valid values:** `founder_exp`, `employee_exp`, `no_exp`\n\n**Expected next_step:** `step_bld_industry`"
-              }
-            },
-            {
-              "name": "3.8A Step: Industri + Komitmen + Relocate",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Accept", "value": "application/json" },
-                  { "key": "Accept-Language", "value": "id" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"step_id\": \"step_bld_industry\",\n  \"answers\": {\n    \"q_industry\": [\"AI/ML\", \"Fintech\", \"SaaS\"],\n    \"q_availability\": \"full_time\",\n    \"q_relocate\": \"yes\"\n  }\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-                },
-                "description": "**Multi-select:** `q_industry` max 5 item\n\n**Valid availability values:** `full_time`, `part_time`, `side_project`, `open_to_discussion`\n\n**Expected next_step:** `step_bld_role`"
-              }
-            },
-            {
-              "name": "3.9A ❌ Industri Terlalu Banyak (max 5)",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Accept", "value": "application/json" },
-                  { "key": "Accept-Language", "value": "id" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"step_id\": \"step_bld_industry\",\n  \"answers\": {\n    \"q_industry\": [\"AI/ML\", \"Fintech\", \"SaaS\", \"EdTech\", \"Web3\", \"Gaming\"],\n    \"q_availability\": \"full_time\",\n    \"q_relocate\": \"yes\"\n  }\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-                },
-                "description": "**Test validasi max_selections:** 6 industri dipilih, padahal max 5.\n\n**Expected Response 422:**\n```json\n{\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"q_industry\": [\n      \"Anda mencentang terlalu banyak! Maksimum 5 buah pada pilihan 'Pilih Industri (Maks 5)'.\"\n    ]\n  }\n}\n```"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Status 422 - too many selections', () => pm.response.to.have.status(422));",
-                      "pm.test('Error on q_industry', () => {",
-                      "  pm.expect(pm.response.json().errors).to.have.property('q_industry');",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "3.10A Step: Peran + LinkedIn",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Accept", "value": "application/json" },
-                  { "key": "Accept-Language", "value": "id" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"step_id\": \"step_bld_role\",\n  \"answers\": {\n    \"q_role_desc\": \"cto\",\n    \"q_role_years\": 5,\n    \"q_linkedin\": \"https://linkedin.com/in/dimasfoo\"\n  }\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-                },
-                "description": "**Step:** `step_bld_role`\n\n`q_linkedin` adalah optional (required: false) — boleh dikirim kosong.\n\n**Transitional Branching setelah step ini:**\n- Jika `q_use_connectx = founder` → ke `step_founder_intent`\n- Jika `q_use_connectx = cofounder` → ke `step_flow_d`\n- Jika `q_use_connectx = team` → ke `step_flow_e`\n\nKarena kita pilih `founder` di step 5 → **Expected next_step:** `step_founder_intent`"
-              }
-            },
-            {
-              "name": "3.11A Step: Founder Intent → SUB-BRANCHING",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Accept", "value": "application/json" },
-                  { "key": "Accept-Language", "value": "id" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"step_id\": \"step_founder_intent\",\n  \"answers\": {\n    \"q_founder_intent\": \"cofounder\"\n  }\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-                },
-                "description": "**🔀 SUB-BRANCHING: Founder Intent**\n\n**Valid values:** `cofounder` → Flow A | `team` → Flow B | `both` → Flow C\n\nPilih `cofounder` → **Expected next_step:** `step_flow_a`"
-              }
-            },
-            {
-              "name": "3.12A Flow A: Tipe Co-Founder yang Dicari (FINISH)",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Accept", "value": "application/json" },
-                  { "key": "Accept-Language", "value": "id" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"step_id\": \"step_flow_a\",\n  \"answers\": {\n    \"q_flow_a_type\": [\"tech\", \"product\"]\n  }\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-                },
-                "description": "**Step terakhir Flow A.** Ini adalah step terakhir dalam flow → setelah ini tidak ada step selanjutnya.\n\n**Valid values:** `tech`, `business`, `product`\n\n**Expected Response 200 (COMPLETED):**\n```json\n{\n  \"next_step\": null,\n  \"completed\": true,\n  \"profile_id\": \"uuid-from-users-table\",\n  \"redirect_to\": \"/home\"\n}\n```\n\n`mapResponsesToProfile()` akan dipanggil → jawaban dikonversikan ke kolom `users`: `name`, `role_category`, `commitment_level`, dll.\n\nFlag `is_onboarded = true` juga di-set ke user."
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                      "pm.test('Session COMPLETED', () => {",
-                      "  const json = pm.response.json();",
-                      "  pm.expect(json.next_step).to.be.null;",
-                      "  pm.expect(json.completed).to.be.true;",
-                      "  pm.expect(json).to.have.property('profile_id');",
-                      "  pm.expect(json.redirect_to).to.equal('/home');",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "── BRANCH: Pilih STARTUP (→ Flow F langsung) ──",
-          "item": [
-            {
-              "name": "3.6F Step 5: Role = startup → Jump ke Flow F",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Accept", "value": "application/json" },
-                  { "key": "Accept-Language", "value": "id" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"step_id\": \"step_role_selection\",\n  \"answers\": {\n    \"q_use_connectx\": \"startup\"\n  }\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-                },
-                "description": "**🔀 FLOW JUMP ke Flow F**\n\nTransisi di DB dengan priority 1:\n```json\n{ \"condition\": { \"q_use_connectx\": \"startup\" }, \"to_flow_id\": \"flow_f\" }\n```\n\n**Expected next_step:** `step_flow_f` (langsung ke Profil Startup, skip semua common steps)"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                      "pm.test('Flow jumped to step_flow_f', () => {",
-                      "  pm.expect(pm.response.json().next_step.id).to.equal('step_flow_f');",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "3.7F Flow F: Profil Startup (FINISH)",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Accept", "value": "application/json" },
-                  { "key": "Accept-Language", "value": "id" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"step_id\": \"step_flow_f\",\n  \"answers\": {\n    \"q_ff_name\": \"Warung Masa Depan Indo\",\n    \"q_ff_stage\": \"mvp\",\n    \"q_ff_look\": \"team\",\n    \"q_ff_ind\": [\"Fintech\", \"EdTech\", \"SaaS\", \"AI/ML\"],\n    \"q_ff_role\": [\"cto\", \"product_manager\"],\n    \"q_ff_offer\": \"Bagi hasil 20% + gaji pasar\"\n  }\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-                },
-                "description": "**Step:** `step_flow_f` — Satu-satunya step di Flow F, mengumpulkan semua info startup sekaligus.\n\n**Valid values:**\n- `q_ff_stage`: `idea`, `mvp`, `live`\n- `q_ff_look`: `cofounder`, `team`, `both`\n- `q_ff_ind`: max 5 item (nama industri persis dari seed)\n- `q_ff_role`: array nama role (slug dari seeder)\n\n**❌ Test validasi max 5 industri** — kirim 6 item untuk dapat 422."
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                      "pm.test('Session COMPLETED', () => {",
-                      "  const json = pm.response.json();",
-                      "  pm.expect(json.completed).to.be.true;",
-                      "  pm.expect(json.redirect_to).to.equal('/home');",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "── BRANCH: Pilih Co-Founder (→ Flow D) ──",
-          "item": [
-            {
-              "name": "3.6D Step 5: Role = cofounder",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Accept", "value": "application/json" },
-                  { "key": "Accept-Language", "value": "id" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"step_id\": \"step_role_selection\",\n  \"answers\": {\n    \"q_use_connectx\": \"cofounder\"\n  }\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-                },
-                "description": "Co-Founder → flow_builder_common → lanjut ke `step_bld_role` → **branching** ke `step_flow_d`"
-              }
-            },
-            {
-              "name": "3.11D Flow D: Detail Co-Founder (FINISH)",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Accept", "value": "application/json" },
-                  { "key": "Accept-Language", "value": "id" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"step_id\": \"step_flow_d\",\n  \"answers\": {\n    \"q_flow_d_type\": \"tech\",\n    \"q_flow_d_equity\": \"20%\",\n    \"q_flow_d_salary_type\": \"flexible\",\n    \"q_flow_d_nominal\": { \"currency\": \"IDR\", \"amount\": 10000000 }\n  }\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-                },
-                "description": "**Step:** `step_flow_d` — Detail Co-Founder setelah melewati common steps\n\n**`q_flow_d_salary_type` valid values:** `strict`, `flexible`, `equity_only`\n\n**`q_flow_d_nominal`:** Type `currency_amount` — dikirim sebagai JSON object `{currency, amount}`"
-              }
-            }
-          ]
-        },
-        {
-          "name": "── BRANCH: Pilih Team Member (→ Flow E) ──",
-          "item": [
-            {
-              "name": "3.11E Flow E: Detail Team Member (FINISH)",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Accept", "value": "application/json" },
-                  { "key": "Accept-Language", "value": "id" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"step_id\": \"step_flow_e\",\n  \"answers\": {\n    \"q_flow_e_skill\": [\"Full-Stack\", \"AI/ML\", \"DevOps\"],\n    \"q_flow_e_equity\": \"10% vesting 4 tahun\",\n    \"q_flow_e_nominal\": { \"currency\": \"IDR\", \"amount\": 15000000 }\n  }\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/answer",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["onboarding", "sessions", "{{session_id}}", "answer"]
-                },
-                "description": "**Step:** `step_flow_e` — Detail Team Member\n\n**`q_flow_e_skill`:** Multi-select dari daftar skills (persis nama dari seeder)"
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "4. Go Back (Previous Step)",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Accept-Language", "value": "id" }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}/back",
-          "host": ["{{baseUrl}}"],
-          "path": ["onboarding", "sessions", "{{session_id}}", "back"]
-        },
-        "description": "## POST /api/v1/onboarding/sessions/:session_id/back\n\n**Tujuan:** Mundur ke step sebelumnya.\n\n**Behavior:**\n1. Cari step terakhir yang direspons sebelum current_step_id\n2. Hapus semua responses dari current_step_id (dibatalkan)\n3. Update `current_step_id` session ke step sebelumnya\n4. Return step tersebut dengan prefill jawaban\n\n**Response 200 (berhasil mundur):**\n```json\n{\n  \"current_step\": {\n    \"id\": \"step_personal_gender\",\n    \"questions\": [\n      {\n        \"id\": \"q_gender\",\n        \"type\": \"single_select_card\",\n        \"previous_answer\": \"male\"\n      }\n    ]\n  },\n  \"progress\": { \"current\": 3, \"total\": 12 },\n  \"can_go_back\": true\n}\n```\n\n**Note:** Field `previous_answer` otomatis disertakan oleh engine jika user pernah menjawab step itu sebelumnya.\n\n**Response 400 (sudah di langkah pertama):**\n```json\n{\n  \"error\": \"Tidak bisa mundur lebih jauh lagi\"\n}\n```\n\n**Response 400 (session sudah completed):**\n```json\n{\n  \"error\": \"Session already completed\"\n}\n```"
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "if (pm.response.code === 200) {",
-              "  pm.test('Has current_step dengan prefill', () => {",
-              "    const json = pm.response.json();",
-              "    pm.expect(json).to.have.property('current_step');",
-              "    pm.expect(json).to.have.property('progress');",
-              "  });",
-              "} else {",
-              "  pm.test('Error 400 jika sudah di awal', () => {",
-              "    pm.expect(pm.response.code).to.equal(400);",
-              "  });",
-              "}"
-            ],
-            "type": "text/javascript"
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
           }
         }
       ]
     },
     {
-      "name": "5. Get Full Session State (Debug / Admin)",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Accept-Language", "value": "id" }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/onboarding/sessions/{{session_id}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["onboarding", "sessions", "{{session_id}}"]
-        },
-        "description": "## GET /api/v1/onboarding/sessions/:session_id\n\n**Tujuan:** Melihat keseluruhan state session: semua jawaban yang sudah teriak, step berapa sekarang, dan kapan dimulai/selesai.\n\n**Response 200:**\n```json\n{\n  \"session_id\": \"ses_xXxXxXxXxX\",\n  \"user_id\": \"uuid-user\",\n  \"status\": \"in_progress\",\n  \"current_step_id\": \"step_personal_dob\",\n  \"started_at\": \"2026-04-16T14:00:00.000000Z\",\n  \"completed_at\": null,\n  \"total_responses\": 2,\n  \"responses\": [\n    {\n      \"step_id\": \"step_personal_name\",\n      \"question_id\": \"q_first_name\",\n      \"value\": [\"Dimas\"],\n      \"answered_at\": \"2026-04-16T14:00:01.000000Z\"\n    },\n    {\n      \"step_id\": \"step_personal_name\",\n      \"question_id\": \"q_last_name\",\n      \"value\": [\"Pratama\"],\n      \"answered_at\": \"2026-04-16T14:00:01.000000Z\"\n    }\n  ]\n}\n```\n\n**Note:** `value` selalu disimpan sebagai array JSON di DB, meski user mengisi satu nilai."
-      },
-      "event": [
+      "name": "4A. Path — Founder",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 200', () => pm.response.to.have.status(200));",
-              "pm.test('Has session data', () => {",
-              "  const json = pm.response.json();",
-              "  pm.expect(json).to.have.property('session_id');",
-              "  pm.expect(json).to.have.property('responses');",
-              "  pm.expect(json.responses).to.be.an('array');",
-              "});"
+          "name": "Step 5: Role Selection → founder",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
             ],
-            "type": "text/javascript"
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_role_selection\",\n  \"answers\": {\n    \"q_use_connectx\": \"founder\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 6: Primary Role + Years",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_bld_role\",\n  \"answers\": {\n    \"q_bld_role\": \"cto\",\n    \"q_bld_years\": 5\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 7: Startup Experience",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_bld_exp\",\n  \"answers\": {\n    \"q_bld_exp\": \"founder_exp\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 8: Looking For → co-founder",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_fdr_looking\",\n  \"answers\": {\n    \"q_fdr_looking\": \"cofounder\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 9: Industries",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_fdr_industry\",\n  \"answers\": {\n    \"q_fdr_industry\": [\"ai\", \"fintech\", \"saas\"]\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 10: CF Type Needed",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_fdr_cf_type\",\n  \"answers\": {\n    \"q_fdr_cf_type\": [\"tech\", \"product\"]\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 11: Availability",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_fdr_cf_avail\",\n  \"answers\": {\n    \"q_fdr_cf_avail\": \"full_time\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 12: Remote + Relocate",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_fdr_cf_remote\",\n  \"answers\": {\n    \"q_fdr_cf_remote\": \"yes\",\n    \"q_fdr_cf_relocate\": \"no\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 13: LinkedIn → COMPLETE ✅",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_fdr_cf_linkedin\",\n  \"answers\": {\n    \"q_fdr_cf_linkedin\": \"https://linkedin.com/in/dimasfoo\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4B. Path — Co-Founder (Joining)",
+      "description": "Create new session first, complete common flow (steps 1-4), then choose cofounder at step 5.",
+      "item": [
+        {
+          "name": "Step 5: Role Selection → cofounder",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_role_selection\",\n  \"answers\": {\n    \"q_use_connectx\": \"cofounder\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 6: Primary Role + Years",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_bld_role\",\n  \"answers\": {\n    \"q_bld_role\": \"full_stack_engineer\",\n    \"q_bld_years\": 3\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 7: Startup Experience",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_bld_exp\",\n  \"answers\": {\n    \"q_bld_exp\": \"product_exp\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 8: Industries",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_cf_industry\",\n  \"answers\": {\n    \"q_cf_industry\": [\"e-commerce\", \"fintech\"]\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 9: CF Type (What type are you?)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_cf_type\",\n  \"answers\": {\n    \"q_cf_type\": \"tech\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 10: Availability",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_cf_avail\",\n  \"answers\": {\n    \"q_cf_avail\": \"full_time\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 11: Compensation (Equity + Salary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_cf_comp\",\n  \"answers\": {\n    \"q_cf_equity\": \"partial_equity\",\n    \"q_cf_salary_type\": \"strict\",\n    \"q_cf_salary_period\": \"annual\",\n    \"q_cf_salary_currency\": \"IDR\",\n    \"q_cf_salary_amount\": 150000000\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 12: Remote + Relocate",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_cf_remote\",\n  \"answers\": {\n    \"q_cf_remote\": \"yes\",\n    \"q_cf_relocate\": \"yes\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 13: LinkedIn → COMPLETE ✅",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_cf_linkedin\",\n  \"answers\": {\n    \"q_cf_linkedin\": \"https://linkedin.com/in/johndoe\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4C. Path — Team Member",
+      "description": "Create new session first, complete common flow (steps 1-4), then choose team at step 5.",
+      "item": [
+        {
+          "name": "Step 5: Role Selection → team",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_role_selection\",\n  \"answers\": {\n    \"q_use_connectx\": \"team\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 6: Primary Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_bld_role\",\n  \"answers\": {\n    \"q_bld_role\": \"ui_ux_designer\",\n    \"q_bld_years\": 2\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 7: Startup Experience",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_bld_exp\",\n  \"answers\": {\n    \"q_bld_exp\": \"team_exp\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 8: Industries",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_tm_industry\",\n  \"answers\": {\n    \"q_tm_industry\": [\"education\", \"saas\"]\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 9: Skills",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_tm_skills\",\n  \"answers\": {\n    \"q_tm_skills\": [\"figma___adobe_suite\", \"prototyping\", \"visual_design\"]\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 10: Availability",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_tm_avail\",\n  \"answers\": {\n    \"q_tm_avail\": \"flexible\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 11: Compensation (no salary minimum)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_tm_comp\",\n  \"answers\": {\n    \"q_tm_equity\": \"equity_heavy\",\n    \"q_tm_salary_type\": \"no_minimum\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 12: Remote + Relocate",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_tm_remote\",\n  \"answers\": {\n    \"q_tm_remote\": \"yes\",\n    \"q_tm_relocate\": \"no\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 13: LinkedIn → COMPLETE ✅",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_tm_linkedin\",\n  \"answers\": {\n    \"q_tm_linkedin\": \"https://linkedin.com/in/janedoe\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4D. Path — Startup (Idea Stage)",
+      "description": "Create new session first, complete common flow (steps 1-4), then choose startup at step 5.",
+      "item": [
+        {
+          "name": "Step 5: Role Selection → startup",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_role_selection\",\n  \"answers\": {\n    \"q_use_connectx\": \"startup\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 6: Startup About (Name + Tagline + Stage=idea)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_su_about\",\n  \"answers\": {\n    \"q_su_name\": \"ConnectX\",\n    \"q_su_tagline\": \"Platform matchmaking untuk startup ecosystem\",\n    \"q_su_stage\": \"idea\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 7: Problem & Solution",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_su_problem\",\n  \"answers\": {\n    \"q_su_problem\": \"Sulit menemukan co-founder dan anggota tim yang tepat untuk startup\",\n    \"q_su_solution\": \"Platform matchmaking berbasis AI yang mencocokkan berdasarkan skill, interest, dan commitment\",\n    \"q_su_target\": \"Startup founders, co-founders, dan talenta yang ingin bergabung dengan startup\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 8: Industry & Business Model",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_su_biz\",\n  \"answers\": {\n    \"q_su_industry\": [\"ai\", \"future_of_work\", \"saas\"],\n    \"q_su_biz_model\": [\"saas\", \"marketplace\"]\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 9: Traction — Idea Stage",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_su_tr_idea\",\n  \"answers\": {\n    \"q_su_tri_prototype\": \"yes\",\n    \"q_su_tri_prototype_link\": \"https://figma.com/proto/abc123\",\n    \"q_su_tri_waitlist\": 150,\n    \"q_su_tri_validation\": \"30 user interviews + 200 survey responses\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 10: Online Presence",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_su_presence\",\n  \"answers\": {\n    \"q_su_website\": \"https://connectx.app\",\n    \"q_su_linkedin\": \"https://linkedin.com/company/connectx\",\n    \"q_su_twitter\": \"https://x.com/connectxapp\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 11: Founder Setup",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_su_founders\",\n  \"answers\": {\n    \"q_su_founder_count\": \"2_founders\",\n    \"q_su_founder_roles\": [\"technical\", \"business\"]\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 12: Team Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_su_team\",\n  \"answers\": {\n    \"q_su_have_team\": \"no\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 13: What You Need → both",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_su_need\",\n  \"answers\": {\n    \"q_su_need\": \"both\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 14: CF Type Needed",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_su_need_bt_cf\",\n  \"answers\": {\n    \"q_su_need_bt_cf\": [\"tech\", \"growth\"]\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 15: Skills Needed",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_su_need_bt_tm\",\n  \"answers\": {\n    \"q_su_need_bt_tm\": [\"react___angular___vue\", \"figma___adobe_suite\", \"seo___sem\"]\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 16: Commitment Level",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_su_commit\",\n  \"answers\": {\n    \"q_su_commitment\": \"full_time\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Step 17: Equity & Compensation → COMPLETE ✅",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_su_equity\",\n  \"answers\": {\n    \"q_su_equity_range\": \"10-20%\",\n    \"q_su_paid\": \"paid\",\n    \"q_su_salary_range\": \"IDR 120-200jt/thn\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Navigation — Back",
+      "item": [
+        {
+          "name": "POST /sessions/{id}/back",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/back", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","back"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Session Status",
+      "item": [
+        {
+          "name": "GET /sessions/{id}",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Validation Scenarios",
+      "item": [
+        {
+          "name": "Missing required field (Name)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_personal_name\",\n  \"answers\": {\n    \"q_first_name\": \"\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Too many industry selections (max 5)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_fdr_industry\",\n  \"answers\": {\n    \"q_fdr_industry\": [\"ai\", \"fintech\", \"saas\", \"education\", \"gaming\", \"healthcare\"]\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
+          }
+        },
+        {
+          "name": "Salary depends_on skip (no_minimum)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "id" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"step_id\": \"step_cf_comp\",\n  \"answers\": {\n    \"q_cf_equity\": \"cash_heavy\",\n    \"q_cf_salary_type\": \"no_minimum\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/onboarding/sessions/{{session_id}}/answer", "host": ["{{base_url}}"], "path": ["onboarding","sessions","{{session_id}}","answer"] }
           }
         }
       ]

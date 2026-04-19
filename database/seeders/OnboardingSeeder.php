@@ -8,363 +8,890 @@ use Carbon\Carbon;
 
 class OnboardingSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        // Reset data menggunakan TRUNCATE CASCADE untuk menjamin kebersihan database
         DB::statement('TRUNCATE TABLE onboarding_flows RESTART IDENTITY CASCADE');
-
         $now = Carbon::now();
 
-        // ═══════════════════════════════════════════════════════
-        // 1. FLOWS
-        // ═══════════════════════════════════════════════════════
-        DB::table('onboarding_flows')->insert([
-            ['id' => 'flow_common', 'name' => 'Data Diri Umum', 'is_entry' => true, 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'flow_builder_common', 'name' => 'Langkah Umum Builder', 'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'flow_a', 'name' => 'Flow A (Founder -> Mencari Co-Founder)', 'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'flow_b', 'name' => 'Flow B (Founder -> Mencari Tim)', 'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'flow_c', 'name' => 'Flow C (Founder -> Mencari Keduanya)', 'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'flow_d', 'name' => 'Flow D (Co-Founder yang Ingin Bergabung)', 'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'flow_e', 'name' => 'Flow E (Anggota Tim yang Ingin Bergabung)', 'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 'flow_f', 'name' => 'Flow F (Profil Startup)', 'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
-        ]);
+        // ════════════════════════════════════════════════════════════════
+        // MASTER DATA LISTS
+        // ════════════════════════════════════════════════════════════════
 
-        // ═══════════════════════════════════════════════════════
-        // INSERT ALL STEPS FOR ALL FLOWS (Many were missing!)
-        // ═══════════════════════════════════════════════════════
-        DB::table('onboarding_steps')->insert([
-            // Common Flow
-            ['id' => 'step_personal_name', 'flow_id' => 'flow_common', 'order_index' => 1, 'section' => 'Data Diri', 'title' => json_encode(['id' => 'Siapa nama Anda?', 'en' => 'What is your name?']), 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'step_personal_dob', 'flow_id' => 'flow_common', 'order_index' => 2, 'section' => 'Data Diri', 'title' => json_encode(['id' => 'Kapan tanggal lahir Anda?', 'en' => 'When is your date of birth?']), 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'step_personal_location', 'flow_id' => 'flow_common', 'order_index' => 3, 'section' => 'Data Diri', 'title' => json_encode(['id' => 'Di mana lokasi Anda saat ini?', 'en' => 'Where are you currently located?']), 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'step_personal_gender', 'flow_id' => 'flow_common', 'order_index' => 4, 'section' => 'Data Diri', 'title' => json_encode(['id' => 'Jenis Kelamin', 'en' => 'Gender']), 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'step_role_selection', 'flow_id' => 'flow_common', 'order_index' => 5, 'section' => 'Tipe Akun', 'title' => json_encode(['id' => 'Bagaimana Anda ingin menggunakan ConnectX?', 'en' => 'How would you like to use ConnectX?']), 'created_at' => now(), 'updated_at' => now()],
-            
-            // Builder Common Flow
-            ['id' => 'step_bld_exp', 'flow_id' => 'flow_builder_common', 'order_index' => 1, 'section' => 'Profil Builder', 'title' => json_encode(['id' => 'Pengalaman startup sebelumnya?', 'en' => 'Previous startup experience?']), 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'step_bld_industry', 'flow_id' => 'flow_builder_common', 'order_index' => 2, 'section' => 'Minat & Ketersediaan', 'title' => json_encode(['id' => 'Industri yang diminati?', 'en' => 'Interested industries?']), 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'step_bld_role', 'flow_id' => 'flow_builder_common', 'order_index' => 3, 'section' => 'Peran Pekerjaan', 'title' => json_encode(['id' => 'Apa peran/jabatan utama Anda?', 'en' => 'What is your primary role?']), 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'step_founder_intent', 'flow_id' => 'flow_builder_common', 'order_index' => 4, 'section' => 'Tujuan Founder', 'title' => json_encode(['id' => 'Apa tujuan Anda merekrut di platform ini?', 'en' => 'What is your intention for recruiting on this platform?']), 'created_at' => now(), 'updated_at' => now()],
-            
-            // Branching Flows
-            ['id' => 'step_flow_a', 'flow_id' => 'flow_a', 'order_index' => 1, 'section' => 'Mencari Co-Founder', 'title' => json_encode(['id' => 'Tipe Co-Founder yang Anda cari?', 'en' => 'What kind of Co-Founder are you looking for?']), 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'step_flow_b', 'flow_id' => 'flow_b', 'order_index' => 1, 'section' => 'Mencari Tim', 'title' => json_encode(['id' => 'Kriteria Tim yang Anda cari?', 'en' => 'What team criteria are you looking for?']), 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'step_flow_c', 'flow_id' => 'flow_c', 'order_index' => 1, 'section' => 'Mencari Co-Founder & Tim', 'title' => json_encode(['id' => 'Apa yang Anda cari?', 'en' => 'What are you looking for?']), 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'step_flow_d', 'flow_id' => 'flow_d', 'order_index' => 1, 'section' => 'Menjadi Co-Founder', 'title' => json_encode(['id' => 'Detail Co-Founder (Anda)', 'en' => 'Co-Founder Details (You)']), 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'step_flow_e', 'flow_id' => 'flow_e', 'order_index' => 1, 'section' => 'Menjadi Anggota Tim', 'title' => json_encode(['id' => 'Detail Keahlian (Anda)', 'en' => 'Skillset Details (You)']), 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 'step_flow_f', 'flow_id' => 'flow_f', 'order_index' => 1, 'section' => 'Profil Startup', 'title' => json_encode(['id' => 'Mohon Lengkapi Profil Startup Anda', 'en' => 'Please Complete Your Startup Profile']), 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        $masterRoles = [
+            'Founders & Leadership' => [
+                'Founder','Co-Founder','CEO','COO','CTO',
+                'CPO (Chief Product Officer)','CMO (Chief Marketing Officer)',
+                'CFO','Managing Director','General Manager',
+            ],
+            'Engineering - Software' => [
+                'Frontend Engineer','Backend Engineer','Full Stack Engineer',
+                'Mobile Engineer (iOS/Android)','Web Developer',
+            ],
+            'Engineering - Specialized' => [
+                'Machine Learning Engineer','AI Engineer','Prompt Engineer',
+                'Data Engineer','Embedded Engineer','Systems Engineer',
+                'DevOps Engineer','Blockchain Engineer','Security Engineer',
+            ],
+            'Engineering - Hardware' => [
+                'Hardware Engineer','Mechanical Engineer','Electrical Engineer',
+            ],
+            'Product & Strategy' => [
+                'Product Manager','Product Owner','Technical Product Manager',
+                'Product Designer','UX Researcher','Business Analyst','Strategy Associate',
+            ],
+            'Design & Creative' => [
+                'UI Designer','UX Designer','UI/UX Designer','Graphic Designer',
+                'Brand Designer','Motion Designer','3D Designer',
+                'Creative Director','Content Designer',
+            ],
+            'Marketing & Growth' => [
+                'Growth Marketer','Digital Marketer','Performance Marketer',
+                'Social Media Manager','Content Creator','Content Strategist',
+                'SEO Specialist','Copywriter','Brand Manager','Community Manager',
+                'Influencer Marketing Manager',
+            ],
+            'Sales & Business Dev' => [
+                'Sales Executive','Account Executive','Business Development Manager',
+                'Partnerships Manager','Account Manager','Customer Success Manager',
+                'Revenue Operations',
+            ],
+            'Data & Analytics' => [
+                'Data Analyst','Data Scientist',
+                'Business Intelligence Analyst','Quantitative Analyst',
+            ],
+            'Operations' => [
+                'Operations Manager','Project Manager','Program Manager',
+                'Supply Chain Manager','Logistics Manager',
+            ],
+            'Finance & Legal' => [
+                'Financial Analyst','Accountant','Finance Manager',
+                'Investment Analyst','Venture Capital Associate',
+                'Legal Counsel','Compliance Officer',
+            ],
+            'People & HR' => [
+                'HR Manager','Talent Acquisition','Recruiter',
+                'People Operations','HR Business Partner',
+            ],
+            'Web3 / Crypto' => [
+                'Smart Contract Developer','Web3 Developer','Crypto Trader',
+                'Tokenomics Analyst','Community Lead (Web3)','DAO Contributor',
+            ],
+            'Creator & Non-Traditional' => [
+                'Creator / Influencer','Indie Hacker','No-Code Builder',
+                'Freelancer','Consultant','Advisor / Mentor',
+            ],
+        ];
 
-        $q = function ($id, $step_id, $order, $type, $labelId, $labelEn, $required = true, $validation = null, $depends_on = null) use ($now) {
-            return [
-                'id' => $id, 'step_id' => $step_id, 'order_index' => $order,
-                'type' => $type, 'label' => json_encode(['id' => $labelId, 'en' => $labelEn]), 'required' => $required,
-                'validation' => $validation, 'depends_on' => $depends_on,
-                'created_at' => $now, 'updated_at' => $now,
-            ];
+        $masterIndustries = [
+            'AI','AR/VR','Advertising','AgTech','Analytics','AudioTech','AutoTech',
+            'Biotech','ClimateTech/CleanTech','Cloud Infrastructure','ConstructionTech',
+            'Cosmetics','Creator/Passion Economy','Data Services','DeepTech','Developer Tools',
+            'Direct-to-Consumer (DTC)','E-commerce','Education','EnergyTech','Enterprise',
+            'Entertainment & Sports','Fashion','FinTech','Food and Beverage','Future of Work',
+            'Gaming','Generative Tech/AI','Gig Economy','GovTech','Hardware','Healthcare',
+            'Human Capital/HRTech','Insurance','IoT','LegalTech','Lodging/Hospitality',
+            'Logistics','Manufacturing','MarketingTech','Marketplaces','Material Science',
+            'Media/Content','Medical Devices','Mental Health','Messaging',
+            'Parenting/Families','Payments','Pharmaceuticals','Productivity Tools',
+            'Real Estate/PropTech','Retail','Robotics','SMB Software','SaaS','Sales & CRM',
+            'Security','Semiconductors','Smart Cities/UrbanTech','Social Impact',
+            'Social Networks','Space','Supply Chain Tech','TransportationTech','Travel',
+            'Web3/Blockchain','Wellness & Fitness',
+        ];
+
+        $masterSkills = [
+            'Engineering, IT & Technical' => [
+                'React / Angular / Vue','Node.js / Java / Python / Go',
+                'API Design & Integration','System Architecture','Microservices',
+                'AWS / GCP / Azure','CI/CD & DevOps pipelines','Kubernetes / Docker',
+                'Database Design (SQL/NoSQL)','Cybersecurity','Smart Contracts (Solidity)',
+            ],
+            'Construction & Property' => [
+                'AutoCAD / SketchUp / Revit','Building Design & Planning',
+                'Interior Styling & Space Planning','Construction Management',
+                'Cost Estimation & Budgeting','Site Supervision','Property Development Strategy',
+            ],
+            'F&B (Food & Beverage)' => [
+                'Menu Development','Food Costing','Kitchen Operations',
+                'Food Safety & Hygiene','Supply Chain (ingredients sourcing)',
+                'Restaurant Branding','Customer Experience',
+            ],
+            'Design & Creative' => [
+                'Figma / Adobe Suite','Branding & Identity','Prototyping',
+                'Visual Design','Motion Graphics','3D Rendering','Fashion Design & Production',
+            ],
+            'Marketing & Growth' => [
+                'Paid Ads (Meta, Google, TikTok)','SEO / SEM','Copywriting',
+                'Social Media Growth','Influencer Marketing','Email Marketing',
+                'Analytics (GA, Mixpanel)','Campaign Strategy',
+            ],
+            'Sales & Partnerships' => [
+                'Lead Generation','Sales Closing','Negotiation','CRM Tools',
+                'B2B / B2C Sales','Deal Structuring','Client Relationship Management',
+            ],
+            'Operations & Supply Chain' => [
+                'Process Optimization','SOP Creation','Inventory Management',
+                'Logistics & Distribution','Vendor Management','Operational Scaling',
+            ],
+            'Finance & Legal' => [
+                'Financial Modeling','Fundraising','Investor Relations',
+                'Budgeting','Accounting','Legal Structuring','Contracts & Compliance',
+            ],
+            'Data, AI & Analytics' => [
+                'Data Analysis','Python / R','Machine Learning',
+                'Data Visualization','Predictive Analytics','AI Model Development',
+            ],
+            'Media & Content' => [
+                'Video Production','Editing (Premiere, CapCut)','Storytelling',
+                'Content Strategy','Social Media Content',
+            ],
+            'HR & People' => [
+                'Hiring & Recruitment','Talent Management','Employer Branding',
+                'HR Strategy','Performance Management',
+            ],
+            'Emerging & Specialized' => [
+                'Smart Contracts','Automation Tools (Zapier, Make)',
+                'No-Code Platforms','Crypto / DeFi Systems',
+            ],
+        ];
+
+        $masterCFTypes = [
+            ['Technical Co-Founder',     'tech',         'Saya membangun produk & teknologi',           'I build the product & tech'],
+            ['Product Co-Founder',       'product',      'Saya memimpin produk dan desain',             'I lead product & design'],
+            ['Business Co-Founder',      'business',     'Saya menangani strategi dan operasional',     'I handle strategy & ops'],
+            ['Growth Co-Founder',        'growth',       'Saya menggerakkan marketing dan growth',      'I drive marketing & growth'],
+            ['AI / Data Co-Founder',     'ai_data',      'Saya membangun AI, data & intelligence',      'I build AI, data & intelligence'],
+            ['Operations Co-Founder',    'operations',   'Saya mengeksekusi dan menskalakan operasional','I execute & scale operations'],
+            ['Finance Co-Founder',       'finance',      'Saya mengelola fundraising dan keuangan',     'I manage fundraising & finance'],
+            ['Partnerships Co-Founder',  'partnerships', 'Saya membangun deal dan partnership',         'I build deals & partnerships'],
+        ];
+
+        $masterBizModels = [
+            'Digital & Software' => [
+                ['SaaS (Subscription software)','saas'],
+                ['Marketplace (2-sided platform)','marketplace'],
+                ['E-commerce (Online store)','ecommerce'],
+                ['Direct-to-Consumer (DTC brand)','dtc'],
+                ['Mobile App (freemium / paid)','mobile_app'],
+                ['API / Infrastructure (B2B tech)','api_infra'],
+            ],
+            'Financial & Transactional' => [
+                ['FinTech (payments, lending, etc.)','fintech'],
+                ['Transaction Fees (per use / commission)','transaction_fees'],
+                ['Brokerage / Commission-based','brokerage'],
+                ['Subscription + Transaction Hybrid','sub_transaction_hybrid'],
+            ],
+            'Media & Attention' => [
+                ['Advertising-based','advertising'],
+                ['Content / Media Platform','content_media'],
+                ['Creator Economy (subscriptions, tips, content)','creator_economy'],
+            ],
+            'Services & Offline' => [
+                ['Service-based (agency, consulting)','service'],
+                ['F&B (restaurant, cafe, cloud kitchen)','fnb'],
+                ['Retail (offline / omnichannel)','retail'],
+                ['Hospitality (hotel, lodging)','hospitality'],
+                ['Events / Experiences','events'],
+            ],
+            'Asset-Heavy / Industry' => [
+                ['Real Estate / Property','real_estate'],
+                ['Construction / Infrastructure','construction'],
+                ['Manufacturing','manufacturing'],
+                ['Logistics / Supply Chain','logistics'],
+                ['Energy / Climate','energy_climate'],
+            ],
+            'Emerging / Tech-Forward' => [
+                ['Web3 / Blockchain','web3'],
+                ['Token-based / Crypto economy','token_crypto'],
+                ['AI-first product','ai_first'],
+                ['DeepTech / R&D','deeptech'],
+            ],
+            'Hybrid / Other' => [
+                ['Franchise Model','franchise'],
+                ['Licensing','licensing'],
+                ['Aggregator','aggregator'],
+                ['Platform + Service hybrid','platform_service'],
+            ],
+        ];
+
+        $locations = [
+            ['Jakarta, Indonesia','jakarta','Asia Tenggara'],
+            ['Bandung, Indonesia','bandung','Asia Tenggara'],
+            ['Surabaya, Indonesia','surabaya','Asia Tenggara'],
+            ['Bali, Indonesia','bali','Asia Tenggara'],
+            ['Yogyakarta, Indonesia','yogyakarta','Asia Tenggara'],
+            ['Medan, Indonesia','medan','Asia Tenggara'],
+            ['Singapore','singapore','Asia Tenggara'],
+            ['Kuala Lumpur, Malaysia','kuala_lumpur','Asia Tenggara'],
+            ['Penang, Malaysia','penang','Asia Tenggara'],
+            ['Bangkok, Thailand','bangkok','Asia Tenggara'],
+            ['Ho Chi Minh City, Vietnam','ho_chi_minh','Asia Tenggara'],
+            ['Hanoi, Vietnam','hanoi','Asia Tenggara'],
+            ['Manila, Philippines','manila','Asia Tenggara'],
+            ['Cebu, Philippines','cebu','Asia Tenggara'],
+            ['Phnom Penh, Cambodia','phnom_penh','Asia Tenggara'],
+            ['Bangalore, India','bangalore','Asia Selatan'],
+            ['Mumbai, India','mumbai','Asia Selatan'],
+            ['Delhi, India','delhi','Asia Selatan'],
+            ['Hyderabad, India','hyderabad','Asia Selatan'],
+            ['Chennai, India','chennai','Asia Selatan'],
+            ['Pune, India','pune','Asia Selatan'],
+            ['Karachi, Pakistan','karachi','Asia Selatan'],
+            ['Colombo, Sri Lanka','colombo','Asia Selatan'],
+            ['Dhaka, Bangladesh','dhaka','Asia Selatan'],
+            ['Tokyo, Japan','tokyo','Asia Timur'],
+            ['Osaka, Japan','osaka','Asia Timur'],
+            ['Seoul, South Korea','seoul','Asia Timur'],
+            ['Beijing, China','beijing','Asia Timur'],
+            ['Shanghai, China','shanghai','Asia Timur'],
+            ['Shenzhen, China','shenzhen','Asia Timur'],
+            ['Hong Kong','hong_kong','Asia Timur'],
+            ['Taipei, Taiwan','taipei','Asia Timur'],
+            ['Dubai, UAE','dubai','Timur Tengah'],
+            ['Abu Dhabi, UAE','abu_dhabi','Timur Tengah'],
+            ['Riyadh, Saudi Arabia','riyadh','Timur Tengah'],
+            ['Tel Aviv, Israel','tel_aviv','Timur Tengah'],
+            ['Amman, Jordan','amman','Timur Tengah'],
+            ['London, UK','london','Eropa'],
+            ['Berlin, Germany','berlin','Eropa'],
+            ['Amsterdam, Netherlands','amsterdam','Eropa'],
+            ['Paris, France','paris','Eropa'],
+            ['Stockholm, Sweden','stockholm','Eropa'],
+            ['Zurich, Switzerland','zurich','Eropa'],
+            ['Lisbon, Portugal','lisbon','Eropa'],
+            ['Barcelona, Spain','barcelona','Eropa'],
+            ['Warsaw, Poland','warsaw','Eropa'],
+            ['Tallinn, Estonia','tallinn','Eropa'],
+            ['San Francisco, USA','san_francisco','Amerika'],
+            ['New York, USA','new_york','Amerika'],
+            ['Austin, USA','austin','Amerika'],
+            ['Seattle, USA','seattle','Amerika'],
+            ['Miami, USA','miami','Amerika'],
+            ['Toronto, Canada','toronto','Amerika'],
+            ['Vancouver, Canada','vancouver','Amerika'],
+            ['São Paulo, Brazil','sao_paulo','Amerika'],
+            ['Mexico City, Mexico','mexico_city','Amerika'],
+            ['Buenos Aires, Argentina','buenos_aires','Amerika'],
+            ['Lagos, Nigeria','lagos','Afrika & Oseania'],
+            ['Nairobi, Kenya','nairobi','Afrika & Oseania'],
+            ['Cairo, Egypt','cairo','Afrika & Oseania'],
+            ['Johannesburg, South Africa','johannesburg','Afrika & Oseania'],
+            ['Sydney, Australia','sydney','Afrika & Oseania'],
+            ['Melbourne, Australia','melbourne','Afrika & Oseania'],
+            ['Auckland, New Zealand','auckland','Afrika & Oseania'],
+            ['Remote (Mana Saja)','remote','Remote'],
+        ];
+
+        // ════════════════════════════════════════════════════════════════
+        // HELPER FUNCTIONS
+        // ════════════════════════════════════════════════════════════════
+
+        $jl = fn($id, $en) => json_encode(['id' => $id, 'en' => $en]);
+
+        // Generate options from flat list for a question
+        $genFlatOpts = function (string $prefix, string $qid, array $items) use ($now) {
+            $opts = [];
+            foreach ($items as $i => $item) {
+                $opts[] = [
+                    'id' => $prefix . '_' . ($i + 1),
+                    'question_id' => $qid,
+                    'order_index' => $i + 1,
+                    'label' => json_encode(['id' => $item, 'en' => $item]),
+                    'value' => \Illuminate\Support\Str::slug($item, '_'),
+                    'sub_label' => null, 'icon' => null, 'group_name' => null,
+                    'created_at' => $now, 'updated_at' => $now,
+                ];
+            }
+            return $opts;
         };
 
-        DB::table('onboarding_questions')->insert([
-            // Flow Common
-            $q('q_first_name', 'step_personal_name', 1, 'text', 'Nama Depan', 'First Name', true, json_encode(['min_length' => 1, 'max_length' => 50])),
-            $q('q_last_name', 'step_personal_name', 2, 'text', 'Nama Belakang', 'Last Name', false),
-            $q('q_dob', 'step_personal_dob', 1, 'date', 'Tanggal Lahir', 'Date of Birth'),
-            $q('q_location', 'step_personal_location', 1, 'searchable_dropdown', 'Pilih Kota/Negara', 'Select City/Country'),
-            $q('q_open_remote', 'step_personal_location', 2, 'single_select_card', 'Terbuka untuk remote?', 'Open to remote?'),
-            $q('q_remote_pref', 'step_personal_location', 3, 'dropdown', 'Preferensi Remote', 'Remote Preference', true, null, json_encode(['question_id' => 'q_open_remote', 'operator' => 'equals', 'value' => 'yes'])),
-            $q('q_gender', 'step_personal_gender', 1, 'single_select_card', 'Jenis Kelamin', 'Gender'),
-            $q('q_use_connectx', 'step_role_selection', 1, 'single_select_card', 'Pilih Tujuan Anda', 'Choose Your Goal'),
-            // Flow Builder Common
-            $q('q_startup_exp', 'step_bld_exp', 1, 'single_select_radio', 'Pilih pengalaman', 'Select experience'),
-            $q('q_industry', 'step_bld_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, json_encode(['max_selections' => 5])),
-            $q('q_availability', 'step_bld_industry', 2, 'dropdown', 'Tingkat Komitmen', 'Commitment Level'),
-            $q('q_relocate', 'step_bld_industry', 3, 'single_select_card', 'Bersedia pindah domisili (Relocate)?', 'Willing to relocate?'),
-            $q('q_role_desc', 'step_bld_role', 1, 'dropdown', 'Peran Pekerjaan Utama', 'Primary Job Role'),
-            $q('q_role_years', 'step_bld_role', 2, 'number', 'Jumlah Tahun Pengalaman', 'Years of Experience'),
-            $q('q_linkedin', 'step_bld_role', 3, 'url', 'URL LinkedIn', 'LinkedIn URL', false),
-            $q('q_founder_intent', 'step_founder_intent', 1, 'single_select_card', 'Tujuan Anda Merekrut', 'Your Recruitment Goal'),
-            // Flow A
-            $q('q_flow_a_type', 'step_flow_a', 1, 'multi_select_chip', 'Tipe Karakter Co-Founder', 'Co-Founder Character Type'),
-            // Flow B
-            $q('q_flow_b_role', 'step_flow_b', 1, 'multi_select_chip', 'Pilih Kualifikasi Pekerjaan', 'Select Job Qualifications'),
-            // Flow C
-            $q('q_flow_c_cf_type', 'step_flow_c', 1, 'multi_select_chip', 'Tipe Karakter Co-Founder', 'Co-Founder Character Type'),
-            $q('q_flow_c_tm_role', 'step_flow_c', 2, 'multi_select_chip', 'Pilih Kualifikasi Anggota Pekerjaan', 'Select Team Qualifications'),
-            // Flow D
-            $q('q_flow_d_type', 'step_flow_d', 1, 'single_select_card', 'Anda tipe co-founder yang seperti apa?', 'What kind of co-founder are you?'),
-            $q('q_flow_d_equity', 'step_flow_d', 2, 'text', 'Ekspektasi Tunai vs Ekuitas (%)', 'Cash vs Equity Expectation (%)'),
-            $q('q_flow_d_salary_type', 'step_flow_d', 3, 'dropdown', 'Jenis Gaji Minimum', 'Minimum Salary Type'),
-            $q('q_flow_d_nominal', 'step_flow_d', 4, 'currency_amount', 'Mata Uang & Nominal (IDR/USD)', 'Currency & Amount (IDR/USD)'),
-            // Flow E
-            $q('q_flow_e_skill', 'step_flow_e', 1, 'multi_select_chip', 'Apa keahlian (skillset) Anda?', 'What is your skillset?'),
-            $q('q_flow_e_equity', 'step_flow_e', 2, 'text', 'Ekspektasi Bonus/Ekuitas (Jika Ada)', 'Bonus/Equity Expectation (If Any)'),
-            $q('q_flow_e_nominal', 'step_flow_e', 3, 'currency_amount', 'Gaji Minimum Spesifik', 'Specific Minimum Salary'),
-            // Flow F
-            $q('q_ff_name', 'step_flow_f', 1, 'text', 'Nama Merk/Startup Anda', 'Your Brand/Startup Name'),
-            $q('q_ff_stage', 'step_flow_f', 2, 'dropdown', 'Tahapan Saat Ini Berada', 'Current Stage'),
-            $q('q_ff_look', 'step_flow_f', 3, 'single_select_card', 'Apa tujuan yang Anda cari di Platform Ini?', 'What goal are you looking for on this Platform?'),
-            $q('q_ff_ind', 'step_flow_f', 4, 'multi_select_chip', 'Sektor Industri Startup', 'Startup Industry Sector', true, json_encode(['max_selections' => 5])),
-            $q('q_ff_role', 'step_flow_f', 5, 'multi_select_chip', 'Tipe Co-Founder / Peran yang sedang Lowong', 'Co-Founder Type / Vacant Role'),
-            $q('q_ff_offer', 'step_flow_f', 6, 'text', 'Sistem Penawaran (Gaji/Ekuitas)', 'Offer System (Salary/Equity)'),
-        ]);
+        // Generate options from grouped list for a question
+        $genGroupedOpts = function (string $prefix, string $qid, array $groups) use ($now) {
+            $opts = [];
+            $i = 0;
+            foreach ($groups as $group => $items) {
+                foreach ($items as $item) {
+                    $i++;
+                    $opts[] = [
+                        'id' => $prefix . '_' . $i,
+                        'question_id' => $qid,
+                        'order_index' => $i,
+                        'label' => json_encode(['id' => $item, 'en' => $item]),
+                        'value' => \Illuminate\Support\Str::slug($item, '_'),
+                        'sub_label' => null, 'icon' => null, 'group_name' => $group,
+                        'created_at' => $now, 'updated_at' => $now,
+                    ];
+                }
+            }
+            return $opts;
+        };
 
-        // ═══════════════════════════════════════════════════════
-        // 4. OPTIONS — Semua opsi dikumpulkan lalu di-batch insert
-        // ═══════════════════════════════════════════════════════
-        $o = function ($id, $qid, $order, $labelId, $labelEn, $value) use ($now) {
+        // Simple option helper (no group)
+        $o = function ($id, $qid, $order, $labelId, $labelEn, $value, $subId = null, $subEn = null) use ($now) {
             return [
                 'id' => $id, 'question_id' => $qid, 'order_index' => $order,
                 'label' => json_encode(['id' => $labelId, 'en' => $labelEn]),
                 'value' => $value,
-                'group_name' => null, // Konsisten dengan $oWithGroup untuk batch insert
+                'sub_label' => ($subId && $subEn) ? json_encode(['id' => $subId, 'en' => $subEn]) : null,
+                'icon' => null, 'group_name' => null,
                 'created_at' => $now, 'updated_at' => $now,
             ];
         };
+
+        // Co-founder type options generator (reused in multiple questions)
+        $genCFOpts = function (string $prefix, string $qid) use ($masterCFTypes, $now) {
+            $opts = [];
+            foreach ($masterCFTypes as $i => [$label, $value, $subId, $subEn]) {
+                $opts[] = [
+                    'id' => $prefix . '_' . ($i + 1),
+                    'question_id' => $qid,
+                    'order_index' => $i + 1,
+                    'label' => json_encode(['id' => $label, 'en' => $label]),
+                    'value' => $value,
+                    'sub_label' => json_encode(['id' => $subId, 'en' => $subEn]),
+                    'icon' => null, 'group_name' => null,
+                    'created_at' => $now, 'updated_at' => $now,
+                ];
+            }
+            return $opts;
+        };
+
+        // ════════════════════════════════════════════════════════════════
+        // 1. FLOWS (18 Flows)
+        // ════════════════════════════════════════════════════════════════
+        DB::table('onboarding_flows')->insert([
+            // Common → Data Diri (Entry Point)
+            ['id' => 'flow_common',           'name' => 'Data Diri',                 'description' => 'Informasi dasar pengguna',          'is_entry' => true,  'created_at' => $now, 'updated_at' => $now],
+            // Builder Common (Role + Experience)
+            ['id' => 'flow_builder_common',   'name' => 'Builder - Profil',           'description' => 'Peran dan pengalaman Builder',      'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            // Founder (Looking for? + Industries)
+            ['id' => 'flow_founder',          'name' => 'Founder',                    'description' => 'Tujuan dan industri Founder',       'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            // Founder Sub-Flows
+            ['id' => 'flow_fdr_cf',           'name' => 'Founder → Cari Co-Founder',  'description' => 'Founder mencari co-founder',        'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 'flow_fdr_team',         'name' => 'Founder → Cari Team',        'description' => 'Founder mencari anggota tim',       'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 'flow_fdr_both',         'name' => 'Founder → Cari Keduanya',    'description' => 'Founder mencari CF + team',         'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            // Co-Founder Joining
+            ['id' => 'flow_cofounder',        'name' => 'Co-Founder (Bergabung)',      'description' => 'Profil co-founder yang bergabung', 'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            // Team Member Joining
+            ['id' => 'flow_team',             'name' => 'Anggota Tim (Bergabung)',     'description' => 'Profil anggota tim',               'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            // Startup Main
+            ['id' => 'flow_startup',          'name' => 'Startup',                    'description' => 'Profil startup',                    'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            // Startup Traction by Stage
+            ['id' => 'flow_su_tr_idea',       'name' => 'Traction - Idea',            'description' => 'Traction stage Idea',               'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 'flow_su_tr_mvp',        'name' => 'Traction - MVP',             'description' => 'Traction stage MVP',                'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 'flow_su_tr_live',       'name' => 'Traction - Live',            'description' => 'Traction stage Live',               'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 'flow_su_tr_scale',      'name' => 'Traction - Scale',           'description' => 'Traction stage Scale',              'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            // Startup Finish (Presence + Team + What You Need)
+            ['id' => 'flow_su_finish',        'name' => 'Startup - Detail',           'description' => 'Detail startup lanjutan',           'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            // Startup Need Sub-Flows
+            ['id' => 'flow_su_need_cf',       'name' => 'Startup → Cari CF',          'description' => 'Startup mencari co-founder',        'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 'flow_su_need_team',     'name' => 'Startup → Cari Team',        'description' => 'Startup mencari anggota tim',       'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 'flow_su_need_both',     'name' => 'Startup → Cari Keduanya',    'description' => 'Startup mencari CF + team',         'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+            // Startup End (Commitment + Equity)
+            ['id' => 'flow_su_end',           'name' => 'Startup - Final',            'description' => 'Komitmen dan kompensasi startup',   'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
+        ]);
+
+        // ════════════════════════════════════════════════════════════════
+        // 2. STEPS (53 Steps)
+        // ════════════════════════════════════════════════════════════════
+        $s = function ($id, $flowId, $order, $section, $titleId, $titleEn, $autoAdvance = false) use ($now) {
+            return [
+                'id' => $id, 'flow_id' => $flowId, 'order_index' => $order,
+                'section' => $section,
+                'title' => json_encode(['id' => $titleId, 'en' => $titleEn]),
+                'subtitle' => null, 'cta_label' => null,
+                'auto_advance' => $autoAdvance, 'can_go_back' => true,
+                'created_at' => $now, 'updated_at' => $now,
+            ];
+        };
+
+        DB::table('onboarding_steps')->insert([
+            // ── COMMON: Data Diri (5 steps) ──
+            $s('step_personal_name',     'flow_common', 1, 'Data Diri', 'Siapa nama Anda?',                          'What\'s your name?'),
+            $s('step_personal_dob',      'flow_common', 2, 'Data Diri', 'Kapan tanggal lahir Anda?',                 'When\'s your date of birth?'),
+            $s('step_personal_location', 'flow_common', 3, 'Data Diri', 'Di mana Anda berlokasi?',                   'Where are you based?'),
+            $s('step_personal_gender',   'flow_common', 4, 'Data Diri', 'Jenis Kelamin',                             'Gender', true),
+            $s('step_role_selection',    'flow_common', 5, 'Tipe Akun', 'Bagaimana Anda ingin menggunakan ConnectX?', 'How would you like to use ConnectX?', true),
+
+            // ── BUILDER COMMON (2 steps) ──
+            $s('step_bld_role',  'flow_builder_common', 1, 'Profil Builder', 'Apa peran/jabatan utama Anda?',     'What is your primary role?'),
+            $s('step_bld_exp',   'flow_builder_common', 2, 'Profil Builder', 'Seberapa besar pengalaman startup Anda?', 'How much startup experience do you have?', true),
+
+            // ── FOUNDER (2 steps) ──
+            $s('step_fdr_looking',  'flow_founder', 1, 'Tujuan Founder',    'Apa yang sedang kamu cari?',              'What are you looking for?', true),
+            $s('step_fdr_industry', 'flow_founder', 2, 'Minat & Industri',  'Industri apa yang menarik minatmu?',      'What industries interest you?'),
+
+            // ── FOUNDER → CF (4 steps) ──
+            $s('step_fdr_cf_type',    'flow_fdr_cf', 1, 'Cari Co-Founder',  'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of Co-Founder do you need?'),
+            $s('step_fdr_cf_avail',   'flow_fdr_cf', 2, 'Ketersediaan',     'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true),
+            $s('step_fdr_cf_remote',  'flow_fdr_cf', 3, 'Lokasi Kerja',     'Preferensi kerja',                       'Work preferences'),
+            $s('step_fdr_cf_linkedin','flow_fdr_cf', 4, 'Profil Online',    'Connect LinkedIn',                       'Connect LinkedIn'),
+
+            // ── FOUNDER → TEAM (4 steps) ──
+            $s('step_fdr_tm_roles',   'flow_fdr_team', 1, 'Cari Anggota Tim','Peran apa yang kamu butuhkan?',          'What roles do you need?'),
+            $s('step_fdr_tm_avail',   'flow_fdr_team', 2, 'Ketersediaan',    'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true),
+            $s('step_fdr_tm_remote',  'flow_fdr_team', 3, 'Lokasi Kerja',    'Preferensi kerja',                       'Work preferences'),
+            $s('step_fdr_tm_linkedin','flow_fdr_team', 4, 'Profil Online',   'Connect LinkedIn',                       'Connect LinkedIn'),
+
+            // ── FOUNDER → BOTH (5 steps) ──
+            $s('step_fdr_bt_cf',      'flow_fdr_both', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of Co-Founder do you need?'),
+            $s('step_fdr_bt_roles',   'flow_fdr_both', 2, 'Cari Anggota Tim','Peran apa yang kamu butuhkan?',          'What roles do you need?'),
+            $s('step_fdr_bt_avail',   'flow_fdr_both', 3, 'Ketersediaan',    'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true),
+            $s('step_fdr_bt_remote',  'flow_fdr_both', 4, 'Lokasi Kerja',    'Preferensi kerja',                       'Work preferences'),
+            $s('step_fdr_bt_linkedin','flow_fdr_both', 5, 'Profil Online',   'Connect LinkedIn',                       'Connect LinkedIn'),
+
+            // ── CO-FOUNDER JOINING (7 steps) ──
+            $s('step_cf_industry', 'flow_cofounder', 1, 'Minat & Industri',   'Industri apa yang menarik minatmu?',        'What industries interest you?'),
+            $s('step_cf_type',     'flow_cofounder', 2, 'Tipe Co-Founder',    'Kamu co-founder tipe apa?',                 'What kind of co-founder are you?', true),
+            $s('step_cf_avail',    'flow_cofounder', 3, 'Ketersediaan',       'Availability seperti apa yang kamu harapkan?','What availability do you expect?', true),
+            $s('step_cf_comp',     'flow_cofounder', 4, 'Ekspektasi Kompensasi','Bagaimana ekspektasimu untuk cash dan equity?','What are your cash & equity expectations?'),
+            $s('step_cf_remote',   'flow_cofounder', 5, 'Lokasi Kerja',       'Preferensi kerja',                         'Work preferences'),
+            $s('step_cf_linkedin', 'flow_cofounder', 6, 'Profil Online',      'Connect LinkedIn',                         'Connect LinkedIn'),
+
+            // ── TEAM MEMBER JOINING (7 steps) ──
+            $s('step_tm_industry', 'flow_team', 1, 'Minat & Industri',   'Industri apa yang menarik minatmu?',         'What industries interest you?'),
+            $s('step_tm_skills',   'flow_team', 2, 'Skill & Keahlian',   'Skill apa yang kamu miliki?',                'What skills do you have?'),
+            $s('step_tm_avail',    'flow_team', 3, 'Ketersediaan',       'Availability seperti apa yang kamu harapkan?','What availability do you expect?', true),
+            $s('step_tm_comp',     'flow_team', 4, 'Ekspektasi Kompensasi','Bagaimana ekspektasimu untuk cash dan equity?','What are your cash & equity expectations?'),
+            $s('step_tm_remote',   'flow_team', 5, 'Lokasi Kerja',       'Preferensi kerja',                          'Work preferences'),
+            $s('step_tm_linkedin', 'flow_team', 6, 'Profil Online',      'Connect LinkedIn',                          'Connect LinkedIn'),
+
+            // ── STARTUP (3 steps) ──
+            $s('step_su_about',   'flow_startup', 1, 'Profil Startup',  'Ceritakan tentang startup kamu',             'Tell us about your startup'),
+            $s('step_su_problem', 'flow_startup', 2, 'Masalah & Solusi','Apa yang sedang kamu bangun?',               'What are you building?'),
+            $s('step_su_biz',     'flow_startup', 3, 'Industri & Model','Industri dan model bisnis',                  'Industry and business model'),
+
+            // ── TRACTION (1 step each, 4 flows) ──
+            $s('step_su_tr_idea',  'flow_su_tr_idea',  1, 'Traction', 'Validasi tahap Idea',       'Idea stage validation'),
+            $s('step_su_tr_mvp',   'flow_su_tr_mvp',   1, 'Traction', 'Traction tahap MVP',        'MVP stage traction'),
+            $s('step_su_tr_live',  'flow_su_tr_live',   1, 'Traction', 'Traction tahap Live',       'Live stage traction'),
+            $s('step_su_tr_scale', 'flow_su_tr_scale',  1, 'Traction', 'Traction tahap Scale',      'Scale stage traction'),
+
+            // ── STARTUP FINISH (4 steps) ──
+            $s('step_su_presence', 'flow_su_finish', 1, 'Online Presence', 'Di mana orang bisa menemukan kamu?',       'Where can people find you?'),
+            $s('step_su_founders', 'flow_su_finish', 2, 'Tim Founder',     'Setup founder',                           'Founder setup'),
+            $s('step_su_team',     'flow_su_finish', 3, 'Status Tim',      'Status tim kamu',                         'Your team status'),
+            $s('step_su_need',     'flow_su_finish', 4, 'Kebutuhan',       'Apa yang sedang kamu cari?',              'What are you looking for?', true),
+
+            // ── STARTUP NEED SUB-FLOWS ──
+            $s('step_su_need_cf',      'flow_su_need_cf',   1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of Co-Founder do you need?'),
+            $s('step_su_need_tm',      'flow_su_need_team', 1, 'Cari Anggota Tim','Skill apa yang belum dipunyai di tim?',      'What skills are you missing?'),
+            $s('step_su_need_bt_cf',   'flow_su_need_both', 1, 'Cari Co-Founder', 'Co-Founder yang dibutuhkan',                'Co-Founder needed'),
+            $s('step_su_need_bt_tm',   'flow_su_need_both', 2, 'Cari Anggota Tim','Skill yang belum dipunyai di tim',           'Skills missing in team'),
+
+            // ── STARTUP END (2 steps) ──
+            $s('step_su_commit', 'flow_su_end', 1, 'Komitmen',    'Commitment level',                              'Commitment level', true),
+            $s('step_su_equity', 'flow_su_end', 2, 'Kompensasi',  'Equity & kompensasi yang ditawarkan',            'Equity & compensation offered'),
+        ]);
+
+        // ════════════════════════════════════════════════════════════════
+        // 3. QUESTIONS
+        // ════════════════════════════════════════════════════════════════
+        $q = function ($id, $step, $order, $type, $labelId, $labelEn, $required = true, $extra = []) use ($now) {
+            return array_merge([
+                'id' => $id, 'step_id' => $step, 'order_index' => $order,
+                'type' => $type,
+                'label' => json_encode(['id' => $labelId, 'en' => $labelEn]),
+                'sub_label' => null, 'helper_text' => null, 'placeholder' => null,
+                'required' => $required,
+                'validation' => null, 'depends_on' => null, 'meta' => null,
+                'created_at' => $now, 'updated_at' => $now,
+            ], $extra);
+        };
+
+        DB::table('onboarding_questions')->insert([
+            // ── COMMON: Data Diri ──
+            $q('q_first_name', 'step_personal_name', 1, 'text', 'Nama Depan', 'First Name', true, ['validation' => json_encode(['min_length'=>1, 'max_length'=>50])]),
+            $q('q_last_name',  'step_personal_name', 2, 'text', 'Nama Belakang', 'Last Name', false),
+            $q('q_dob',        'step_personal_dob',  1, 'date', 'Tanggal Lahir', 'Date of Birth'),
+            $q('q_location',   'step_personal_location', 1, 'searchable_dropdown', 'Pilih Kota/Negara', 'Select City/Country'),
+            $q('q_open_remote','step_personal_location', 2, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
+            $q('q_remote_pref','step_personal_location', 3, 'dropdown', 'Preferensi remote', 'Remote preference', true, ['depends_on' => json_encode(['question_id'=>'q_open_remote','operator'=>'equals','value'=>'yes'])]),
+            $q('q_gender',     'step_personal_gender',   1, 'single_select_card', 'Jenis Kelamin', 'Gender'),
+            $q('q_use_connectx','step_role_selection',    1, 'single_select_card', 'Bagaimana kamu ingin menggunakan ConnectX?', 'How do you want to use ConnectX?'),
+
+            // ── BUILDER COMMON ──
+            $q('q_bld_role',   'step_bld_role', 1, 'searchable_dropdown', 'Peran Utama', 'Primary Role'),
+            $q('q_bld_years',  'step_bld_role', 2, 'number', 'Tahun Pengalaman', 'Years of Experience', true, ['placeholder' => json_encode(['id'=>'contoh: 3','en'=>'e.g. 3'])]),
+            $q('q_bld_exp',    'step_bld_exp',  1, 'single_select_card', 'Pengalaman Startup', 'Startup Experience'),
+
+            // ── FOUNDER ──
+            $q('q_fdr_looking',  'step_fdr_looking',  1, 'single_select_card', 'Apa yang sedang kamu cari?', 'What are you looking for?'),
+            $q('q_fdr_industry', 'step_fdr_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections'=>1,'max_selections'=>5])]),
+
+            // ── FOUNDER → CF ──
+            $q('q_fdr_cf_type',    'step_fdr_cf_type',    1, 'multi_select_chip', 'Tipe Co-Founder yang dibutuhkan', 'Co-Founder type needed'),
+            $q('q_fdr_cf_avail',   'step_fdr_cf_avail',   1, 'single_select_card', 'Availability', 'Availability'),
+            $q('q_fdr_cf_remote',  'step_fdr_cf_remote',  1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
+            $q('q_fdr_cf_relocate','step_fdr_cf_remote',  2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
+            $q('q_fdr_cf_linkedin','step_fdr_cf_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id'=>'https://linkedin.com/in/...','en'=>'https://linkedin.com/in/...'])]),
+
+            // ── FOUNDER → TEAM ──
+            $q('q_fdr_tm_roles',   'step_fdr_tm_roles',   1, 'multi_select_chip', 'Peran yang dibutuhkan', 'Roles needed'),
+            $q('q_fdr_tm_avail',   'step_fdr_tm_avail',   1, 'single_select_card', 'Availability', 'Availability'),
+            $q('q_fdr_tm_remote',  'step_fdr_tm_remote',  1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
+            $q('q_fdr_tm_relocate','step_fdr_tm_remote',  2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
+            $q('q_fdr_tm_linkedin','step_fdr_tm_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id'=>'https://linkedin.com/in/...','en'=>'https://linkedin.com/in/...'])]),
+
+            // ── FOUNDER → BOTH ──
+            $q('q_fdr_bt_cf',      'step_fdr_bt_cf',    1, 'multi_select_chip', 'Tipe Co-Founder yang dibutuhkan', 'Co-Founder type needed'),
+            $q('q_fdr_bt_roles',   'step_fdr_bt_roles', 1, 'multi_select_chip', 'Peran yang dibutuhkan', 'Roles needed'),
+            $q('q_fdr_bt_avail',   'step_fdr_bt_avail', 1, 'single_select_card', 'Availability', 'Availability'),
+            $q('q_fdr_bt_remote',  'step_fdr_bt_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
+            $q('q_fdr_bt_relocate','step_fdr_bt_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
+            $q('q_fdr_bt_linkedin','step_fdr_bt_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id'=>'https://linkedin.com/in/...','en'=>'https://linkedin.com/in/...'])]),
+
+            // ── CO-FOUNDER JOINING ──
+            $q('q_cf_industry',  'step_cf_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections'=>1,'max_selections'=>5])]),
+            $q('q_cf_type',      'step_cf_type',     1, 'single_select_card', 'Kamu co-founder tipe apa?', 'What kind of co-founder are you?'),
+            $q('q_cf_avail',     'step_cf_avail',    1, 'single_select_card', 'Availability', 'Availability'),
+            // Compensation
+            $q('q_cf_equity',       'step_cf_comp', 1, 'single_select_card', 'Ekspektasi equity', 'Equity expectation'),
+            $q('q_cf_salary_type',  'step_cf_comp', 2, 'single_select_card', 'Apakah kamu punya ekspektasi minimum gaji?', 'Do you have a minimum salary expectation?'),
+            $q('q_cf_salary_period','step_cf_comp', 3, 'dropdown', 'Periode gaji', 'Salary period', true, ['depends_on' => json_encode(['question_id'=>'q_cf_salary_type','operator'=>'in','value'=>['strict','flexible']])]),
+            $q('q_cf_salary_currency','step_cf_comp', 4, 'dropdown', 'Mata uang', 'Currency', true, ['depends_on' => json_encode(['question_id'=>'q_cf_salary_type','operator'=>'in','value'=>['strict','flexible']])]),
+            $q('q_cf_salary_amount','step_cf_comp', 5, 'number', 'Berapa minimum gaji?', 'Minimum salary amount?', true, ['depends_on' => json_encode(['question_id'=>'q_cf_salary_type','operator'=>'in','value'=>['strict','flexible']]), 'placeholder' => json_encode(['id'=>'e.g. 10000000','en'=>'e.g. 10000000'])]),
+            // Remote + LinkedIn
+            $q('q_cf_remote',   'step_cf_remote',  1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
+            $q('q_cf_relocate', 'step_cf_remote',  2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
+            $q('q_cf_linkedin', 'step_cf_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id'=>'https://linkedin.com/in/...','en'=>'https://linkedin.com/in/...'])]),
+
+            // ── TEAM MEMBER JOINING ──
+            $q('q_tm_industry', 'step_tm_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections'=>1,'max_selections'=>5])]),
+            $q('q_tm_skills',   'step_tm_skills',   1, 'multi_select_chip', 'Skill yang kamu miliki', 'Skills you have'),
+            $q('q_tm_avail',    'step_tm_avail',    1, 'single_select_card', 'Availability', 'Availability'),
+            // Compensation
+            $q('q_tm_equity',       'step_tm_comp', 1, 'single_select_card', 'Ekspektasi equity', 'Equity expectation'),
+            $q('q_tm_salary_type',  'step_tm_comp', 2, 'single_select_card', 'Apakah kamu punya ekspektasi minimum gaji?', 'Do you have a minimum salary expectation?'),
+            $q('q_tm_salary_period','step_tm_comp', 3, 'dropdown', 'Periode gaji', 'Salary period', true, ['depends_on' => json_encode(['question_id'=>'q_tm_salary_type','operator'=>'in','value'=>['strict','flexible']])]),
+            $q('q_tm_salary_currency','step_tm_comp', 4, 'dropdown', 'Mata uang', 'Currency', true, ['depends_on' => json_encode(['question_id'=>'q_tm_salary_type','operator'=>'in','value'=>['strict','flexible']])]),
+            $q('q_tm_salary_amount','step_tm_comp', 5, 'number', 'Berapa minimum gaji?', 'Minimum salary amount?', true, ['depends_on' => json_encode(['question_id'=>'q_tm_salary_type','operator'=>'in','value'=>['strict','flexible']]), 'placeholder' => json_encode(['id'=>'e.g. 10000000','en'=>'e.g. 10000000'])]),
+            // Remote + LinkedIn
+            $q('q_tm_remote',   'step_tm_remote',  1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
+            $q('q_tm_relocate', 'step_tm_remote',  2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
+            $q('q_tm_linkedin', 'step_tm_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id'=>'https://linkedin.com/in/...','en'=>'https://linkedin.com/in/...'])]),
+
+            // ── STARTUP: About ──
+            $q('q_su_name',    'step_su_about', 1, 'text', 'Nama Startup', 'Startup Name', true, ['validation' => json_encode(['min_length'=>2,'max_length'=>100])]),
+            $q('q_su_tagline', 'step_su_about', 2, 'text', 'Tagline (1 kalimat)', 'Tagline (1 sentence)', true, ['validation' => json_encode(['max_length'=>150])]),
+            $q('q_su_stage',   'step_su_about', 3, 'dropdown', 'Tahap Startup', 'Startup Stage'),
+
+            // ── STARTUP: Problem & Solution ──
+            $q('q_su_problem', 'step_su_problem', 1, 'textarea', 'Masalah yang kamu selesaikan', 'Problem you\'re solving'),
+            $q('q_su_solution','step_su_problem', 2, 'textarea', 'Solusi kamu', 'Your solution'),
+            $q('q_su_target',  'step_su_problem', 3, 'textarea', 'Target pengguna', 'Target users'),
+
+            // ── STARTUP: Industry & Biz Model ──
+            $q('q_su_industry', 'step_su_biz', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections'=>1,'max_selections'=>5])]),
+            $q('q_su_biz_model','step_su_biz', 2, 'multi_select_chip', 'Model Bisnis', 'Business Model'),
+
+            // ── TRACTION: Idea ──
+            $q('q_su_tri_prototype',     'step_su_tr_idea', 1, 'single_select_card', 'Apakah kamu punya prototype?', 'Do you have a prototype?'),
+            $q('q_su_tri_prototype_link','step_su_tr_idea', 2, 'url', 'Link Prototype', 'Prototype Link', false, ['depends_on' => json_encode(['question_id'=>'q_su_tri_prototype','operator'=>'equals','value'=>'yes'])]),
+            $q('q_su_tri_waitlist',      'step_su_tr_idea', 3, 'number', 'Ukuran Waitlist', 'Waitlist Size', false),
+            $q('q_su_tri_validation',    'step_su_tr_idea', 4, 'text', 'Validasi (interview, survey, dll)', 'Validation (interviews, surveys, etc.)', false),
+
+            // ── TRACTION: MVP ──
+            $q('q_su_trm_users',   'step_su_tr_mvp', 1, 'number', 'Jumlah Users', 'Number of Users', false),
+            $q('q_su_trm_mau',     'step_su_tr_mvp', 2, 'number', 'Monthly Active Users (MAU)', 'Monthly Active Users (MAU)', false),
+            $q('q_su_trm_revenue', 'step_su_tr_mvp', 3, 'number', 'Revenue (jika ada)', 'Revenue (if any)', false),
+            $q('q_su_trm_growth',  'step_su_tr_mvp', 4, 'text', 'Growth Rate', 'Growth Rate', false),
+
+            // ── TRACTION: Live ──
+            $q('q_su_trl_mrr',       'step_su_tr_live', 1, 'number', 'Monthly Recurring Revenue (MRR)', 'MRR', false),
+            $q('q_su_trl_customers', 'step_su_tr_live', 2, 'number', 'Jumlah Pelanggan', 'Number of Customers', false),
+            $q('q_su_trl_retention', 'step_su_tr_live', 3, 'text', 'Retention Rate', 'Retention Rate', false),
+            $q('q_su_trl_metrics',   'step_su_tr_live', 4, 'text', 'Key Metrics (GMV, dll)', 'Key Metrics (GMV, etc.)', false),
+
+            // ── TRACTION: Scale ──
+            $q('q_su_trs_funding',   'step_su_tr_scale', 1, 'text', 'Funding yang sudah didapat', 'Funding raised', false),
+            $q('q_su_trs_investors', 'step_su_tr_scale', 2, 'text', 'Investor (opsional)', 'Investors (optional)', false),
+            $q('q_su_trs_teamsize',  'step_su_tr_scale', 3, 'number', 'Ukuran Tim', 'Team Size', false),
+            $q('q_su_trs_arr',       'step_su_tr_scale', 4, 'number', 'Annual Recurring Revenue (ARR)', 'ARR', false),
+
+            // ── STARTUP FINISH: Online Presence ──
+            $q('q_su_website',   'step_su_presence', 1, 'url', 'Website', 'Website', false),
+            $q('q_su_linkedin',  'step_su_presence', 2, 'url', 'LinkedIn', 'LinkedIn', false),
+            $q('q_su_twitter',   'step_su_presence', 3, 'url', 'Twitter / X', 'Twitter / X', false),
+            $q('q_su_instagram', 'step_su_presence', 4, 'url', 'Instagram', 'Instagram', false),
+            $q('q_su_pitchdeck', 'step_su_presence', 5, 'url', 'Pitch Deck (opsional 🔥)', 'Pitch Deck (optional 🔥)', false),
+
+            // ── STARTUP FINISH: Founder Setup ──
+            $q('q_su_founder_count',  'step_su_founders', 1, 'single_select_card', 'Berapa banyak founder?', 'How many founders?'),
+            $q('q_su_founder_roles',  'step_su_founders', 2, 'multi_select_chip', 'Peran apa yang sudah terisi?', 'What roles are already covered?', false, ['depends_on' => json_encode(['question_id'=>'q_su_founder_count','operator'=>'not_equals','value'=>'solo'])]),
+
+            // ── STARTUP FINISH: Team Status ──
+            $q('q_su_have_team',   'step_su_team', 1, 'single_select_card', 'Apakah kamu punya tim selain founder?', 'Do you have a team beyond founders?'),
+            $q('q_su_team_size',   'step_su_team', 2, 'single_select_card', 'Ukuran tim', 'Team size', true, ['depends_on' => json_encode(['question_id'=>'q_su_have_team','operator'=>'equals','value'=>'yes'])]),
+            $q('q_su_team_roles',  'step_su_team', 3, 'multi_select_chip', 'Departemen/peran di tim', 'Team departments/roles', true, ['depends_on' => json_encode(['question_id'=>'q_su_have_team','operator'=>'equals','value'=>'yes'])]),
+
+            // ── STARTUP FINISH: What You Need ──
+            $q('q_su_need', 'step_su_need', 1, 'single_select_card', 'Apa yang sedang kamu cari?', 'What are you looking for?'),
+
+            // ── STARTUP NEED: CF ──
+            $q('q_su_need_cf_type',   'step_su_need_cf',    1, 'multi_select_chip', 'Co-Founder tipe apa yang dibutuhkan?', 'What Co-Founder type do you need?'),
+            // ── STARTUP NEED: Team ──
+            $q('q_su_need_tm_skills', 'step_su_need_tm',    1, 'multi_select_chip', 'Skill apa yang belum dipunyai di tim?', 'What skills are missing in the team?'),
+            // ── STARTUP NEED: Both ──
+            $q('q_su_need_bt_cf',     'step_su_need_bt_cf', 1, 'multi_select_chip', 'Co-Founder yang dibutuhkan', 'Co-Founder needed'),
+            $q('q_su_need_bt_tm',     'step_su_need_bt_tm', 1, 'multi_select_chip', 'Skill yang belum dipunyai', 'Missing skills'),
+
+            // ── STARTUP END: Commitment ──
+            $q('q_su_commitment', 'step_su_commit', 1, 'single_select_card', 'Commitment Level', 'Commitment Level'),
+
+            // ── STARTUP END: Equity & Comp ──
+            $q('q_su_equity_range', 'step_su_equity', 1, 'text', 'Equity yang ditawarkan (% range)', 'Equity offered (% range)', true, ['placeholder' => json_encode(['id'=>'contoh: 5-15%','en'=>'e.g. 5-15%'])]),
+            $q('q_su_paid',         'step_su_equity', 2, 'single_select_card', 'Apakah posisi ini dibayar?', 'Is this a paid position?'),
+            $q('q_su_salary_range', 'step_su_equity', 3, 'text', 'Range gaji per tahun', 'Annual salary range', false, ['depends_on' => json_encode(['question_id'=>'q_su_paid','operator'=>'equals','value'=>'paid']), 'placeholder' => json_encode(['id'=>'contoh: IDR 100-200jt/thn','en'=>'e.g. USD 30-60k/yr'])]),
+        ]);
+
+        // ════════════════════════════════════════════════════════════════
+        // 4. OPTIONS
+        // ════════════════════════════════════════════════════════════════
         $opts = [];
 
-        // ═══════════════════════════════════════════════════════
-        // LOCATION — 60+ Global Startup Hub Cities
-        // Dikelompokkan by region (field group_name) sehingga FE
-        // bisa render section header di searchable_dropdown.
-        // Value = slug lowercase, unik, URL-safe.
-        // FE melakukan client-side search/filter dari daftar ini.
-        // ═══════════════════════════════════════════════════════
-        $locations = [
-            // Southeast Asia
-            ['Jakarta, Indonesia',       'jakarta',        'Asia Tenggara'],
-            ['Bandung, Indonesia',        'bandung',        'Asia Tenggara'],
-            ['Surabaya, Indonesia',       'surabaya',       'Asia Tenggara'],
-            ['Bali, Indonesia',           'bali',           'Asia Tenggara'],
-            ['Yogyakarta, Indonesia',     'yogyakarta',     'Asia Tenggara'],
-            ['Medan, Indonesia',          'medan',          'Asia Tenggara'],
-            ['Singapore',                 'singapore',      'Asia Tenggara'],
-            ['Kuala Lumpur, Malaysia',    'kuala_lumpur',   'Asia Tenggara'],
-            ['Penang, Malaysia',          'penang',         'Asia Tenggara'],
-            ['Bangkok, Thailand',         'bangkok',        'Asia Tenggara'],
-            ['Ho Chi Minh City, Vietnam', 'ho_chi_minh',   'Asia Tenggara'],
-            ['Hanoi, Vietnam',            'hanoi',          'Asia Tenggara'],
-            ['Manila, Philippines',       'manila',         'Asia Tenggara'],
-            ['Cebu, Philippines',         'cebu',           'Asia Tenggara'],
-            ['Yangon, Myanmar',           'yangon',         'Asia Tenggara'],
-            ['Phnom Penh, Cambodia',      'phnom_penh',     'Asia Tenggara'],
-
-            // South Asia
-            ['Bangalore, India',          'bangalore',      'Asia Selatan'],
-            ['Mumbai, India',             'mumbai',         'Asia Selatan'],
-            ['Delhi, India',              'delhi',          'Asia Selatan'],
-            ['Hyderabad, India',          'hyderabad',      'Asia Selatan'],
-            ['Chennai, India',            'chennai',        'Asia Selatan'],
-            ['Pune, India',               'pune',           'Asia Selatan'],
-            ['Karachi, Pakistan',         'karachi',        'Asia Selatan'],
-            ['Colombo, Sri Lanka',        'colombo',        'Asia Selatan'],
-            ['Dhaka, Bangladesh',         'dhaka',          'Asia Selatan'],
-
-            // East Asia
-            ['Tokyo, Japan',              'tokyo',          'Asia Timur'],
-            ['Osaka, Japan',              'osaka',          'Asia Timur'],
-            ['Seoul, South Korea',        'seoul',          'Asia Timur'],
-            ['Beijing, China',            'beijing',        'Asia Timur'],
-            ['Shanghai, China',           'shanghai',       'Asia Timur'],
-            ['Shenzhen, China',           'shenzhen',       'Asia Timur'],
-            ['Hong Kong',                 'hong_kong',      'Asia Timur'],
-            ['Taipei, Taiwan',            'taipei',         'Asia Timur'],
-
-            // Middle East
-            ['Dubai, UAE',                'dubai',          'Timur Tengah'],
-            ['Abu Dhabi, UAE',            'abu_dhabi',      'Timur Tengah'],
-            ['Riyadh, Saudi Arabia',      'riyadh',         'Timur Tengah'],
-            ['Tel Aviv, Israel',          'tel_aviv',       'Timur Tengah'],
-            ['Amman, Jordan',             'amman',          'Timur Tengah'],
-
-            // Europe
-            ['London, UK',                'london',         'Eropa'],
-            ['Berlin, Germany',           'berlin',         'Eropa'],
-            ['Amsterdam, Netherlands',    'amsterdam',      'Eropa'],
-            ['Paris, France',             'paris',          'Eropa'],
-            ['Stockholm, Sweden',         'stockholm',      'Eropa'],
-            ['Zurich, Switzerland',       'zurich',         'Eropa'],
-            ['Lisbon, Portugal',          'lisbon',         'Eropa'],
-            ['Barcelona, Spain',          'barcelona',      'Eropa'],
-            ['Warsaw, Poland',            'warsaw',         'Eropa'],
-            ['Tallinn, Estonia',          'tallinn',        'Eropa'],
-
-            // Americas
-            ['San Francisco, USA',        'san_francisco',  'Amerika'],
-            ['New York, USA',             'new_york',       'Amerika'],
-            ['Austin, USA',               'austin',         'Amerika'],
-            ['Seattle, USA',              'seattle',        'Amerika'],
-            ['Miami, USA',                'miami',          'Amerika'],
-            ['Toronto, Canada',           'toronto',        'Amerika'],
-            ['Vancouver, Canada',         'vancouver',      'Amerika'],
-            ['São Paulo, Brazil',         'sao_paulo',      'Amerika'],
-            ['Mexico City, Mexico',       'mexico_city',    'Amerika'],
-            ['Buenos Aires, Argentina',   'buenos_aires',   'Amerika'],
-
-            // Africa & Oceania
-            ['Lagos, Nigeria',            'lagos',          'Afrika & Oseania'],
-            ['Nairobi, Kenya',            'nairobi',        'Afrika & Oseania'],
-            ['Cairo, Egypt',              'cairo',          'Afrika & Oseania'],
-            ['Johannesburg, South Africa','johannesburg',   'Afrika & Oseania'],
-            ['Sydney, Australia',         'sydney',         'Afrika & Oseania'],
-            ['Melbourne, Australia',      'melbourne',      'Afrika & Oseania'],
-            ['Auckland, New Zealand',     'auckland',       'Afrika & Oseania'],
-
-            // Special / Remote
-            ['Remote (Mana Saja)',        'remote',         'Remote'],
-        ];
-
-        $oWithGroup = function ($id, $qid, $order, $label, $value, $group) use ($now) {
-            return [
-                'id' => $id, 'question_id' => $qid, 'order_index' => $order,
-                'label' => json_encode(['id' => $label, 'en' => $label]),
-                'value' => $value,
-                'group_name' => $group,
+        // ── Locations (68 cities with groups) ──
+        foreach ($locations as $i => [$label, $value, $group]) {
+            $opts[] = [
+                'id' => 'opt_loc_' . ($i + 1), 'question_id' => 'q_location', 'order_index' => $i + 1,
+                'label' => json_encode(['id' => $label, 'en' => $label]), 'value' => $value,
+                'sub_label' => null, 'icon' => null, 'group_name' => $group,
                 'created_at' => $now, 'updated_at' => $now,
             ];
-        };
-
-        foreach ($locations as $i => [$label, $value, $group]) {
-            $opts[] = $oWithGroup('opt_loc_' . ($i + 1), 'q_location', $i + 1, $label, $value, $group);
         }
 
-        // --- Remote ---
+        // ── Common Simple Options ──
         $opts[] = $o('opt_rem_yes', 'q_open_remote', 1, 'Ya', 'Yes', 'yes');
-        $opts[] = $o('opt_rem_no', 'q_open_remote', 2, 'Tidak', 'No', 'no');
-        $opts[] = $o('opt_rp_1', 'q_remote_pref', 1, 'Hybrid', 'Hybrid', 'hybrid');
-        $opts[] = $o('opt_rp_2', 'q_remote_pref', 2, 'Hanya Remote', 'Remote Only', 'remote_only');
-
-        // --- Gender ---
+        $opts[] = $o('opt_rem_no',  'q_open_remote', 2, 'Tidak', 'No', 'no');
+        $opts[] = $o('opt_rp_1',  'q_remote_pref', 1, 'Hybrid', 'Hybrid', 'hybrid');
+        $opts[] = $o('opt_rp_2',  'q_remote_pref', 2, 'Hanya Remote', 'Remote Only', 'remote_only');
         $opts[] = $o('opt_gen_m', 'q_gender', 1, 'Pria', 'Male', 'male');
         $opts[] = $o('opt_gen_f', 'q_gender', 2, 'Wanita', 'Female', 'female');
 
-        // --- Role Selection (Tujuan ConnectX) ---
-        $opts[] = $o('opt_bld_founder', 'q_use_connectx', 1, 'Founder', 'Founder', 'founder');
-        $opts[] = $o('opt_bld_cofounder', 'q_use_connectx', 2, 'Co-Founder (Bergabung ke startup)', 'Co-Founder (Join a startup)', 'cofounder');
-        $opts[] = $o('opt_bld_team', 'q_use_connectx', 3, 'Anggota Tim (Bergabung ke startup)', 'Team Member (Join a startup)', 'team');
-        $opts[] = $o('opt_startup', 'q_use_connectx', 4, 'Mewakili Startup (Akun Bisnis)', 'I represent a Startup', 'startup');
+        // ── Role Selection ──
+        $opts[] = $o('opt_uc_1', 'q_use_connectx', 1, 'Saya seorang Builder — Founder', 'I\'m a Builder — Founder', 'founder', 'Saya ingin membangun startup dan mencari partner', 'I want to build a startup and find partners');
+        $opts[] = $o('opt_uc_2', 'q_use_connectx', 2, 'Saya seorang Builder — Co-Founder', 'I\'m a Builder — Co-Founder', 'cofounder', 'Saya ingin bergabung sebagai co-founder', 'I want to join as a co-founder');
+        $opts[] = $o('opt_uc_3', 'q_use_connectx', 3, 'Saya seorang Builder — Anggota Tim', 'I\'m a Builder — Team Member', 'team', 'Saya ingin bergabung dengan tim startup', 'I want to join a startup team');
+        $opts[] = $o('opt_uc_4', 'q_use_connectx', 4, 'Saya mewakili Startup', 'I represent a Startup', 'startup', 'Startup saya sedang mencari talent', 'My startup is looking for talent');
 
-        // --- Startup Experience ---
-        $opts[] = $o('opt_exp_1', 'q_startup_exp', 1, 'Pernah Membangun/Pendiri', 'Built/Founding Experience', 'founder_exp');
-        $opts[] = $o('opt_exp_2', 'q_startup_exp', 2, 'Pernah Bekerja di Startup', 'Worked at Startup', 'employee_exp');
-        $opts[] = $o('opt_exp_3', 'q_startup_exp', 3, 'Belum ada pengalaman', 'No experience', 'no_exp');
+        // ── Primary Roles (grouped, for q_bld_role) ──
+        $opts = array_merge($opts, $genGroupedOpts('opt_role', 'q_bld_role', $masterRoles));
 
-        // --- Commitment Level (Professional) ---
-        $opts[] = $o('opt_av_1', 'q_availability', 1, 'Purnawaktu (Full-time)', 'Full-time', 'full_time');
-        $opts[] = $o('opt_av_2', 'q_availability', 2, 'Paruh Waktu (Part-time)', 'Part-time', 'part_time');
-        $opts[] = $o('opt_av_3', 'q_availability', 3, 'Proyek Sampingan', 'Side Project', 'side_project');
-        $opts[] = $o('opt_av_4', 'q_availability', 4, 'Terbuka untuk Diskusi', 'Open to Discussion', 'open_to_discussion');
+        // ── Experience Level ──
+        $opts[] = $o('opt_exp_1', 'q_bld_exp', 1, 'Pernah mendirikan startup', 'Founded a startup before', 'founder_exp');
+        $opts[] = $o('opt_exp_2', 'q_bld_exp', 2, 'Pernah membangun produk di startup', 'Built a product at a startup', 'product_exp');
+        $opts[] = $o('opt_exp_3', 'q_bld_exp', 3, 'Pernah bekerja di tim startup', 'Worked in a startup team', 'team_exp');
+        $opts[] = $o('opt_exp_4', 'q_bld_exp', 4, 'Baru di dunia startup', 'New to the startup world', 'no_exp');
 
-        // --- Relocate ---
-        $opts[] = $o('opt_rl_1', 'q_relocate', 1, 'Ya', 'Yes', 'yes');
-        $opts[] = $o('opt_rl_2', 'q_relocate', 2, 'Tidak', 'No', 'no');
+        // ── Founder: Looking For ──
+        $opts[] = $o('opt_fdr_look_1', 'q_fdr_looking', 1, 'Co-Founder', 'Co-Founder', 'cofounder', 'Mencari partner untuk membangun bersama', 'Looking for a partner to build together');
+        $opts[] = $o('opt_fdr_look_2', 'q_fdr_looking', 2, 'Anggota Tim', 'Team Members', 'team', 'Mencari anggota tim untuk startup saya', 'Looking for team members for my startup');
+        $opts[] = $o('opt_fdr_look_3', 'q_fdr_looking', 3, 'Keduanya', 'Both', 'both', 'Mencari co-founder dan anggota tim', 'Looking for both co-founder and team members');
 
-        // ═══════════════════════════════════════════════════════
-        // Industries — Sinkronisasi dengan TagSeeder (33 industri)
-        // ═══════════════════════════════════════════════════════
-        $industries = [
-            'AI/ML', 'Fintech', 'Healthtech', 'EdTech', 'Web3', 'SaaS', 'Marketplace', 'Gaming',
-            'Climate Tech', 'AgriTech', 'LegalTech', 'InsurTech', 'PropTech', 'FoodTech',
-            'Logistics', 'E-Commerce', 'Media', 'Entertainment', 'Travel', 'Social', 'HRTech',
-            'Cybersecurity', 'IoT', 'Robotics', 'Biotech', 'SpaceTech', 'Fashion', 'Sports',
-            'Automotive', 'Energy', 'Construction', 'Telecom', 'GovTec',
-        ];
-        foreach ($industries as $i => $ind) {
-            $opts[] = $o('opt_ind_' . ($i + 1), 'q_industry', $i + 1, $ind, $ind, $ind);
-            $opts[] = $o('opt_ff_ind_' . ($i + 1), 'q_ff_ind', $i + 1, $ind, $ind, $ind);
+        // ── Industries (for all industry questions) ──
+        $industryQuestions = ['q_fdr_industry', 'q_cf_industry', 'q_tm_industry', 'q_su_industry'];
+        foreach ($industryQuestions as $qid) {
+            $opts = array_merge($opts, $genFlatOpts('opt_ind_' . str_replace('q_', '', $qid), $qid, $masterIndustries));
         }
 
-        // ═══════════════════════════════════════════════════════
-        // Roles — Dipakai di q_role_desc, Flow B, Flow C, Flow F
-        // ═══════════════════════════════════════════════════════
-        $roles = [
-            'CTO', 'CEO', 'COO', 'CMO', 'CPO', 'Product Manager', 'UI/UX Designer',
-            'Backend Developer', 'Frontend Developer', 'Fullstack Developer',
-            'Mobile Developer', 'Data Scientist', 'DevOps Engineer', 'Growth Marketer',
-            'Content Strategist', 'Sales Executive', 'Operations Manager', 'Quality Assurance',
-        ];
-        $roleSlug = fn ($r) => strtolower(str_replace([' ', '/'], '_', $r));
-
-        foreach ($roles as $i => $role) {
-            $slug = $roleSlug($role);
-            $opts[] = $o('opt_role_' . ($i + 1), 'q_role_desc', $i + 1, $role, $role, $slug);
-            $opts[] = $o('opt_fb_' . ($i + 1), 'q_flow_b_role', $i + 1, $role, $role, $slug);
-            $opts[] = $o('opt_fc_role_' . ($i + 1), 'q_flow_c_tm_role', $i + 1, $role, $role, $slug);
-            $opts[] = $o('opt_ff_role_' . ($i + 1), 'q_ff_role', $i + 1, $role, $role, $slug);
+        // ── Co-Founder Types (reused across multiple questions) ──
+        $cfTypeQuestions = ['q_fdr_cf_type', 'q_fdr_bt_cf', 'q_cf_type', 'q_su_need_cf_type', 'q_su_need_bt_cf'];
+        foreach ($cfTypeQuestions as $qid) {
+            $opts = array_merge($opts, $genCFOpts('opt_cft_' . str_replace('q_', '', $qid), $qid));
         }
 
-        // --- Founder Intent ---
-        $opts[] = $o('opt_fnd_1', 'q_founder_intent', 1, 'Mencari Co-Founder', 'Looking for Co-Founder', 'cofounder');
-        $opts[] = $o('opt_fnd_2', 'q_founder_intent', 2, 'Mencari Tim Inti', 'Looking for Core Team', 'team');
-        $opts[] = $o('opt_fnd_3', 'q_founder_intent', 3, 'Keduanya', 'Both', 'both');
-
-        // --- Flow A: Co-Founder Type ---
-        $opts[] = $o('opt_fa_1', 'q_flow_a_type', 1, 'Teknis (Hacker)', 'Technical (Hacker)', 'tech');
-        $opts[] = $o('opt_fa_2', 'q_flow_a_type', 2, 'Bisnis (Hustler)', 'Business (Hustler)', 'business');
-        $opts[] = $o('opt_fa_3', 'q_flow_a_type', 3, 'Produk/Desain (Hipster)', 'Product/Design (Hipster)', 'product');
-
-        // --- Flow C: Co-Founder Type ---
-        $opts[] = $o('opt_fc_1', 'q_flow_c_cf_type', 1, 'Teknis', 'Technical', 'tech');
-        $opts[] = $o('opt_fc_2', 'q_flow_c_cf_type', 2, 'Bisnis', 'Business', 'business');
-
-        // --- Flow D: Co-Founder Type + Salary ---
-        $opts[] = $o('opt_fd_1', 'q_flow_d_type', 1, 'Teknis', 'Technical', 'tech');
-        $opts[] = $o('opt_fd_2', 'q_flow_d_type', 2, 'Bisnis/Produk', 'Business/Product', 'business');
-        $opts[] = $o('opt_fd_st_1', 'q_flow_d_salary_type', 1, 'Ketat (Wajib Penuh)', 'Strict (Full req)', 'strict');
-        $opts[] = $o('opt_fd_st_2', 'q_flow_d_salary_type', 2, 'Fleksibel / Tawar-menawar', 'Flexible / Negotiable', 'flexible');
-        $opts[] = $o('opt_fd_st_3', 'q_flow_d_salary_type', 3, 'Hanya Ekuitas (Vesting)', 'Equity Only (Vesting)', 'equity_only');
-
-        // ═══════════════════════════════════════════════════════
-        // Skills — Sinkronisasi dengan TagSeeder (59 skills)
-        // ═══════════════════════════════════════════════════════
-        $skills = [
-            'AI/ML', 'Full-Stack', 'Frontend', 'Backend', 'Mobile Dev', 'Data Science', 'Cloud/Infra',
-            'DevOps', 'Blockchain', 'Cybersecurity', 'QA/Testing', 'Embedded Systems', 'Game Dev',
-            'AR/VR', 'Robotics', 'NLP', 'Hardware', 'Product Management', 'UI/UX', 'Graphic Design',
-            'UX Research', 'Digital Marketing', 'SEO/SEM', 'Social Media', 'Content Creation',
-            'Copywriting', 'Brand Strategy', 'Email Marketing', 'Influencer Marketing', 'PR/Comms',
-            'Sales Business', 'Dev Partnerships', 'Account Management', 'Customer Success',
-            'Lead Generation', 'Operations', 'Supply Chain', 'Project Management', 'Strategy',
-            'Process Optimization', 'Logistics', 'Finance', 'Accounting', 'Financial Modeling',
-            'Fundraising', 'Investor Relations', 'Tax/Compliance', 'Bookkeeping', 'Legal',
-            'HR/Recruiting', 'Talent Acquisition', 'People Ops', 'Compensation & Benefits',
-            'Technical Writing', 'Community Management', 'Data Analytics', 'Market Research',
-            'Public Speaking', 'Consulting',
-        ];
-        foreach ($skills as $i => $skill) {
-            $opts[] = $o('opt_skill_' . ($i + 1), 'q_flow_e_skill', $i + 1, $skill, $skill, $skill);
+        // ── Roles (for founder team needs + startup needs) ──
+        $teamRoleQuestions = ['q_fdr_tm_roles', 'q_fdr_bt_roles'];
+        foreach ($teamRoleQuestions as $qid) {
+            $opts = array_merge($opts, $genGroupedOpts('opt_tmr_' . str_replace('q_', '', $qid), $qid, $masterRoles));
         }
 
-        // ═══════════════════════════════════════════════════════
-        // Startup Stages — Idea, MVP, Live (sesuai keputusan user)
-        // ═══════════════════════════════════════════════════════
-        $stages = ['Idea', 'MVP', 'Live'];
-        foreach ($stages as $i => $stage) {
-            $opts[] = $o('opt_stage_' . ($i + 1), 'q_ff_stage', $i + 1, $stage, $stage, strtolower($stage));
+        // ── Skills (for team member + startup needs) ──
+        $skillQuestions = ['q_tm_skills', 'q_su_need_tm_skills', 'q_su_need_bt_tm'];
+        foreach ($skillQuestions as $qid) {
+            $opts = array_merge($opts, $genGroupedOpts('opt_sk_' . str_replace('q_', '', $qid), $qid, $masterSkills));
         }
 
-        // --- Flow F: Look ---
-        $opts[] = $o('opt_ff_look_1', 'q_ff_look', 1, 'Sedang Cari Co-Founder', 'Looking for Co-Founder', 'cofounder');
-        $opts[] = $o('opt_ff_look_2', 'q_ff_look', 2, 'Sedang Cari Anggota Tim', 'Looking for Team Members', 'team');
-        $opts[] = $o('opt_ff_look_3', 'q_ff_look', 3, 'Sedang Cari Keduanya', 'Looking for Both', 'both');
+        // ── Availability Options (reused for multiple questions) ──
+        $availQuestions = ['q_fdr_cf_avail', 'q_fdr_tm_avail', 'q_fdr_bt_avail', 'q_cf_avail', 'q_tm_avail'];
+        foreach ($availQuestions as $qid) {
+            $p = str_replace('q_', 'opt_av_', $qid);
+            $opts[] = $o($p.'_1', $qid, 1, 'Full-time', 'Full-time', 'full_time');
+            $opts[] = $o($p.'_2', $qid, 2, 'Part-time', 'Part-time', 'part_time');
+            $opts[] = $o($p.'_3', $qid, 3, 'Fleksibel / Open', 'Flexible / Open', 'flexible');
+        }
 
-        // Batch insert semua options sekaligus
-        DB::table('onboarding_options')->insert($opts);
+        // ── Remote Options (reused) ──
+        $remoteQuestions = ['q_fdr_cf_remote', 'q_fdr_tm_remote', 'q_fdr_bt_remote', 'q_cf_remote', 'q_tm_remote'];
+        foreach ($remoteQuestions as $qid) {
+            $p = str_replace('q_', 'opt_rm_', $qid);
+            $opts[] = $o($p.'_1', $qid, 1, 'Ya', 'Yes', 'yes');
+            $opts[] = $o($p.'_2', $qid, 2, 'Tidak', 'No', 'no');
+        }
 
-        // ═══════════════════════════════════════════════════════
-        // 5. TRANSITIONS — Routing logic antar flow
-        // ═══════════════════════════════════════════════════════
+        // ── Relocate Options (reused) ──
+        $relocateQuestions = ['q_fdr_cf_relocate', 'q_fdr_tm_relocate', 'q_fdr_bt_relocate', 'q_cf_relocate', 'q_tm_relocate'];
+        foreach ($relocateQuestions as $qid) {
+            $p = str_replace('q_', 'opt_rl_', $qid);
+            $opts[] = $o($p.'_1', $qid, 1, 'Ya', 'Yes', 'yes');
+            $opts[] = $o($p.'_2', $qid, 2, 'Tidak', 'No', 'no');
+        }
+
+        // ── Equity Expectation (Co-Founder + Team Member) ──
+        $equityQuestions = ['q_cf_equity', 'q_tm_equity'];
+        foreach ($equityQuestions as $qid) {
+            $p = str_replace('q_', 'opt_eq_', $qid);
+            $opts[] = $o($p.'_1', $qid, 1, 'Equity sangat penting', 'Equity is very important', 'equity_heavy');
+            $opts[] = $o($p.'_2', $qid, 2, 'Tertarik dengan sebagian equity', 'Interested in some equity', 'partial_equity');
+            $opts[] = $o($p.'_3', $qid, 3, 'Kompensasi berat di cash', 'Compensation heavy on cash', 'cash_heavy');
+        }
+
+        // ── Salary Type (Co-Founder + Team Member) ──
+        $salaryTypeQuestions = ['q_cf_salary_type', 'q_tm_salary_type'];
+        foreach ($salaryTypeQuestions as $qid) {
+            $p = str_replace('q_', 'opt_st_', $qid);
+            $opts[] = $o($p.'_1', $qid, 1, 'Ya, saya punya minimum yang tegas', 'Yes, I have a strict minimum', 'strict');
+            $opts[] = $o($p.'_2', $qid, 2, 'Ya, tapi saya bisa turun tergantung peluang', 'Yes, but flexible depending on opportunity', 'flexible');
+            $opts[] = $o($p.'_3', $qid, 3, 'Tidak, saya fleksibel soal gaji', 'No, I\'m flexible on salary', 'no_minimum');
+        }
+
+        // ── Salary Period (Co-Founder + Team Member) ──
+        $salaryPeriodQuestions = ['q_cf_salary_period', 'q_tm_salary_period'];
+        foreach ($salaryPeriodQuestions as $qid) {
+            $p = str_replace('q_', 'opt_sp_', $qid);
+            $opts[] = $o($p.'_1', $qid, 1, 'Per Tahun (Annual)', 'Annual', 'annual');
+            $opts[] = $o($p.'_2', $qid, 2, 'Per Jam (Hourly)', 'Hourly', 'hourly');
+        }
+
+        // ── Salary Currency ──
+        $salaryCurrencyQuestions = ['q_cf_salary_currency', 'q_tm_salary_currency'];
+        foreach ($salaryCurrencyQuestions as $qid) {
+            $p = str_replace('q_', 'opt_sc_', $qid);
+            $opts[] = $o($p.'_1', $qid, 1, 'IDR', 'IDR', 'IDR');
+            $opts[] = $o($p.'_2', $qid, 2, 'USD', 'USD', 'USD');
+            $opts[] = $o($p.'_3', $qid, 3, 'SGD', 'SGD', 'SGD');
+        }
+
+        // ── Startup Stage ──
+        $opts[] = $o('opt_stage_1', 'q_su_stage', 1, 'Idea', 'Idea', 'idea');
+        $opts[] = $o('opt_stage_2', 'q_su_stage', 2, 'MVP', 'MVP', 'mvp');
+        $opts[] = $o('opt_stage_3', 'q_su_stage', 3, 'Live (Sudah Launching)', 'Live (Already Launched)', 'live');
+        $opts[] = $o('opt_stage_4', 'q_su_stage', 4, 'Scale (Seed / Series A)', 'Scale (Seed / Series A)', 'scale');
+
+        // ── Business Models (grouped, for q_su_biz_model) ──
+        $bizIdx = 0;
+        foreach ($masterBizModels as $group => $models) {
+            foreach ($models as [$label, $value]) {
+                $bizIdx++;
+                $opts[] = [
+                    'id' => 'opt_biz_' . $bizIdx, 'question_id' => 'q_su_biz_model', 'order_index' => $bizIdx,
+                    'label' => json_encode(['id' => $label, 'en' => $label]), 'value' => $value,
+                    'sub_label' => null, 'icon' => null, 'group_name' => $group,
+                    'created_at' => $now, 'updated_at' => $now,
+                ];
+            }
+        }
+
+        // ── Traction: Prototype Yes/No ──
+        $opts[] = $o('opt_proto_1', 'q_su_tri_prototype', 1, 'Ya', 'Yes', 'yes');
+        $opts[] = $o('opt_proto_2', 'q_su_tri_prototype', 2, 'Belum', 'No', 'no');
+
+        // ── Founder Count ──
+        $opts[] = $o('opt_fc_1', 'q_su_founder_count', 1, 'Solo Founder', 'Solo Founder', 'solo');
+        $opts[] = $o('opt_fc_2', 'q_su_founder_count', 2, '2 Founders', '2 Founders', '2_founders');
+        $opts[] = $o('opt_fc_3', 'q_su_founder_count', 3, '3+ Founders', '3+ Founders', '3plus_founders');
+
+        // ── Founder Roles Covered ──
+        $founderRolesCovered = ['Technical','Product','Business','Growth','Operations','Finance','Design','Other'];
+        foreach ($founderRolesCovered as $i => $r) {
+            $opts[] = $o('opt_frc_'.($i+1), 'q_su_founder_roles', $i+1, $r, $r, \Illuminate\Support\Str::slug($r, '_'));
+        }
+
+        // ── Have Team ──
+        $opts[] = $o('opt_ht_1', 'q_su_have_team', 1, 'Tidak, hanya founder', 'No, just founders', 'no');
+        $opts[] = $o('opt_ht_2', 'q_su_have_team', 2, 'Ya', 'Yes', 'yes');
+
+        // ── Team Size ──
+        $opts[] = $o('opt_ts_1', 'q_su_team_size', 1, '1-3 orang', '1-3 people', '1_3');
+        $opts[] = $o('opt_ts_2', 'q_su_team_size', 2, '4-10 orang', '4-10 people', '4_10');
+        $opts[] = $o('opt_ts_3', 'q_su_team_size', 3, '10+ orang', '10+ people', '10_plus');
+
+        // ── Team Departments ──
+        $teamDepts = ['Engineering','Marketing','Sales','Operations','Design','Finance','Other'];
+        foreach ($teamDepts as $i => $d) {
+            $opts[] = $o('opt_td_'.($i+1), 'q_su_team_roles', $i+1, $d, $d, \Illuminate\Support\Str::slug($d, '_'));
+        }
+
+        // ── Startup: What You Need ──
+        $opts[] = $o('opt_sn_1', 'q_su_need', 1, 'Co-Founder', 'Co-Founder', 'cofounder');
+        $opts[] = $o('opt_sn_2', 'q_su_need', 2, 'Anggota Tim', 'Team Members', 'team');
+        $opts[] = $o('opt_sn_3', 'q_su_need', 3, 'Keduanya', 'Both', 'both');
+
+        // ── Commitment Level ──
+        $opts[] = $o('opt_cl_1', 'q_su_commitment', 1, 'Full-time only', 'Full-time only', 'full_time');
+        $opts[] = $o('opt_cl_2', 'q_su_commitment', 2, 'Part-time', 'Part-time', 'part_time');
+        $opts[] = $o('opt_cl_3', 'q_su_commitment', 3, 'Open / Fleksibel', 'Open / Flexible', 'flexible');
+
+        // ── Paid/Unpaid ──
+        $opts[] = $o('opt_paid_1', 'q_su_paid', 1, 'Berbayar (Paid)', 'Paid', 'paid');
+        $opts[] = $o('opt_paid_2', 'q_su_paid', 2, 'Tidak Dibayar (Unpaid)', 'Unpaid', 'unpaid');
+        $opts[] = $o('opt_paid_3', 'q_su_paid', 3, 'Open to Discussion', 'Open to Discussion', 'open');
+
+        // ── Batch Insert Options (chunk to avoid memory issues) ──
+        foreach (array_chunk($opts, 200) as $chunk) {
+            DB::table('onboarding_options')->insert($chunk);
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // 5. TRANSITIONS (Branching Logic)
+        // ════════════════════════════════════════════════════════════════
+        $t = function ($from, $condition, $toStep, $toFlow, $priority = 0) use ($now) {
+            return [
+                'from_step_id' => $from,
+                'condition' => $condition ? json_encode($condition) : null,
+                'to_step_id' => $toStep,
+                'to_flow_id' => $toFlow,
+                'priority' => $priority,
+                'created_at' => $now, 'updated_at' => $now,
+            ];
+        };
+
         DB::table('onboarding_transitions')->insert([
-            // Dari role selection: startup -> Flow F, sisanya -> builder common
-            ['from_step_id' => 'step_role_selection', 'condition' => json_encode(['question_id' => 'q_use_connectx', 'operator' => 'equals', 'value' => 'startup']), 'to_step_id' => 'step_flow_f', 'to_flow_id' => 'flow_f', 'priority' => 1, 'created_at' => $now, 'updated_at' => $now],
-            ['from_step_id' => 'step_role_selection', 'condition' => null, 'to_step_id' => 'step_bld_exp', 'to_flow_id' => 'flow_builder_common', 'priority' => 10, 'created_at' => $now, 'updated_at' => $now],
-            // Dari builder role: founder -> intent, cofounder -> Flow D, team -> Flow E
-            ['from_step_id' => 'step_bld_role', 'condition' => json_encode(['question_id' => 'q_use_connectx', 'operator' => 'equals', 'value' => 'founder']), 'to_step_id' => 'step_founder_intent', 'to_flow_id' => 'flow_builder_common', 'priority' => 1, 'created_at' => $now, 'updated_at' => $now],
-            ['from_step_id' => 'step_bld_role', 'condition' => json_encode(['question_id' => 'q_use_connectx', 'operator' => 'equals', 'value' => 'cofounder']), 'to_step_id' => 'step_flow_d', 'to_flow_id' => 'flow_d', 'priority' => 2, 'created_at' => $now, 'updated_at' => $now],
-            ['from_step_id' => 'step_bld_role', 'condition' => json_encode(['question_id' => 'q_use_connectx', 'operator' => 'equals', 'value' => 'team']), 'to_step_id' => 'step_flow_e', 'to_flow_id' => 'flow_e', 'priority' => 3, 'created_at' => $now, 'updated_at' => $now],
-            // Dari founder intent: cofounder -> Flow A, team -> Flow B, both -> Flow C
-            ['from_step_id' => 'step_founder_intent', 'condition' => json_encode(['question_id' => 'q_founder_intent', 'operator' => 'equals', 'value' => 'cofounder']), 'to_step_id' => 'step_flow_a', 'to_flow_id' => 'flow_a', 'priority' => 1, 'created_at' => $now, 'updated_at' => $now],
-            ['from_step_id' => 'step_founder_intent', 'condition' => json_encode(['question_id' => 'q_founder_intent', 'operator' => 'equals', 'value' => 'team']), 'to_step_id' => 'step_flow_b', 'to_flow_id' => 'flow_b', 'priority' => 2, 'created_at' => $now, 'updated_at' => $now],
-            ['from_step_id' => 'step_founder_intent', 'condition' => json_encode(['question_id' => 'q_founder_intent', 'operator' => 'equals', 'value' => 'both']), 'to_step_id' => 'step_flow_c', 'to_flow_id' => 'flow_c', 'priority' => 3, 'created_at' => $now, 'updated_at' => $now],
+            // ── step_role_selection: startup → flow_startup, else → flow_builder_common ──
+            $t('step_role_selection', ['question_id'=>'q_use_connectx','operator'=>'equals','value'=>'startup'], null, 'flow_startup', 10),
+            $t('step_role_selection', null, null, 'flow_builder_common', 0),  // default: founder/cofounder/team all go to builder common
+
+            // ── step_bld_exp: branch by original role selection ──
+            $t('step_bld_exp', ['question_id'=>'q_use_connectx','operator'=>'equals','value'=>'founder'],   null, 'flow_founder',   10),
+            $t('step_bld_exp', ['question_id'=>'q_use_connectx','operator'=>'equals','value'=>'cofounder'], null, 'flow_cofounder', 10),
+            $t('step_bld_exp', ['question_id'=>'q_use_connectx','operator'=>'equals','value'=>'team'],      null, 'flow_team',      10),
+
+            // ── step_fdr_industry: branch by what founder is looking for ──
+            $t('step_fdr_industry', ['question_id'=>'q_fdr_looking','operator'=>'equals','value'=>'cofounder'], null, 'flow_fdr_cf',   10),
+            $t('step_fdr_industry', ['question_id'=>'q_fdr_looking','operator'=>'equals','value'=>'team'],      null, 'flow_fdr_team', 10),
+            $t('step_fdr_industry', ['question_id'=>'q_fdr_looking','operator'=>'equals','value'=>'both'],      null, 'flow_fdr_both', 10),
+
+            // ── Startup: step_su_biz → Traction by stage ──
+            $t('step_su_biz', ['question_id'=>'q_su_stage','operator'=>'equals','value'=>'idea'],  null, 'flow_su_tr_idea',  10),
+            $t('step_su_biz', ['question_id'=>'q_su_stage','operator'=>'equals','value'=>'mvp'],   null, 'flow_su_tr_mvp',   10),
+            $t('step_su_biz', ['question_id'=>'q_su_stage','operator'=>'equals','value'=>'live'],  null, 'flow_su_tr_live',  10),
+            $t('step_su_biz', ['question_id'=>'q_su_stage','operator'=>'equals','value'=>'scale'], null, 'flow_su_tr_scale', 10),
+
+            // ── Traction → flow_su_finish (unconditional) ──
+            $t('step_su_tr_idea',  null, null, 'flow_su_finish', 0),
+            $t('step_su_tr_mvp',   null, null, 'flow_su_finish', 0),
+            $t('step_su_tr_live',  null, null, 'flow_su_finish', 0),
+            $t('step_su_tr_scale', null, null, 'flow_su_finish', 0),
+
+            // ── step_su_need: branch by what startup needs ──
+            $t('step_su_need', ['question_id'=>'q_su_need','operator'=>'equals','value'=>'cofounder'], null, 'flow_su_need_cf',   10),
+            $t('step_su_need', ['question_id'=>'q_su_need','operator'=>'equals','value'=>'team'],      null, 'flow_su_need_team', 10),
+            $t('step_su_need', ['question_id'=>'q_su_need','operator'=>'equals','value'=>'both'],      null, 'flow_su_need_both', 10),
+
+            // ── Startup Need sub-flows → flow_su_end (unconditional) ──
+            $t('step_su_need_cf',    null, null, 'flow_su_end', 0),
+            $t('step_su_need_tm',    null, null, 'flow_su_end', 0),
+            $t('step_su_need_bt_tm', null, null, 'flow_su_end', 0),
         ]);
     }
 }

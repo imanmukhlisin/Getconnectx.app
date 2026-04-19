@@ -432,14 +432,28 @@ class OnboardingEngineService
             ->distinct('step_id')
             ->count('step_id');
 
+        // Estimasi total step berdasarkan role (lebih akurat dari hardcode 12)
+        $role = OnboardingResponse::where('session_id', $session->id)
+            ->where('question_id', 'q_use_connectx')
+            ->first();
+
+        $total = match ($role ? $this->getValue($role->value) : null) {
+            'founder'   => 11,  // common(5) + builder(2) + founder(2) + sub-flow(~2)
+            'cofounder' => 13,  // common(5) + builder(2) + cofounder(6)
+            'team'      => 13,  // common(5) + builder(2) + team(6)
+            'startup'   => 14,  // common(5) + startup(3) + traction(1) + finish(4) + need(1-2) + end(2)
+            default     => 12,
+        };
+
         return [
             'current' => $answeredSteps + 1,
-            'total' => 12 // Estimasi statis berdasarkan gambaran API Contract
+            'total'   => $total,
         ];
     }
 
     /**
      * Memetakan kumpulan jawaban JSON ke kolom tabel `users` utama dan sinkronisasi tags.
+     * Mendukung semua 18 flow dan 90+ question ID dari seeder.
      */
     private function mapResponsesToProfile(OnboardingSession $session)
     {
@@ -447,34 +461,112 @@ class OnboardingEngineService
         $responses = OnboardingResponse::where('session_id', $session->id)->get()->keyBy('question_id');
 
         $updateData = [];
-        $syncTags = [];
 
-        // Contoh aturan sinkronisasi berdasarkan ID yang disyaratkan di Seeder
+        // ── Nama ──
         if ($responses->has('q_first_name')) {
             $firstName = $this->getValue($responses['q_first_name']->value);
             $lastName = $responses->has('q_last_name') ? $this->getValue($responses['q_last_name']->value) : '';
             $updateData['name'] = trim($firstName . ' ' . $lastName);
         }
 
+        // ── Tanggal Lahir ──
+        if ($responses->has('q_dob')) {
+            $updateData['date_of_birth'] = $this->getValue($responses['q_dob']->value);
+        }
+
+        // ── Lokasi ──
+        if ($responses->has('q_location')) {
+            $updateData['location'] = $this->getValue($responses['q_location']->value);
+        }
+
+        // ── Gender ──
+        if ($responses->has('q_gender')) {
+            $updateData['gender'] = $this->getValue($responses['q_gender']->value);
+        }
+
+        // ── Role Category ──
         if ($responses->has('q_use_connectx')) {
             $action = $this->getValue($responses['q_use_connectx']->value);
-            if ($action === 'startup') {
-                $updateData['role_category'] = 'Startup';
-            } elseif ($action === 'founder') {
-                $updateData['role_category'] = 'Founder';
-            } elseif ($action === 'cofounder') {
-                $updateData['role_category'] = 'Co-Founder';
-            } elseif ($action === 'team') {
-                $updateData['role_category'] = 'Team Member';
+            $updateData['role_category'] = match ($action) {
+                'founder'   => 'Founder',
+                'cofounder' => 'Co-Founder',
+                'team'      => 'Team Member',
+                'startup'   => 'Startup',
+                default     => null,
+            };
+        }
+
+        // ── Primary Role (Builder paths) ──
+        if ($responses->has('q_bld_role')) {
+            $updateData['primary_role'] = $this->getValue($responses['q_bld_role']->value);
+        }
+
+        // ── Years of Experience ──
+        if ($responses->has('q_bld_years')) {
+            $updateData['years_experience'] = $this->getValue($responses['q_bld_years']->value);
+        }
+
+        // ── Startup Experience Level ──
+        if ($responses->has('q_bld_exp')) {
+            $updateData['startup_experience'] = $this->getValue($responses['q_bld_exp']->value);
+        }
+
+        // ── Co-Founder Type (for co-founder joining path) ──
+        if ($responses->has('q_cf_type')) {
+            $updateData['cofounder_type'] = $this->getValue($responses['q_cf_type']->value);
+        }
+
+        // ── Commitment Level (multiple possible question IDs dari berbagai flow) ──
+        $availQuestions = ['q_fdr_cf_avail','q_fdr_tm_avail','q_fdr_bt_avail','q_cf_avail','q_tm_avail'];
+        foreach ($availQuestions as $qid) {
+            if ($responses->has($qid)) {
+                $updateData['commitment_level'] = $this->getValue($responses[$qid]->value);
+                break;
             }
         }
 
-        if ($responses->has('q_availability')) {
-            $updateData['commitment_level'] = $this->getValue($responses['q_availability']->value);
+        // ── Startup Commitment (startup path) ──
+        if ($responses->has('q_su_commitment')) {
+            $updateData['commitment_level'] = $this->getValue($responses['q_su_commitment']->value);
         }
 
-        if ($responses->has('q_ff_stage')) {
-            $updateData['startup_stage'] = $this->getValue($responses['q_ff_stage']->value);
+        // ── LinkedIn (multiple possible question IDs) ──
+        $linkedinQuestions = ['q_fdr_cf_linkedin','q_fdr_tm_linkedin','q_fdr_bt_linkedin','q_cf_linkedin','q_tm_linkedin','q_su_linkedin'];
+        foreach ($linkedinQuestions as $qid) {
+            if ($responses->has($qid)) {
+                $val = $this->getValue($responses[$qid]->value);
+                if (!empty($val)) {
+                    $updateData['linkedin_url'] = $val;
+                    break;
+                }
+            }
+        }
+
+        // ── Startup-specific fields ──
+        if ($responses->has('q_su_name')) {
+            $updateData['startup_name'] = $this->getValue($responses['q_su_name']->value);
+        }
+        if ($responses->has('q_su_tagline')) {
+            $updateData['startup_tagline'] = $this->getValue($responses['q_su_tagline']->value);
+        }
+        if ($responses->has('q_su_stage')) {
+            $updateData['startup_stage'] = $this->getValue($responses['q_su_stage']->value);
+        }
+
+        // ── Remote & Relocate preferences ──
+        $remoteQuestions = ['q_open_remote','q_fdr_cf_remote','q_fdr_tm_remote','q_fdr_bt_remote','q_cf_remote','q_tm_remote'];
+        foreach ($remoteQuestions as $qid) {
+            if ($responses->has($qid)) {
+                $updateData['open_to_remote'] = $this->getValue($responses[$qid]->value) === 'yes';
+                break;
+            }
+        }
+        $relocateQuestions = ['q_fdr_cf_relocate','q_fdr_tm_relocate','q_fdr_bt_relocate','q_cf_relocate','q_tm_relocate'];
+        foreach ($relocateQuestions as $qid) {
+            if ($responses->has($qid)) {
+                $updateData['willing_to_relocate'] = $this->getValue($responses[$qid]->value) === 'yes';
+                break;
+            }
         }
 
         $updateData['is_onboarded'] = true;
@@ -483,35 +575,40 @@ class OnboardingEngineService
             $user->update($updateData);
         }
 
-        // Sinkronisasi Many-to-Many Tags (Industri dan Keahlian/Skill)
+        // ── Sinkronisasi Many-to-Many Tags (Industri + Skill) ──
         $tagNames = [];
 
-        if ($responses->has('q_industry')) {
-            $names = $responses['q_industry']->value;
-            if (is_array($names)) $tagNames = array_merge($tagNames, $names);
+        // Semua kemungkinan industry question IDs
+        $industryQids = ['q_fdr_industry','q_cf_industry','q_tm_industry','q_su_industry'];
+        foreach ($industryQids as $qid) {
+            if ($responses->has($qid)) {
+                $names = $responses[$qid]->value;
+                if (is_array($names)) $tagNames = array_merge($tagNames, $names);
+            }
         }
 
-        if ($responses->has('q_ff_ind')) {
-            $names = $responses['q_ff_ind']->value;
-            if (is_array($names)) $tagNames = array_merge($tagNames, $names);
-        }
-
-        if ($responses->has('q_flow_e_skill')) {
-            $names = $responses['q_flow_e_skill']->value;
-            if (is_array($names)) $tagNames = array_merge($tagNames, $names);
+        // Semua kemungkinan skill question IDs
+        $skillQids = ['q_tm_skills','q_su_need_tm_skills','q_su_need_bt_tm'];
+        foreach ($skillQids as $qid) {
+            if ($responses->has($qid)) {
+                $names = $responses[$qid]->value;
+                if (is_array($names)) $tagNames = array_merge($tagNames, $names);
+            }
         }
 
         if (!empty($tagNames)) {
-            // Dapatkan tag IDs dari database berdasarkan nama karena form nyimpan 'name'
             $tagIds = \App\Models\Tag::whereIn('name', $tagNames)->pluck('id')->toArray();
             if (!empty($tagIds)) {
                 $user->tags()->sync($tagIds);
             }
         }
 
-        // Cache Invalidation for Feed: When user's profile changes (role, stages, tags),
-        // we must clear their discovery feed cache so new compatibility scores apply.
-        app(\App\Services\FeedService::class)->invalidateUserFeedCache($user->id);
+        // Cache Invalidation for Feed
+        try {
+            app(\App\Services\FeedService::class)->invalidateUserFeedCache($user->id);
+        } catch (\Throwable $e) {
+            // FeedService may not exist yet — silently ignore
+        }
     }
 
     private function getValue($jsonValue)
