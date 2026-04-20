@@ -17,11 +17,13 @@ class TagSeeder extends Seeder
         DB::statement('TRUNCATE TABLE tags RESTART IDENTITY CASCADE');
 
         $industries = [
-            'AI/ML', 'Fintech', 'Healthtech', 'EdTech', 'Web3', 'SaaS', 'Marketplace', 'Gaming',
-            'Climate Tech', 'AgriTech', 'LegalTech', 'InsurTech', 'PropTech', 'FoodTech',
-            'Logistics', 'E-Commerce', 'Media', 'Entertainment', 'Travel', 'Social', 'HRTech',
-            'Cybersecurity', 'IoT', 'Robotics', 'Biotech', 'SpaceTech', 'Fashion', 'Sports',
-            'Automotive', 'Energy', 'Construction', 'Telecom', 'GovTec'
+            'AI','Generative Tech/AI','DeepTech','AR/VR','IoT','Robotics','Semiconductors','Cloud Infrastructure','Developer Tools','Security','Data Services','Analytics',
+            'SaaS','SMB Software','Productivity Tools','Sales & CRM','Enterprise','Messaging','Social Networks',
+            'E-commerce','Marketplaces','Direct-to-Consumer (DTC)','Retail','Fashion','Cosmetics','Food and Beverage','Creator/Passion Economy',
+            'FinTech','Payments','Insurance','LegalTech','Human Capital/HRTech',
+            'Healthcare','Medical Devices','Pharmaceuticals','Education','EnergyTech','ClimateTech/CleanTech','AgTech','ConstructionTech','Manufacturing','Logistics','Supply Chain Tech','TransportationTech','Real Estate/PropTech','GovTech',
+            'Gaming','Entertainment & Sports','Media/Content','Travel','Lodging/Hospitality','Wellness & Fitness','Mental Health','Parenting/Families',
+            'Web3/Blockchain','Space','Smart Cities/UrbanTech','Future of Work','Gig Economy','Social Impact','Hardware','Material Science',
         ];
 
         $skills = [

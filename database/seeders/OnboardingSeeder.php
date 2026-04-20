@@ -83,20 +83,37 @@ class OnboardingSeeder extends Seeder
         ];
 
         $masterIndustries = [
-            'AI','AR/VR','Advertising','AgTech','Analytics','AudioTech','AutoTech',
-            'Biotech','ClimateTech/CleanTech','Cloud Infrastructure','ConstructionTech',
-            'Cosmetics','Creator/Passion Economy','Data Services','DeepTech','Developer Tools',
-            'Direct-to-Consumer (DTC)','E-commerce','Education','EnergyTech','Enterprise',
-            'Entertainment & Sports','Fashion','FinTech','Food and Beverage','Future of Work',
-            'Gaming','Generative Tech/AI','Gig Economy','GovTech','Hardware','Healthcare',
-            'Human Capital/HRTech','Insurance','IoT','LegalTech','Lodging/Hospitality',
-            'Logistics','Manufacturing','MarketingTech','Marketplaces','Material Science',
-            'Media/Content','Medical Devices','Mental Health','Messaging',
-            'Parenting/Families','Payments','Pharmaceuticals','Productivity Tools',
-            'Real Estate/PropTech','Retail','Robotics','SMB Software','SaaS','Sales & CRM',
-            'Security','Semiconductors','Smart Cities/UrbanTech','Social Impact',
-            'Social Networks','Space','Supply Chain Tech','TransportationTech','Travel',
-            'Web3/Blockchain','Wellness & Fitness',
+            'Core Technology' => [
+                'AI','Generative Tech/AI','DeepTech','AR/VR','IoT',
+                'Robotics','Semiconductors','Cloud Infrastructure','Developer Tools',
+                'Security','Data Services','Analytics',
+            ],
+            'Software & Digital Products' => [
+                'SaaS','SMB Software','Productivity Tools','Sales & CRM',
+                'Enterprise','Messaging','Social Networks',
+            ],
+            'Consumer & Marketplace' => [
+                'E-commerce','Marketplaces','Direct-to-Consumer (DTC)','Retail',
+                'Fashion','Cosmetics','Food and Beverage','Creator/Passion Economy',
+            ],
+            'Finance & Business Infrastructure' => [
+                'FinTech','Payments','Insurance','LegalTech','Human Capital/HRTech',
+            ],
+            'Industry-Specific Solutions' => [
+                'Healthcare','Medical Devices','Pharmaceuticals','Education',
+                'EnergyTech','ClimateTech/CleanTech','AgTech','ConstructionTech',
+                'Manufacturing','Logistics','Supply Chain Tech','TransportationTech',
+                'Real Estate/PropTech','GovTech',
+            ],
+            'Media, Lifestyle & Experience' => [
+                'Gaming','Entertainment & Sports','Media/Content','Travel',
+                'Lodging/Hospitality','Wellness & Fitness','Mental Health',
+                'Parenting/Families',
+            ],
+            'Emerging & Future' => [
+                'Web3/Blockchain','Space','Smart Cities/UrbanTech','Future of Work',
+                'Gig Economy','Social Impact','Hardware','Material Science',
+            ],
         ];
 
         $masterSkills = [
@@ -691,7 +708,7 @@ class OnboardingSeeder extends Seeder
         // ── Industries (for all industry questions) ──
         $industryQuestions = ['q_fdr_industry', 'q_cf_industry', 'q_tm_industry', 'q_su_industry'];
         foreach ($industryQuestions as $qid) {
-            $opts = array_merge($opts, $genFlatOpts('opt_ind_' . str_replace('q_', '', $qid), $qid, $masterIndustries));
+            $opts = array_merge($opts, $genGroupedOpts('opt_ind_' . str_replace('q_', '', $qid), $qid, $masterIndustries));
         }
 
         // ── Co-Founder Types (reused across multiple questions) ──
