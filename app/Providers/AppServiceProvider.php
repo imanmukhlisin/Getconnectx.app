@@ -42,6 +42,13 @@ class AppServiceProvider extends ServiceProvider
     {
         \URL::forceScheme('https');
 
+        \BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch::configureUsing(function (\BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch $switch) {
+            $switch
+                ->locales(['id', 'en'])
+                ->visible(outsidePanels: true);
+        });
+
+
         // ── Onboarding Option Resource ────────────────────────────────────────
         \Livewire\Livewire::component(
             'app.filament.resources.onboarding.onboarding-option-resource.pages.create-onboarding-option',
