@@ -17,25 +17,26 @@ class OnboardingOptionResource extends Resource
 
     protected static ?string $navigationIcon  = 'heroicon-o-squares-plus';
     protected static ?string $navigationGroup = 'Onboarding Engine';
-    protected static ?string $navigationLabel = 'Pilihan Jawaban';
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.nav.options');
+    }
     protected static ?int    $navigationSort  = 4;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Pengaturan Pilihan')
+                Forms\Components\Section::make(__('admin.option.info_section'))
                     ->description('Setiap pilihan adalah satu opsi jawaban yang bisa dipilih user dari pertanyaan bertipe "Select" atau "Multi Select".')
                     ->schema([
                         Forms\Components\Select::make('question_id')
-                            ->label('Pertanyaan')
+                            ->label(__('admin.nav.questions'))
                             ->helperText('Pilih pertanyaan yang memiliki opsi jawaban ini.')
                             ->options(function () {
                                 return OnboardingQuestion::all()
                                     ->mapWithKeys(function ($q) {
-                                        $label = is_array($q->label)
-                                            ? ($q->label['id'] ?? 'Pertanyaan #' . $q->order_index)
-                                            : ($q->label ?? 'Pertanyaan #' . $q->order_index);
+                                        $label = $q->getTranslated('label') ?? 'Pertanyaan #' . $q->order_index;
                                         return [$q->id => $label];
                                     });
                             })
@@ -43,7 +44,7 @@ class OnboardingOptionResource extends Resource
                             ->required(),
 
                         Forms\Components\TextInput::make('order_index')
-                            ->label('Urutan Tampil')
+                            ->label(__('admin.option.order_index'))
                             ->helperText('Urutan pilihan ini dalam daftar (1 = paling atas).')
                             ->placeholder('Contoh: 1')
                             ->numeric()
@@ -51,47 +52,47 @@ class OnboardingOptionResource extends Resource
                             ->required(),
 
                         Forms\Components\TextInput::make('value')
-                            ->label('Nilai (Value)')
+                            ->label(__('admin.option.value'))
                             ->helperText('Nilai teknis yang disimpan ke database ketika user memilih opsi ini. Gunakan huruf kecil tanpa spasi. Contoh: software_engineer')
                             ->placeholder('Contoh: software_engineer')
                             ->required()
                             ->maxLength(255),
 
                         Forms\Components\TextInput::make('icon')
-                            ->label('Ikon (Opsional)')
+                            ->label(__('admin.option.icon'))
                             ->helperText('Nama emoji atau kode ikon. Contoh: 💻 atau heroicon-o-computer-desktop')
                             ->placeholder('Contoh: 💻')
                             ->maxLength(255),
 
                         Forms\Components\TextInput::make('group_name')
-                            ->label('Nama Grup (Opsional)')
+                            ->label(__('admin.option.group_name'))
                             ->helperText('Jika pilihan dikelompokkan, isi nama grupnya. Contoh: "Teknologi", "Bisnis".')
                             ->placeholder('Contoh: Teknologi')
                             ->maxLength(255),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Teks Pilihan')
+                Forms\Components\Section::make(__('admin.option.label'))
                     ->description('Teks yang dilihat user saat memilih opsi ini. Isi dalam dua bahasa.')
                     ->schema([
-                        Forms\Components\Fieldset::make('Label Pilihan (Wajib)')
+                        Forms\Components\Fieldset::make(__('admin.option.label'))
                             ->schema([
                                 Forms\Components\TextInput::make('label.id')
-                                    ->label('🇮🇩 Teks Pilihan (Indonesia)')
+                                    ->label('🇮🇩 ' . __('admin.option.label') . ' (Indonesia)')
                                     ->placeholder('Contoh: Software Engineer')
                                     ->required(),
                                 Forms\Components\TextInput::make('label.en')
-                                    ->label('🇬🇧 Option Label (English)')
+                                    ->label('🇬🇧 ' . __('admin.option.label') . ' (English)')
                                     ->placeholder('Example: Software Engineer')
                                     ->required(),
                             ])->columns(2),
 
-                        Forms\Components\Fieldset::make('Sub-label (Opsional)')
+                        Forms\Components\Fieldset::make(__('admin.option.sub_label'))
                             ->schema([
                                 Forms\Components\TextInput::make('sub_label.id')
-                                    ->label('🇮🇩 Keterangan Tambahan (Indonesia)')
+                                    ->label('🇮🇩 ' . __('admin.option.sub_label') . ' (Indonesia)')
                                     ->placeholder('Contoh: Membangun dan memelihara sistem perangkat lunak'),
                                 Forms\Components\TextInput::make('sub_label.en')
-                                    ->label('🇬🇧 Additional Description (English)')
+                                    ->label('🇬🇧 ' . __('admin.option.sub_label') . ' (English)')
                                     ->placeholder('Example: Build and maintain software systems'),
                             ])->columns(2),
                     ]),
@@ -107,26 +108,26 @@ class OnboardingOptionResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->limit(20),
                 Tables\Columns\TextColumn::make('question_id')
-                    ->label('Pertanyaan (ID)')
+                    ->label(__('admin.nav.questions') . ' (ID)')
                     ->searchable()
                     ->limit(20)
                     ->badge()
                     ->color('info'),
                 Tables\Columns\TextColumn::make('order_index')
-                    ->label('Urutan')
+                    ->label(__('admin.step.order_index'))
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('label')
-                    ->label('Label (ID)')
-                    ->formatStateUsing(fn ($state) => is_array($state) ? ($state['id'] ?? '-') : $state)
+                    ->label(__('admin.option.label'))
+                    ->formatStateUsing(fn ($record) => $record->getTranslated('label'))
                     ->limit(30),
                 Tables\Columns\TextColumn::make('value')
-                    ->label('Value')
+                    ->label(__('admin.option.value'))
                     ->badge()
                     ->color('gray')
                     ->limit(20),
                 Tables\Columns\TextColumn::make('group_name')
-                    ->label('Grup')
+                    ->label(__('admin.option.group_name'))
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('order_index')
@@ -143,13 +144,13 @@ class OnboardingOptionResource extends Resource
                     ->searchable(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()->label('Edit'),
+                Tables\Actions\EditAction::make()->label(__('admin.common.edit')),
                 Tables\Actions\DeleteAction::make()
-                    ->label('Hapus')
+                    ->label(__('admin.common.delete'))
                     ->requiresConfirmation()
-                    ->modalHeading('Hapus Pilihan Jawaban?')
-                    ->modalDescription('Tindakan ini akan menghapus pilihan jawaban ini secara permanen.')
-                    ->modalSubmitActionLabel('Ya, Hapus'),
+                    ->modalHeading(__('admin.common.delete_confirm'))
+                    ->modalDescription(__('admin.common.delete_desc'))
+                    ->modalSubmitActionLabel(__('admin.common.yes_delete')),
             ])
             ->bulkActions([]);
     }

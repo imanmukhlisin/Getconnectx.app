@@ -17,25 +17,28 @@ class OnboardingStepResource extends Resource
 
     protected static ?string $navigationIcon  = 'heroicon-o-list-bullet';
     protected static ?string $navigationGroup = 'Onboarding Engine';
-    protected static ?string $navigationLabel = 'Halaman (Steps)';
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.nav.steps');
+    }
     protected static ?int    $navigationSort  = 2;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Pengaturan Halaman')
+                Forms\Components\Section::make(__('admin.step.info_section'))
                     ->description('Setiap "Step" adalah satu halaman yang dilihat user saat proses onboarding.')
                     ->schema([
                         Forms\Components\Select::make('flow_id')
-                            ->label('Alur Onboarding')
+                            ->label(__('admin.flow.name'))
                             ->helperText('Pilih alur onboarding tempat halaman ini berada.')
                             ->options(fn () => OnboardingFlow::pluck('name', 'id'))
                             ->searchable()
                             ->required(),
 
                         Forms\Components\TextInput::make('order_index')
-                            ->label('Urutan Tampil')
+                            ->label(__('admin.step.order_index'))
                             ->helperText('Angka urutan halaman ini dalam alur (1 = pertama, 2 = kedua, dst).')
                             ->placeholder('Contoh: 1')
                             ->numeric()
@@ -43,7 +46,7 @@ class OnboardingStepResource extends Resource
                             ->required(),
 
                         Forms\Components\TextInput::make('section')
-                            ->label('Kategori / Section')
+                            ->label(__('admin.step.section'))
                             ->helperText('Pengelompokan internal. Contoh: personal_info, skills, preferences.')
                             ->placeholder('Contoh: personal_info'),
                     ])->columns(3),
@@ -51,7 +54,7 @@ class OnboardingStepResource extends Resource
                 Forms\Components\Section::make('Konten Teks')
                     ->description('Teks yang ditampilkan kepada user di halaman ini. Isi dalam dua bahasa (Indonesia & Inggris).')
                     ->schema([
-                        Forms\Components\Fieldset::make('Judul Halaman')
+                        Forms\Components\Fieldset::make(__('admin.step.title'))
                             ->schema([
                                 Forms\Components\TextInput::make('title.id')
                                     ->label('🇮🇩 Judul (Indonesia)')
@@ -63,7 +66,7 @@ class OnboardingStepResource extends Resource
                                     ->required(),
                             ])->columns(2),
 
-                        Forms\Components\Fieldset::make('Subjudul Halaman')
+                        Forms\Components\Fieldset::make(__('admin.step.subtitle'))
                             ->schema([
                                 Forms\Components\TextInput::make('subtitle.id')
                                     ->label('🇮🇩 Subjudul (Indonesia)')
@@ -73,7 +76,7 @@ class OnboardingStepResource extends Resource
                                     ->placeholder('Example: This helps us find the best connections for you'),
                             ])->columns(2),
 
-                        Forms\Components\Fieldset::make('Teks Tombol Lanjut (CTA)')
+                        Forms\Components\Fieldset::make(__('admin.step.cta_label'))
                             ->schema([
                                 Forms\Components\TextInput::make('cta_label.id')
                                     ->label('🇮🇩 Teks Tombol (Indonesia)')
@@ -87,11 +90,11 @@ class OnboardingStepResource extends Resource
                 Forms\Components\Section::make('Pengaturan Navigasi')
                     ->schema([
                         Forms\Components\Toggle::make('auto_advance')
-                            ->label('⚡ Otomatis Lanjut?')
+                            ->label('⚡ ' . __('admin.step.auto_advance'))
                             ->helperText('Jika aktif, user otomatis berpindah ke halaman berikutnya setelah mengisi. Cocok untuk halaman dengan satu pertanyaan sederhana.'),
 
                         Forms\Components\Toggle::make('can_go_back')
-                            ->label('↩️ Bisa Kembali ke Halaman Sebelumnya?')
+                            ->label('↩️ ' . __('admin.step.can_go_back'))
                             ->helperText('Jika aktif, user bisa menekan tombol kembali untuk mengubah jawaban di halaman sebelumnya.'),
                     ])->columns(2),
             ]);
@@ -102,25 +105,25 @@ class OnboardingStepResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('flow.name')
-                    ->label('Alur')
+                    ->label(__('admin.flow.name'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('order_index')
-                    ->label('Urutan')
+                    ->label(__('admin.step.order_index'))
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('title')
-                    ->label('Judul')
-                    ->formatStateUsing(fn ($state) => is_array($state) ? ($state['id'] ?? '-') : $state)
+                    ->label(__('admin.step.title'))
+                    ->formatStateUsing(fn ($record) => $record->getTranslated('title'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('section')
-                    ->label('Kategori')
+                    ->label(__('admin.step.section'))
                     ->searchable(),
                 Tables\Columns\IconColumn::make('auto_advance')
-                    ->label('Auto Lanjut?')
+                    ->label(__('admin.step.auto_advance'))
                     ->boolean(),
                 Tables\Columns\IconColumn::make('can_go_back')
-                    ->label('Bisa Kembali?')
+                    ->label(__('admin.step.can_go_back'))
                     ->boolean(),
             ])
             ->defaultSort('order_index')
@@ -130,13 +133,13 @@ class OnboardingStepResource extends Resource
                     ->relationship('flow', 'name'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()->label('Edit'),
+                Tables\Actions\EditAction::make()->label(__('admin.common.edit')),
                 Tables\Actions\DeleteAction::make()
-                    ->label('Hapus')
+                    ->label(__('admin.common.delete'))
                     ->requiresConfirmation()
-                    ->modalHeading('Hapus Halaman Onboarding?')
-                    ->modalDescription('Tindakan ini akan menghapus halaman beserta semua pertanyaan di dalamnya. Tidak dapat dibatalkan!')
-                    ->modalSubmitActionLabel('Ya, Hapus'),
+                    ->modalHeading(__('admin.common.delete_confirm'))
+                    ->modalDescription(__('admin.common.delete_confirm'))
+                    ->modalSubmitActionLabel(__('admin.common.yes_delete')),
             ])
             ->bulkActions([]);
     }

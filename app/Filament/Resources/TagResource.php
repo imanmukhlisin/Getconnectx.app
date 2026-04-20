@@ -16,7 +16,10 @@ class TagResource extends Resource
 
     protected static ?string $navigationIcon  = 'heroicon-o-tag';
     protected static ?string $navigationGroup = 'Master Data';
-    protected static ?string $navigationLabel = 'Kelola Tags';
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.nav.tags');
+    }
     protected static ?int    $navigationSort  = 1;
 
     public static function form(Form $form): Form
@@ -37,8 +40,8 @@ class TagResource extends Resource
                             ->label('Kategori Tag')
                             ->helperText('Pilih apakah ini tag keahlian teknis (Skill) atau bidang industri (Industri).')
                             ->options([
-                                'skill'    => '🔧 Skill — Keahlian teknis (contoh: React.js, Python, UI/UX)',
-                                'industry' => '🏭 Industri — Bidang industri (contoh: Fintech, E-Commerce, Healthtech)',
+                                'skill'    => '🔧 Skill',
+                                'industry' => '🏭 Industri',
                             ])
                             ->native(false)
                             ->required(),
@@ -68,7 +71,7 @@ class TagResource extends Resource
                         default    => $state,
                     }),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Dibuat')
+                    ->label(__('admin.common.last_updated'))
                     ->dateTime('d M Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -83,13 +86,13 @@ class TagResource extends Resource
                     ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()->label('Edit'),
+                Tables\Actions\EditAction::make()->label(__('admin.common.edit')),
                 Tables\Actions\DeleteAction::make()
-                    ->label('Hapus')
+                    ->label(__('admin.common.delete'))
                     ->requiresConfirmation()
-                    ->modalHeading('Hapus Tag?')
-                    ->modalDescription('Tag yang sudah dipakai user tidak disarankan dihapus karena bisa mempengaruhi profil mereka.')
-                    ->modalSubmitActionLabel('Ya, Hapus'),
+                    ->modalHeading(__('admin.common.delete_confirm'))
+                    ->modalDescription(__('admin.common.delete_confirm'))
+                    ->modalSubmitActionLabel(__('admin.common.yes_delete')),
             ])
             ->bulkActions([]);
     }
