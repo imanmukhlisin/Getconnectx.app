@@ -16,32 +16,35 @@ class OnboardingFlowResource extends Resource
 
     protected static ?string $navigationIcon  = 'heroicon-o-arrow-path-rounded-square';
     protected static ?string $navigationGroup = 'Onboarding Engine';
-    protected static ?string $navigationLabel = 'Alur Onboarding';
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.nav.flows');
+    }
     protected static ?int    $navigationSort  = 1;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Informasi Alur')
-                    ->description('Alur (flow) adalah kumpulan step/halaman yang dilalui user saat onboarding.')
+                Forms\Components\Section::make(__('admin.flow.info_section'))
+                    ->description(__('admin.flow.info_desc'))
                     ->schema([
                         Forms\Components\TextInput::make('name')
-                            ->label('Nama Alur')
+                            ->label(__('admin.flow.name'))
                             ->placeholder('Contoh: Onboarding Utama, Onboarding Freelancer')
                             ->helperText('Nama internal alur ini. Tidak terlihat oleh user.')
                             ->required()
                             ->maxLength(255),
 
                         Forms\Components\Textarea::make('description')
-                            ->label('Deskripsi')
+                            ->label(__('admin.flow.description'))
                             ->placeholder('Contoh: Alur standar untuk semua user baru ConnectX')
                             ->helperText('Catatan singkat tentang tujuan alur ini.')
                             ->rows(3)
                             ->columnSpanFull(),
 
                         Forms\Components\Toggle::make('is_entry')
-                            ->label('Alur Utama (Entry Point)?')
+                            ->label(__('admin.flow.is_entry'))
                             ->helperText('Aktifkan jika ini adalah alur pertama yang dijalani user baru. Hanya boleh ada 1 alur utama.')
                             ->required(),
                     ]),
@@ -53,37 +56,37 @@ class OnboardingFlowResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Nama Alur')
+                    ->label(__('admin.flow.name'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('description')
-                    ->label('Deskripsi')
+                    ->label(__('admin.flow.description'))
                     ->limit(50)
                     ->tooltip(fn ($record) => $record->description),
                 Tables\Columns\IconColumn::make('is_entry')
-                    ->label('Alur Utama?')
+                    ->label(__('admin.flow.is_entry'))
                     ->boolean()
                     ->trueIcon('heroicon-o-check-badge')
                     ->falseIcon('heroicon-o-x-circle'),
                 Tables\Columns\TextColumn::make('steps_count')
-                    ->label('Jumlah Step')
+                    ->label(__('admin.flow.steps_count'))
                     ->counts('steps')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Terakhir Diubah')
+                    ->label(__('admin.common.last_updated'))
                     ->dateTime('d M Y, H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([])
             ->actions([
-                Tables\Actions\EditAction::make()->label('Edit'),
+                Tables\Actions\EditAction::make()->label(__('admin.common.edit')),
                 Tables\Actions\DeleteAction::make()
-                    ->label('Hapus')
+                    ->label(__('admin.common.delete'))
                     ->requiresConfirmation()
-                    ->modalHeading('Hapus Alur Onboarding?')
-                    ->modalDescription('Tindakan ini akan menghapus alur beserta seluruh step dan pertanyaan di dalamnya. Tidak dapat dibatalkan!')
-                    ->modalSubmitActionLabel('Ya, Hapus'),
+                    ->modalHeading(__('admin.common.delete_confirm'))
+                    ->modalDescription(__('admin.common.delete_desc'))
+                    ->modalSubmitActionLabel(__('admin.common.yes_delete')),
             ])
             ->bulkActions([]);  // Bulk delete dihapus untuk keamanan
     }

@@ -2,13 +2,14 @@
 
 namespace App\Models\Onboarding;
 
+use App\Models\Concerns\HasTranslations;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class OnboardingStep extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, HasTranslations;
 
     protected $table = 'onboarding_steps';
 
