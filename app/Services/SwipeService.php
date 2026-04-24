@@ -8,6 +8,7 @@ use App\Models\Like;
 use App\Models\UserMatch;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class SwipeService
 {
@@ -119,6 +120,45 @@ class SwipeService
         app(FeedService::class)->invalidateUserFeedCache($fromUserId);
 
         return ['success' => true];
+    }
+
+    /**
+     * Handle rewind action (undo last swipe).
+     * Only rewinds the most recent swipe that was NOT a mutual match.
+     *
+     * @param string $userId
+     * @return array|null The rewound like array or null if history is empty or unrewindable
+     */
+    public function rewind(string $userId): ?array
+    {
+        // Find the most recent like
+        $lastSwipe = Like::where('from_user_id', $userId)
+                         ->latest('created_at')
+                         ->first();
+
+        if (!$lastSwipe) {
+            return null; // EMPTY_HISTORY
+        }
+
+        // Check if it's already a mutual match
+        if ($lastSwipe->is_mutual) {
+            // Unrewindable because it resulted in a mutual match
+            throw new Exception("ALREADY_MATCHED");
+        }
+
+        $targetId = $lastSwipe->to_user_id;
+        $action = $lastSwipe->type === Like::TYPE_SKIP ? 'pass' : 'like';
+
+        // Delete the like record
+        $lastSwipe->delete();
+
+        // Target can re-appear in feed cache, invalidate
+        app(FeedService::class)->invalidateUserFeedCache($userId);
+
+        return [
+            'targetUserId' => $targetId,
+            'action' => $action
+        ];
     }
 
     // ─────────────────────────────────────────────────────────────────────────
