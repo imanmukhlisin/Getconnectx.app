@@ -4,10 +4,15 @@ namespace App\Services\Discovery;
 
 use App\Models\Startup;
 use App\Models\User;
+use App\Services\Discovery\MatchmakingScoringService;
 use Carbon\Carbon;
 
 class CardTransformerService
 {
+    public function __construct(private MatchmakingScoringService $scoringService)
+    {
+    }
+
     // ═══════════════════════════════════════════════════════════════════
     //  Profile Card (entityType: "profile")
     // ═══════════════════════════════════════════════════════════════════
@@ -15,13 +20,14 @@ class CardTransformerService
     /**
      * Transform a User model into the V2 profile card response format.
      */
-    public function transformProfileCard(User $user, int $index = 0): array
+    public function transformProfileCard(User $user, int $index, ?float $distanceKm = null, ?User $authUser = null): array
     {
         $distanceKm = isset($user->distance_km) ? round((float) $user->distance_km, 1) : null;
 
-        // Dummy score until PM approves algorithm
-        $matchScore = rand(75, 99);
-        $matchLabel = $this->buildMatchLabel($matchScore);
+        $matchResult = ['score' => rand(60, 99), 'label' => 'Potential Match'];
+        if ($authUser) {
+            $matchResult = $this->scoringService->computeScore($authUser, $user, 'finding_cofounder');
+        }
 
         // Build interests from user tags
         $interests = [];
@@ -52,7 +58,7 @@ class CardTransformerService
 
         return [
             'entityType'  => 'profile',
-            'id'          => 'card_' . substr(md5($user->id), 0, 6) . '_' . $index,
+            'id'          => 'card_' . substr(md5($user->id . $index), 0, 8),
             'profileId'   => $user->id,
             'photoUrl'    => $user->avatar_url,
             'name'        => $user->name,
@@ -64,10 +70,7 @@ class CardTransformerService
                 'display'    => $this->buildLocationDisplay($user->city, $user->country),
                 'distanceKm' => $distanceKm,
             ],
-            'match' => [
-                'score' => $matchScore,
-                'label' => $matchLabel,
-            ],
+            'match' => $matchResult,
             'badges'      => $this->buildBadges($user),
             'bio'         => $user->bio,
             'startupIdea' => $user->startup_idea,
@@ -86,16 +89,18 @@ class CardTransformerService
     /**
      * Transform a Startup model into the V2 startup card response format.
      */
-    public function transformStartupCard(Startup $startup, int $index = 0): array
+    public function transformStartupCard(Startup $startup, int $index, ?float $distanceKm = null, ?User $authUser = null): array
     {
-        $distanceKm = isset($startup->distance_km) ? round((float) $startup->distance_km, 1) : null;
-        $matchScore = rand(75, 99);
-
         $owner = $startup->relationLoaded('owner') ? $startup->owner : null;
+        
+        $matchResult = ['score' => rand(60, 99), 'label' => 'Potential Match'];
+        if ($authUser && $owner) {
+            $matchResult = $this->scoringService->computeScore($authUser, $owner, 'explore_startups');
+        }
 
         return [
             'entityType' => 'startup',
-            'id'         => 'startup_card_' . substr(md5($startup->id), 0, 8),
+            'id'         => 'startup_card_' . substr(md5($startup->id . $index), 0, 8),
             'startupId'  => $startup->id,
             'name'       => $startup->name,
             'logoUrl'    => $startup->logo_url,
@@ -106,10 +111,7 @@ class CardTransformerService
                 'name'  => $owner->name,
                 'title' => 'Founder',
             ] : null,
-            'match' => [
-                'score' => $matchScore,
-                'label' => $this->buildMatchLabel($matchScore),
-            ],
+            'match' => $matchResult,
             'industry' => [
                 'primary'   => $startup->industry,
                 'secondary' => $startup->secondary_industry,

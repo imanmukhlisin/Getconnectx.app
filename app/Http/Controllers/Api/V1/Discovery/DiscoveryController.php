@@ -109,16 +109,16 @@ class DiscoveryController extends Controller
             $query->with('tags'); // eager load for card transformation
             $result = $this->filterBuilder->applyCursorPagination($query, $cursor, $limit);
 
-            $items = $result['items']->map(function ($user, $idx) {
-                return $this->cardTransformer->transformProfileCard($user, $idx);
+            $items = $result['items']->map(function ($user, $idx) use ($authUser) {
+                return $this->cardTransformer->transformProfileCard($user, $idx, null, $authUser);
             })->values()->toArray();
         } else {
             $query  = $this->filterBuilder->buildStartupQuery($authUser, $filters, $mode);
             $query->with('owner'); // eager load founder
             $result = $this->filterBuilder->applyCursorPagination($query, $cursor, $limit);
 
-            $items = $result['items']->map(function ($startup, $idx) {
-                return $this->cardTransformer->transformStartupCard($startup, $idx);
+            $items = $result['items']->map(function ($startup, $idx) use ($authUser) {
+                return $this->cardTransformer->transformStartupCard($startup, $idx, null, $authUser);
             })->values()->toArray();
         }
 
@@ -229,5 +229,96 @@ class DiscoveryController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Something went wrong. Please try again.'], 500);
         }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  4. POST /api/v1/discovery/swipes/rewind
+    // ═══════════════════════════════════════════════════════════════════
+
+    #[OA\Post(
+        path: '/api/v1/discovery/swipes/rewind',
+        summary: 'Rewind the last swipe action',
+        description: 'Restores the most recent swipe for the current user. Premium feature.',
+        security: [['sanctum' => []]],
+        tags: ['Discovery'],
+        responses: [
+            new OA\Response(response: 200, description: 'Last swipe rewound'),
+            new OA\Response(response: 403, description: 'Premium required'),
+            new OA\Response(response: 409, description: 'No swipe available to rewind'),
+        ]
+    )]
+    public function rewind(Request $request): JsonResponse
+    {
+        $authUser = $request->user();
+
+        // 1. Check premium entitlement
+        if (!$authUser->is_pro) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ConnectX Pro is required to rewind your last swipe.',
+                'error'   => [
+                    'code'    => 'DISCOVERY_REWIND_PREMIUM_REQUIRED',
+                    'details' => [
+                        'requiredEntitlement' => 'connectx_pro'
+                    ]
+                ]
+            ], 403);
+        }
+
+        try {
+            $rewoundData = $this->swipeService->rewind($authUser->id);
+
+            if (!$rewoundData) {
+                return $this->rewindConflictResponse('EMPTY_HISTORY');
+            }
+
+            // Restore the card payload to return
+            $targetUserId = $rewoundData['targetUserId'];
+            $action = $rewoundData['action'];
+            
+            // Check if target is a startup (mock logic or actual model load)
+            $targetUser = \App\Models\User::with('tags')->find($targetUserId);
+            
+            if (!$targetUser) {
+                // If user doesn't exist anymore
+                return $this->rewindConflictResponse('WINDOW_EXPIRED');
+            }
+
+            // Transform into card
+            $card = $this->cardTransformer->transformProfileCard($targetUser, 0, null, $authUser);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Last swipe rewound.',
+                'data'    => [
+                    'profileId'     => $targetUserId,
+                    'rewoundAction' => $action,
+                    'card'          => $card
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            if ($e->getMessage() === 'ALREADY_MATCHED') {
+                return $this->rewindConflictResponse('ALREADY_REWOUND'); // or ALREADY_MATCHED
+            }
+
+            return response()->json(['success' => false, 'message' => 'Something went wrong.'], 500);
+        }
+    }
+
+    private function rewindConflictResponse(string $reason): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => 'No swipe is available to rewind right now.',
+            'error'   => [
+                'code'    => 'DISCOVERY_REWIND_NOT_AVAILABLE',
+                'details' => [
+                    'profileId'     => null,
+                    'rewoundAction' => null,
+                    'reason'        => $reason
+                ]
+            ]
+        ], 409);
     }
 }

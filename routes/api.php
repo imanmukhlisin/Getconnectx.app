@@ -154,6 +154,7 @@ Route::prefix('v1')->group(function () {
         Route::get('filter-options',         [DiscoveryController::class, 'filterOptions'])->name('discovery.filter-options');
         Route::post('cards',                 [DiscoveryController::class, 'cards'])->name('discovery.cards');
         Route::post('cards/{targetId}/action', [DiscoveryController::class, 'swipeAction'])->name('discovery.swipe-action');
+        Route::post('swipes/rewind',         [DiscoveryController::class, 'rewind'])->name('discovery.rewind');
     });
 
     // ─── Authenticated: Chat System ───────────────────────────────────────────
