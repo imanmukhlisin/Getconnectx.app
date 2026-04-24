@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\Chat\MessageController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\Discovery\FeedController;
 use App\Http\Controllers\Api\V1\Discovery\SwipeController;
+use App\Http\Controllers\Api\V1\Discovery\DiscoveryController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -146,6 +147,13 @@ Route::prefix('v1')->group(function () {
     Route::prefix('swipe')->middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
         Route::post('connect', [SwipeController::class, 'connect'])->name('swipe.connect');
         Route::post('skip',    [SwipeController::class, 'skip'])->name('swipe.skip');
+    });
+
+    // ─── Authenticated: Discovery V2 — Filter Engine ─────────────────────────
+    Route::prefix('discovery')->middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
+        Route::get('filter-options',         [DiscoveryController::class, 'filterOptions'])->name('discovery.filter-options');
+        Route::post('cards',                 [DiscoveryController::class, 'cards'])->name('discovery.cards');
+        Route::post('cards/{targetId}/action', [DiscoveryController::class, 'swipeAction'])->name('discovery.swipe-action');
     });
 
     // ─── Authenticated: Chat System ───────────────────────────────────────────

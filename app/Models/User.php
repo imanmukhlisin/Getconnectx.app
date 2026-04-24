@@ -63,6 +63,16 @@ class User extends Authenticatable
         'startup_tagline',
         'open_to_remote',
         'willing_to_relocate',
+        'is_pro',
+        'city',
+        'country',
+        'bio',
+        'startup_idea',
+        'education',
+        'languages',
+        'leadership_style',
+        'work_arrangement',
+        'remote_ready',
     ];
 
     /**
@@ -86,10 +96,19 @@ class User extends Authenticatable
             'registration_step'    => 'integer',
             'password'             => 'hashed',
             'is_onboarded'         => 'boolean',
+            'is_pro'               => 'boolean',
+            'remote_ready'         => 'boolean',
+            'education'            => 'array',
+            'languages'            => 'array',
         ];
     }
 
     // ─── Relationships ────────────────────────────────────────────────────────
+
+    public function startup()
+    {
+        return $this->hasOne(\App\Models\Startup::class, 'owner_id');
+    }
 
     public function tags()
     {
