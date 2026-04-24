@@ -173,14 +173,14 @@ class OnboardingSeeder extends Seeder
         ];
 
         $masterCFTypes = [
-            ['Technical Co-Founder',     'tech',         'Saya membangun produk & teknologi',           'I build the product & tech'],
-            ['Product Co-Founder',       'product',      'Saya memimpin produk dan desain',             'I lead product & design'],
-            ['Business Co-Founder',      'business',     'Saya menangani strategi dan operasional',     'I handle strategy & ops'],
-            ['Growth Co-Founder',        'growth',       'Saya menggerakkan marketing dan growth',      'I drive marketing & growth'],
-            ['AI / Data Co-Founder',     'ai_data',      'Saya membangun AI, data & intelligence',      'I build AI, data & intelligence'],
-            ['Operations Co-Founder',    'operations',   'Saya mengeksekusi dan menskalakan operasional','I execute & scale operations'],
-            ['Finance Co-Founder',       'finance',      'Saya mengelola fundraising dan keuangan',     'I manage fundraising & finance'],
-            ['Partnerships Co-Founder',  'partnerships', 'Saya membangun deal dan partnership',         'I build deals & partnerships'],
+            ['Technical Co-Founder',     'tech',         'Saya membangun produk & teknologi',           'I build the product & tech',       'cofounder_technical'],
+            ['Product Co-Founder',       'product',      'Saya memimpin produk dan desain',             'I lead product & design',          'cofounder_product'],
+            ['Business Co-Founder',      'business',     'Saya menangani strategi dan operasional',     'I handle strategy & ops',          'cofounder_business'],
+            ['Growth Co-Founder',        'growth',       'Saya menggerakkan marketing dan growth',      'I drive marketing & growth',       'cofounder_growth'],
+            ['AI / Data Co-Founder',     'ai_data',      'Saya membangun AI, data & intelligence',      'I build AI, data & intelligence',  'cofounder_ai'],
+            ['Operations Co-Founder',    'operations',   'Saya mengeksekusi dan menskalakan operasional','I execute & scale operations',     'cofounder_operations'],
+            ['Finance Co-Founder',       'finance',      'Saya mengelola fundraising dan keuangan',     'I manage fundraising & finance',   'cofounder_finance'],
+            ['Partnerships Co-Founder',  'partnerships', 'Saya membangun deal dan partnership',         'I build deals & partnerships',     'cofounder_partnerships'],
         ];
 
         $masterBizModels = [
@@ -344,13 +344,13 @@ class OnboardingSeeder extends Seeder
         };
 
         // Simple option helper (no group)
-        $o = function ($id, $qid, $order, $labelId, $labelEn, $value, $subId = null, $subEn = null) use ($now) {
+        $o = function ($id, $qid, $order, $labelId, $labelEn, $value, $subId = null, $subEn = null, $icon = null) use ($now) {
             return [
                 'id' => $id, 'question_id' => $qid, 'order_index' => $order,
                 'label' => json_encode(['id' => $labelId, 'en' => $labelEn]),
                 'value' => $value,
                 'sub_label' => ($subId && $subEn) ? json_encode(['id' => $subId, 'en' => $subEn]) : null,
-                'icon' => null, 'group_name' => null,
+                'icon' => $icon, 'group_name' => null,
                 'created_at' => $now, 'updated_at' => $now,
             ];
         };
@@ -358,7 +358,7 @@ class OnboardingSeeder extends Seeder
         // Co-founder type options generator (reused in multiple questions)
         $genCFOpts = function (string $prefix, string $qid) use ($masterCFTypes, $now) {
             $opts = [];
-            foreach ($masterCFTypes as $i => [$label, $value, $subId, $subEn]) {
+            foreach ($masterCFTypes as $i => [$label, $value, $subId, $subEn, $icon]) {
                 $opts[] = [
                     'id' => $prefix . '_' . ($i + 1),
                     'question_id' => $qid,
@@ -366,7 +366,7 @@ class OnboardingSeeder extends Seeder
                     'label' => json_encode(['id' => $label, 'en' => $label]),
                     'value' => $value,
                     'sub_label' => json_encode(['id' => $subId, 'en' => $subEn]),
-                    'icon' => null, 'group_name' => null,
+                    'icon' => $icon, 'group_name' => null,
                     'created_at' => $now, 'updated_at' => $now,
                 ];
             }
@@ -430,9 +430,10 @@ class OnboardingSeeder extends Seeder
             $s('step_personal_gender',   'flow_common', 4, 'Data Diri', 'Jenis Kelamin',                             'Gender', true),
             $s('step_role_selection',    'flow_common', 5, 'Tipe Akun', 'Bagaimana Anda ingin menggunakan ConnectX?', 'How would you like to use ConnectX?', true),
 
-            // ── BUILDER COMMON (2 steps) ──
-            $s('step_bld_role',  'flow_builder_common', 1, 'Profil Builder', 'Apa peran/jabatan utama Anda?',     'What is your primary role?'),
-            $s('step_bld_exp',   'flow_builder_common', 2, 'Profil Builder', 'Seberapa besar pengalaman startup Anda?', 'How much startup experience do you have?', true),
+            // ── BUILDER COMMON (3 steps) ──
+            $s('step_bld_type', 'flow_builder_common', 1, 'Profil Builder', 'Apa yang paling menggambarkan kamu?', 'What best describes you?', true),
+            $s('step_bld_role',  'flow_builder_common', 2, 'Profil Builder', 'Apa peran/jabatan utama Anda?',     'What is your primary role?'),
+            $s('step_bld_exp',   'flow_builder_common', 3, 'Profil Builder', 'Seberapa besar pengalaman startup Anda?', 'How much startup experience do you have?', true),
 
             // ── FOUNDER (2 steps) ──
             $s('step_fdr_looking',  'flow_founder', 1, 'Tujuan Founder',    'Apa yang sedang kamu cari?',              'What are you looking for?', true),
@@ -528,6 +529,7 @@ class OnboardingSeeder extends Seeder
             $q('q_use_connectx','step_role_selection',    1, 'single_select_card', 'Bagaimana kamu ingin menggunakan ConnectX?', 'How do you want to use ConnectX?'),
 
             // ── BUILDER COMMON ──
+            $q('q_bld_type',   'step_bld_type', 1, 'single_select_card', 'Apa yang paling menggambarkan kamu?', 'What best describes you?'),
             $q('q_bld_role',   'step_bld_role', 1, 'searchable_dropdown', 'Peran Utama', 'Primary Role'),
             $q('q_bld_years',  'step_bld_role', 2, 'number', 'Tahun Pengalaman', 'Years of Experience', true, ['placeholder' => json_encode(['id'=>'contoh: 3','en'=>'e.g. 3'])]),
             $q('q_bld_exp',    'step_bld_exp',  1, 'single_select_card', 'Pengalaman Startup', 'Startup Experience'),
@@ -678,32 +680,35 @@ class OnboardingSeeder extends Seeder
         }
 
         // ── Common Simple Options ──
-        $opts[] = $o('opt_rem_yes', 'q_open_remote', 1, 'Ya', 'Yes', 'yes');
-        $opts[] = $o('opt_rem_no',  'q_open_remote', 2, 'Tidak', 'No', 'no');
+        $opts[] = $o('opt_rem_yes', 'q_open_remote', 1, 'Ya', 'Yes', 'yes', null, null, 'yes');
+        $opts[] = $o('opt_rem_no',  'q_open_remote', 2, 'Tidak', 'No', 'no', null, null, 'no');
         $opts[] = $o('opt_rp_1',  'q_remote_pref', 1, 'Hybrid', 'Hybrid', 'hybrid');
         $opts[] = $o('opt_rp_2',  'q_remote_pref', 2, 'Hanya Remote', 'Remote Only', 'remote_only');
         $opts[] = $o('opt_gen_m', 'q_gender', 1, 'Pria', 'Male', 'male');
         $opts[] = $o('opt_gen_f', 'q_gender', 2, 'Wanita', 'Female', 'female');
 
-        // ── Role Selection ──
-        $opts[] = $o('opt_uc_1', 'q_use_connectx', 1, 'Saya seorang Builder — Founder', 'I\'m a Builder — Founder', 'founder', 'Saya ingin membangun startup dan mencari partner', 'I want to build a startup and find partners');
-        $opts[] = $o('opt_uc_2', 'q_use_connectx', 2, 'Saya seorang Builder — Co-Founder', 'I\'m a Builder — Co-Founder', 'cofounder', 'Saya ingin bergabung sebagai co-founder', 'I want to join as a co-founder');
-        $opts[] = $o('opt_uc_3', 'q_use_connectx', 3, 'Saya seorang Builder — Anggota Tim', 'I\'m a Builder — Team Member', 'team', 'Saya ingin bergabung dengan tim startup', 'I want to join a startup team');
-        $opts[] = $o('opt_uc_4', 'q_use_connectx', 4, 'Saya mewakili Startup', 'I represent a Startup', 'startup', 'Startup saya sedang mencari talent', 'My startup is looking for talent');
+        // ── Role Selection (Builder vs Startup) ──
+        $opts[] = $o('opt_uc_1', 'q_use_connectx', 1, 'Saya seorang Builder', 'I\'m a Builder', 'builder', 'Founder, co-founder, atau anggota tim', 'Founder, co-founder, or team member', 'team');
+        $opts[] = $o('opt_uc_2', 'q_use_connectx', 2, 'Saya mewakili Startup', 'I represent a Startup', 'startup', 'Membangun tim atau mencari co-founder', 'Building a team or hiring co-founders', 'rocket');
+
+        // ── Builder Sub-Type (Founder / Co-Founder / Team Member) ──
+        $opts[] = $o('opt_bt_1', 'q_bld_type', 1, 'Founder', 'Founder', 'founder', 'Saya sedang membangun sesuatu dan mencari orang', 'I\'m building something and looking for people', 'founder_rocket');
+        $opts[] = $o('opt_bt_2', 'q_bld_type', 2, 'Co-Founder', 'Co-Founder', 'cofounder', 'Saya ingin bergabung ke startup sebagai co-founder', 'I want to join a startup as a co-founder', 'cofounder_handshake');
+        $opts[] = $o('opt_bt_3', 'q_bld_type', 3, 'Anggota Tim', 'Team Member', 'team', 'Saya ingin bergabung ke tim startup', 'I want to join a startup team', 'team_member_group');
 
         // ── Primary Roles (grouped, for q_bld_role) ──
         $opts = array_merge($opts, $genGroupedOpts('opt_role', 'q_bld_role', $masterRoles));
 
         // ── Experience Level ──
-        $opts[] = $o('opt_exp_1', 'q_bld_exp', 1, 'Pernah mendirikan startup', 'Founded a startup before', 'founder_exp');
-        $opts[] = $o('opt_exp_2', 'q_bld_exp', 2, 'Pernah membangun produk di startup', 'Built a product at a startup', 'product_exp');
-        $opts[] = $o('opt_exp_3', 'q_bld_exp', 3, 'Pernah bekerja di tim startup', 'Worked in a startup team', 'team_exp');
-        $opts[] = $o('opt_exp_4', 'q_bld_exp', 4, 'Baru di dunia startup', 'New to the startup world', 'no_exp');
+        $opts[] = $o('opt_exp_1', 'q_bld_exp', 1, 'Pernah mendirikan startup', 'Founded a startup before', 'founder_exp', null, null, 'exp_founded');
+        $opts[] = $o('opt_exp_2', 'q_bld_exp', 2, 'Pernah membangun produk di startup', 'Built a product at a startup', 'product_exp', null, null, 'exp_built');
+        $opts[] = $o('opt_exp_3', 'q_bld_exp', 3, 'Pernah bekerja di tim startup', 'Worked in a startup team', 'team_exp', null, null, 'exp_worked');
+        $opts[] = $o('opt_exp_4', 'q_bld_exp', 4, 'Baru di dunia startup', 'New to the startup world', 'no_exp', null, null, 'exp_none');
 
         // ── Founder: Looking For ──
-        $opts[] = $o('opt_fdr_look_1', 'q_fdr_looking', 1, 'Co-Founder', 'Co-Founder', 'cofounder', 'Mencari partner untuk membangun bersama', 'Looking for a partner to build together');
-        $opts[] = $o('opt_fdr_look_2', 'q_fdr_looking', 2, 'Anggota Tim', 'Team Members', 'team', 'Mencari anggota tim untuk startup saya', 'Looking for team members for my startup');
-        $opts[] = $o('opt_fdr_look_3', 'q_fdr_looking', 3, 'Keduanya', 'Both', 'both', 'Mencari co-founder dan anggota tim', 'Looking for both co-founder and team members');
+        $opts[] = $o('opt_fdr_look_1', 'q_fdr_looking', 1, 'Co-Founder', 'Co-Founder', 'cofounder', 'Mencari partner untuk membangun bersama', 'Looking for a partner to build together', 'goal_cofounder');
+        $opts[] = $o('opt_fdr_look_2', 'q_fdr_looking', 2, 'Anggota Tim', 'Team Members', 'team', 'Mencari anggota tim untuk startup saya', 'Looking for team members for my startup', 'goal_team_members');
+        $opts[] = $o('opt_fdr_look_3', 'q_fdr_looking', 3, 'Keduanya', 'Both', 'both', 'Mencari co-founder dan anggota tim', 'Looking for both co-founder and team members', 'goal_both');
 
         // ── Industries (for all industry questions) ──
         $industryQuestions = ['q_fdr_industry', 'q_cf_industry', 'q_tm_industry', 'q_su_industry'];
@@ -733,25 +738,25 @@ class OnboardingSeeder extends Seeder
         $availQuestions = ['q_fdr_cf_avail', 'q_fdr_tm_avail', 'q_fdr_bt_avail', 'q_cf_avail', 'q_tm_avail'];
         foreach ($availQuestions as $qid) {
             $p = str_replace('q_', 'opt_av_', $qid);
-            $opts[] = $o($p.'_1', $qid, 1, 'Full-time', 'Full-time', 'full_time');
-            $opts[] = $o($p.'_2', $qid, 2, 'Part-time', 'Part-time', 'part_time');
-            $opts[] = $o($p.'_3', $qid, 3, 'Fleksibel / Open', 'Flexible / Open', 'flexible');
+            $opts[] = $o($p.'_1', $qid, 1, 'Full-time', 'Full-time', 'full_time', null, null, 'availability_full_time');
+            $opts[] = $o($p.'_2', $qid, 2, 'Part-time', 'Part-time', 'part_time', null, null, 'availability_part_time');
+            $opts[] = $o($p.'_3', $qid, 3, 'Fleksibel / Open', 'Flexible / Open', 'flexible', null, null, 'availability_flexible');
         }
 
         // ── Remote Options (reused) ──
         $remoteQuestions = ['q_fdr_cf_remote', 'q_fdr_tm_remote', 'q_fdr_bt_remote', 'q_cf_remote', 'q_tm_remote'];
         foreach ($remoteQuestions as $qid) {
             $p = str_replace('q_', 'opt_rm_', $qid);
-            $opts[] = $o($p.'_1', $qid, 1, 'Ya', 'Yes', 'yes');
-            $opts[] = $o($p.'_2', $qid, 2, 'Tidak', 'No', 'no');
+            $opts[] = $o($p.'_1', $qid, 1, 'Ya', 'Yes', 'yes', null, null, 'yes');
+            $opts[] = $o($p.'_2', $qid, 2, 'Tidak', 'No', 'no', null, null, 'no');
         }
 
         // ── Relocate Options (reused) ──
         $relocateQuestions = ['q_fdr_cf_relocate', 'q_fdr_tm_relocate', 'q_fdr_bt_relocate', 'q_cf_relocate', 'q_tm_relocate'];
         foreach ($relocateQuestions as $qid) {
             $p = str_replace('q_', 'opt_rl_', $qid);
-            $opts[] = $o($p.'_1', $qid, 1, 'Ya', 'Yes', 'yes');
-            $opts[] = $o($p.'_2', $qid, 2, 'Tidak', 'No', 'no');
+            $opts[] = $o($p.'_1', $qid, 1, 'Ya', 'Yes', 'yes', null, null, 'yes');
+            $opts[] = $o($p.'_2', $qid, 2, 'Tidak', 'No', 'no', null, null, 'no');
         }
 
         // ── Equity Expectation (Co-Founder + Team Member) ──
@@ -810,13 +815,13 @@ class OnboardingSeeder extends Seeder
         }
 
         // ── Traction: Prototype Yes/No ──
-        $opts[] = $o('opt_proto_1', 'q_su_tri_prototype', 1, 'Ya', 'Yes', 'yes');
-        $opts[] = $o('opt_proto_2', 'q_su_tri_prototype', 2, 'Belum', 'No', 'no');
+        $opts[] = $o('opt_proto_1', 'q_su_tri_prototype', 1, 'Ya', 'Yes', 'yes', null, null, 'yes');
+        $opts[] = $o('opt_proto_2', 'q_su_tri_prototype', 2, 'Belum', 'No', 'no', null, null, 'no');
 
         // ── Founder Count ──
-        $opts[] = $o('opt_fc_1', 'q_su_founder_count', 1, 'Solo Founder', 'Solo Founder', 'solo');
-        $opts[] = $o('opt_fc_2', 'q_su_founder_count', 2, '2 Founders', '2 Founders', '2_founders');
-        $opts[] = $o('opt_fc_3', 'q_su_founder_count', 3, '3+ Founders', '3+ Founders', '3plus_founders');
+        $opts[] = $o('opt_fc_1', 'q_su_founder_count', 1, 'Solo Founder', 'Solo Founder', 'solo', null, null, 'founder_solo');
+        $opts[] = $o('opt_fc_2', 'q_su_founder_count', 2, '2 Founders', '2 Founders', '2_founders', null, null, 'founder_two');
+        $opts[] = $o('opt_fc_3', 'q_su_founder_count', 3, '3+ Founders', '3+ Founders', '3plus_founders', null, null, 'founder_three_plus');
 
         // ── Founder Roles Covered ──
         $founderRolesCovered = ['Technical','Product','Business','Growth','Operations','Finance','Design','Other'];
@@ -825,13 +830,13 @@ class OnboardingSeeder extends Seeder
         }
 
         // ── Have Team ──
-        $opts[] = $o('opt_ht_1', 'q_su_have_team', 1, 'Tidak, hanya founder', 'No, just founders', 'no');
-        $opts[] = $o('opt_ht_2', 'q_su_have_team', 2, 'Ya', 'Yes', 'yes');
+        $opts[] = $o('opt_ht_1', 'q_su_have_team', 1, 'Tidak, hanya founder', 'No, just founders', 'no', null, null, 'no');
+        $opts[] = $o('opt_ht_2', 'q_su_have_team', 2, 'Ya', 'Yes', 'yes', null, null, 'yes');
 
         // ── Team Size ──
-        $opts[] = $o('opt_ts_1', 'q_su_team_size', 1, '1-3 orang', '1-3 people', '1_3');
-        $opts[] = $o('opt_ts_2', 'q_su_team_size', 2, '4-10 orang', '4-10 people', '4_10');
-        $opts[] = $o('opt_ts_3', 'q_su_team_size', 3, '10+ orang', '10+ people', '10_plus');
+        $opts[] = $o('opt_ts_1', 'q_su_team_size', 1, '1-3 orang', '1-3 people', '1_3', null, null, 'team_size_small');
+        $opts[] = $o('opt_ts_2', 'q_su_team_size', 2, '4-10 orang', '4-10 people', '4_10', null, null, 'team_size_medium');
+        $opts[] = $o('opt_ts_3', 'q_su_team_size', 3, '10+ orang', '10+ people', '10_plus', null, null, 'team_size_large');
 
         // ── Team Departments ──
         $teamDepts = ['Engineering','Marketing','Sales','Operations','Design','Finance','Other'];
@@ -840,14 +845,14 @@ class OnboardingSeeder extends Seeder
         }
 
         // ── Startup: What You Need ──
-        $opts[] = $o('opt_sn_1', 'q_su_need', 1, 'Co-Founder', 'Co-Founder', 'cofounder');
-        $opts[] = $o('opt_sn_2', 'q_su_need', 2, 'Anggota Tim', 'Team Members', 'team');
-        $opts[] = $o('opt_sn_3', 'q_su_need', 3, 'Keduanya', 'Both', 'both');
+        $opts[] = $o('opt_sn_1', 'q_su_need', 1, 'Co-Founder', 'Co-Founder', 'cofounder', null, null, 'goal_cofounder');
+        $opts[] = $o('opt_sn_2', 'q_su_need', 2, 'Anggota Tim', 'Team Members', 'team', null, null, 'goal_team_members');
+        $opts[] = $o('opt_sn_3', 'q_su_need', 3, 'Keduanya', 'Both', 'both', null, null, 'goal_both');
 
         // ── Commitment Level ──
-        $opts[] = $o('opt_cl_1', 'q_su_commitment', 1, 'Full-time only', 'Full-time only', 'full_time');
-        $opts[] = $o('opt_cl_2', 'q_su_commitment', 2, 'Part-time', 'Part-time', 'part_time');
-        $opts[] = $o('opt_cl_3', 'q_su_commitment', 3, 'Open / Fleksibel', 'Open / Flexible', 'flexible');
+        $opts[] = $o('opt_cl_1', 'q_su_commitment', 1, 'Full-time only', 'Full-time only', 'full_time', null, null, 'availability_full_time');
+        $opts[] = $o('opt_cl_2', 'q_su_commitment', 2, 'Part-time', 'Part-time', 'part_time', null, null, 'availability_part_time');
+        $opts[] = $o('opt_cl_3', 'q_su_commitment', 3, 'Open / Fleksibel', 'Open / Flexible', 'flexible', null, null, 'availability_flexible');
 
         // ── Paid/Unpaid ──
         $opts[] = $o('opt_paid_1', 'q_su_paid', 1, 'Berbayar (Paid)', 'Paid', 'paid');
@@ -879,9 +884,9 @@ class OnboardingSeeder extends Seeder
             $t('step_role_selection', null, null, 'flow_builder_common', 0),  // default: founder/cofounder/team all go to builder common
 
             // ── step_bld_exp: branch by original role selection ──
-            $t('step_bld_exp', ['question_id'=>'q_use_connectx','operator'=>'equals','value'=>'founder'],   null, 'flow_founder',   10),
-            $t('step_bld_exp', ['question_id'=>'q_use_connectx','operator'=>'equals','value'=>'cofounder'], null, 'flow_cofounder', 10),
-            $t('step_bld_exp', ['question_id'=>'q_use_connectx','operator'=>'equals','value'=>'team'],      null, 'flow_team',      10),
+            $t('step_bld_exp', ['question_id'=>'q_bld_type','operator'=>'equals','value'=>'founder'],   null, 'flow_founder',   10),
+            $t('step_bld_exp', ['question_id'=>'q_bld_type','operator'=>'equals','value'=>'cofounder'], null, 'flow_cofounder', 10),
+            $t('step_bld_exp', ['question_id'=>'q_bld_type','operator'=>'equals','value'=>'team'],      null, 'flow_team',      10),
 
             // ── step_fdr_industry: branch by what founder is looking for ──
             $t('step_fdr_industry', ['question_id'=>'q_fdr_looking','operator'=>'equals','value'=>'cofounder'], null, 'flow_fdr_cf',   10),

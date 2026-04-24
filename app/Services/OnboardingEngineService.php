@@ -433,17 +433,26 @@ class OnboardingEngineService
             ->count('step_id');
 
         // Estimasi total step berdasarkan role (lebih akurat dari hardcode 12)
-        $role = OnboardingResponse::where('session_id', $session->id)
+        $useConnectx = OnboardingResponse::where('session_id', $session->id)
             ->where('question_id', 'q_use_connectx')
             ->first();
+        $bldType = OnboardingResponse::where('session_id', $session->id)
+            ->where('question_id', 'q_bld_type')
+            ->first();
 
-        $total = match ($role ? $this->getValue($role->value) : null) {
-            'founder'   => 11,  // common(5) + builder(2) + founder(2) + sub-flow(~2)
-            'cofounder' => 13,  // common(5) + builder(2) + cofounder(6)
-            'team'      => 13,  // common(5) + builder(2) + team(6)
-            'startup'   => 14,  // common(5) + startup(3) + traction(1) + finish(4) + need(1-2) + end(2)
-            default     => 12,
-        };
+        $action = $useConnectx ? $this->getValue($useConnectx->value) : null;
+        $subType = $bldType ? $this->getValue($bldType->value) : null;
+
+        if ($action === 'startup') {
+            $total = 14; // common(5) + startup(3) + traction(1) + finish(4) + need(1-2) + end(2)
+        } else {
+            $total = match ($subType) {
+                'founder'   => 12,  // common(5) + builder(3) + founder(2) + sub-flow(~2)
+                'cofounder' => 14,  // common(5) + builder(3) + cofounder(6)
+                'team'      => 14,  // common(5) + builder(3) + team(6)
+                default     => 12,
+            };
+        }
 
         return [
             'current' => $answeredSteps + 1,
@@ -487,13 +496,17 @@ class OnboardingEngineService
         // ── Role Category ──
         if ($responses->has('q_use_connectx')) {
             $action = $this->getValue($responses['q_use_connectx']->value);
-            $updateData['role_category'] = match ($action) {
-                'founder'   => 'Founder',
-                'cofounder' => 'Co-Founder',
-                'team'      => 'Team Member',
-                'startup'   => 'Startup',
-                default     => null,
-            };
+            if ($action === 'startup') {
+                $updateData['role_category'] = 'Startup';
+            } elseif ($action === 'builder' && $responses->has('q_bld_type')) {
+                $subType = $this->getValue($responses['q_bld_type']->value);
+                $updateData['role_category'] = match ($subType) {
+                    'founder'   => 'Founder',
+                    'cofounder' => 'Co-Founder',
+                    'team'      => 'Team Member',
+                    default     => null,
+                };
+            }
         }
 
         // ── Primary Role (Builder paths) ──
