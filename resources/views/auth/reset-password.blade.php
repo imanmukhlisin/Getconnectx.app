@@ -245,6 +245,162 @@
         }
         .footer a { color: #6BAC64; text-decoration: none; }
 
+        /* Expired View */
+        .expired {
+            display: none;
+            text-align: center;
+            padding: 20px 0 10px;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .expired-icon-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .expired-icon {
+            position: relative;
+            z-index: 10;
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.3);
+            animation: pulse-red 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .expired-icon svg {
+            width: 36px;
+            height: 36px;
+            color: #ef4444;
+        }
+
+        .draw-circle {
+            stroke-dasharray: 63;
+            stroke-dashoffset: 63;
+            animation: draw 1s ease-out forwards;
+        }
+        .draw-clock {
+            stroke-dasharray: 20;
+            stroke-dashoffset: 20;
+            animation: draw 0.8s ease-out 0.8s forwards;
+        }
+        .draw-slash {
+            stroke-dasharray: 30;
+            stroke-dashoffset: 30;
+            animation: draw 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.4s forwards;
+            transform-origin: center;
+        }
+
+        @keyframes draw {
+            to { stroke-dashoffset: 0; }
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { transform: scale(1); box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 15px 35px -5px rgba(239, 68, 68, 0.5); }
+        }
+
+        .ripple {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 72px;
+            height: 72px;
+            background: rgba(239, 68, 68, 0.2);
+            border-radius: 50%;
+            animation: ripple-anim 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+
+        .ripple-2 {
+            animation-delay: 1s;
+        }
+
+        @keyframes ripple-anim {
+            0% { width: 72px; height: 72px; opacity: 1; }
+            100% { width: 150px; height: 150px; opacity: 0; }
+        }
+
+        .expired-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #0f172a, #334155);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .expired-desc {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 28px;
+            padding: 0 10px;
+        }
+
+        .expired .btn {
+            background: #ef4444;
+            box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.39);
+            margin-top: 10px;
+            text-decoration: none;
+        }
+        
+        .expired .btn:hover:not(:disabled) {
+            background: #dc2626;
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.23);
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #ef4444;
+            border-radius: 50%;
+            opacity: 0;
+        }
+        .p1 { top: 10%; left: 20%; animation: float1 3s infinite 0.2s; }
+        .p2 { top: 20%; right: 15%; animation: float2 3.5s infinite 0.7s; }
+        .p3 { bottom: 15%; left: 15%; animation: float3 2.5s infinite 1.2s; }
+        .p4 { bottom: 10%; right: 20%; animation: float4 4s infinite 0.5s; }
+
+        @keyframes float1 {
+            0% { transform: translate(0, 0) scale(0); opacity: 0; }
+            50% { opacity: 0.6; }
+            100% { transform: translate(-20px, -20px) scale(1.5); opacity: 0; }
+        }
+        @keyframes float2 {
+            0% { transform: translate(0, 0) scale(0); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translate(20px, -15px) scale(1.2); opacity: 0; }
+        }
+        @keyframes float3 {
+            0% { transform: translate(0, 0) scale(0); opacity: 0; }
+            50% { opacity: 0.7; }
+            100% { transform: translate(-15px, 20px) scale(1.8); opacity: 0; }
+        }
+        @keyframes float4 {
+            0% { transform: translate(0, 0) scale(0); opacity: 0; }
+            50% { opacity: 0.4; }
+            100% { transform: translate(15px, 15px) scale(1.4); opacity: 0; }
+        }
+
         /* Mobile */
         @media (max-width: 480px) {
             .page { padding: 24px 16px; justify-content: flex-start; padding-top: 48px; }
@@ -262,7 +418,7 @@
     </div>
 
     <div class="card">
-        <div id="formView">
+        <div id="formView" style="display: {{ $isExpired ? 'none' : 'block' }};">
             <h1 class="card-title">Reset Password</h1>
             <p class="card-subtitle">Buat password baru untuk akun Anda.</p>
 
@@ -320,6 +476,29 @@
             <h3>Password Diperbarui</h3>
             <p>Password baru Anda telah tersimpan. Silakan buka kembali aplikasi ConnectX dan login.</p>
             <p class="hint">Halaman ini bisa ditutup.</p>
+        </div>
+
+        <div class="expired" id="expiredView" style="display: {{ $isExpired ? 'block' : 'none' }};">
+            <div class="expired-icon-container">
+                <div class="ripple"></div>
+                <div class="ripple ripple-2"></div>
+                <div class="expired-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" class="draw-circle" />
+                        <path d="M12 8v4l3 3" class="draw-clock" />
+                        <path d="M4 4l16 16" class="draw-slash" stroke="#ef4444" stroke-width="2" />
+                    </svg>
+                </div>
+                <!-- Floating particles -->
+                <div class="particle p1"></div>
+                <div class="particle p2"></div>
+                <div class="particle p3"></div>
+                <div class="particle p4"></div>
+            </div>
+            <h3 class="expired-title">Link Telah Kadaluarsa!</h3>
+            <p class="expired-desc">Link reset password ini sudah tidak berlaku atau sudah digunakan sebelumnya. Demi keamanan, Anda perlu membuat permintaan baru.</p>
+            
+            <a href="https://www.getconnectx.app" class="btn">Kembali ke Aplikasi</a>
         </div>
     </div>
 
@@ -407,9 +586,15 @@
                     const first = Object.values(data.errors)[0];
                     msg = Array.isArray(first) ? first[0] : first;
                 }
-                showAlert('error', msg);
-                btn.classList.remove('loading');
-                validate();
+                
+                if (msg.toLowerCase().includes('kadaluarsa') || msg.toLowerCase().includes('tidak valid') || msg.toLowerCase().includes('sudah digunakan')) {
+                    document.getElementById('formView').style.display = 'none';
+                    document.getElementById('expiredView').style.display = 'block';
+                } else {
+                    showAlert('error', msg);
+                    btn.classList.remove('loading');
+                    validate();
+                }
             }
         } catch {
             showAlert('error', 'Gagal menghubungi server.');

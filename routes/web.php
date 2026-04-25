@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 Route::get('/', function () {
     return view('welcome');
@@ -27,8 +30,22 @@ Route::get('/onboarding', function () {
 })->name('onboarding');
 
 Route::get('/reset-password/{token}', function (string $token, \Illuminate\Http\Request $request) {
+    $email = $request->query('email', '');
+    $record = DB::table('password_reset_tokens')->where('email', $email)->first();
+    
+    $isExpired = true;
+    if ($record) {
+        $createdAt = Carbon::parse($record->created_at);
+        if (!$createdAt->addMinutes(60)->isPast()) {
+            if (Hash::check($token, $record->token)) {
+                $isExpired = false;
+            }
+        }
+    }
+
     return view('auth.reset-password', [
         'token' => $token,
-        'email' => $request->query('email', ''),
+        'email' => $email,
+        'isExpired' => $isExpired,
     ]);
 })->name('password.reset');
