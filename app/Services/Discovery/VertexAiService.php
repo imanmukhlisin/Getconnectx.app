@@ -79,11 +79,23 @@ PROMPT;
      */
     private function callVertexAi(string $prompt): string
     {
-        // Ensure credentials are set securely
-        $credentialPath = base_path('storage/service-account.json');
-        if (!file_exists($credentialPath)) {
-            throw new \Exception("Vertex AI Service Account not found at: {$credentialPath}");
+        // 1. Check if credentials exist in ENV as a JSON string (Vercel way)
+        $envCreds = env('GOOGLE_CLOUD_CREDENTIALS_JSON');
+        
+        if ($envCreds) {
+            // We'll write it to /tmp temporarily because the underlying Google library 
+            // often expects a file path for the default credentials middleware.
+            $credentialPath = '/tmp/google-creds.json';
+            file_put_contents($credentialPath, $envCreds);
+        } else {
+            // Fallback to local file path (Development way)
+            $credentialPath = base_path('storage/service-account.json');
         }
+
+        if (!file_exists($credentialPath)) {
+            throw new \Exception("Vertex AI Credentials not found. Please set GOOGLE_CLOUD_CREDENTIALS_JSON in .env or provide storage/service-account.json");
+        }
+
         putenv('GOOGLE_APPLICATION_CREDENTIALS=' . $credentialPath);
 
         // Read Project ID and Location
