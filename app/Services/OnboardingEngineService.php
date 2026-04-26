@@ -26,8 +26,15 @@ class OnboardingEngineService
             return $existingSession;
         }
 
-        $entryFlow = OnboardingFlow::where('is_entry', true)->firstOrFail();
-        $firstStep = $entryFlow->steps()->orderBy('order_index')->firstOrFail();
+        // Eager-load entry flow + first step in ONE query
+        $entryFlow = OnboardingFlow::where('is_entry', true)
+            ->with(['steps' => fn($q) => $q->orderBy('order_index')->limit(1)])
+            ->firstOrFail();
+
+        $firstStep = $entryFlow->steps->first();
+        if (!$firstStep) {
+            throw new \RuntimeException('Entry flow has no steps configured.');
+        }
 
         $session = OnboardingSession::create([
             'id' => 'ses_' . Str::random(10),
@@ -268,19 +275,25 @@ class OnboardingEngineService
         $this->validateAnswers($stepId, $answers);
 
         // 2. Simpan jawaban (upsert per question_id agar tidak duplikat saat back-and-forth)
+        //    Bulk-build the records, then upsert in one go
+        $now = now();
+        $upsertData = [];
         foreach ($answers as $questionId => $value) {
-            OnboardingResponse::updateOrCreate(
-                [
-                    'session_id' => $session->id,
-                    'step_id' => $stepId,
-                    'question_id' => $questionId
-                ],
-                [
-                    'value' => is_array($value) ? $value : [$value],
-                    'answered_at' => now(),
-                ]
-            );
+            $upsertData[] = [
+                'session_id'  => $session->id,
+                'step_id'     => $stepId,
+                'question_id' => $questionId,
+                'value'       => json_encode(is_array($value) ? $value : [$value]),
+                'answered_at' => $now,
+            ];
         }
+
+        // Single query upsert instead of N individual updateOrCreate calls
+        OnboardingResponse::upsert(
+            $upsertData,
+            ['session_id', 'step_id', 'question_id'], // unique key
+            ['value', 'answered_at']                   // columns to update
+        );
 
         $currentStep = OnboardingStep::findOrFail($stepId);
 
@@ -294,7 +307,10 @@ class OnboardingEngineService
                 'completed_at' => now(),
             ]);
 
-            $this->mapResponsesToProfile($session);
+            // Dispatch profile mapping to queue (non-blocking)
+            dispatch(function () use ($session) {
+                $this->mapResponsesToProfile($session);
+            })->afterResponse();
 
             return [
                 'next_step' => null,

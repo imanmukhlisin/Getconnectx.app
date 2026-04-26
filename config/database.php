@@ -47,7 +47,7 @@ return [
             'driver'         => 'pgsql',
             'url'            => env('DB_URL'),
             'host'           => env('DB_HOST', 'db.xxxxxxxxxxxxxxxxxxxx.supabase.co'),
-            'port'           => env('DB_PORT', '5432'),
+            'port'           => env('DB_PORT', '6543'),
             'database'       => env('DB_DATABASE', 'postgres'),
             'username'       => env('DB_USERNAME', 'postgres'),
             'password'       => env('DB_PASSWORD', ''),
@@ -55,7 +55,15 @@ return [
             'prefix'         => '',
             'prefix_indexes' => true,
             'search_path'    => 'public',
-            'sslmode'        => env('DB_SSLMODE', 'require'), // Supabase requires SSL
+            'sslmode'        => env('DB_SSLMODE', 'require'),
+
+            // ── pgBouncer Transaction Mode ────────────────────────────────
+            // Prepared statements are NOT supported in transaction pooling.
+            // Setting ATTR_EMULATE_PREPARES = true makes PDO do client-side
+            // parameter binding instead of server-side prepared statements.
+            'options'        => env('PGBOUNCER', false) ? [
+                \PDO::ATTR_EMULATE_PREPARES => true,
+            ] : [],
         ],
 
         'sqlite' => [
