@@ -604,6 +604,62 @@ class OnboardingEngineService
             $user->update($updateData);
         }
 
+        // ── Buat atau Update Data di Tabel Startups ──
+        if (isset($updateData['role_category']) && $updateData['role_category'] === 'Startup') {
+            $startupData = [];
+            
+            if ($responses->has('q_su_name')) {
+                $startupData['name'] = $this->getValue($responses['q_su_name']->value);
+            }
+            if ($responses->has('q_su_tagline')) {
+                $startupData['tagline'] = $this->getValue($responses['q_su_tagline']->value);
+            }
+            if ($responses->has('q_su_stage')) {
+                $startupData['stage'] = $this->getValue($responses['q_su_stage']->value);
+            }
+            if ($responses->has('q_su_industry')) {
+                $industries = $responses['q_su_industry']->value;
+                if (is_array($industries) && count($industries) > 0) {
+                    $startupData['industry'] = $industries[0];
+                    if (count($industries) > 1) {
+                        $startupData['secondary_industry'] = $industries[1];
+                    }
+                }
+            }
+
+            if (isset($updateData['location'])) {
+                $startupData['city'] = $updateData['location'];
+            }
+            
+            $startupData['latitude'] = $user->latitude;
+            $startupData['longitude'] = $user->longitude;
+
+            // Pastikan startup_name wajib ada sebelum masuk tabel startups
+            if (!empty($startupData['name'])) {
+                \App\Models\Startup::updateOrCreate(
+                    ['owner_id' => $user->id],
+                    $startupData
+                );
+            }
+        }
+
+        // ── Buat atau Update Data di Tabel Builders (P2P Discovery) ──
+        if (isset($updateData['role_category']) && $updateData['role_category'] !== 'Startup') {
+            \App\Models\Builder::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'role_category'      => $updateData['role_category'] ?? null,
+                    'primary_role'       => $updateData['primary_role'] ?? null,
+                    'commitment_level'   => $updateData['commitment_level'] ?? null,
+                    'work_arrangement'   => $user->work_arrangement ?? null,
+                    'remote_ready'       => $updateData['open_to_remote'] ?? false,
+                    'open_to_remote'     => $updateData['open_to_remote'] ?? false,
+                    'willing_to_relocate' => $updateData['willing_to_relocate'] ?? false,
+                ]
+            );
+        }
+
+
         // ── Sinkronisasi Many-to-Many Tags (Industri + Skill) ──
         $tagNames = [];
 

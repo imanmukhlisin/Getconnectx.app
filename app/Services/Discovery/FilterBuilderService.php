@@ -75,7 +75,10 @@ class FilterBuilderService
         $userId = $authUser->id;
         $excludedIds = $this->getExcludedUserIds($userId);
 
+        // ── P2P: Query users that have a builders profile (JOIN) ──────────
+        // CardTransformerService still receives User models — no changes needed there.
         $query = User::select('users.*')
+            ->join('builders', 'builders.user_id', '=', 'users.id')
             ->whereNotIn('users.id', $excludedIds)
             ->where('users.is_active', true)
             ->where('users.is_onboarded', true);
@@ -106,39 +109,39 @@ class FilterBuilderService
             });
         }
 
-        // ── Role filter ───────────────────────────────────────────────────
+        // ── Role filter (from builders table) ────────────────────────────
         if (!empty($filters['roleNeededIds'])) {
             $roles = $this->mapIds($filters['roleNeededIds'], $this->buildRoleMap());
-            $query->whereIn('users.role_category', $roles);
+            $query->whereIn('builders.role_category', $roles);
         }
 
-        // ── Skill strength filter (finding_cofounder mode) ────────────────
+        // ── Skill strength filter (from builders table) ───────────────────
         if (!empty($filters['skillStrengthIds'])) {
             $strengths = $this->mapIds($filters['skillStrengthIds'], $this->buildSkillStrengthMap());
-            $query->whereIn('users.role_category', $strengths);
+            $query->whereIn('builders.role_category', $strengths);
         }
 
-        // ── Commitment filter ─────────────────────────────────────────────
+        // ── Commitment filter (from builders table) ───────────────────────
         if (!empty($filters['commitmentIds'])) {
             $commitments = $this->mapIds($filters['commitmentIds'], self::COMMITMENT_MAP);
-            $query->whereIn('users.commitment_level', $commitments);
+            $query->whereIn('builders.commitment_level', $commitments);
         }
 
         // ── Location / Distance filter ────────────────────────────────────
         $this->applyLocationFilter($query, $authUser, $filters, 'users');
 
-        // ── Work arrangement filter ───────────────────────────────────────
+        // ── Work arrangement filter (from builders table) ─────────────────
         if (!empty($filters['locationAvailability']['workArrangementIds'] ?? null)) {
             $arrangements = $this->mapIds(
                 $filters['locationAvailability']['workArrangementIds'],
                 self::WORK_ARRANGEMENT_MAP
             );
-            $query->whereIn('users.work_arrangement', $arrangements);
+            $query->whereIn('builders.work_arrangement', $arrangements);
         }
 
-        // ── Remote ready filter ───────────────────────────────────────────
+        // ── Remote ready filter (from builders table) ─────────────────────
         if (!empty($filters['locationAvailability']['remoteReady'] ?? false)) {
-            $query->where('users.remote_ready', true);
+            $query->where('builders.remote_ready', true);
         }
 
         return $query;
