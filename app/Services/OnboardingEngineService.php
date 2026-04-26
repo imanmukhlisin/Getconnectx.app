@@ -62,8 +62,11 @@ class OnboardingEngineService
             }
         ])->firstOrFail();
 
+        // Hanya 1 kali query ke onboarding_responses (untuk progress, existing answers, dll)
+        $allResponses = OnboardingResponse::where('session_id', $session->id)->get();
+
         // Menghitung progress
-        $progress = $this->calculateProgress($session);
+        $progress = $this->calculateProgress($session, $allResponses);
         $sectionProgress = $this->calculateSectionProgress($step);
 
         // Translasi On-the-fly untuk Server Driven UI berdasarkan Locale
@@ -76,8 +79,7 @@ class OnboardingEngineService
         };
 
         // Ambil jawaban yang sudah ada untuk step ini (prefill pada resume/back)
-        $existingAnswers = OnboardingResponse::where('session_id', $session->id)
-            ->where('step_id', $step->id)
+        $existingAnswers = $allResponses->where('step_id', $step->id)
             ->pluck('value', 'question_id')
             ->toArray();
 
@@ -164,9 +166,8 @@ class OnboardingEngineService
      * Akan melemparkan ValidationException jika ada yang tidak sesuai standar Frontend.
      * Pesan error dilokalisasi berdasarkan Accept-Language header (id/en).
      */
-    private function validateAnswers(string $stepId, array $answers): void
+    private function validateAnswersByStep(OnboardingStep $step, array $answers): void
     {
-        $step = OnboardingStep::with('questions')->findOrFail($stepId);
         $errors = [];
         $locale = app()->getLocale();
 
@@ -271,8 +272,11 @@ class OnboardingEngineService
      */
     public function processAnswer(OnboardingSession $session, string $stepId, array $answers): array
     {
-        // 1. Tembok Pengaman: Validasi input berdasarkan aturan pertanyaan
-        $this->validateAnswers($stepId, $answers);
+        // 0. Ambil current step dengan relasi questions (Cuma 1 Query)
+        $currentStep = OnboardingStep::with('questions')->findOrFail($stepId);
+
+        // 1. Tembok Pengaman: Validasi input berdasarkan aturan pertanyaan (tanpa query DB lagi)
+        $this->validateAnswersByStep($currentStep, $answers);
 
         // 2. Simpan jawaban (upsert per question_id agar tidak duplikat saat back-and-forth)
         foreach ($answers as $questionId => $value) {
@@ -289,10 +293,12 @@ class OnboardingEngineService
             );
         }
 
-        $currentStep = OnboardingStep::findOrFail($stepId);
+        // Hit ke database SEKALI SAJA di sini untuk semua jawaban di session ini. Menghindari N+1 Query.
+        $allResponses = OnboardingResponse::where('session_id', $session->id)->get();
+        $responsesByKey = $allResponses->keyBy('question_id');
 
-        // Mencari langkah selanjutnya (Branching Logic)
-        $nextStep = $this->determineNextStep($currentStep, $session);
+        // Mencari langkah selanjutnya (Branching Logic) - Kirim dictionary di memory
+        $nextStep = $this->determineNextStep($currentStep, $session, $responsesByKey);
 
         if (!$nextStep) {
             // Tidak ada langkah selanjutnya = Alur (Flow) Selesai
@@ -319,7 +325,7 @@ class OnboardingEngineService
 
         return [
             'next_step' => $this->getCurrentStep($session),
-            'progress' => $this->calculateProgress($session),
+            'progress' => $this->calculateProgress($session, $allResponses),
             'can_go_back' => $nextStep->can_go_back,
         ];
     }
@@ -327,12 +333,16 @@ class OnboardingEngineService
     /**
      * Menentukan langkah selanjutnya dengan mengevaluasi transisi (transitions).
      */
-    private function determineNextStep(OnboardingStep $currentStep, OnboardingSession $session): ?OnboardingStep
+    private function determineNextStep(OnboardingStep $currentStep, OnboardingSession $session, $responsesByKey = null): ?OnboardingStep
     {
         $transitions = $currentStep->transitions()->orderByDesc('priority')->get();
 
+        if ($responsesByKey === null && $transitions->isNotEmpty()) {
+            $responsesByKey = OnboardingResponse::where('session_id', $session->id)->get()->keyBy('question_id');
+        }
+
         foreach ($transitions as $transition) {
-            if ($this->evaluateCondition($transition->condition, $session)) {
+            if ($this->evaluateCondition($transition->condition, $responsesByKey)) {
                 if ($transition->to_step_id) {
                     return OnboardingStep::find($transition->to_step_id);
                 } elseif ($transition->to_flow_id) {
@@ -353,7 +363,7 @@ class OnboardingEngineService
     /**
      * Mengevaluasi kondisi bersyarat untuk penentuan cabang (branching logic).
      */
-    private function evaluateCondition(?array $condition, OnboardingSession $session): bool
+    private function evaluateCondition(?array $condition, $responsesByKey = null): bool
     {
         if (empty($condition)) {
             return true; // Transisi tanpa syarat (unconditional)
@@ -363,14 +373,9 @@ class OnboardingEngineService
         $operator = $condition['operator'] ?? 'equals';
         $expectedValue = $condition['value'] ?? null;
 
-        if (!$questionId) return false;
+        if (!$questionId || !$responsesByKey || !isset($responsesByKey[$questionId])) return false;
 
-        $response = OnboardingResponse::where('session_id', $session->id)
-            ->where('question_id', $questionId)
-            ->first();
-
-        // Jika pertanyaan tersebut belum dijawab
-        if (!$response) return false;
+        $response = $responsesByKey[$questionId];
 
         $actualValue = $response->value; // biasanya disimpan dalam bentuk array, contoh: ["founder"]
 
@@ -436,19 +441,18 @@ class OnboardingEngineService
         ];
     }
 
-    private function calculateProgress(OnboardingSession $session): array
+    private function calculateProgress(OnboardingSession $session, $responses = null): array
     {
-        $answeredSteps = OnboardingResponse::where('session_id', $session->id)
-            ->distinct('step_id')
-            ->count('step_id');
+        if (!$responses) {
+            $responses = OnboardingResponse::where('session_id', $session->id)->get();
+        }
+
+        $answeredSteps = $responses->pluck('step_id')->unique()->count();
+        $responsesByKey = $responses->keyBy('question_id');
 
         // Estimasi total step berdasarkan role (lebih akurat dari hardcode 12)
-        $useConnectx = OnboardingResponse::where('session_id', $session->id)
-            ->where('question_id', 'q_use_connectx')
-            ->first();
-        $bldType = OnboardingResponse::where('session_id', $session->id)
-            ->where('question_id', 'q_bld_type')
-            ->first();
+        $useConnectx = $responsesByKey['q_use_connectx'] ?? null;
+        $bldType = $responsesByKey['q_bld_type'] ?? null;
 
         $action = $useConnectx ? $this->getValue($useConnectx->value) : null;
         $subType = $bldType ? $this->getValue($bldType->value) : null;

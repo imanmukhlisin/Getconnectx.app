@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "regions": ["sin1"],
   "framework": null,
   "buildCommand": "echo 'Skipping build - handled by vercel-php runtime'",
   "outputDirectory": "public",
