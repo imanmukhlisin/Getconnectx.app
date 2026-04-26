@@ -105,7 +105,25 @@ Mencari Startup yang mau di-join.
         "founder": { "name": "Siti Aminah", "title": "Founder" },
         "match": { "score": 88, "label": "Strong Match" },
         "industry": { "primary": "Healthtech", "display": "Healthtech" },
-        "team": { "memberCount": 5, "display": "5 members" }
+        "team": { "memberCount": 5, "display": "5 members" },
+        "summary": "AI-driven health diagnosis",
+        "openRoles": [],
+        "lookingFor": [],
+        "teamStage": {
+          "teamSize": 5,
+          "stage": "SEED",
+          "industry": "Healthtech",
+          "hiringCount": 0
+        },
+        "journey": {
+          "currentStage": "seed",
+          "stages": [
+            { "id": "idea", "label": "Idea", "state": "completed" },
+            { "id": "mvp", "label": "MVP", "state": "completed" },
+            { "id": "pre_seed", "label": "Pre-Seed", "state": "completed" },
+            { "id": "seed", "label": "Seed", "state": "current" }
+          ]
+        }
       }
     ],
     "nextCursor": null,
