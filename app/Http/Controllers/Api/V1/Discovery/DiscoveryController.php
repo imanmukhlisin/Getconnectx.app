@@ -171,18 +171,15 @@ class DiscoveryController extends Controller
         $authUser = $request->user();
         $action   = $request->input('action');
 
-        // Determine if target is a user or startup
-        $isStartup = str_starts_with($targetId, 'startup_');
+        // Detect if targetId is a startup UUID by looking it up in the startups table.
+        // FE passes the raw startupId UUID from the card response (no prefix needed).
+        $startup = \App\Models\Startup::find($targetId);
+        $isStartup = $startup !== null;
         $actualTargetId = $targetId;
 
-        // For now, all actions target user profiles (startup matching = match with owner)
-        // If startup, resolve owner_id
+        // Resolve: if startup, match is against the owner (founder)
         $resolvedUserId = $actualTargetId;
         if ($isStartup) {
-            $startup = \App\Models\Startup::find($actualTargetId);
-            if (!$startup) {
-                return response()->json(['success' => false, 'message' => 'Startup not found.'], 404);
-            }
             $resolvedUserId = $startup->owner_id;
         }
 
