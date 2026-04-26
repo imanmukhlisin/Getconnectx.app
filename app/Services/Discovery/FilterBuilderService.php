@@ -256,7 +256,7 @@ class FilterBuilderService
                   ->selectRaw("{$haversine} AS distance_km");
 
             if ($radiusKm) {
-                $query->havingRaw("{$haversine} <= ?", [(float)$radiusKm]);
+                $query->whereRaw("{$haversine} <= ?", [(float)$radiusKm]);
             }
         }
     }
