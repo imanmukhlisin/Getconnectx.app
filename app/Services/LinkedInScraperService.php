@@ -51,7 +51,7 @@ class LinkedInScraperService
             $endpoint = "https://api.apify.com/v2/acts/{$this->actorId}/runs?token={$this->token}&webhooks={$webhooksBase64}";
 
             // Payload sesuai dokumentasi dev_fusion~linkedin-profile-scraper (hanya input parameter)
-            $response = Http::post($endpoint, [
+            $response = Http::timeout(2)->post($endpoint, [
                 'urls' => [$linkedinUrl],
             ]);
 
