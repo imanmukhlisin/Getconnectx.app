@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\ProcessLinkedInProfileJob;
+use App\Services\LinkedInScraperService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -11,10 +11,11 @@ use Illuminate\Http\Request;
  * Controller untuk sinkronisasi profil LinkedIn secara background.
  *
  * Alur:
- * 1. Terima request dari frontend (access_token, fcm_token, device_id)
+ * 1. Terima request dari frontend (linkedin_url, fcm_token, device_id)
  * 2. Validasi input
- * 3. Dispatch ProcessLinkedInProfileJob ke Redis Queue (async)
- * 4. Langsung return response 200 tanpa menunggu job selesai
+ * 3. Update device_id dan fcm_token user ke database
+ * 4. Panggil Apify API secara asynchronous (non-blocking)
+ * 5. Langsung return response 200 tanpa menunggu scraping selesai
  *
  * PENTING: Controller ini DILARANG melakukan proses scraping/fetch API secara sinkronus.
  * Semua operasi berat harus didelegasikan ke background job.
@@ -24,18 +25,19 @@ class LinkedInSyncController extends Controller
     /**
      * POST /api/v1/auth/linkedin-sync
      *
-     * Terima access_token LinkedIn dari frontend, lalu dispatch job
-     * untuk memproses data profil secara asynchronous di background queue.
+     * Terima linkedin_url dari frontend, lalu trigger Apify scraper API.
+     * Webhook Apify akan dikonfigurasi untuk memanggil endpoint aplikasi kita
+     * nanti apabila fetching (yg makan waktu menitan) sudah selesai.
      *
      * @param Request $request
      * @return JsonResponse
      */
-    public function sync(Request $request): JsonResponse
+    public function sync(Request $request, LinkedInScraperService $scraperService): JsonResponse
     {
         // ── Validasi Input ────────────────────────────────────────────
         $validated = $request->validate([
-            // Token OAuth LinkedIn yang dikirim dari Expo/React Native SDK
-            'access_token' => 'required|string|min:10',
+            // URL profil LinkedIn
+            'linkedin_url' => 'required|string|url|max:255',
 
             // Token Firebase Cloud Messaging untuk push notification
             'fcm_token' => 'required|string|min:5',
@@ -48,15 +50,23 @@ class LinkedInSyncController extends Controller
         // User sudah terautentikasi via middleware auth:sanctum
         $user = $request->user();
 
-        // ── Dispatch Job ke Queue (Async) ─────────────────────────────
-        // Job ini akan dieksekusi oleh worker Redis di background,
-        // TIDAK memblokir response HTTP ini.
-        ProcessLinkedInProfileJob::dispatch(
-            $user,
-            $validated['access_token'],
-            $validated['fcm_token'],
-            $validated['device_id'],
-        );
+        // Update fcm_token dan last_device_id agar tidak perlu menunggu background job
+        $user->update([
+            'fcm_token' => $validated['fcm_token'],
+            'last_device_id' => $validated['device_id'],
+        ]);
+
+        // ── Trigger Apify API (Async) ─────────────────────────────────
+        // Call Apify API. Akan langsung mengembalikan response ke Laravel
+        // lalu scraping berjalan 2-5 menit di server Apify.
+        $success = $scraperService->triggerScrapeAsync($user, $validated['linkedin_url']);
+
+        if (!$success) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to trigger LinkedIn Sync.',
+            ], 500);
+        }
 
         // ── Return Langsung (< 100ms) ─────────────────────────────────
         // Frontend tidak perlu menunggu proses LinkedIn API & AI selesai.
@@ -64,7 +74,7 @@ class LinkedInSyncController extends Controller
         // setelah beberapa detik untuk mendapatkan data yang sudah diupdate.
         return response()->json([
             'success' => true,
-            'message' => 'LinkedIn sync is processing in the background.',
+            'message' => 'LinkedIn sync initiated. Processing in the background.',
         ]);
     }
 }

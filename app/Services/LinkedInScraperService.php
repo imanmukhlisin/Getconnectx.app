@@ -21,10 +21,11 @@ class LinkedInScraperService
      * Jalankan scraper secara Asynchronous ke API Apify dan sisipkan Webhook URL.
      * Metode ini 100% aman untuk Vercel (Serverless) karena tidak memblokir respon PHP (non-blocking).
      *
+     * @param User $user
      * @param string $linkedinUrl
      * @return bool
      */
-    public function triggerScrapeAsync(string $linkedinUrl): bool
+    public function triggerScrapeAsync(User $user, string $linkedinUrl): bool
     {
         if (empty($this->token)) {
             Log::error('LinkedInScraperService: APIFY_TOKEN is missing.');
@@ -37,7 +38,12 @@ class LinkedInScraperService
         }
 
         try {
-            $webhookUrl = config('app.url') . '/api/v1/webhooks/apify/linkedin';
+            // Secret token untuk memvalidasi request masuk dari Apify
+            $secretToken = config('services.apify.webhook_token', md5($this->token . 'webhook'));
+            
+            // Tambahkan user_id dan secret_token ke query parameter agar webhook tahu data milik siapa
+            $webhookUrl = config('app.url') . "/api/v1/webhooks/apify/linkedin?user_id={$user->id}&token={$secretToken}";
+            
             // Konfigurasi Webhook spesifik dari APIFY (via query parameter webhooks base64 encoded)
             $webhooksJson = json_encode([
                 [

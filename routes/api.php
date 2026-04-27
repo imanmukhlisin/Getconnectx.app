@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V1\Auth\LinkedInSyncController;
 use App\Http\Controllers\Api\V1\Auth\OAuthController;
+use App\Http\Controllers\Api\V1\Auth\ApifyWebhookController;
 use App\Http\Controllers\Api\V1\Profile\ProfileController;
 use App\Http\Controllers\Api\V1\Chat\MessageController;
 use App\Http\Controllers\Api\V1\OnboardingController;
@@ -104,11 +105,15 @@ Route::prefix('v1')->group(function () {
             ->name('auth.refresh');
 
         // ── LinkedIn Sync (Async Background Job) ──────────────────────────────
-        // Terima access_token LinkedIn, dispatch ProcessLinkedInProfileJob ke queue
-        // Response langsung dalam < 100ms tanpa menunggu proses sync selesai
+        // Terima linkedin_url LinkedIn, trigger Apify
+        // Response langsung dalam < 100ms
         Route::post('linkedin-sync', [LinkedInSyncController::class, 'sync'])
             ->name('auth.linkedin-sync');
     });
+
+    // ── Webhook Apify (Dipanggil Eksternal) ──────────────────────────────────
+    Route::post('webhooks/apify/linkedin', [ApifyWebhookController::class, 'handle'])
+        ->name('webhooks.apify.linkedin');
 
     // ─── Authenticated: Profile & Onboarding ──────────────────────────────────
     Route::prefix('profile')->middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
