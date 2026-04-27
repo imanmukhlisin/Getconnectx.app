@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\ForgotPasswordController;
+use App\Http\Controllers\Api\V1\Auth\LinkedInSyncController;
 use App\Http\Controllers\Api\V1\Auth\OAuthController;
 use App\Http\Controllers\Api\V1\Profile\ProfileController;
 use App\Http\Controllers\Api\V1\Chat\MessageController;
@@ -101,6 +102,12 @@ Route::prefix('v1')->group(function () {
         // ── Refresh Token ─────────────────────────────────────────────────────
         Route::post('refresh', [AuthController::class, 'refreshToken'])
             ->name('auth.refresh');
+
+        // ── LinkedIn Sync (Async Background Job) ──────────────────────────────
+        // Terima access_token LinkedIn, dispatch ProcessLinkedInProfileJob ke queue
+        // Response langsung dalam < 100ms tanpa menunggu proses sync selesai
+        Route::post('linkedin-sync', [LinkedInSyncController::class, 'sync'])
+            ->name('auth.linkedin-sync');
     });
 
     // ─── Authenticated: Profile & Onboarding ──────────────────────────────────

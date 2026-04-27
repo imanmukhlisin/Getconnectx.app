@@ -73,6 +73,7 @@ class User extends Authenticatable
         'leadership_style',
         'work_arrangement',
         'remote_ready',
+        'last_device_id',
     ];
 
     /**
@@ -108,6 +109,14 @@ class User extends Authenticatable
     public function startup()
     {
         return $this->hasOne(\App\Models\Startup::class, 'owner_id');
+    }
+
+    /**
+     * Kredensial OAuth user (LinkedIn, Google, dll).
+     */
+    public function credentials()
+    {
+        return $this->hasMany(UserCredential::class);
     }
 
     public function tags()

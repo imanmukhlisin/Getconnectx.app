@@ -36,6 +36,57 @@ class VertexAiService
         });
     }
 
+    // ═══════════════════════════════════════════════════════════════════
+    //  Generate Biografi dari Data LinkedIn
+    // ═══════════════════════════════════════════════════════════════════
+
+    /**
+     * Generate biografi profesional 3-4 kalimat dari data LinkedIn user.
+     * Digunakan oleh ProcessLinkedInProfileJob setelah sync data dari LinkedIn API.
+     *
+     * Fallback jika AI gagal: return headline saja sebagai bio.
+     *
+     * @param string $headline Jabatan/headline dari LinkedIn
+     * @param array  $experiences Riwayat pekerjaan (maks 3 item)
+     * @return string Biografi profesional siap simpan ke kolom bio
+     */
+    public function generateLinkedInBio(string $headline, array $experiences): string
+    {
+        try {
+            // Susun ringkasan experience untuk dimasukkan ke prompt
+            $experienceSummary = collect($experiences)
+                ->map(fn($e) => "- {$e['title']} at {$e['company']} ({$e['period']})")
+                ->implode("\n");
+
+            if (empty($experienceSummary)) {
+                $experienceSummary = '(No work experience provided)';
+            }
+
+            $prompt = <<<PROMPT
+You are ConnectX AI, a professional writing assistant for a startup networking platform.
+Generate a compelling, professional bio in 3-4 sentences based on the following professional profile.
+The tone should be first-person, confident, and concise. Do NOT use bullet points or headers.
+
+Profile:
+- Headline: {$headline}
+- Work Experience:
+{$experienceSummary}
+
+Write the bio directly, without any introduction or explanation.
+PROMPT;
+
+            return $this->callVertexAi($prompt);
+
+        } catch (\Throwable $e) {
+            Log::error('VertexAiService: Gagal generate LinkedIn bio.', [
+                'message' => $e->getMessage(),
+            ]);
+
+            // Fallback: gunakan headline saja agar bio tidak kosong
+            return $headline;
+        }
+    }
+
     /**
      * Build the contextual prompt for Gemini 1.5 Pro.
      */
