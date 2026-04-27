@@ -11,6 +11,9 @@ return [
     'whatsapp_delivery_failed' => 'Failed to send WhatsApp OTP. Please try again.',
     'whatsapp_verify_success' => 'WhatsApp has already been verified. Registration complete.',
     'registration_complete' => 'Registration complete! Welcome to ConnectX.',
+    'login_success' => 'Login successful! Welcome back.',
+    'login_failed' => 'Invalid email or password. Please try again.',
+    'inactive_user' => 'Your account is not active yet. Please complete the registration or verification process first.',
     
     // OAuth Responses
     'oauth_provider_unsupported' => "Provider ':provider' is not supported. Use: :allowed.",
