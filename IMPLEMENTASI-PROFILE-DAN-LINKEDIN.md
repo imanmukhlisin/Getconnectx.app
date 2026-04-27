@@ -99,3 +99,8 @@ Berikut merupakan peta proses data yang terjadi saat pengguna menekan tombol _"S
     Fungsi internal dalam Job `ProcessLinkedInProfileJob::handle()` menjamin bahwa data list JSON diproses dengan `is_array()` dan nilai primitif `[]` akan menutupi kemungkinan pengikatan Null, mematuhi prinsip pencegahan _Silent Failure Database System_. 
 
 `--- Document End ---`
+
+GET /api/v1/me/profile
+PATCH /api/v1/me/profile
+GET /api/v1/profile-options
+GET /api/v1/profiles/{id}

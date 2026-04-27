@@ -697,7 +697,7 @@ class OnboardingEngineService
 
         // ── Dispatch LinkedIn Background Scraper (Serverless/Webhook strategy) ──
         if (!empty($linkedinUrlToSync)) {
-            app(\App\Services\LinkedInScraperService::class)->triggerScrapeAsync($linkedinUrlToSync);
+            app(\App\Services\LinkedInScraperService::class)->triggerScrapeAsync($user, $linkedinUrlToSync);
         }
     }
 
