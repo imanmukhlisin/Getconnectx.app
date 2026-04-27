@@ -3,55 +3,138 @@
 namespace App\Http\Controllers\Api\V1\Profile;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
-use App\Http\Requests\Profile\UpdateProfileStageARequest;
-use App\Http\Requests\Profile\UpdateProfileStageBRequest;
+use App\Http\Resources\ProfileResource;
 use App\Models\Tag;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ProfileController extends Controller
 {
     /**
-     * GET /api/v1/profile
+     * GET /api/v1/me/profile
      *
-     * Ambil data profil user saat ini beserta tag-nya.
+     * Berdasarkan API-PROFILE-LINKEDIN.md, endpoint ini mengembalikan profil user
+     * dengan struktur ter-mapping (termasuk sections.about, personalityAndHobbies, dll).
      */
-    public function index(Request $request): JsonResponse
+    public function me(Request $request): JsonResponse
     {
-        $user = $request->user()->load('tags');
+        $user = $request->user()->load(['tags', 'startup']);
 
         return response()->json([
-            'status' => 'success',
-            'data'   => [
-                'user' => $user->registrationSummary(),
-                'tags' => $user->tags
-            ],
+            'success' => true,
+            'message' => 'Profile fetched successfully',
+            'data'    => new ProfileResource($user),
         ]);
     }
 
     /**
-     * GET /api/v1/profile/tags
+     * PATCH /api/v1/me/profile
      *
-     * Ambil semua master tag (industry & skill) untuk opsi di frontend.
+     * Update data profil secara parsial. Mendukung fields:
+     * name, headline, location, about, personalityAndHobbyIds
      */
-    public function tags(): JsonResponse
+    public function updateMe(Request $request): JsonResponse
     {
-        $tags = Tag::all()->groupBy('type');
+        $validated = $request->validate([
+            'name'                   => 'nullable|string|max:255',
+            'headline'               => 'nullable|string|max:255',
+            'location'               => 'nullable|string|max:255',
+            'about'                  => 'nullable|string|max:1000',
+            'personalityAndHobbyIds' => 'nullable|array',
+            'personalityAndHobbyIds.*' => 'integer|exists:tags,id',
+        ]);
+
+        $user = $request->user();
+        $updateData = [];
+
+        if (isset($validated['name'])) {
+            $updateData['name'] = $validated['name'];
+        }
+        if (isset($validated['headline'])) {
+            $updateData['position'] = $validated['headline']; // Kita simpan headline di kolom position
+        }
+        if (isset($validated['location'])) {
+            // FE mengirim string misal "Bandung, Indonesia", kita pisah untuk struktur database
+            $locParts = explode(',', $validated['location']);
+            $updateData['city'] = trim($locParts[0] ?? '');
+            $updateData['country'] = trim($locParts[1] ?? '');
+        }
+
+        if (isset($validated['about'])) {
+            $user->load('startup');
+            if ($user->startup !== null) {
+                // Di database kita simpan di kolom startup_idea untuk founder yg punya entitas startup
+                $updateData['startup_idea'] = $validated['about'];
+            } else {
+                $updateData['bio'] = $validated['about'];
+            }
+        }
+
+        if (!empty($updateData)) {
+            $user->update($updateData);
+        }
+
+        if (isset($validated['personalityAndHobbyIds'])) {
+            // Karena tag menggunakan sync, kita hanya menyinkronkan tag yg divalidasi
+            // Ini akan menghapus tag lama dan menggantinya dengan yg baru. Pastikan FE mengirim semua P&H id.
+            $user->tags()->sync($validated['personalityAndHobbyIds']);
+        }
 
         return response()->json([
-            'status' => 'success',
-            'data'   => $tags,
+            'success' => true,
+            'message' => 'Profile updated successfully',
+            'data'    => new ProfileResource($user->fresh(['tags', 'startup'])),
         ]);
     }
 
+    /**
+     * GET /api/v1/profile-options
+     *
+     * Mengambil daftar master data seperti personalityAndHobbies agar Front End
+     * dapat me-render opsi saat edit profile.
+     */
+    public function options(): JsonResponse
+    {
+        // Ambil Tag untuk personality, hobby
+        $tags = Tag::whereIn('type', ['personality_hobbies', 'hobby', 'personality'])->get()
+            ->map(function($tag) {
+                return [
+                    'id'   => $tag->id,
+                    'name' => $tag->name,
+                ];
+            });
 
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile options fetched successfully',
+            'data'    => [
+                'personalityAndHobbies' => $tags
+            ]
+        ]);
+    }
+
+    /**
+     * GET /api/v1/profiles/{id}
+     *
+     * Berdasarkan API-PROFILE-LINKEDIN.md, ini untuk fetch public profile.
+     */
+    public function show(string $id): JsonResponse
+    {
+        $user = User::with(['tags', 'startup'])->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile fetched successfully',
+            'data'    => new ProfileResource($user),
+        ]);
+    }
 
     /**
      * PUT /api/v1/profile/fcm-token
      *
-     * Perbarui FCM Token milik user ini untuk Push Notification.
-     * Dipanggil oleh Flutter setiap kali mendapatkan update token dari Firebase.
+     * Masih dipertahankan karena Firebase Flutter masih memanggilnya.
      */
     public function updateFcmToken(Request $request): JsonResponse
     {
@@ -59,11 +142,10 @@ class ProfileController extends Controller
             'fcm_token' => 'required|string',
         ]);
 
-        $user = $request->user();
-        $user->update(['fcm_token' => $request->fcm_token]);
+        $request->user()->update(['fcm_token' => $request->fcm_token]);
 
         return response()->json([
-            'status'  => 'success',
+            'success' => true,
             'message' => 'FCM Token berhasil diperbarui.',
         ]);
     }

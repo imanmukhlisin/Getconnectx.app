@@ -116,12 +116,14 @@ Route::prefix('v1')->group(function () {
         ->name('webhooks.apify.linkedin');
 
     // ─── Authenticated: Profile & Onboarding ──────────────────────────────────
-    Route::prefix('profile')->middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
-        Route::get('/', [ProfileController::class, 'index'])
-            ->name('profile.index');
-        Route::get('tags', [ProfileController::class, 'tags'])
-            ->name('profile.tags');
-        Route::put('fcm-token', [ProfileController::class, 'updateFcmToken'])
+    Route::middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
+        Route::get('me/profile', [ProfileController::class, 'me'])->name('profile.me');
+        Route::patch('me/profile', [ProfileController::class, 'updateMe'])->name('profile.update_me');
+        Route::get('profile-options', [ProfileController::class, 'options'])->name('profile.options');
+        Route::get('profiles/{id}', [ProfileController::class, 'show'])->name('profile.show');
+
+        // endpoint tambahan untuk fitur FCM flutter
+        Route::put('profile/fcm-token', [ProfileController::class, 'updateFcmToken'])
             ->name('profile.update.fcm-token');
     });
 
