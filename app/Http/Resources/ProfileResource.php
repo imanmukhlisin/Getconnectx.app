@@ -15,13 +15,10 @@ class ProfileResource extends JsonResource
     public function toArray(Request $request): array
     {
         // ── Cek kepemilikan Startup ─────────────────────────────
-        // Berdasarkan arsitektur, kepemilikan startup menentukan jenis profil
-        // Jika ada startup (bisa diload relasinya) berarti "startupIdea", kalau ngga "personalDescription"
-        $hasStartup = $this->relationLoaded('startup') && $this->startup !== null;
-        
-        $aboutKind = $hasStartup ? 'startupIdea' : 'personalDescription';
-        $aboutTitle = $hasStartup ? 'Startup Idea' : 'Description';
-        $aboutValue = $hasStartup ? ($this->startup_idea ?? '') : ($this->bio ?? '');
+        $hasStartup  = $this->relationLoaded('startup') && $this->startup !== null;
+        $aboutKind   = $hasStartup ? 'startupIdea' : 'personalDescription';
+        $aboutTitle  = $hasStartup ? 'Startup Idea' : 'Description';
+        $aboutValue  = $hasStartup ? ($this->startup_idea ?? '') : ($this->bio ?? '');
 
         // ── Manipulasi Lokasi ──────────────────────────────────
         $locationDisplay = trim(($this->city ?? '') . ', ' . ($this->country ?? ''), ', ');
@@ -29,25 +26,50 @@ class ProfileResource extends JsonResource
             $locationDisplay = 'Location not set';
         }
 
-        // ── Konversi Tags/Hobbies ───────────────────────────────────────────
-        $hobbies = [];
-        $skills   = [];
+        // ── Mapping Tags per Tipe ───────────────────────────────
+        $hobbies   = [];
+        $skills    = [];
+        $interests = [];
+
         if ($this->relationLoaded('tags')) {
             $hobbies = $this->tags
                 ->where('type', 'personality_hobbies')
                 ->filter(fn($tag) => !empty($tag->code))
-                ->map(fn($tag) => [
-                    'id'   => $tag->code,  // ph_1, ph_2, ...
-                    'name' => $tag->name,
-                ])->values()->all();
+                ->map(fn($tag) => ['id' => $tag->code, 'name' => $tag->name])
+                ->values()->all();
 
             $skills = $this->tags
                 ->where('type', 'skill')
                 ->filter(fn($tag) => !empty($tag->code))
-                ->map(fn($tag) => [
-                    'id'   => $tag->code,  // sk_1, sk_2, ...
-                    'name' => $tag->name,
-                ])->values()->all();
+                ->map(fn($tag) => ['id' => $tag->code, 'name' => $tag->name])
+                ->values()->all();
+
+            $interests = $this->tags
+                ->where('type', 'industry')
+                ->filter(fn($tag) => !empty($tag->code))
+                ->map(fn($tag) => ['id' => $tag->code, 'name' => $tag->name])
+                ->values()->all();
+        }
+
+        // ── Highlights: Computed dari user_credentials + user data ──
+        $highlights = [];
+
+        if ($this->relationLoaded('credentials')) {
+            $cred = $this->credentials->where('provider', 'linkedin')->first();
+            if ($cred) {
+                $expCount = count($cred->experience ?? []);
+                if ($expCount > 0) {
+                    $highlights[] = $expCount . '+ years startup experience';
+                }
+                $edu = collect($cred->education ?? [])->first();
+                if ($edu && !empty($edu['degree']) && !empty($edu['school'])) {
+                    $highlights[] = $edu['degree'] . ', ' . $edu['school'];
+                }
+            }
+        }
+
+        if (!empty($this->languages)) {
+            $highlights[] = $this->languages;
         }
 
         return [
@@ -67,7 +89,6 @@ class ProfileResource extends JsonResource
                 'teamsJoined' => $this->teams_joined_count ?? 0,
                 'matches'     => $this->matches_count ?? 0,
             ],
-            // TODO: Konfigurasi Badges otomatis dari internal logic / achivement
             'badges' => [
                 ['id' => 'connectx-user', 'label' => 'ConnectX User']
             ],
@@ -84,6 +105,13 @@ class ProfileResource extends JsonResource
                 'skills' => [
                     'title' => 'Skills',
                     'items' => $skills,
+                ],
+                'interests' => [
+                    'title' => 'Interests',
+                    'items' => $interests,
+                ],
+                'highlights' => [
+                    'items' => $highlights,
                 ],
             ],
             'createdAt' => $this->created_at ? $this->created_at->toIso8601String() : null,

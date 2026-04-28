@@ -20,7 +20,7 @@ class ProfileController extends Controller
      */
     public function me(Request $request): JsonResponse
     {
-        $user = $request->user()->load(['tags', 'startup']);
+        $user = $request->user()->load(['tags', 'startup', 'credentials']);
 
         return response()->json([
             'success' => true,
@@ -85,7 +85,7 @@ class ProfileController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Profile updated successfully',
-            'data'    => new ProfileResource($user->fresh(['tags', 'startup'])),
+            'data'    => new ProfileResource($user->fresh(['tags', 'startup', 'credentials'])),
         ]);
     }
 
