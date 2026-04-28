@@ -33,10 +33,11 @@ class ProfileResource extends JsonResource
         // Asumsi "personalityAndHobbies" diambil dari relasi tags yang mana typenya 'personality'
         $hobbies = [];
         if ($this->relationLoaded('tags')) {
-            $hobbies = $this->tags->whereIn('type', ['personality_hobbies', 'hobby', 'personality'])
+            $hobbies = $this->tags
                 ->map(fn($tag) => [
                     'id'   => 'ph_' . $tag->id,
                     'name' => $tag->name,
+                    'debug_type' => $tag->type // Kita liat typenya apa
                 ])->values()->all();
         }
 
