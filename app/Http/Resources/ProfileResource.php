@@ -29,15 +29,23 @@ class ProfileResource extends JsonResource
             $locationDisplay = 'Location not set';
         }
 
-        // ── Konversi Tags/Hobbies ────────────────────────────────
-        // Asumsi "personalityAndHobbies" diambil dari relasi tags yang mana typenya 'personality'
+        // ── Konversi Tags/Hobbies ───────────────────────────────────────────
         $hobbies = [];
+        $skills   = [];
         if ($this->relationLoaded('tags')) {
             $hobbies = $this->tags
                 ->where('type', 'personality_hobbies')
                 ->filter(fn($tag) => !empty($tag->code))
                 ->map(fn($tag) => [
-                    'id'   => $tag->code,  // ph_1, ph_2, ... sesuai kontrak API
+                    'id'   => $tag->code,  // ph_1, ph_2, ...
+                    'name' => $tag->name,
+                ])->values()->all();
+
+            $skills = $this->tags
+                ->where('type', 'skill')
+                ->filter(fn($tag) => !empty($tag->code))
+                ->map(fn($tag) => [
+                    'id'   => $tag->code,  // sk_1, sk_2, ...
                     'name' => $tag->name,
                 ])->values()->all();
         }
@@ -73,11 +81,10 @@ class ProfileResource extends JsonResource
                     'title' => 'Personality & Hobbies',
                     'items' => $hobbies,
                 ],
-                // Bagian Skills & Interests mungkin dikembangkan nanti sesuai API
                 'skills' => [
                     'title' => 'Skills',
-                    'items' => []
-                ]
+                    'items' => $skills,
+                ],
             ],
             'createdAt' => $this->created_at ? $this->created_at->toIso8601String() : null,
             'updatedAt' => $this->updated_at ? $this->updated_at->toIso8601String() : null,
