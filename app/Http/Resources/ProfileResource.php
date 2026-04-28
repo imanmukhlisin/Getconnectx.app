@@ -35,7 +35,7 @@ class ProfileResource extends JsonResource
         if ($this->relationLoaded('tags')) {
             $hobbies = $this->tags->whereIn('type', ['personality_hobbies', 'hobby', 'personality'])
                 ->map(fn($tag) => [
-                    'id'   => $tag->id,
+                    'id'   => 'ph_' . $tag->id,
                     'name' => $tag->name,
                 ])->values()->all();
         }

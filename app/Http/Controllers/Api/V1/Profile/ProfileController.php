@@ -43,7 +43,6 @@ class ProfileController extends Controller
             'location'               => 'nullable|string|max:255',
             'about'                  => 'nullable|string|max:1000',
             'personalityAndHobbyIds' => 'nullable|array',
-            'personalityAndHobbyIds.*' => 'integer|exists:tags,id',
         ]);
 
         $user = $request->user();
@@ -53,10 +52,9 @@ class ProfileController extends Controller
             $updateData['name'] = $validated['name'];
         }
         if (isset($validated['headline'])) {
-            $updateData['position'] = $validated['headline']; // Kita simpan headline di kolom position
+            $updateData['position'] = $validated['headline'];
         }
         if (isset($validated['location'])) {
-            // FE mengirim string misal "Bandung, Indonesia", kita pisah untuk struktur database
             $locParts = explode(',', $validated['location']);
             $updateData['city'] = trim($locParts[0] ?? '');
             $updateData['country'] = trim($locParts[1] ?? '');
@@ -65,7 +63,6 @@ class ProfileController extends Controller
         if (isset($validated['about'])) {
             $user->load('startup');
             if ($user->startup !== null) {
-                // Di database kita simpan di kolom startup_idea untuk founder yg punya entitas startup
                 $updateData['startup_idea'] = $validated['about'];
             } else {
                 $updateData['bio'] = $validated['about'];
@@ -77,9 +74,18 @@ class ProfileController extends Controller
         }
 
         if (isset($validated['personalityAndHobbyIds'])) {
-            // Karena tag menggunakan sync, kita hanya menyinkronkan tag yg divalidasi
-            // Ini akan menghapus tag lama dan menggantinya dengan yg baru. Pastikan FE mengirim semua P&H id.
-            $user->tags()->sync($validated['personalityAndHobbyIds']);
+            // Kita bersihkan ID dari prefix 'ph_' jika dikirim oleh frontend
+            // agar bisa divalidasi dan di-sync sebagai ID integer database.
+            $sanitizedIds = collect($validated['personalityAndHobbyIds'])
+                ->map(function ($id) {
+                    return (int) str_replace('ph_', '', $id);
+                })
+                ->filter(fn($id) => $id > 0)
+                ->unique()
+                ->values()
+                ->all();
+
+            $user->tags()->sync($sanitizedIds);
         }
 
         return response()->json([
@@ -101,7 +107,7 @@ class ProfileController extends Controller
         $tags = Tag::whereIn('type', ['personality_hobbies', 'hobby', 'personality'])->get()
             ->map(function($tag) {
                 return [
-                    'id'   => $tag->id,
+                    'id'   => 'ph_' . $tag->id, // Berikan prefix agar FE konsisten
                     'name' => $tag->name,
                 ];
             });
