@@ -34,10 +34,11 @@ class ProfileResource extends JsonResource
         $hobbies = [];
         if ($this->relationLoaded('tags')) {
             $hobbies = $this->tags
+                ->where('type', 'personality_hobbies')
+                ->filter(fn($tag) => !empty($tag->code))
                 ->map(fn($tag) => [
-                    'id'   => 'ph_' . $tag->id,
+                    'id'   => $tag->code,  // ph_1, ph_2, ... sesuai kontrak API
                     'name' => $tag->name,
-                    'debug_type' => $tag->type // Kita liat typenya apa
                 ])->values()->all();
         }
 

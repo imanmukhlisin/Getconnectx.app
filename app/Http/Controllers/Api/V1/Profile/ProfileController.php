@@ -74,18 +74,12 @@ class ProfileController extends Controller
         }
 
         if (isset($validated['personalityAndHobbyIds'])) {
-            // Kita bersihkan ID dari prefix 'ph_' jika dikirim oleh frontend
-            // agar bisa divalidasi dan di-sync sebagai ID integer database.
-            $sanitizedIds = collect($validated['personalityAndHobbyIds'])
-                ->map(function ($id) {
-                    return (int) str_replace('ph_', '', $id);
-                })
-                ->filter(fn($id) => $id > 0)
-                ->unique()
-                ->values()
+            // Lookup tag by kolom `code` (misal ph_1, ph_2, ...) bukan integer ID
+            $tagIds = \App\Models\Tag::whereIn('code', $validated['personalityAndHobbyIds'])
+                ->pluck('id')
                 ->all();
 
-            $user->tags()->sync($sanitizedIds);
+            $user->tags()->sync($tagIds);
         }
 
         return response()->json([
@@ -103,11 +97,15 @@ class ProfileController extends Controller
      */
     public function options(): JsonResponse
     {
-        // Ambil Tag untuk personality, hobby
-        $tags = Tag::whereIn('type', ['personality_hobbies', 'hobby', 'personality'])->get()
-            ->map(function($tag) {
+        // Ambil Tag personality/hobby dan pakai kolom `code` sebagai ID
+        // agar konsisten dengan kontrak API (ph_1, ph_2, ...)
+        $tags = Tag::whereIn('type', ['personality_hobbies'])
+            ->whereNotNull('code')
+            ->orderBy('code')
+            ->get()
+            ->map(function ($tag) {
                 return [
-                    'id'   => 'ph_' . $tag->id, // Berikan prefix agar FE konsisten
+                    'id'   => $tag->code,  // ph_1, ph_2, ...
                     'name' => $tag->name,
                 ];
             });
