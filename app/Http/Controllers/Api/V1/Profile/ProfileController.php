@@ -73,13 +73,37 @@ class ProfileController extends Controller
             $user->update($updateData);
         }
 
-        if (isset($validated['personalityAndHobbyIds'])) {
-            // Lookup tag by kolom `code` (misal ph_1, ph_2, ...) bukan integer ID
-            $tagIds = \App\Models\Tag::whereIn('code', $validated['personalityAndHobbyIds'])
-                ->pluck('id')
-                ->all();
+        if ($request->has('personalityAndHobbyIds') || $request->has('personalityAndHobbies')) {
+            $phIds = $request->input('personalityAndHobbyIds', []);
+            if (empty($phIds) && $request->has('personalityAndHobbies.items')) {
+                $phIds = collect($request->input('personalityAndHobbies.items'))->pluck('id')->all();
+            }
 
-            $user->tags()->sync($tagIds);
+            $tagIds = \App\Models\Tag::whereIn('code', $phIds)->pluck('id')->all();
+            $otherTags = $user->tags()->where('type', '!=', 'personality_hobbies')->pluck('tags.id')->all();
+            $user->tags()->sync(array_merge($otherTags, $tagIds));
+        }
+
+        if ($request->has('skillIds') || $request->has('skills')) {
+            $skIds = $request->input('skillIds', []);
+            if (empty($skIds) && $request->has('skills.items')) {
+                $skIds = collect($request->input('skills.items'))->pluck('id')->all();
+            }
+
+            $tagIds = \App\Models\Tag::whereIn('code', $skIds)->pluck('id')->all();
+            $otherTags = $user->tags()->where('type', '!=', 'skill')->pluck('tags.id')->all();
+            $user->tags()->sync(array_merge($otherTags, $tagIds));
+        }
+
+        if ($request->has('interestIds') || $request->has('interests')) {
+            $inIds = $request->input('interestIds', []);
+            if (empty($inIds) && $request->has('interests.items')) {
+                $inIds = collect($request->input('interests.items'))->pluck('id')->all();
+            }
+
+            $tagIds = \App\Models\Tag::whereIn('code', $inIds)->pluck('id')->all();
+            $otherTags = $user->tags()->where('type', '!=', 'industry')->pluck('tags.id')->all();
+            $user->tags()->sync(array_merge($otherTags, $tagIds));
         }
 
         return response()->json([
