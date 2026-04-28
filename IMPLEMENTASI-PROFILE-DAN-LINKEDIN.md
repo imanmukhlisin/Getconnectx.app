@@ -1,106 +1,130 @@
-# Implementasi Sinkronisasi Profil LinkedIn via Apify Webhook
+# Implementasi Profile & LinkedIn Sync (Asynchronous)
 
-Dokumen ini merangkum arsitektur, alur sistem, dan pembaruan _database_ untuk fitur **LinkedIn Profile Synchronization**. Fitur ini memungkinkan aplikasi mengambil data profil LinkedIn pengguna (berbasis *Scraping* via Apify), menghasilkan Biografi menggunakan AI (Gemini Vertex AI), dan merekam kredensial pengguna secara asinkron tanpa terjadinya kegagalan pada antarmuka aplikasi.
+Dokumen ini merangkum arsitektur, alur sistem, dan pembaruan _database_ untuk fitur **LinkedIn Profile Synchronization** serta pengelolaan profil pengguna yang sesuai dengan kontrak `API-PROFILE-LINKEDIN.md`.
 
 ---
 
-## 1. Arsitektur Asinkron (Webhook-Driven Architecture)
+## 1. Arsitektur Asinkron (Apify Webhook)
 
-Pengambilan data (_scraping_) profil LinkedIn menggunakan Apify (`dev_fusion~linkedin-profile-scraper`) umumnya memerlukan durasi antara 2 hingga 5 menit untuk _node processing_. 
-Oleh karena itu, operasi tidak boleh dilakukan secara sinkron untuk menghindari _timeout_ HTTP Server dan mempertahankan performa aplikasi.
-
-Arsitektur diubah dari pendekatan _polling_ / Sinkron (REST) menjadi **Asinkron berbasis Webhook + Job Queue**.
+Pengambilan data profil LinkedIn menggunakan **Apify Scraper** memerlukan waktu 2-5 menit. Arsitektur menggunakan **Webhook-Driven Workflow** agar tidak memblokir performa aplikasi.
 
 ### Komponen Utama
-1. **Pemicu (Endpoint API)**: `POST /api/v1/auth/linkedin-sync` menerima _Payload_ inisasi dari frontend dan mengembalikan status 200 secara instan.
-2. **Actor Scraper (Apify)**: Berjalan secara terpisah pada jaringan _Apify Cloud_.
-3. **Webhook Listener**: `POST /api/v1/webhooks/apify/linkedin` bertanggung jawab mendengarkan pesan konfirmasi keberhasilan scraping `ACTOR.RUN.SUCCEEDED` dari Apify.
-4. **Queue Processor**: `ProcessLinkedInProfileJob` berjalan di memori Redis/Database Server lokal untuk mengekstraksi data, memanggil AI (Vertex AI), dan memperbaharui _Cache_.
+1. **Trigger (FE)**: `POST /api/v1/auth/linkedin-sync` (Memicu scraping & simpan device info).
+2. **Scraper (Apify Cloud)**: Melakukan crawling data LinkedIn secara eksternal.
+3. **Webhook Receiver**: `POST /api/v1/webhooks/apify/linkedin` (Menangkap sinyal sukses dari Apify).
+4. **Job Processor**: `ProcessLinkedInProfileJob` (Mengolah dataset, memanggil AI Gemini, dan update DB).
 
 ---
 
-## 2. Struktur Relasional Database Baru
+## 2. API Reference & Contract Compliance
 
-Pembaruan skema PostgreSQL _database_ melalui _Supabase_ telah di-_deploy_ di _production_ (atau branch `develop`).
+Seluruh endpoint profil telah di-_refactor_ menggunakan `ProfileResource` guna mendukung struktur JSON yang dibutuhkan Frontend (terutama bagian `sections` dan `location`).
 
-### A. Tabel `users` (Pembaruan)
-Penambahan kolom referensi perangkat untuk kebutuhan notifikasi jika pekerjaan asinkron selesai:
-- `last_device_id` `varchar(255) NULL`
+### A. Endpoint List
+| Method | URI | Deskripsi | Auth |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/api/v1/me/profile` | Ambil profil user yang sedang login | Sanctum |
+| **PATCH** | `/api/v1/me/profile` | Update profil (partial update) | Sanctum |
+| **GET** | `/api/v1/profiles/{id}` | Ambil profil publik pengguna lain | Sanctum |
+| **GET** | `/api/v1/profile-options` | Ambil daftar opsi Master Data (Tags/Hobbies) | Sanctum |
+| **POST** | `/api/v1/auth/linkedin-sync` | Inisiasi sinkronisasi LinkedIn via Apify | Sanctum |
 
-*(Catatan: `bio` dan `position` pada tabel ini dimanfaatkan untuk menyimpan Bio yang dihasilkan AI dan Headline pengguna).*
+### B. Konsep Baru: `ProfileResource` Data Mapping
+Backend mengimplementasikan logika dinamis pada `App\Http\Resources\ProfileResource` untuk memenuhi kebutuhan UI:
 
-### B. Tabel `user_credentials` (Tabel Baru)
-Pemecahan entitas untuk mempermudah skalabilitas dan sentralisasi sertifikasi/riwayat pekerjaan pihak eksternal, dipisah dari tabel `users` berdasar arsitektur _Micro-service_ yang dianjurkan.
+1. **Sections: About**
+   - Jika user memiliki relasi `startup`, maka `kind` menjadi `startupIdea` dan `value` diambil dari kolom `startup_idea`.
+   - Jika user tidak memiliki startup, maka `kind` menjadi `personalDescription` dan `value` diambil dari kolom `bio`.
+2. **Location Objects**
+   - Request PATCH mengirim string tunggal: `"Jakarta, Indonesia"`.
+   - Backend melakukan `explode` untuk menyimpan ke kolom `city` dan `country`.
+   - Response mengembalikan object: `{"city": "Jakarta", "country": "Indonesia", "display": "Jakarta, Indonesia"}`.
+3. **Personality & Hobbies**
+   - Di-mapping otomatis dari relasi `tags` yang memiliki tipe `personality`, `hobby`, atau `personality_hobbies`.
 
-```sql
-CREATE TABLE IF NOT EXISTS user_credentials (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    provider    VARCHAR(50) NOT NULL DEFAULT 'linkedin',
-    experience  JSONB NOT NULL DEFAULT '[]'::jsonb,
-    education   JSONB NOT NULL DEFAULT '[]'::jsonb,
-    raw_data    JSONB,
-    created_at  TIMESTAMP,
-    updated_at  TIMESTAMP,
-    CONSTRAINT user_credentials_user_id_provider_unique UNIQUE (user_id, provider)
-);
+---
+
+## 3. Contoh Request & Response
+
+### GET `/api/v1/me/profile`
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid-string",
+    "name": "Alex Doe",
+    "headline": "Product Manager",
+    "location": {
+      "city": "Jakarta",
+      "country": "Indonesia",
+      "display": "Jakarta, Indonesia"
+    },
+    "sections": {
+      "about": {
+        "kind": "personalDescription",
+        "title": "Description",
+        "value": "Experienced PM with focus on AI products..."
+      },
+      "personalityAndHobbies": {
+        "title": "Personality & Hobbies",
+        "items": [
+          { "id": 1, "name": "Adventurous" },
+          { "id": 5, "name": "Gaming" }
+        ]
+      }
+    }
+  }
+}
 ```
 
-> [!CAUTION]
-> **ATURAN KETAT**: Nilai _default_ untuk kolom `experience` dan `education` adalah _Array Json_ kosong (`[]`). **Dilarang memasukkan nilai `NULL`** ke dalam kolom-kolom ini. Modul *Scoring Engine (Variabel G dan J)* akan memicu _NullPointerException_ jika terjadi kesalahan pengikatan tipe JSON List. Hal ini dirancang sesuai algoritma Matchmaking ConnectX.
+### PATCH `/api/v1/me/profile`
+**Request Payload:**
+```json
+{
+  "name": "Alex Update",
+  "headline": "Senior Product Manager",
+  "location": "Singapore, Singapore",
+  "about": "New bio description...",
+  "personalityAndHobbyIds": [1, 5, 10]
+}
+```
 
 ---
 
-## 3. End-To-End Workflow (Alur Kerja Eksekusi)
+## 4. Cara Menjalankan Sinkronisasi LinkedIn (Testing)
 
-Berikut merupakan peta proses data yang terjadi saat pengguna menekan tombol _"Sync LinkedIn"_ di aplikasi utama (Frontend Expo):
+### Manual Trigger (Frontend Simulator)
+Hit endpoint berikut menggunakan Bearer Token user:
+**POST** `{{base_url}}/api/v1/auth/linkedin-sync`
+```json
+{
+  "linkedin_url": "https://www.linkedin.com/in/username",
+  "fcm_token": "fcm_token_device",
+  "device_id": "iphone_15_pro"
+}
+```
 
-#### Fase 1: Memicu Scraper (Controller: `LinkedInSyncController`)
-1. Frontend mengirim payload ke `/api/v1/auth/linkedin-sync`, berisikan `linkedin_url`, `fcm_token`, `device_id`.
-2. Backend (Sanctum Auth) melakukan autentikasi `user`.
-3. Meng-_update_ kolom `last_device_id` dan `fcm_token` di tabel `users`.
-4. Meracik **Webhook URL Cerdas** yang dilampirkan bersama Request ke Apify:
-   `https://[url]/api/v1/webhooks/apify/linkedin?user_id=[UUID]&token=[SECRET]`
-5. Meneruskan _trigger_ ke API REST Apify.
-6. Backend merespon langsung dalam `< 100ms` kepada Frontend dengan respon positif.
-
-#### Fase 2: Scraping Berjalan secara Paralel 
-- Apify Cloud mendaki DOM situs LinkedIn pengguna `https://www.linkedin.com/in/....` untuk menangkap variabel esensial (Headline, Foto Profil, Rentang Karir/Pendidikan, dsb). Ini butuh estimasi 3 menit.
-
-#### Fase 3: Callback dan Konfirmasi Webhook (Controller: `ApifyWebhookController`)
-1. Setelah apify selesai, Apify Server mengirim HTTP POST JSON `ACTOR.RUN.SUCCEEDED` ke URL Webhook ConnectX.
-2. `ApifyWebhookController` di *Backend* mencegat *Event* tersebut.
-3. Controller ini **memeriksa keamanan** dengan validasi dari Query params `&token=...`. Request yang tidak valid di-blokir (401 Unauthorized).
-4. _Dataset ID Apify_ dari dalam Body Json dan _ID User_ diambil. Controller Melemparnya ke layanan *Laravel Job Queues* (`ProcessLinkedInProfileJob::dispatch()`).
-5. Webhook HTTP langsung ditutup (dikembalikan dengan 200 OK ke Apify agar koneksi _Server_ terjaga).
-
-#### Fase 4: Analisis dan Perhitungan Dataset (Job: `ProcessLinkedInProfileJob`)
-1. `ProcessLinkedInProfileJob` berjalan di memori Redis / pekerja `php artisan queue:work`.
-2. Job ini menarik seluruh *Item JSON* dari _Apify Dataset Cloud_.
-3. Memilah `experience` (Maksimal 3 terbaru), dan `education`, diatur ke `[]` jika kosong.
-4. Memicu **Integrasi Gemini 1.5 Pro (Vertex AI)** melalui metode `VertexAiService::generateLinkedInBio($headline, $experiences)`. Menggunakan *prompt system* untuk mengubah riwayat profil yang terbaca menjadi paragraf ringkas (3-4 kalimat) bergaya personal.
-5. Mempebaharui data pengguna dengan _first-wins strategy_:
-   * `name`
-   * `avatar_url` 
-   * `position` *(Digantikan dengan Headline)*
-   * `bio` *(Diisi dengan teks produksi AI / Fallback jika AI limit tercapai)*
-6. Memuat profil pada tabel `user_credentials` dan raw datanya dengan klausa pengamanan `updateOrCreate` untuk mencegah redudansi eksekusi.
-7. Membersihkan (_Invalidate_) **Redis Caching `connectx:match_score:{user_id}...`** milik *user* tersebut agara *Matchmaking Engine* membaca _Variabel Kompatibilitas Baru_ keesokan harinya/saat discovery menu diakses di Frontend.
+### Simulasi Webhook (Manual Testing tanpa Apify)
+Jika ingin melewati proses scraping dan langsung menjalankan Job, tembak endpoint Webhook dengan token rahasia:
+**POST** `/api/v1/webhooks/apify/linkedin?user_id=[USER_UUID]&token=[WEBHOOK_TOKEN_FROM_ENV]`
+**Payload:**
+```json
+{
+  "resource": {
+    "defaultDatasetId": "dataset-id-yang-sudah-ada-di-apify"
+  }
+}
+```
 
 ---
 
-## 4. Keamanan dan Kendali Pengecualian 
+## 5. Database Rule (Critical)
 
-*   **Penyaringan Webhook (_Webhook Filtering_)** \
-    Otoritas dilindungi menggunakan `webhook_token` dari file *.env* lokal atau variabel Vercel. Webhook ini aman diekspos sebagai API Publik tanpa autentikasi _Bearer_, dikarenakan validasi Query Parameter yang rahasia mencegah simulasi data sembarang.
-*   **Retry Pattern on Event Error** \
-    `ProcessLinkedInProfileJob` memiliki tenggang waktu kerja (_Timeout_) sebesar **60 Detik** dengan peluang percobaaan sebanyak **2x**. Hal ini memberikan jaring penanganan jikalau API Google Vertex/Gemini AI sedang padat (_Rate Limit_ / 429).
-*   **Sanitasi Null Type JSON** \
-    Fungsi internal dalam Job `ProcessLinkedInProfileJob::handle()` menjamin bahwa data list JSON diproses dengan `is_array()` dan nilai primitif `[]` akan menutupi kemungkinan pengikatan Null, mematuhi prinsip pencegahan _Silent Failure Database System_. 
+> [!IMPORTANT]
+> **Experience & Education Data**:
+> Kolom `experience` dan `education` pada tabel `user_credentials` disimpan dalam format JSONB. Job `ProcessLinkedInProfileJob` menjamin data selalu berupa **Array Kosong `[]`** jika data tidak ditemukan.
+> **DILARANG KERAS** mengubah data menjadi `NULL` karena akan merusak logika *Matchmaking Scoring Engine* (Constraint Variabel G & J).
 
-`--- Document End ---`
-
-GET /api/v1/me/profile
-PATCH /api/v1/me/profile
-GET /api/v1/profile-options
-GET /api/v1/profiles/{id}
+---
+`--- Dokumentasi Terakhir Diperbarui: 2026-04-28 ---`
