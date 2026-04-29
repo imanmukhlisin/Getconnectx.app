@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\GoogleIdTokenVerifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,8 @@ class OAuthController extends Controller
     private const ALLOWED_PROVIDERS = ['google', 'apple', 'linkedin'];
 
     public function __construct(
-        private readonly \App\Services\SupabaseAuthService $supabaseAuth
+        private readonly \App\Services\SupabaseAuthService $supabaseAuth,
+        private readonly GoogleIdTokenVerifier $googleIdTokenVerifier,
     ) {}
 
     // =========================================================================
@@ -108,17 +110,24 @@ class OAuthController extends Controller
      * POST /api/v1/auth/oauth/{provider}/verify-token
      *
      * Menerima token dari SDK Native (Google Sign-In, Apple Sign In,
-     * LinkedIn SDK) dan memverifikasinya melalui Socialite.
+     * LinkedIn SDK) dan memverifikasinya.
      *
      * Request Body:
      *   - provider_token (string, required): Token/ID Token dari SDK native.
+     *   - fcm_token (string, optional): Firebase Cloud Messaging token.
      *
-     * Flow:
-     *   1. Flutter/FE mendapatkan token dari SDK native provider.
-     *   2. FE mengirim token tersebut ke endpoint ini via POST.
-     *   3. BE memvalidasi token via Socialite::userFromToken().
-     *   4. BE membuat/memperbarui akun user → skip email verification.
-     *   5. BE mengembalikan registration token untuk lanjut ke verifikasi WA.
+     * Flow untuk Google (Mobile/Flutter):
+     *   1. Flutter → google_sign_in SDK → mendapatkan `idToken` (JWT)
+     *   2. Flutter → POST ke endpoint ini { provider_token: idToken }
+     *   3. Backend → GoogleIdTokenVerifier → decode & verify JWT secara langsung
+     *      menggunakan Google JWKS public keys (tanpa network call ke userinfo).
+     *   4. Backend → processOAuthUser() → create/update user → return token.
+     *
+     * Flow untuk provider lain (LinkedIn, Apple):
+     *   1. FE → SDK native → mendapatkan Access Token
+     *   2. FE → POST ke endpoint ini { provider_token: accessToken }
+     *   3. Backend → Socialite::userFromToken() → hit provider userinfo API
+     *   4. Backend → processOAuthUser() → create/update user → return token.
      */
     public function verifyToken(string $provider, Request $request): JsonResponse
     {
@@ -142,11 +151,32 @@ class OAuthController extends Controller
         }
 
         try {
-            $driverName = $provider === 'linkedin' ? 'linkedin-openid' : $provider;
+            if ($provider === 'google') {
+                // ─── Google: ID Token (JWT) verification ───────────────
+                // Flutter google_sign_in mengirim idToken (JWT), bukan
+                // Access Token. Kita verifikasi JWT-nya langsung
+                // menggunakan Google JWKS public keys.
+                $oauthUser = $this->googleIdTokenVerifier->verify(
+                    $request->provider_token
+                );
+            } else {
+                // ─── Other Providers: Access Token via Socialite ───────
+                $driverName = $provider === 'linkedin' ? 'linkedin-openid' : $provider;
 
-            /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
-            $driver = Socialite::driver($driverName);
-            $oauthUser = $driver->stateless()->userFromToken($request->provider_token);
+                /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
+                $driver = Socialite::driver($driverName);
+                $oauthUser = $driver->stateless()->userFromToken($request->provider_token);
+            }
+        } catch (\InvalidArgumentException $e) {
+            // Google ID Token verification specific errors
+            Log::warning("Google ID Token verification failed", [
+                'error' => $e->getMessage(),
+            ]);
+            return response()->json([
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+                'code'    => 'INVALID_PROVIDER_TOKEN',
+            ], 401);
         } catch (Throwable $e) {
             Log::error("OAuth native token verification failed for {$provider}", [
                 'error' => $e->getMessage(),
