@@ -222,9 +222,9 @@
             status.style.color = '#aaa';
 
             try {
-                const res = await fetch('https://getconnectxapp.vercel.app/api/v1/auth/oauth/google/verify-token', {
+                const res = await fetch('http://127.0.0.1:8000/api/v1/auth/oauth/google/verify-token', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify({
                         provider_token: currentToken,
                         fcm_token: 'test-from-web-page'
