@@ -116,12 +116,13 @@ class OAuthController extends Controller
      *   - provider_token (string, required): Token/ID Token dari SDK native.
      *   - fcm_token (string, optional): Firebase Cloud Messaging token.
      *
-     * Flow untuk Google (Mobile/Flutter):
-     *   1. Flutter → google_sign_in SDK → mendapatkan `idToken` (JWT)
-     *   2. Flutter → POST ke endpoint ini { provider_token: idToken }
-     *   3. Backend → GoogleIdTokenVerifier → decode & verify JWT secara langsung
-     *      menggunakan Google JWKS public keys (tanpa network call ke userinfo).
-     *   4. Backend → processOAuthUser() → create/update user → return token.
+     * Flow untuk Google (Mobile/Flutter via Firebase Auth):
+     *   1. Flutter → google_sign_in → dapat Google credential
+     *   2. Flutter → FirebaseAuth.signInWithCredential(googleCredential)
+     *   3. Flutter → currentUser.getIdToken() → Firebase ID Token
+     *   4. Flutter → POST ke endpoint ini { provider_token: firebaseIdToken }
+     *   5. Backend → Firebase Admin SDK → verify Firebase ID Token
+     *   6. Backend → processOAuthUser() → create/update user → return Sanctum token
      *
      * Flow untuk provider lain (LinkedIn, Apple):
      *   1. FE → SDK native → mendapatkan Access Token
@@ -152,10 +153,10 @@ class OAuthController extends Controller
 
         try {
             if ($provider === 'google') {
-                // ─── Google: ID Token (JWT) verification ───────────────
-                // Flutter google_sign_in mengirim idToken (JWT), bukan
-                // Access Token. Kita verifikasi JWT-nya langsung
-                // menggunakan Google JWKS public keys.
+                // ─── Google: Firebase ID Token verification ────────────
+                // Flutter sign in via Google → Firebase Auth → kirim
+                // Firebase ID Token ke sini. Backend verify pakai
+                // Firebase Admin SDK (kreait/laravel-firebase).
                 $oauthUser = $this->googleIdTokenVerifier->verify(
                     $request->provider_token
                 );
