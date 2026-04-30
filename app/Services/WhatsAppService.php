@@ -151,10 +151,18 @@ class WhatsAppService
             );
         }
 
+        // Format number for Saung WA:
+        // Hapus karakter non-angka (+, spasi, strip, dll)
+        $formattedTo = preg_replace('/[^0-9]/', '', $to);
+        // Jika dimulai dengan angka 0, ubah menjadi 62 (kode negara Indonesia)
+        if (str_starts_with($formattedTo, '0')) {
+            $formattedTo = '62' . substr($formattedTo, 1);
+        }
+
         return Http::asMultipart()->post($url, [
             ['name' => 'appkey',  'contents' => $appKey],
             ['name' => 'authkey', 'contents' => $authKey],
-            ['name' => 'to',      'contents' => $to],
+            ['name' => 'to',      'contents' => $formattedTo],
             ['name' => 'message', 'contents' => $message],
             ['name' => 'sandbox', 'contents' => 'false'],
         ]);
