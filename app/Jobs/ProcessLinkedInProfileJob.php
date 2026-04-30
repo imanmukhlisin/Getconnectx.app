@@ -55,64 +55,62 @@ class ProcessLinkedInProfileJob implements ShouldQueue
             return;
         }
 
-        // ── Step 1: Fetch Proxycurl Dataset ─────────────────────────────────
-        $proxycurlApiKey = env('PROXYCURL_API_KEY');
-        if (!$proxycurlApiKey) {
-            Log::error("ProcessLinkedInProfileJob: PROXYCURL_API_KEY is missing.");
+        // ── Step 1: Fetch Scrapin.io Dataset ─────────────────────────────────
+        $apiKey = env('SCRAPIN_API_KEY');
+        if (!$apiKey) {
+            Log::error("ProcessLinkedInProfileJob: SCRAPIN_API_KEY is missing.");
             return;
         }
 
-        $datasetUrl = "https://nubela.co/proxycurl/api/v2/linkedin";
-        $response = Http::withToken($proxycurlApiKey)
-            ->timeout(20)
+        $datasetUrl = "https://api.scrapin.io/enrichment/profile";
+        $response = Http::timeout(20)
             ->get($datasetUrl, [
-                'url' => $this->linkedinUrl,
-                'fallback_to_cache' => 'on-error',
-                'use_cache' => 'if-present',
+                'linkedinUrl' => $this->linkedinUrl,
+                'apikey'      => $apiKey,
             ]);
 
-        if (!$response->successful() || empty($response->json())) {
-            Log::error("ProcessLinkedInProfileJob: Gagal baca atau kosong Proxycurl Dataset.", [
+        if (!$response->successful() || empty($response->json()) || isset($response->json()['error'])) {
+            Log::error("ProcessLinkedInProfileJob: Gagal baca atau kosong Scrapin.io Dataset.", [
                 'status' => $response->status(),
                 'body'   => $response->body()
             ]);
-            $this->fail(new \Exception("Cannot fetch dataset from Proxycurl."));
+            $this->fail(new \Exception("Cannot fetch dataset from Scrapin.io."));
             return;
         }
 
-        $datasetData = $response->json();
+        $personData = $response->json()['person'] ?? null;
         
-        if (!$datasetData) {
-            Log::error("ProcessLinkedInProfileJob: Array kosong dicoba dari dataset Proxycurl.");
+        if (!$personData) {
+            Log::error("ProcessLinkedInProfileJob: Array kosong dicoba dari dataset Scrapin.io.");
             return;
         }
 
         // ── Step 2: Ekstrak Experience & Education ──────────────────────
         // Normalisasi format experience
-        $rawExp = $datasetData['experiences'] ?? [];
+        $rawExp = $personData['positions']['positionHistory'] ?? [];
         $experiences = collect($rawExp)->take(3)->map(function ($item) {
-            $startYear = $item['starts_at']['year'] ?? '';
-            $endYear   = $item['ends_at']['year'] ?? 'Present';
+            $startYear = $item['startEndDate']['start']['year'] ?? '';
+            $endYear   = $item['startEndDate']['end']['year'] ?? 'Present';
             $period    = trim("{$startYear} - {$endYear}", " -");
 
             return [
                 'title'     => $item['title'] ?? null,
-                'company'   => $item['company'] ?? null,
+                'company'   => $item['companyName'] ?? null,
                 'period'    => $period,
-                'isCurrent' => $item['ends_at'] === null,
+                'isCurrent' => ($item['startEndDate']['end'] ?? null) === null,
             ];
         })->toArray();
 
         // Normalisasi format education
-        $rawEdu = $datasetData['education'] ?? [];
+        $rawEdu = $personData['schools']['educationHistory'] ?? [];
         $educations = collect($rawEdu)->map(function ($item) {
-            $startYear = $item['starts_at']['year'] ?? '';
-            $endYear   = $item['ends_at']['year'] ?? 'Present';
+            $startYear = $item['startEndDate']['start']['year'] ?? '';
+            $endYear   = $item['startEndDate']['end']['year'] ?? 'Present';
             $period    = trim("{$startYear} - {$endYear}", " -");
 
             return [
-                'degree' => $item['degree_name'] ?? null,
-                'school' => $item['school'] ?? null,
+                'degree' => $item['degreeName'] ?? null,
+                'school' => $item['schoolName'] ?? null,
                 'period' => $period,
             ];
         })->toArray();
@@ -122,7 +120,7 @@ class ProcessLinkedInProfileJob implements ShouldQueue
         $educations  = is_array($educations)  ? $educations  : [];
 
         // ── Step 3: Generate biografi profesional via Gemini AI ───────
-        $headline = $datasetData['headline'] ?? ($user->position ?? '');
+        $headline = $personData['headline'] ?? ($user->position ?? '');
         $bio      = '';
 
         if (!empty($headline)) {
@@ -133,15 +131,15 @@ class ProcessLinkedInProfileJob implements ShouldQueue
         try {
             $updateData = [];
             
-            $firstName = $datasetData['first_name'] ?? '';
-            $lastName  = $datasetData['last_name'] ?? '';
+            $firstName = $personData['firstName'] ?? '';
+            $lastName  = $personData['lastName'] ?? '';
             $fullName  = trim("{$firstName} {$lastName}");
 
             if (!empty($fullName)) {
                 $updateData['name'] = $fullName;
             }
-            if (!empty($datasetData['profile_pic_url'])) {
-                $updateData['avatar_url'] = $datasetData['profile_pic_url'];
+            if (!empty($personData['photoUrl'])) {
+                $updateData['avatar_url'] = $personData['photoUrl'];
             }
             if (!empty($headline)) {
                 $updateData['position'] = $headline;
@@ -168,7 +166,7 @@ class ProcessLinkedInProfileJob implements ShouldQueue
                 [
                     'experience' => $experiences,
                     'education'  => $educations,
-                    'raw_data'   => $datasetData,
+                    'raw_data'   => $personData,
                 ]
             );
             Log::info("ProcessLinkedInProfileJob: Tabel user_credentials berhasil di-upsert.", ['user_id' => $user->id]);
