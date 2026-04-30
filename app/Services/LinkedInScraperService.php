@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 class LinkedInScraperService
 {
     protected string $token;
-    protected string $actorId = 'rockey~linkedin-profile-scraper';
+    protected string $actorId = 'bebity~linkedin-profile-scraper';
 
     public function __construct()
     {
