@@ -251,7 +251,7 @@ class User extends Authenticatable
             'whatsapp_verified_at'  => $this->whatsapp_verified_at,
             'registration_step'     => $this->registration_step,
             'is_active'             => $this->is_active,
-            'is_onboarded'          => $this->is_onboarded,
+            'is_onboarded'          => (bool) $this->is_onboarded,
         ];
     }
 }
