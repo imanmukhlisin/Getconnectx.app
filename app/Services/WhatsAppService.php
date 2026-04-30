@@ -151,12 +151,12 @@ class WhatsAppService
             );
         }
 
-        return Http::asForm()->post($url, [
-            'appkey'  => $appKey,
-            'authkey' => $authKey,
-            'to'      => $to,
-            'message' => $message,
-            'sandbox' => 'false',
+        return Http::asMultipart()->post($url, [
+            ['name' => 'appkey',  'contents' => $appKey],
+            ['name' => 'authkey', 'contents' => $authKey],
+            ['name' => 'to',      'contents' => $to],
+            ['name' => 'message', 'contents' => $message],
+            ['name' => 'sandbox', 'contents' => 'false'],
         ]);
     }
 
