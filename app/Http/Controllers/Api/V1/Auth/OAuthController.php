@@ -272,7 +272,7 @@ class OAuthController extends Controller
                 return response()->json([
                     'status'     => 'success',
                     'message'    => __('messages.oauth_login_success_returning', ['provider' => $provider]),
-                    'next_step'  => 'LOGIN_SUCCESS',
+                    'next_step'  => $user->nextStep(),
                     'token'      => $fullToken,
                     'supabase_token' => $supabaseToken,
                     'token_type' => 'Bearer',
@@ -299,7 +299,7 @@ class OAuthController extends Controller
             return response()->json([
                 'status'     => 'success',
                 'message'    => __('messages.oauth_login_success_new', ['provider' => $provider]),
-                'next_step'  => 'NEED_WHATSAPP_VERIFICATION',
+                'next_step'  => $user->nextStep(),
                 'token'      => $token,
                 'token_type' => 'Bearer',
                 'data'       => [

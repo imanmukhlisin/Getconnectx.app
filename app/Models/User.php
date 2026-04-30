@@ -228,6 +228,10 @@ class User extends Authenticatable
 
     public function nextStep(): string
     {
+        if ($this->is_active) {
+            return $this->is_onboarded ? 'LOGIN_SUCCESS' : 'NEED_ONBOARDING';
+        }
+
         return self::NEXT_STEP_MAP[$this->registration_step]
             ?? 'UNKNOWN';
     }

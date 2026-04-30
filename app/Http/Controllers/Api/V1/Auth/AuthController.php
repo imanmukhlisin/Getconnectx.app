@@ -217,7 +217,7 @@ class AuthController extends Controller
         if ($user->hasVerifiedWhatsApp()) {
             return $this->successResponse(
                 message : __('messages.whatsapp_verify_success'),
-                nextStep: 'REGISTRATION_COMPLETE',
+                nextStep: $user->nextStep(),
                 data    : ['user' => $user->registrationSummary()],
             );
         }
@@ -250,7 +250,7 @@ class AuthController extends Controller
 
         return $this->successResponse(
             message : __('messages.registration_complete'),
-            nextStep: 'REGISTRATION_COMPLETE',
+            nextStep: $user->fresh()->nextStep(),
             data    : ['user' => $user->fresh()->registrationSummary()],
             token   : $finalToken,
             extra   : ['supabase_token' => $supabaseToken]
@@ -304,7 +304,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth-token', ['*'])->plainTextToken;
         $supabaseToken = $this->supabaseAuth->generateSupabaseToken($user);
 
-        $nextStep = $user->is_active ? 'LOGIN_SUCCESS' : $user->nextStep();
+        $nextStep = $user->nextStep();
 
         return $this->successResponse(
             message : 'Login berhasil! Selamat datang kembali.',
@@ -341,7 +341,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth-token', ['*'])->plainTextToken;
         $supabaseToken = $this->supabaseAuth->generateSupabaseToken($user);
 
-        $nextStep = $user->is_active ? 'LOGIN_SUCCESS' : $user->nextStep();
+        $nextStep = $user->nextStep();
 
         return $this->successResponse(
             message : __('messages.login_success'),
