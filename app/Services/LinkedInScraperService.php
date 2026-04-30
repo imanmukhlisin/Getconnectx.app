@@ -56,9 +56,9 @@ class LinkedInScraperService
             // Kita hit endpoint Asynchronous: /runs (BUKAN run-sync) ditambah webhook
             $endpoint = "https://api.apify.com/v2/acts/{$this->actorId}/runs?token={$this->token}&webhooks={$webhooksBase64}";
 
-            // Payload sesuai dokumentasi dev_fusion~linkedin-profile-scraper (hanya input parameter)
+            // Payload sesuai dokumentasi dev_fusion~linkedin-profile-scraper
             $response = Http::timeout(2)->post($endpoint, [
-                'urls' => [$linkedinUrl],
+                'profileUrls' => [$linkedinUrl],
             ]);
 
             if ($response->successful()) {
