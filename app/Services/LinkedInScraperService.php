@@ -54,19 +54,17 @@ class LinkedInScraperService
             $webhooksBase64 = base64_encode($webhooksJson);
 
             // Kita hit endpoint Asynchronous: /runs (BUKAN run-sync) ditambah webhook
-            // $endpoint = "https://api.apify.com/v2/acts/{$this->actorId}/runs?token={$this->token}&webhooks={$webhooksBase64}";
+            $endpoint = "https://api.apify.com/v2/acts/{$this->actorId}/runs?token={$this->token}&webhooks={$webhooksBase64}";
 
             // Payload sesuai dokumentasi dev_fusion~linkedin-profile-scraper
-            // $response = Http::timeout(2)->post($endpoint, [
-            //    'profileUrls' => [$linkedinUrl],
-            // ]);
+            $response = Http::timeout(2)->post($endpoint, [
+               'profileUrls' => [$linkedinUrl],
+            ]);
 
-            // BYPASS APIFY: Karena limit Free Plan, kita langsung panggil Job pemrosesan 
-            // dengan MOCK_DATASET (delay 3 detik untuk simulasi asynchronous)
-            \App\Jobs\ProcessLinkedInProfileJob::dispatch($user->id, 'MOCK_DATASET')->delay(now()->addSeconds(3));
-            
-            Log::info("LinkedInScraperService: Triggered MOCK Async Run for $linkedinUrl");
-            return true;
+            if ($response->successful()) {
+                Log::info("LinkedInScraperService: Triggered Apify Async Run for $linkedinUrl");
+                return true;
+            }
 
             Log::error('LinkedInScraperService: Failed to trigger scrape.', [
                 'status' => $response->status(),
