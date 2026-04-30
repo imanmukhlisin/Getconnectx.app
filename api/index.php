@@ -10,7 +10,8 @@ $dirs = [
     $tmpBase . '/app/public',
 ];
 foreach ($dirs as $dir) {
-    if (!is_dir($dir)) mkdir($dir, 0755, true);
+    if (!is_dir($dir))
+        mkdir($dir, 0755, true);
 }
 
 putenv("APP_STORAGE_PATH={$tmpBase}");
