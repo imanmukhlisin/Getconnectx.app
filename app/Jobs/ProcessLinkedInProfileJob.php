@@ -55,31 +55,60 @@ class ProcessLinkedInProfileJob implements ShouldQueue
             return;
         }
 
-        // ── Step 1: Fetch Apify Dataset ─────────────────────────────────
-        $apifyToken = config('services.apify.token', env('APIFY_TOKEN'));
-        if (!$apifyToken) {
-            Log::error("ProcessLinkedInProfileJob: APIFY_TOKEN is missing.");
-            return;
-        }
+        // ── Step 1: Fetch Apify Dataset atau Gunakan Mock Data ─────────────────────────────────
+        if ($this->datasetId === 'MOCK_DATASET') {
+            Log::info("ProcessLinkedInProfileJob: Menggunakan MOCK DATA untuk bypass Apify limits.");
+            $datasetData = [
+                'firstName' => 'Mukhlis',
+                'lastName'  => 'ConnectX',
+                'headline'  => 'Senior Fullstack Engineer & Tech Lead',
+                'profilePictureUrl' => 'https://ui-avatars.com/api/?name=Mukhlis+ConnectX&background=random&size=256',
+                'experience' => [
+                    [
+                        'title' => 'Senior Backend Engineer',
+                        'companyName' => 'Tech Startup Inc.',
+                        'duration' => ['startDate' => '2021', 'endDate' => null]
+                    ],
+                    [
+                        'title' => 'Software Engineer',
+                        'companyName' => 'Global Corp',
+                        'duration' => ['startDate' => '2018', 'endDate' => '2021']
+                    ]
+                ],
+                'education' => [
+                    [
+                        'degreeName' => 'Bachelor of Computer Science',
+                        'schoolName' => 'University of Technology',
+                        'duration' => ['startDate' => '2014', 'endDate' => '2018']
+                    ]
+                ]
+            ];
+        } else {
+            $apifyToken = config('services.apify.token', env('APIFY_TOKEN'));
+            if (!$apifyToken) {
+                Log::error("ProcessLinkedInProfileJob: APIFY_TOKEN is missing.");
+                return;
+            }
 
-        $datasetUrl = "https://api.apify.com/v2/datasets/{$this->datasetId}/items?token={$apifyToken}";
-        $response = Http::timeout(15)->get($datasetUrl);
+            $datasetUrl = "https://api.apify.com/v2/datasets/{$this->datasetId}/items?token={$apifyToken}";
+            $response = Http::timeout(15)->get($datasetUrl);
 
-        if (!$response->successful() || empty($response->json())) {
-            Log::error("ProcessLinkedInProfileJob: Gagal baca atau kosong Apify Dataset.", [
-                'status' => $response->status(),
-                'body'   => $response->body()
-            ]);
-            $this->fail(new \Exception("Cannot fetch dataset from Apify."));
-            return;
-        }
+            if (!$response->successful() || empty($response->json())) {
+                Log::error("ProcessLinkedInProfileJob: Gagal baca atau kosong Apify Dataset.", [
+                    'status' => $response->status(),
+                    'body'   => $response->body()
+                ]);
+                $this->fail(new \Exception("Cannot fetch dataset from Apify."));
+                return;
+            }
 
-        // Mengambil array item (data orang pertama di index 0)
-        $datasetData = $response->json()[0] ?? null;
-        
-        if (!$datasetData) {
-            Log::error("ProcessLinkedInProfileJob: Array kosong dicoba dari dataset Apify.");
-            return;
+            // Mengambil array item (data orang pertama di index 0)
+            $datasetData = $response->json()[0] ?? null;
+            
+            if (!$datasetData) {
+                Log::error("ProcessLinkedInProfileJob: Array kosong dicoba dari dataset Apify.");
+                return;
+            }
         }
 
         // ── Step 2: Ekstrak Experience & Education ──────────────────────
