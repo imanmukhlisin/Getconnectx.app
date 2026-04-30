@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 class LinkedInScraperService
 {
     protected string $token;
-    protected string $actorId = 'dev_fusion~linkedin-profile-scraper';
+    protected string $actorId = 'rockey~linkedin-profile-scraper';
 
     public function __construct()
     {
@@ -56,9 +56,11 @@ class LinkedInScraperService
             // Kita hit endpoint Asynchronous: /runs (BUKAN run-sync) ditambah webhook
             $endpoint = "https://api.apify.com/v2/acts/{$this->actorId}/runs?token={$this->token}&webhooks={$webhooksBase64}";
 
-            // Payload sesuai dokumentasi dev_fusion~linkedin-profile-scraper
+            // Kirim payload. Menggunakan kombinasi 'profileUrls' dan 'urls' 
+            // supaya cocok untuk berbagai jenis Actor LinkedIn di Apify.
             $response = Http::timeout(2)->post($endpoint, [
                'profileUrls' => [$linkedinUrl],
+               'urls'        => [$linkedinUrl],
             ]);
 
             if ($response->successful()) {
