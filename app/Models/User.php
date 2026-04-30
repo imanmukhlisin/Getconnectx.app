@@ -243,6 +243,8 @@ class User extends Authenticatable
     {
         return [
             'id'                    => $this->id,
+            'name'                  => $this->name,
+            'avatar_url'            => $this->avatar_url,
             'email'                 => $this->email,
             'email_verified_at'     => $this->email_verified_at,
             'whatsapp_number'       => $this->whatsapp_number,
@@ -250,7 +252,6 @@ class User extends Authenticatable
             'registration_step'     => $this->registration_step,
             'is_active'             => $this->is_active,
             'is_onboarded'          => $this->is_onboarded,
-
         ];
     }
 }
