@@ -18,8 +18,8 @@ use Illuminate\Support\Facades\Log;
  * Background Job: Proses sinkronisasi profil LinkedIn user DARI APIFY DATASET.
  *
  * Alur kerja:
- * 1. Dipanggil oleh ApifyWebhookController dengan userID dan datasetID
- * 2. Fetch data profiling dari Apify menggunakan dataset ID
+ * 1. Dipanggil oleh LinkedInSyncController dengan userID dan linkedinUrl
+ * 2. Fetch data profiling dari Proxycurl API
  * 3. Generate biografi profesional via Gemini AI
  * 4. Update tabel users (full_name, avatar_url, headline→position, bio)
  * 5. Upsert tabel user_credentials (experience, education — default [] jika kosong)
@@ -34,19 +34,19 @@ class ProcessLinkedInProfileJob implements ShouldQueue
     public int $backoff = 10;
 
     protected string $userId;
-    protected string $datasetId;
+    protected string $linkedinUrl;
 
-    public function __construct(string $userId, string $datasetId)
+    public function __construct(string $userId, string $linkedinUrl)
     {
         $this->userId = $userId;
-        $this->datasetId = $datasetId;
+        $this->linkedinUrl = $linkedinUrl;
     }
 
     public function handle(VertexAiService $vertexAi): void
     {
-        Log::info("ProcessLinkedInProfileJob: Mulai fetch Apify dataset.", [
-            'user_id'    => $this->userId,
-            'dataset_id' => $this->datasetId,
+        Log::info("ProcessLinkedInProfileJob: Mulai fetch Proxycurl dataset.", [
+            'user_id'      => $this->userId,
+            'linkedin_url' => $this->linkedinUrl,
         ]);
 
         $user = User::find($this->userId);
@@ -55,59 +55,64 @@ class ProcessLinkedInProfileJob implements ShouldQueue
             return;
         }
 
-        // ── Step 1: Fetch Apify Dataset ─────────────────────────────────
-        $apifyToken = config('services.apify.token', env('APIFY_TOKEN'));
-        if (!$apifyToken) {
-            Log::error("ProcessLinkedInProfileJob: APIFY_TOKEN is missing.");
+        // ── Step 1: Fetch Proxycurl Dataset ─────────────────────────────────
+        $proxycurlApiKey = env('PROXYCURL_API_KEY');
+        if (!$proxycurlApiKey) {
+            Log::error("ProcessLinkedInProfileJob: PROXYCURL_API_KEY is missing.");
             return;
         }
 
-        $datasetUrl = "https://api.apify.com/v2/datasets/{$this->datasetId}/items?token={$apifyToken}";
-        $response = Http::timeout(15)->get($datasetUrl);
+        $datasetUrl = "https://nubela.co/proxycurl/api/v2/linkedin";
+        $response = Http::withToken($proxycurlApiKey)
+            ->timeout(20)
+            ->get($datasetUrl, [
+                'url' => $this->linkedinUrl,
+                'fallback_to_cache' => 'on-error',
+                'use_cache' => 'if-present',
+            ]);
 
         if (!$response->successful() || empty($response->json())) {
-            Log::error("ProcessLinkedInProfileJob: Gagal baca atau kosong Apify Dataset.", [
+            Log::error("ProcessLinkedInProfileJob: Gagal baca atau kosong Proxycurl Dataset.", [
                 'status' => $response->status(),
                 'body'   => $response->body()
             ]);
-            $this->fail(new \Exception("Cannot fetch dataset from Apify."));
+            $this->fail(new \Exception("Cannot fetch dataset from Proxycurl."));
             return;
         }
 
-        // Mengambil array item (data orang pertama di index 0)
-        $datasetData = $response->json()[0] ?? null;
+        $datasetData = $response->json();
         
         if (!$datasetData) {
-            Log::error("ProcessLinkedInProfileJob: Array kosong dicoba dari dataset Apify.");
+            Log::error("ProcessLinkedInProfileJob: Array kosong dicoba dari dataset Proxycurl.");
             return;
         }
 
         // ── Step 2: Ekstrak Experience & Education ──────────────────────
         // Normalisasi format experience
-        $rawExp = $datasetData['experience'] ?? [];
+        $rawExp = $datasetData['experiences'] ?? [];
         $experiences = collect($rawExp)->take(3)->map(function ($item) {
-            $start = $item['duration']['startDate'] ?? null;
-            $end = $item['duration']['endDate'] ?? 'Present';
-            $period = trim("{$start} - {$end}", " -");
+            $startYear = $item['starts_at']['year'] ?? '';
+            $endYear   = $item['ends_at']['year'] ?? 'Present';
+            $period    = trim("{$startYear} - {$endYear}", " -");
 
             return [
                 'title'     => $item['title'] ?? null,
-                'company'   => $item['companyName'] ?? null,
+                'company'   => $item['company'] ?? null,
                 'period'    => $period,
-                'isCurrent' => $item['duration']['endDate'] === null,
+                'isCurrent' => $item['ends_at'] === null,
             ];
         })->toArray();
 
         // Normalisasi format education
         $rawEdu = $datasetData['education'] ?? [];
         $educations = collect($rawEdu)->map(function ($item) {
-            $start = $item['duration']['startDate'] ?? null;
-            $end = $item['duration']['endDate'] ?? 'Present';
-            $period = trim("{$start} - {$end}", " -");
+            $startYear = $item['starts_at']['year'] ?? '';
+            $endYear   = $item['ends_at']['year'] ?? 'Present';
+            $period    = trim("{$startYear} - {$endYear}", " -");
 
             return [
-                'degree' => $item['degreeName'] ?? null,
-                'school' => $item['schoolName'] ?? null,
+                'degree' => $item['degree_name'] ?? null,
+                'school' => $item['school'] ?? null,
                 'period' => $period,
             ];
         })->toArray();
@@ -128,15 +133,15 @@ class ProcessLinkedInProfileJob implements ShouldQueue
         try {
             $updateData = [];
             
-            $firstName = $datasetData['firstName'] ?? '';
-            $lastName  = $datasetData['lastName'] ?? '';
+            $firstName = $datasetData['first_name'] ?? '';
+            $lastName  = $datasetData['last_name'] ?? '';
             $fullName  = trim("{$firstName} {$lastName}");
 
             if (!empty($fullName)) {
                 $updateData['name'] = $fullName;
             }
-            if (!empty($datasetData['profilePictureUrl'])) {
-                $updateData['avatar_url'] = $datasetData['profilePictureUrl'];
+            if (!empty($datasetData['profile_pic_url'])) {
+                $updateData['avatar_url'] = $datasetData['profile_pic_url'];
             }
             if (!empty($headline)) {
                 $updateData['position'] = $headline;
@@ -180,6 +185,6 @@ class ProcessLinkedInProfileJob implements ShouldQueue
             Log::warning("ProcessLinkedInProfileJob: Gagal invalidate cache.", ['error' => $e->getMessage()]);
         }
 
-        Log::info("ProcessLinkedInProfileJob: Selesai! LinkedIn sync via Webhook sukses.");
+        Log::info("ProcessLinkedInProfileJob: Selesai! LinkedIn sync via Proxycurl sukses.");
     }
 }

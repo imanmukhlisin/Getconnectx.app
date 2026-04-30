@@ -4,7 +4,6 @@ use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V1\Auth\LinkedInSyncController;
 use App\Http\Controllers\Api\V1\Auth\OAuthController;
-use App\Http\Controllers\Api\V1\Auth\ApifyWebhookController;
 use App\Http\Controllers\Api\V1\Profile\ProfileController;
 use App\Http\Controllers\Api\V1\Chat\MessageController;
 use App\Http\Controllers\Api\V1\OnboardingController;
@@ -111,9 +110,6 @@ Route::prefix('v1')->group(function () {
             ->name('auth.linkedin-sync');
     });
 
-    // ── Webhook Apify (Dipanggil Eksternal) ──────────────────────────────────
-    Route::post('webhooks/apify/linkedin', [ApifyWebhookController::class, 'handle'])
-        ->name('webhooks.apify.linkedin');
 
     // ─── Authenticated: Profile & Onboarding ──────────────────────────────────
     Route::middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
@@ -193,9 +189,5 @@ Route::prefix('v1')->group(function () {
     });
 });
 
-// ─── Webhooks ───────────────────────────────────────────────────────────────
-Route::prefix('v1/webhooks')->group(function () {
-    Route::post('apify/linkedin', [\App\Http\Controllers\Api\V1\WebhookController::class, 'apifyLinkedIn'])
-        ->name('webhooks.apify.linkedin');
-});
+
 

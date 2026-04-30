@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Services\LinkedInScraperService;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -32,7 +32,7 @@ class LinkedInSyncController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function sync(Request $request, LinkedInScraperService $scraperService): JsonResponse
+    public function sync(Request $request): JsonResponse
     {
         // ── Validasi Input ────────────────────────────────────────────
         $validated = $request->validate([
@@ -56,17 +56,9 @@ class LinkedInSyncController extends Controller
             'last_device_id' => $validated['device_id'],
         ]);
 
-        // ── Trigger Apify API (Async) ─────────────────────────────────
-        // Call Apify API. Akan langsung mengembalikan response ke Laravel
-        // lalu scraping berjalan 2-5 menit di server Apify.
-        $success = $scraperService->triggerScrapeAsync($user, $validated['linkedin_url']);
-
-        if (!$success) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to trigger LinkedIn Sync.',
-            ], 500);
-        }
+        // ── Trigger Proxycurl API & AI (Async) ─────────────────────────────────
+        // Dispatch Job untuk fetching Proxycurl API dan memanggil Gemini secara async di background.
+        \App\Jobs\ProcessLinkedInProfileJob::dispatch($user->id, $validated['linkedin_url']);
 
         // ── Return Langsung (< 100ms) ─────────────────────────────────
         // Frontend tidak perlu menunggu proses LinkedIn API & AI selesai.
