@@ -61,6 +61,7 @@ class WhatsAppService
                 'twilio'   => $this->sendViaTwilio($to, $message),
                 'webhook'  => $this->sendViaWebhook($to, $message),
                 'wasender' => $this->sendViaWasender($to, $message),
+                'saungwa'  => $this->sendViaSaungwa($to, $message),
                 default    => throw new WhatsAppDeliveryException("Provider '{$this->provider}' tidak didukung."),
             };
 
@@ -128,6 +129,34 @@ class WhatsAppService
         ])->post($url, [
             'to'   => $to,
             'text' => $message,
+        ]);
+    }
+
+    /**
+     * Saung WA API implementation.
+     * Docs: https://saungwa.com (dashboard → API Doc)
+     *
+     * Auth: appkey + authkey (form-data style, not Bearer token)
+     * Endpoint: POST https://app.saungwa.com/api/create-message
+     */
+    private function sendViaSaungwa(string $to, string $message)
+    {
+        $url     = $this->apiUrl ?: 'https://app.saungwa.com/api/create-message';
+        $appKey  = config('otp.whatsapp.saungwa_appkey');
+        $authKey = config('otp.whatsapp.saungwa_authkey');
+
+        if (empty($appKey) || empty($authKey)) {
+            throw new WhatsAppDeliveryException(
+                'Saung WA credentials belum diisi. Set SAUNGWA_APP_KEY & SAUNGWA_AUTH_KEY di .env'
+            );
+        }
+
+        return Http::asForm()->post($url, [
+            'appkey'  => $appKey,
+            'authkey' => $authKey,
+            'to'      => $to,
+            'message' => $message,
+            'sandbox' => 'false',
         ]);
     }
 

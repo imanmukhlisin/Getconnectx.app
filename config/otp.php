@@ -24,5 +24,9 @@ return [
         'twilio_sid'   => env('TWILIO_ACCOUNT_SID'),
         'twilio_token' => env('TWILIO_AUTH_TOKEN'),
         'twilio_from'  => env('TWILIO_WHATSAPP_FROM'),
+
+        // Saung WA-specific (used when provider = 'saungwa')
+        'saungwa_appkey'  => env('SAUNGWA_APP_KEY'),
+        'saungwa_authkey' => env('SAUNGWA_AUTH_KEY'),
     ],
 ];
