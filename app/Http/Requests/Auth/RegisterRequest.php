@@ -19,7 +19,17 @@ class RegisterRequest extends FormRequest
             'fcm_token'             => ['nullable', 'string'],
             'latitude'              => ['nullable', 'numeric', 'between:-90,90'],
             'longitude'             => ['nullable', 'numeric', 'between:-180,180'],
-            'email'                 => ['required', 'email:rfc,dns', 'max:255', 'unique:users,email'],
+            'email'                 => [
+                'required',
+                'email:rfc,dns',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    $user = \App\Models\User::where('email', strtolower($value))->first();
+                    if ($user && $user->is_active) {
+                        $fail(__('messages.val_email_unique'));
+                    }
+                }
+            ],
             'password'              => [
                 'required',
                 'confirmed',

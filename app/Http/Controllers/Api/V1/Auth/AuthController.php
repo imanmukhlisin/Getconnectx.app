@@ -44,14 +44,42 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = DB::transaction(function () use ($request) {
+            $email = strtolower($request->email);
+            $user = User::where('email', $email)->first();
+
+            if ($user) {
+                // Re-register inactive user
+                $updateData = [
+                    'password'  => $request->password, // auto-hashed via cast
+                    'fcm_token' => $request->fcm_token,
+                    'latitude'  => $request->latitude,
+                    'longitude' => $request->longitude,
+                ];
+
+                // Jika belum verify email, kembali ke step awal (1)
+                // Jika sudah verify email tapi belum verify WA, kembali ke step email verified (3)
+                if (!$user->hasVerifiedEmail()) {
+                    $updateData['registration_step'] = User::STEP_REGISTERED;
+                } else if (!$user->hasVerifiedWhatsApp()) {
+                    $updateData['registration_step'] = User::STEP_EMAIL_VERIFIED;
+                }
+
+                $user->update($updateData);
+
+                // Revoke old tokens
+                $user->tokens()->where('name', 'registration-token')->delete();
+
+                return $user;
+            }
+
             return User::create([
-                'email'            => strtolower($request->email),
-                'password'         => $request->password, // auto-hashed via cast
-                'fcm_token'        => $request->fcm_token,
-                'latitude'         => $request->latitude,
-                'longitude'        => $request->longitude,
+                'email'             => $email,
+                'password'          => $request->password, // auto-hashed via cast
+                'fcm_token'         => $request->fcm_token,
+                'latitude'          => $request->latitude,
+                'longitude'         => $request->longitude,
                 'registration_step' => User::STEP_REGISTERED,
-                'is_active'        => false,
+                'is_active'         => false,
             ]);
         });
 
@@ -64,7 +92,7 @@ class AuthController extends Controller
 
         return $this->successResponse(
             message : __('messages.registration_success'),
-            nextStep: 'NEED_EMAIL_OTP',
+            nextStep: $user->nextStep(),
             data    : ['user' => $user->registrationSummary()],
             token   : $token,
             status  : 201
