@@ -36,6 +36,7 @@ return [
     'val_email_format' => 'Invalid email format (e.g., name@email.com).',
     'val_email_max' => 'Email is too long (maximum 255 characters).',
     'val_email_unique' => 'This email is already registered. Please use another email or login.',
+    'val_email_not_found' => 'We could not find an account with that email address.',
     'val_password_required' => 'Password is required.',
     'val_password_confirmed' => 'Password confirmation does not match the typed password.',
     'val_password_min' => 'Password must be at least 8 characters long.',
@@ -50,6 +51,7 @@ return [
     'val_otp_digits' => 'OTP code must be 6 numeric digits.',
     'val_wa_number_required' => 'WhatsApp number is required.',
     'val_wa_number_regex' => 'WhatsApp number must use an international format, e.g., +6281234567890.',
+    'val_provider_token_required' => 'The OAuth provider token is required.',
     // WhatsApp Delivery Content
     'wa_otp_messages' => [
         ":greeting!\n\nThank you for choosing ConnectX. To ensure the highest level of security for your account, please use the following One-Time Password (OTP) to complete your verification process:\n\n*👉 :code 👈*\n\nThis code will strictly expire in :expiry minutes. For your protection, please do not share this code with anyone under any circumstances.\n\nBest regards,\nConnectX Security Team",
