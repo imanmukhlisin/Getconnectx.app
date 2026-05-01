@@ -17,6 +17,34 @@ class OnboardingController extends Controller
     }
 
     /**
+     * Resolve session by ID — falls back to user's latest in_progress session
+     * if the given ID is stale/missing (handles server restarts gracefully).
+     */
+    private function resolveSession(Request $request, string $sessionId): OnboardingSession
+    {
+        $user = $request->user();
+
+        // Try exact session first
+        $session = OnboardingSession::where('id', $sessionId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        // Fallback: user's latest in_progress session
+        if (!$session) {
+            $session = OnboardingSession::where('user_id', $user->id)
+                ->where('status', 'in_progress')
+                ->latest()
+                ->first();
+        }
+
+        if (!$session) {
+            abort(404, 'No active onboarding session found. Please start a new session.');
+        }
+
+        return $session;
+    }
+
+    /**
      * Start onboarding session.
      * POST /api/v1/onboarding/sessions
      * Body: { "locale": "en" }   (optional, also via Accept-Language header)
@@ -36,12 +64,9 @@ class OnboardingController extends Controller
      * Get current step (for resume or reload).
      * GET /api/v1/onboarding/sessions/{session}/current
      */
-    public function current(Request $request, OnboardingSession $session)
+    public function current(Request $request, string $session)
     {
-        // Ensure session belongs to user
-        if ($session->user_id !== $request->user()->id) {
-            abort(403, __('messages.unauthorized'));
-        }
+        $session = $this->resolveSession($request, $session);
 
         if ($session->status === 'completed') {
             return response()->json([
@@ -62,11 +87,9 @@ class OnboardingController extends Controller
      * POST /api/v1/onboarding/sessions/{session}/answer
      * Body: { "step_id": "step_personal_name", "answers": { "q_first_name": "Dimas" } }
      */
-    public function answer(Request $request, OnboardingSession $session)
+    public function answer(Request $request, string $session)
     {
-        if ($session->user_id !== $request->user()->id) {
-            abort(403, __('messages.unauthorized'));
-        }
+        $session = $this->resolveSession($request, $session);
 
         if ($session->status === 'completed') {
             return response()->json([
@@ -91,11 +114,9 @@ class OnboardingController extends Controller
      * Go back to previous step.
      * POST /api/v1/onboarding/sessions/{session}/back
      */
-    public function back(Request $request, OnboardingSession $session)
+    public function back(Request $request, string $session)
     {
-        if ($session->user_id !== $request->user()->id) {
-            abort(403, __('messages.unauthorized'));
-        }
+        $session = $this->resolveSession($request, $session);
 
         if ($session->status === 'completed') {
             return response()->json([
@@ -120,11 +141,9 @@ class OnboardingController extends Controller
      * Get full session state (for debugging/admin).
      * GET /api/v1/onboarding/sessions/{session}
      */
-    public function show(Request $request, OnboardingSession $session)
+    public function show(Request $request, string $session)
     {
-        if ($session->user_id !== $request->user()->id) {
-            abort(403, __('messages.unauthorized'));
-        }
+        $session = $this->resolveSession($request, $session);
 
         $session->load('responses', 'currentStep');
 
