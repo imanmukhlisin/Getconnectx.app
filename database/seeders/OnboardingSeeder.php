@@ -1076,9 +1076,9 @@ class OnboardingSeeder extends Seeder
             $s('step_su_need', 'flow_su_finish', 4, 'Kebutuhan', 'Apa yang sedang kamu cari?', 'What are you looking for?', true),
 
             // ── STARTUP NEED SUB-FLOWS ──
-            $s('step_su_need_cf', 'flow_su_need_cf', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of Co-Founder do you need?'),
+            $s('step_su_need_cf', 'flow_su_need_cf', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of co-founder do you need?', false, 'Pilih semua yang sesuai', 'Select all that apply'),
             $s('step_su_need_tm', 'flow_su_need_team', 1, 'Cari Anggota Tim', 'Skill apa yang belum dipunyai di tim?', 'What skills are you missing?'),
-            $s('step_su_need_bt_cf', 'flow_su_need_both', 1, 'Cari Co-Founder', 'Co-Founder yang dibutuhkan', 'Co-Founder needed'),
+            $s('step_su_need_bt_cf', 'flow_su_need_both', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of co-founder do you need?', false, 'Pilih semua yang sesuai', 'Select all that apply'),
             $s('step_su_need_bt_tm', 'flow_su_need_both', 2, 'Cari Anggota Tim', 'Skill yang belum dipunyai di tim', 'Skills missing in team'),
 
             // ── STARTUP END (2 steps) ──
@@ -1184,14 +1184,14 @@ class OnboardingSeeder extends Seeder
             $q('q_tm_linkedin', 'step_tm_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/...', 'en' => 'https://linkedin.com/in/...'])]),
 
             // ── STARTUP: About ──
-            $q('q_su_name', 'step_su_about', 1, 'text', 'Nama Startup', 'Startup Name', true, ['validation' => json_encode(['min_length' => 2, 'max_length' => 100])]),
-            $q('q_su_tagline', 'step_su_about', 2, 'text', 'Tagline (1 kalimat)', 'Tagline (1 sentence)', true, ['validation' => json_encode(['max_length' => 150])]),
+            $q('q_su_name', 'step_su_about', 1, 'text', 'Nama Startup', 'Startup Name', true, ['validation' => json_encode(['min_length' => 2, 'max_length' => 100]), 'placeholder' => json_encode(['id' => 'contoh: ConnectX', 'en' => 'e.g. ConnectX'])]),
+            $q('q_su_tagline', 'step_su_about', 2, 'text', 'Tagline (1 kalimat)', 'Tagline (1 sentence)', true, ['validation' => json_encode(['max_length' => 150]), 'placeholder' => json_encode(['id' => 'contoh: Platform matchmaking untuk startup founders', 'en' => 'e.g. Matchmaking platform for startup founders'])]),
             $q('q_su_stage', 'step_su_about', 3, 'dropdown', 'Tahap Startup', 'Startup Stage'),
 
             // ── STARTUP: Problem & Solution ──
-            $q('q_su_problem', 'step_su_problem', 1, 'textarea', 'Masalah yang kamu selesaikan', 'Problem you\'re solving'),
-            $q('q_su_solution', 'step_su_problem', 2, 'textarea', 'Solusi kamu', 'Your solution'),
-            $q('q_su_target', 'step_su_problem', 3, 'textarea', 'Target pengguna', 'Target users'),
+            $q('q_su_problem', 'step_su_problem', 1, 'textarea', 'Masalah yang kamu selesaikan', 'Problem you\'re solving', true, ['placeholder' => json_encode(['id' => 'contoh: Susah mencari co-founder yang satu visi dan saling melengkapi skill.', 'en' => 'e.g. It is hard to find co-founders with aligned vision and complementary skills.'])]),
+            $q('q_su_solution', 'step_su_problem', 2, 'textarea', 'Solusi kamu', 'Your solution', true, ['placeholder' => json_encode(['id' => 'contoh: Kami membuat aplikasi Tinder for Founders untuk mempermudah matchmaking.', 'en' => 'e.g. We are building a Tinder for Founders app to streamline matchmaking.'])]),
+            $q('q_su_target', 'step_su_problem', 3, 'textarea', 'Target pengguna', 'Target users', true, ['placeholder' => json_encode(['id' => 'contoh: Mahasiswa, profesional muda, dan serial entrepreneur.', 'en' => 'e.g. University students, young professionals, and serial entrepreneurs.'])]),
 
             // ── STARTUP: Industry & Biz Model ──
             $q('q_su_industry', 'step_su_biz', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5])]),
@@ -1200,8 +1200,8 @@ class OnboardingSeeder extends Seeder
             // ── TRACTION: Idea ──
             $q('q_su_tri_prototype', 'step_su_tr_idea', 1, 'single_select_card', 'Apakah kamu punya prototype?', 'Do you have a prototype?'),
             $q('q_su_tri_prototype_link', 'step_su_tr_idea', 2, 'url', 'Link Prototype', 'Prototype Link', false, ['depends_on' => json_encode(['question_id' => 'q_su_tri_prototype', 'operator' => 'equals', 'value' => 'yes'])]),
-            $q('q_su_tri_waitlist', 'step_su_tr_idea', 3, 'number', 'Ukuran Waitlist', 'Waitlist Size', false),
-            $q('q_su_tri_validation', 'step_su_tr_idea', 4, 'text', 'Validasi (interview, survey, dll)', 'Validation (interviews, surveys, etc.)', false),
+            $q('q_su_tri_waitlist', 'step_su_tr_idea', 3, 'number', 'Ukuran Waitlist', 'Waitlist Size', false, ['placeholder' => json_encode(['id' => 'contoh: 150', 'en' => 'e.g. 150'])]),
+            $q('q_su_tri_validation', 'step_su_tr_idea', 4, 'text', 'Validasi (interview, survey, dll)', 'Validation (interviews, surveys, etc.)', false, ['placeholder' => json_encode(['id' => 'contoh: 50+ interview dengan target user', 'en' => 'e.g. 50+ user interviews conducted'])]),
 
             // ── TRACTION: MVP ──
             $q('q_su_trm_users', 'step_su_tr_mvp', 1, 'number', 'Jumlah Users', 'Number of Users', false),
@@ -1241,11 +1241,11 @@ class OnboardingSeeder extends Seeder
             $q('q_su_need', 'step_su_need', 1, 'single_select_card', 'Apa yang sedang kamu cari?', 'What are you looking for?'),
 
             // ── STARTUP NEED: CF ──
-            $q('q_su_need_cf_type', 'step_su_need_cf', 1, 'multi_select_chip', 'Co-Founder tipe apa yang dibutuhkan?', 'What Co-Founder type do you need?'),
+            $q('q_su_need_cf_type', 'step_su_need_cf', 1, 'multi_select_card', '', ''),
             // ── STARTUP NEED: Team ──
             $q('q_su_need_tm_skills', 'step_su_need_tm', 1, 'multi_select_chip', 'Skill apa yang belum dipunyai di tim?', 'What skills are missing in the team?'),
             // ── STARTUP NEED: Both ──
-            $q('q_su_need_bt_cf', 'step_su_need_bt_cf', 1, 'multi_select_chip', 'Co-Founder yang dibutuhkan', 'Co-Founder needed'),
+            $q('q_su_need_bt_cf', 'step_su_need_bt_cf', 1, 'multi_select_card', '', ''),
             $q('q_su_need_bt_tm', 'step_su_need_bt_tm', 1, 'multi_select_chip', 'Skill yang belum dipunyai', 'Missing skills'),
 
             // ── STARTUP END: Commitment ──
