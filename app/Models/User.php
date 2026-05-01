@@ -104,6 +104,21 @@ class User extends Authenticatable
         ];
     }
 
+    // ─── Booted Method (Observers) ────────────────────────────────────────────
+    protected static function booted()
+    {
+        static::updated(function ($user) {
+            // Automatically send the "account_created" push notification when user finishes onboarding
+            if ($user->wasChanged('is_onboarded') && $user->is_onboarded) {
+                try {
+                    app(\App\Services\PushNotificationService::class)->sendFromTemplate($user, 'account_created');
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Observer failed to send push notification: " . $e->getMessage());
+                }
+            }
+        });
+    }
+
     // ─── Relationships ────────────────────────────────────────────────────────
 
     public function startup()
