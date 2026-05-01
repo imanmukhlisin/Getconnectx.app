@@ -1083,8 +1083,8 @@ class OnboardingSeeder extends Seeder
 
         DB::table('onboarding_questions')->insert([
             // ── COMMON: Data Diri ──
-            $q('q_first_name', 'step_personal_name', 1, 'text', 'Nama Depan', 'First Name', true, ['validation' => json_encode(['min_length' => 1, 'max_length' => 50])]),
-            $q('q_last_name', 'step_personal_name', 2, 'text', 'Nama Belakang', 'Last Name', false),
+            $q('q_first_name', 'step_personal_name', 1, 'text', 'Nama Depan', 'First Name', true, ['validation' => json_encode(['min_length' => 1, 'max_length' => 50]), 'placeholder' => json_encode(['id' => ['Contoh: Kevin', 'Contoh: Britania', 'Contoh: Budi'], 'en' => ['e.g. Thomas', 'e.g. Tania']])]),
+            $q('q_last_name', 'step_personal_name', 2, 'text', 'Nama Belakang', 'Last Name', false, ['placeholder' => json_encode(['id' => ['Contoh: Anggara', 'Contoh: Cheryl', 'Contoh: Wijaya'], 'en' => ['e.g. Marvel', 'e.g. Ivania']])]),
             $q('q_dob', 'step_personal_dob', 1, 'date', 'Tanggal Lahir', 'Date of Birth'),
             $q('q_location', 'step_personal_location', 1, 'searchable_dropdown', 'Pilih Kota/Negara', 'Select City/Country'),
             $q('q_open_remote', 'step_personal_location', 2, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
@@ -1106,14 +1106,14 @@ class OnboardingSeeder extends Seeder
 
             // ── FOUNDER → CF ──
             $q('q_fdr_cf_type', 'step_fdr_cf_type', 1, 'multi_select_card', 'Tipe Co-Founder', 'Co-Founder Type'),
-            $q('q_fdr_cf_avail', 'step_fdr_cf_avail', 1, 'single_select_card', 'Availability', 'Availability'),
+            $q('q_fdr_cf_avail', 'step_fdr_cf_avail', 1, 'single_select_card', '', ''),
             $q('q_fdr_cf_remote', 'step_fdr_cf_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
             $q('q_fdr_cf_relocate', 'step_fdr_cf_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
             $q('q_fdr_cf_linkedin', 'step_fdr_cf_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/...', 'en' => 'https://linkedin.com/in/...'])]),
 
             // ── FOUNDER → TEAM ──
             $q('q_fdr_tm_roles', 'step_fdr_tm_roles', 1, 'multi_select_chip', 'Peran yang dibutuhkan', 'Roles needed'),
-            $q('q_fdr_tm_avail', 'step_fdr_tm_avail', 1, 'single_select_card', 'Availability', 'Availability'),
+            $q('q_fdr_tm_avail', 'step_fdr_tm_avail', 1, 'single_select_card', '', ''),
             $q('q_fdr_tm_remote', 'step_fdr_tm_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
             $q('q_fdr_tm_relocate', 'step_fdr_tm_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
             $q('q_fdr_tm_linkedin', 'step_fdr_tm_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/...', 'en' => 'https://linkedin.com/in/...'])]),
@@ -1121,7 +1121,7 @@ class OnboardingSeeder extends Seeder
             // ── FOUNDER → BOTH ──
             $q('q_fdr_bt_cf', 'step_fdr_bt_cf', 1, 'multi_select_card', 'Tipe Co-Founder', 'Co-Founder Type'),
             $q('q_fdr_bt_roles', 'step_fdr_bt_roles', 1, 'multi_select_chip', 'Peran yang dibutuhkan', 'Roles needed'),
-            $q('q_fdr_bt_avail', 'step_fdr_bt_avail', 1, 'single_select_card', 'Availability', 'Availability'),
+            $q('q_fdr_bt_avail', 'step_fdr_bt_avail', 1, 'single_select_card', '', ''),
             $q('q_fdr_bt_remote', 'step_fdr_bt_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
             $q('q_fdr_bt_relocate', 'step_fdr_bt_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
             $q('q_fdr_bt_linkedin', 'step_fdr_bt_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/...', 'en' => 'https://linkedin.com/in/...'])]),
@@ -1129,7 +1129,7 @@ class OnboardingSeeder extends Seeder
             // ── CO-FOUNDER JOINING ──
             $q('q_cf_industry', 'step_cf_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5])]),
             $q('q_cf_type', 'step_cf_type', 1, 'single_select_card', 'Kamu co-founder tipe apa?', 'What kind of co-founder are you?'),
-            $q('q_cf_avail', 'step_cf_avail', 1, 'single_select_card', 'Availability', 'Availability'),
+            $q('q_cf_avail', 'step_cf_avail', 1, 'single_select_card', '', ''),
             // Compensation
             $q('q_cf_equity', 'step_cf_comp', 1, 'single_select_card', 'Ekspektasi equity', 'Equity expectation'),
             $q('q_cf_salary_type', 'step_cf_comp', 2, 'single_select_card', 'Apakah kamu punya ekspektasi minimum gaji?', 'Do you have a minimum salary expectation?'),
@@ -1144,7 +1144,7 @@ class OnboardingSeeder extends Seeder
             // ── TEAM MEMBER JOINING ──
             $q('q_tm_industry', 'step_tm_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5])]),
             $q('q_tm_skills', 'step_tm_skills', 1, 'multi_select_chip', 'Skill yang kamu miliki', 'Skills you have'),
-            $q('q_tm_avail', 'step_tm_avail', 1, 'single_select_card', 'Availability', 'Availability'),
+            $q('q_tm_avail', 'step_tm_avail', 1, 'single_select_card', '', ''),
             // Compensation
             $q('q_tm_equity', 'step_tm_comp', 1, 'single_select_card', 'Ekspektasi equity', 'Equity expectation'),
             $q('q_tm_salary_type', 'step_tm_comp', 2, 'single_select_card', 'Apakah kamu punya ekspektasi minimum gaji?', 'Do you have a minimum salary expectation?'),
