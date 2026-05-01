@@ -84,35 +84,32 @@ class OnboardingSeeder extends Seeder
 
         $masterIndustries = [
             'Core Technology' => [
-                'AI','Generative Tech/AI','DeepTech','AR/VR','IoT',
-                'Robotics','Semiconductors','Cloud Infrastructure','Developer Tools',
-                'Security','Data Services','Analytics',
+                'AI','Analytics','AR/VR','Cloud Infrastructure','Data Services','DeepTech',
+                'Developer Tools','Generative Tech/AI','IoT','Robotics','Security','Semiconductors',
             ],
             'Software & Digital Products' => [
-                'SaaS','SMB Software','Productivity Tools','Sales & CRM',
-                'Enterprise','Messaging','Social Networks',
+                'Enterprise','Messaging','Productivity Tools','SaaS','Sales & CRM','SMB Software','Social Networks',
             ],
             'Consumer & Marketplace' => [
-                'E-commerce','Marketplaces','Direct-to-Consumer (DTC)','Retail',
-                'Fashion','Cosmetics','Food and Beverage','Creator/Passion Economy',
+                'Cosmetics','Creator/Passion Economy','Direct-to-Consumer (DTC)','E-commerce',
+                'Fashion','Food and Beverage','Marketplaces','Retail',
             ],
             'Finance & Business Infrastructure' => [
-                'FinTech','Payments','Insurance','LegalTech','Human Capital/HRTech',
+                'FinTech','Human Capital/HRTech','Insurance','LegalTech','Payments',
             ],
             'Industry-Specific Solutions' => [
-                'Healthcare','Medical Devices','Pharmaceuticals','Education',
-                'EnergyTech','ClimateTech/CleanTech','AgTech','ConstructionTech',
-                'Manufacturing','Logistics','Supply Chain Tech','TransportationTech',
-                'Real Estate/PropTech','GovTech',
+                'AgTech','ClimateTech/CleanTech','ConstructionTech','Education',
+                'EnergyTech','GovTech','Healthcare','Logistics','Manufacturing',
+                'Medical Devices','Pharmaceuticals','Real Estate/PropTech',
+                'Supply Chain Tech','TransportationTech',
             ],
             'Media, Lifestyle & Experience' => [
-                'Gaming','Entertainment & Sports','Media/Content','Travel',
-                'Lodging/Hospitality','Wellness & Fitness','Mental Health',
-                'Parenting/Families',
+                'Entertainment & Sports','Gaming','Lodging/Hospitality','Media/Content',
+                'Mental Health','Parenting/Families','Travel','Wellness & Fitness',
             ],
             'Emerging & Future' => [
-                'Web3/Blockchain','Space','Smart Cities/UrbanTech','Future of Work',
-                'Gig Economy','Social Impact','Hardware','Material Science',
+                'Future of Work','Gig Economy','Hardware','Material Science',
+                'Smart Cities/UrbanTech','Social Impact','Space','Web3/Blockchain',
             ],
         ];
 
@@ -532,7 +529,9 @@ class OnboardingSeeder extends Seeder
             $q('q_bld_type',   'step_bld_type', 1, 'single_select_card', 'Apa yang paling menggambarkan kamu?', 'What best describes you?'),
             $q('q_bld_role',   'step_bld_role', 1, 'searchable_dropdown', 'Peran Utama', 'Primary Role'),
             $q('q_bld_years',  'step_bld_role', 2, 'number', 'Tahun Pengalaman', 'Years of Experience', true, ['placeholder' => json_encode(['id'=>'contoh: 3','en'=>'e.g. 3'])]),
-            $q('q_bld_exp',    'step_bld_exp',  1, 'single_select_card', 'Pengalaman Startup', 'Startup Experience'),
+            $q('q_bld_exp_fdr', 'step_bld_exp',  1, 'single_select_card', 'Apakah kamu memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?', true, ['depends_on' => json_encode(['question_id'=>'q_bld_type','operator'=>'equals','value'=>'founder'])]),
+            $q('q_bld_exp_cf',  'step_bld_exp',  2, 'single_select_card', 'Apakah kamu memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?', true, ['depends_on' => json_encode(['question_id'=>'q_bld_type','operator'=>'equals','value'=>'cofounder'])]),
+            $q('q_bld_exp_tm',  'step_bld_exp',  3, 'single_select_card', 'Apakah kamu memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?', true, ['depends_on' => json_encode(['question_id'=>'q_bld_type','operator'=>'equals','value'=>'team'])]),
 
             // ── FOUNDER ──
             $q('q_fdr_looking',  'step_fdr_looking',  1, 'single_select_card', 'Apa yang sedang kamu cari?', 'What are you looking for?'),
@@ -699,11 +698,25 @@ class OnboardingSeeder extends Seeder
         // ── Primary Roles (grouped, for q_bld_role) ──
         $opts = array_merge($opts, $genGroupedOpts('opt_role', 'q_bld_role', $masterRoles));
 
-        // ── Experience Level ──
-        $opts[] = $o('opt_exp_1', 'q_bld_exp', 1, 'Pernah mendirikan startup', 'Founded a startup before', 'founder_exp', null, null, 'exp_founded');
-        $opts[] = $o('opt_exp_2', 'q_bld_exp', 2, 'Pernah membangun produk di startup', 'Built a product at a startup', 'product_exp', null, null, 'exp_built');
-        $opts[] = $o('opt_exp_3', 'q_bld_exp', 3, 'Pernah bekerja di tim startup', 'Worked in a startup team', 'team_exp', null, null, 'exp_worked');
-        $opts[] = $o('opt_exp_4', 'q_bld_exp', 4, 'Baru di dunia startup', 'New to the startup world', 'no_exp', null, null, 'exp_none');
+        // ── Experience Level (Founder) ──
+        $opts[] = $o('opt_exp_fdr_1', 'q_bld_exp_fdr', 1, 'Pernah mendirikan startup', 'Founded a startup before', 'founded', null, null, 'exp_founded');
+        $opts[] = $o('opt_exp_fdr_2', 'q_bld_exp_fdr', 2, 'Pernah menjual startup', 'Sold a startup', 'sold', null, null, 'exp_sold');
+        $opts[] = $o('opt_exp_fdr_3', 'q_bld_exp_fdr', 3, 'Pernah bekerja di startup', 'Worked in a startup', 'worked', null, null, 'exp_worked');
+        $opts[] = $o('opt_exp_fdr_4', 'q_bld_exp_fdr', 4, 'Pernah membangun produk di startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
+        $opts[] = $o('opt_exp_fdr_5', 'q_bld_exp_fdr', 5, 'Tidak ada pengalaman startup sebelumnya', 'No Prior startup experience', 'none', null, null, 'exp_none');
+
+        // ── Experience Level (Co-Founder) ──
+        $opts[] = $o('opt_exp_cf_1', 'q_bld_exp_cf', 1, 'Pernah menjadi Founder / Co-Founder', 'Founder / co-founded a company', 'founded', null, null, 'exp_founded');
+        $opts[] = $o('opt_exp_cf_2', 'q_bld_exp_cf', 2, 'Pernah menjual startup', 'Sold a startup', 'sold', null, null, 'exp_sold');
+        $opts[] = $o('opt_exp_cf_3', 'q_bld_exp_cf', 3, 'Pernah bekerja di startup', 'Worked in a startup', 'worked', null, null, 'exp_worked');
+        $opts[] = $o('opt_exp_cf_4', 'q_bld_exp_cf', 4, 'Pernah membangun produk di startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
+        $opts[] = $o('opt_exp_cf_5', 'q_bld_exp_cf', 5, 'Tidak ada pengalaman startup sebelumnya', 'No Prior startup experience', 'none', null, null, 'exp_none');
+
+        // ── Experience Level (Team Member) ──
+        $opts[] = $o('opt_exp_tm_1', 'q_bld_exp_tm', 1, 'Pernah menjadi Founder / Co-Founder', 'Founder / co-founded a company', 'founded', null, null, 'exp_founded');
+        $opts[] = $o('opt_exp_tm_2', 'q_bld_exp_tm', 2, 'Pernah bekerja di startup', 'Worked in a startup', 'worked', null, null, 'exp_worked');
+        $opts[] = $o('opt_exp_tm_3', 'q_bld_exp_tm', 3, 'Pernah membangun produk di startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
+        $opts[] = $o('opt_exp_tm_4', 'q_bld_exp_tm', 4, 'Tidak ada pengalaman startup sebelumnya', 'No Prior startup experience', 'none', null, null, 'exp_none');
 
         // ── Founder: Looking For ──
         $opts[] = $o('opt_fdr_look_1', 'q_fdr_looking', 1, 'Co-Founder', 'Co-Founder', 'cofounder', 'Mencari partner untuk membangun bersama', 'Looking for a partner to build together', 'goal_cofounder');
