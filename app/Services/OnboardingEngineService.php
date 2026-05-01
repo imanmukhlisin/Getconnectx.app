@@ -288,6 +288,12 @@ class OnboardingEngineService
         // 0. Ambil current step dengan relasi questions (Cuma 1 Query)
         $currentStep = OnboardingStep::with('questions')->findOrFail($stepId);
 
+        \Illuminate\Support\Facades\Log::info('processAnswer', [
+            'session_id' => $session->id,
+            'step_id'    => $stepId,
+            'answers'    => $answers,
+        ]);
+
         // 1. Tembok Pengaman: Validasi input berdasarkan aturan pertanyaan
         $this->validateAnswersByStep($currentStep, $answers, $session);
 
