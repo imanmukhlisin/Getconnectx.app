@@ -961,14 +961,14 @@ class OnboardingSeeder extends Seeder
         // ════════════════════════════════════════════════════════════════
         // 2. STEPS (53 Steps)
         // ════════════════════════════════════════════════════════════════
-        $s = function ($id, $flowId, $order, $section, $titleId, $titleEn, $autoAdvance = false) use ($now) {
+        $s = function ($id, $flowId, $order, $section, $titleId, $titleEn, $autoAdvance = false, $subtitleId = null, $subtitleEn = null) use ($now) {
             return [
                 'id' => $id,
                 'flow_id' => $flowId,
                 'order_index' => $order,
                 'section' => $section,
                 'title' => json_encode(['id' => $titleId, 'en' => $titleEn]),
-                'subtitle' => null,
+                'subtitle' => ($subtitleId && $subtitleEn) ? json_encode(['id' => $subtitleId, 'en' => $subtitleEn]) : null,
                 'cta_label' => null,
                 'auto_advance' => $autoAdvance,
                 'can_go_back' => true,
@@ -983,40 +983,40 @@ class OnboardingSeeder extends Seeder
             $s('step_personal_dob', 'flow_common', 2, 'Data Diri', 'Kapan tanggal lahir Anda?', 'When\'s your date of birth?'),
             $s('step_personal_location', 'flow_common', 3, 'Data Diri', 'Di mana Anda berlokasi?', 'Where are you based?'),
             $s('step_personal_gender', 'flow_common', 4, 'Data Diri', 'Jenis Kelamin', 'Gender', true),
-            $s('step_role_selection', 'flow_common', 5, 'Tipe Akun', 'Bagaimana Anda ingin menggunakan ConnectX?', 'How would you like to use ConnectX?', true),
+            $s('step_role_selection', 'flow_common', 5, 'Tipe Akun', 'Bagaimana Anda ingin menggunakan ConnectX?', 'How do you want to use ConnectX?', true, 'Ini menentukan seluruh pengalaman Anda', 'This shapes your entire experience'),
 
             // ── BUILDER COMMON (3 steps) ──
-            $s('step_bld_type', 'flow_builder_common', 1, 'Profil Builder', 'Apa yang paling menggambarkan kamu?', 'What best describes you?', true),
-            $s('step_bld_role', 'flow_builder_common', 2, 'Profil Builder', 'Apa peran/jabatan utama Anda?', 'What is your primary role?'),
+            $s('step_bld_type', 'flow_builder_common', 1, 'Profil Builder', 'Apa yang paling menggambarkan kamu?', 'What best describes you?', true, 'Ini menentukan apa yang akan Anda lihat di feed', 'This determines what you\'ll see in your feed'),
+            $s('step_bld_role', 'flow_builder_common', 2, 'Profil Builder', 'Peran apa yang paling mendeskripsikan Anda secara utama?', 'Which role best describes you primarily?'),
             $s('step_bld_exp', 'flow_builder_common', 3, 'Profil Builder', 'Seberapa besar pengalaman startup Anda?', 'How much startup experience do you have?', true),
 
             // ── FOUNDER (2 steps) ──
-            $s('step_fdr_looking', 'flow_founder', 1, 'Tujuan Founder', 'Apa yang sedang kamu cari?', 'What are you looking for?', true),
+            $s('step_fdr_looking', 'flow_founder', 1, 'Tujuan Founder', 'Apa yang sedang kamu cari?', 'What are you looking for?', true, 'Siapa yang kamu butuhkan untuk maju?', 'Who do you need to move forward?'),
             $s('step_fdr_industry', 'flow_founder', 2, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?'),
 
             // ── FOUNDER → CF (4 steps) ──
             $s('step_fdr_cf_type', 'flow_fdr_cf', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of Co-Founder do you need?'),
-            $s('step_fdr_cf_avail', 'flow_fdr_cf', 2, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true),
+            $s('step_fdr_cf_avail', 'flow_fdr_cf', 2, 'Ketersediaan', 'Availability apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_fdr_cf_remote', 'flow_fdr_cf', 3, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_fdr_cf_linkedin', 'flow_fdr_cf', 4, 'Profil Online', 'Connect LinkedIn', 'Connect LinkedIn'),
 
             // ── FOUNDER → TEAM (4 steps) ──
             $s('step_fdr_tm_roles', 'flow_fdr_team', 1, 'Cari Anggota Tim', 'Peran apa yang kamu butuhkan?', 'What roles do you need?'),
-            $s('step_fdr_tm_avail', 'flow_fdr_team', 2, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true),
+            $s('step_fdr_tm_avail', 'flow_fdr_team', 2, 'Ketersediaan', 'Availability apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_fdr_tm_remote', 'flow_fdr_team', 3, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_fdr_tm_linkedin', 'flow_fdr_team', 4, 'Profil Online', 'Connect LinkedIn', 'Connect LinkedIn'),
 
             // ── FOUNDER → BOTH (5 steps) ──
             $s('step_fdr_bt_cf', 'flow_fdr_both', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of Co-Founder do you need?'),
             $s('step_fdr_bt_roles', 'flow_fdr_both', 2, 'Cari Anggota Tim', 'Peran apa yang kamu butuhkan?', 'What roles do you need?'),
-            $s('step_fdr_bt_avail', 'flow_fdr_both', 3, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true),
+            $s('step_fdr_bt_avail', 'flow_fdr_both', 3, 'Ketersediaan', 'Availability apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_fdr_bt_remote', 'flow_fdr_both', 4, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_fdr_bt_linkedin', 'flow_fdr_both', 5, 'Profil Online', 'Connect LinkedIn', 'Connect LinkedIn'),
 
             // ── CO-FOUNDER JOINING (7 steps) ──
             $s('step_cf_industry', 'flow_cofounder', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?'),
             $s('step_cf_type', 'flow_cofounder', 2, 'Tipe Co-Founder', 'Kamu co-founder tipe apa?', 'What kind of co-founder are you?', true),
-            $s('step_cf_avail', 'flow_cofounder', 3, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true),
+            $s('step_cf_avail', 'flow_cofounder', 3, 'Ketersediaan', 'Availability apa yang kamu miliki?', 'What availability do you have?', true, 'Berapa tingkat komitmen yang bisa kamu berikan?', 'What commitment level can you offer?'),
             $s('step_cf_comp', 'flow_cofounder', 4, 'Ekspektasi Kompensasi', 'Bagaimana ekspektasimu untuk cash dan equity?', 'What are your cash & equity expectations?'),
             $s('step_cf_remote', 'flow_cofounder', 5, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_cf_linkedin', 'flow_cofounder', 6, 'Profil Online', 'Connect LinkedIn', 'Connect LinkedIn'),
@@ -1024,7 +1024,7 @@ class OnboardingSeeder extends Seeder
             // ── TEAM MEMBER JOINING (7 steps) ──
             $s('step_tm_industry', 'flow_team', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?'),
             $s('step_tm_skills', 'flow_team', 2, 'Skill & Keahlian', 'Skill apa yang kamu miliki?', 'What skills do you have?'),
-            $s('step_tm_avail', 'flow_team', 3, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true),
+            $s('step_tm_avail', 'flow_team', 3, 'Ketersediaan', 'Availability apa yang kamu miliki?', 'What availability do you have?', true, 'Berapa tingkat komitmen yang bisa kamu berikan?', 'What commitment level can you offer?'),
             $s('step_tm_comp', 'flow_team', 4, 'Ekspektasi Kompensasi', 'Bagaimana ekspektasimu untuk cash dan equity?', 'What are your cash & equity expectations?'),
             $s('step_tm_remote', 'flow_team', 5, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_tm_linkedin', 'flow_team', 6, 'Profil Online', 'Connect LinkedIn', 'Connect LinkedIn'),
@@ -1092,7 +1092,7 @@ class OnboardingSeeder extends Seeder
 
             // ── BUILDER COMMON ──
             $q('q_bld_type', 'step_bld_type', 1, 'single_select_card', 'Apa yang paling menggambarkan kamu?', 'What best describes you?'),
-            $q('q_bld_role', 'step_bld_role', 1, 'searchable_dropdown', 'Peran Utama', 'Primary Role'),
+            $q('q_bld_role', 'step_bld_role', 1, 'searchable_dropdown', 'Pilih peran utama Anda*', 'Select your primary role*'),
             $q('q_bld_years', 'step_bld_role', 2, 'number', 'Tahun Pengalaman', 'Years of Experience', true, ['placeholder' => json_encode(['id' => 'contoh: 3', 'en' => 'e.g. 3'])]),
             $q('q_bld_exp', 'step_bld_exp', 1, 'single_select_card', 'Apakah kamu memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?'),
 
@@ -1330,9 +1330,9 @@ class OnboardingSeeder extends Seeder
         $availQuestions = ['q_fdr_cf_avail', 'q_fdr_tm_avail', 'q_fdr_bt_avail', 'q_cf_avail', 'q_tm_avail'];
         foreach ($availQuestions as $qid) {
             $p = str_replace('q_', 'opt_av_', $qid);
-            $opts[] = $o($p . '_1', $qid, 1, 'Full-time', 'Full-time', 'full_time', null, null, 'availability_full_time');
-            $opts[] = $o($p . '_2', $qid, 2, 'Part-time', 'Part-time', 'part_time', null, null, 'availability_part_time');
-            $opts[] = $o($p . '_3', $qid, 3, 'Fleksibel / Open', 'Flexible / Open', 'flexible', null, null, 'availability_flexible');
+            $opts[] = $o($p . '_1', $qid, 1, 'Full-time', 'Full-time', 'full_time', 'Kandidat harus komitmen penuh', 'Candidates must be fully committed', 'availability_full_time');
+            $opts[] = $o($p . '_2', $qid, 2, 'Part-time', 'Part-time', 'part_time', 'Terbuka untuk kandidat dengan komitmen lain', 'Open to candidates with other commitments', 'availability_part_time');
+            $opts[] = $o($p . '_3', $qid, 3, 'Flexible / Hybrid', 'Flexible / Hybrid', 'flexible', 'Terbuka untuk mendiskusikan pengaturan', 'Open to discuss arrangement', 'availability_flexible');
         }
 
         // ── Remote Options (reused) ──
