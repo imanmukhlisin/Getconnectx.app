@@ -698,7 +698,14 @@ class OnboardingSeeder extends Seeder
         $genGroupedOpts = function (string $prefix, string $qid, array $groups) use ($now) {
             $opts = [];
             $i = 0;
+            
+            // Sort categories alphabetically (A-Z)
+            ksort($groups);
+            
             foreach ($groups as $group => $items) {
+                // Sort items within category alphabetically (A-Z)
+                sort($items);
+                
                 foreach ($items as $item) {
                     $i++;
                     $opts[] = [
