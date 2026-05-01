@@ -980,7 +980,7 @@ class OnboardingSeeder extends Seeder
         DB::table('onboarding_steps')->insert([
             // ── COMMON: Data Diri (5 steps) ──
             $s('step_personal_name', 'flow_common', 1, 'Data Diri', 'Siapa nama Anda?', 'What\'s your name?'),
-            $s('step_personal_dob', 'flow_common', 2, 'Data Diri', 'Kapan tanggal lahir Anda?', 'When\'s your date of birth?'),
+            $s('step_personal_dob', 'flow_common', 2, 'Data Diri', 'Kapan tanggal lahir Anda?', 'When is your date of birth?'),
             $s('step_personal_location', 'flow_common', 3, 'Data Diri', 'Di mana Anda berlokasi?', 'Where are you based?'),
             $s('step_personal_gender', 'flow_common', 4, 'Data Diri', 'Jenis Kelamin', 'Gender', true),
             $s('step_role_selection', 'flow_common', 5, 'Tipe Akun', 'Bagaimana Anda ingin menggunakan ConnectX?', 'How do you want to use ConnectX?', true, 'Ini menentukan seluruh pengalaman Anda', 'This shapes your entire experience'),
