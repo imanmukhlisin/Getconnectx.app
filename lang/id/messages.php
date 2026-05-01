@@ -54,7 +54,6 @@ return [
     
     // WhatsApp Delivery Content
     'wa_otp_messages' => [
-        // Indonesian Professional Variations
         ":greeting!\n\nTerima kasih telah memilih ConnectX sebagai platform kolaborasi Anda. Untuk alasan keamanan, berikut adalah kode verifikasi (OTP) yang Anda perlukan untuk mengakses akun Anda:\n\n*👉 :code 👈*\n\nKode ini hanya berlaku selama :expiry menit. Mohon untuk tidak membagikan kode ini kepada siapa pun, termasuk pihak yang mengatasnamakan ConnectX.\n\nSalam hangat,\nTim Keamanan ConnectX",
         
         ":greeting!\n\nKami menerima permintaan verifikasi untuk akun ConnectX Anda. Silakan gunakan kode otentikasi berikut untuk melanjutkan proses:\n\n*👉 :code 👈*\n\nDemi keamanan privasi Anda, kode ini akan kedaluwarsa dalam waktu :expiry menit. Pastikan Anda tidak meneruskan pesan ini kepada siapapun.\n\nHormat kami,\nLayanan Pelanggan ConnectX",
@@ -65,15 +64,14 @@ return [
         
         ":greeting!\n\nTerima kasih telah bergabung bersama ConnectX. Langkah terakhir untuk mengaktifkan sesi Anda adalah dengan memasukkan kode verifikasi berikut:\n\n*👉 :code 👈*\n\nMasa berlaku kode ini adalah :expiry menit. Kami berkomitmen untuk selalu menjaga kerahasiaan data dan akun Anda.\n\nSalam hangat,\nTim ConnectX",
 
-        // English Professional Variations
-        ":greeting!\n\nThank you for choosing ConnectX. To ensure the highest level of security for your account, please use the following One-Time Password (OTP) to complete your verification process:\n\n*👉 :code 👈*\n\nThis code will strictly expire in :expiry minutes. For your protection, please do not share this code with anyone under any circumstances.\n\nBest regards,\nConnectX Security Team",
-        
-        ":greeting!\n\nWe have received a verification request for your ConnectX account. Please proceed by entering the authentication code below:\n\n*👉 :code 👈*\n\nFor privacy and security reasons, this code is valid for only :expiry minutes. Please ensure that you do not forward this message to unauthorized individuals.\n\nSincerely,\nConnectX Customer Service",
-        
-        ":greeting! Welcome to the ConnectX ecosystem.\n\nTo verify your identity and secure your account access, please input the following OTP on your application screen:\n\n*👉 :code 👈*\n\nAs a gentle reminder, this code is strictly confidential and will remain valid for the next :expiry minutes. Thank you for your trust.\n\nWarm regards,\nThe ConnectX Team",
-        
-        ":greeting!\n\nOur system has detected an authorization attempt for your ConnectX account. Use the security code below to finalize the verification procedure:\n\n*👉 :code 👈*\n\nThe code will automatically expire after :expiry minutes. If you did not initiate this request, please disregard this message to keep your account secure.\n\nThank you,\nConnectX Support",
-        
-        ":greeting!\n\nThank you for joining ConnectX. The final step to activate your secure session is to enter the verification code provided below:\n\n*👉 :code 👈*\n\nThe validity period for this code is :expiry minutes. We are fully committed to maintaining the confidentiality of your data and account.\n\nBest regards,\nThe ConnectX Team",
+        ":greeting!\n\nInilah saatnya menghubungkan ide Anda dengan ConnectX! Masukkan kode otentikasi berikut untuk melanjutkan sesi aman Anda:\n\n*👉 :code 👈*\n\nKode verifikasi ini akan kedaluwarsa setelah :expiry menit. Jaga kerahasiaan kode ini dengan baik demi keamanan data Anda.\n\nSukses selalu,\nTim IT ConnectX",
+
+        ":greeting! Mari wujudkan kolaborasi hebat bersama ConnectX.\n\nBerikut adalah kode OTP unik Anda untuk mengakses platform kami:\n\n*👉 :code 👈*\n\nMasa aktif kode ini terbatas hanya :expiry menit. Pastikan Anda segera memasukkannya dan tidak menyebarkannya kepada pihak luar.\n\nSalam Inovasi,\nConnectX Indonesia",
+
+        ":greeting!\n\nKami sangat menghargai privasi dan keamanan Anda. Untuk memastikan bahwa ini benar-benar Anda, silakan gunakan kode rahasia di bawah ini:\n\n*👉 :code 👈*\n\nSegera masukkan kode ini dalam waktu :expiry menit sebelum hangus. Abaikan pesan ini jika Anda tidak merasa melakukan pendaftaran.\n\nTerima kasih,\nTim Sekuritas ConnectX",
+
+        ":greeting!\n\nSelamat! Anda hanya berjarak satu langkah lagi menuju dashboard ConnectX Anda. Gunakan OTP verifikasi di bawah ini:\n\n*👉 :code 👈*\n\nKode keamanan ini dikhususkan untuk akun Anda dan akan expired dalam :expiry menit. Hati-hati terhadap penipuan.\n\nSalam Hangat,\nCustomer Care ConnectX",
+
+        ":greeting! Kami senang melihat antusiasme Anda di ConnectX.\n\nSelesaikan proses otentikasi akun Anda dengan memasukkan kode berikut secara akurat:\n\n*👉 :code 👈*\n\nIngat, kode ini hanya dapat digunakan sekali dan hanya berlaku :expiry menit. Jangan pernah membagikannya kepada siapa pun.\n\nSalam sukses,\nManajemen ConnectX",
     ],
 ];

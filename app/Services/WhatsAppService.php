@@ -179,14 +179,26 @@ class WhatsAppService
         $expiry = config('otp.expiry_minutes', 10);
         $hour = (int) now()->timezone('Asia/Jakarta')->format('H');
         
-        if ($hour >= 5 && $hour < 12) {
-            $greeting = 'Selamat Pagi / Good Morning';
-        } elseif ($hour >= 12 && $hour < 15) {
-            $greeting = 'Selamat Siang / Good Afternoon';
-        } elseif ($hour >= 15 && $hour < 18) {
-            $greeting = 'Selamat Sore / Good Evening';
+        if (app()->getLocale() === 'en') {
+            if ($hour >= 5 && $hour < 12) {
+                $greeting = 'Good Morning';
+            } elseif ($hour >= 12 && $hour < 15) {
+                $greeting = 'Good Afternoon';
+            } elseif ($hour >= 15 && $hour < 18) {
+                $greeting = 'Good Evening';
+            } else {
+                $greeting = 'Good Night';
+            }
         } else {
-            $greeting = 'Selamat Malam / Good Night';
+            if ($hour >= 5 && $hour < 12) {
+                $greeting = 'Selamat Pagi';
+            } elseif ($hour >= 12 && $hour < 15) {
+                $greeting = 'Selamat Siang';
+            } elseif ($hour >= 15 && $hour < 18) {
+                $greeting = 'Selamat Sore';
+            } else {
+                $greeting = 'Selamat Malam';
+            }
         }
 
         $messages = __('messages.wa_otp_messages');

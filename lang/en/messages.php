@@ -49,8 +49,26 @@ return [
     'val_otp_digits' => 'OTP code must be 6 numeric digits.',
     'val_wa_number_required' => 'WhatsApp number is required.',
     'val_wa_number_regex' => 'WhatsApp number must use an international format, e.g., +6281234567890.',
-    'val_provider_token_required' => 'The OAuth provider token is required.',
-    
     // WhatsApp Delivery Content
-    'wa_otp_message' => "Your ConnectX verification code is: *:code*\n\nValid for :expiry minutes. Do not share this code with anyone.",
+    'wa_otp_messages' => [
+        ":greeting!\n\nThank you for choosing ConnectX. To ensure the highest level of security for your account, please use the following One-Time Password (OTP) to complete your verification process:\n\n*👉 :code 👈*\n\nThis code will strictly expire in :expiry minutes. For your protection, please do not share this code with anyone under any circumstances.\n\nBest regards,\nConnectX Security Team",
+        
+        ":greeting!\n\nWe have received a verification request for your ConnectX account. Please proceed by entering the authentication code below:\n\n*👉 :code 👈*\n\nFor privacy and security reasons, this code is valid for only :expiry minutes. Please ensure that you do not forward this message to unauthorized individuals.\n\nSincerely,\nConnectX Customer Service",
+        
+        ":greeting! Welcome to the ConnectX ecosystem.\n\nTo verify your identity and secure your account access, please input the following OTP on your application screen:\n\n*👉 :code 👈*\n\nAs a gentle reminder, this code is strictly confidential and will remain valid for the next :expiry minutes. Thank you for your trust.\n\nWarm regards,\nThe ConnectX Team",
+        
+        ":greeting!\n\nOur system has detected an authorization attempt for your ConnectX account. Use the security code below to finalize the verification procedure:\n\n*👉 :code 👈*\n\nThe code will automatically expire after :expiry minutes. If you did not initiate this request, please disregard this message to keep your account secure.\n\nThank you,\nConnectX Support",
+        
+        ":greeting!\n\nThank you for joining ConnectX. The final step to activate your secure session is to enter the verification code provided below:\n\n*👉 :code 👈*\n\nThe validity period for this code is :expiry minutes. We are fully committed to maintaining the confidentiality of your data and account.\n\nBest regards,\nThe ConnectX Team",
+
+        ":greeting!\n\nIt is time to connect your ideas with the world through ConnectX! Please enter the authentication code below to continue your secure session:\n\n*👉 :code 👈*\n\nThis verification code will expire after :expiry minutes. Keep it strictly confidential to protect your data.\n\nTo your success,\nConnectX IT Department",
+
+        ":greeting! Let us make great collaborations happen together.\n\nHere is your unique OTP code to access our platform:\n\n*👉 :code 👈*\n\nThe validity period for this code is limited to :expiry minutes. Please enter it immediately and do not share it with external parties.\n\nYours innovatively,\nConnectX Global",
+
+        ":greeting!\n\nWe highly value your privacy and security. To confirm that this is truly you, please use the secret code provided below:\n\n*👉 :code 👈*\n\nEnter this code within :expiry minutes before it expires. If you did not register for an account, please ignore this message.\n\nThank you,\nConnectX Security Unit",
+
+        ":greeting!\n\nCongratulations! You are just one step away from your new ConnectX dashboard. Please use the verification OTP below:\n\n*👉 :code 👈*\n\nThis security code is exclusively generated for your account and will expire in :expiry minutes. Beware of scams.\n\nWarm regards,\nConnectX Customer Care",
+
+        ":greeting! We are thrilled to see your enthusiasm for ConnectX.\n\nPlease complete your account authentication process by accurately entering the following code:\n\n*👉 :code 👈*\n\nRemember, this code can only be used once and is valid for :expiry minutes. Do not share it with anyone.\n\nTo your continuous success,\nConnectX Management",
+    ],
 ];
