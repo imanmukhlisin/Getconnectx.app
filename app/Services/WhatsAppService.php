@@ -196,13 +196,16 @@ class WhatsAppService
             'to' => $formattedTo,
         ]);
 
-        return Http::asMultipart()->timeout(10)->post($url, [
-            ['name' => 'appkey',  'contents' => $appKey],
-            ['name' => 'authkey', 'contents' => $authKey],
-            ['name' => 'to',      'contents' => $formattedTo],
-            ['name' => 'message', 'contents' => $message],
-            ['name' => 'sandbox', 'contents' => 'false'],
-        ]);
+        return Http::asForm()
+            ->timeout(10)
+            ->withOptions([\CURLOPT_IPRESOLVE => \CURL_IPRESOLVE_V4])
+            ->post($url, [
+                'appkey'  => $appKey,
+                'authkey' => $authKey,
+                'to'      => $formattedTo,
+                'message' => $message,
+                'sandbox' => 'false',
+            ]);
     }
 
     private function buildMessage(string $code): string
