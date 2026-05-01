@@ -256,6 +256,7 @@ class OnboardingEngineService
 
         // Kalau ada satu saja yang melanggar, Gagalkan dengan status code 422!
         if (!empty($errors)) {
+            \Illuminate\Support\Facades\Log::error('Validation Errors', ['errors' => $errors, 'answers' => $answers, 'prior_q_bld_type' => isset($priorResponses['q_bld_type']) ? $this->getValue($priorResponses['q_bld_type']->value) : null]);
             throw \Illuminate\Validation\ValidationException::withMessages($errors);
         }
     }
