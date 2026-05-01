@@ -1083,8 +1083,8 @@ class OnboardingSeeder extends Seeder
 
         DB::table('onboarding_questions')->insert([
             // ── COMMON: Data Diri ──
-            $q('q_first_name', 'step_personal_name', 1, 'text', 'Nama Depan', 'First Name', true, ['validation' => json_encode(['min_length' => 1, 'max_length' => 50]), 'placeholder' => json_encode(['id' => ['Contoh: Kevin', 'Contoh: Britania', 'Contoh: Budi'], 'en' => ['e.g. Thomas', 'e.g. Tania']])]),
-            $q('q_last_name', 'step_personal_name', 2, 'text', 'Nama Belakang', 'Last Name', false, ['placeholder' => json_encode(['id' => ['Contoh: Anggara', 'Contoh: Cheryl', 'Contoh: Wijaya'], 'en' => ['e.g. Marvel', 'e.g. Ivania']])]),
+            $q('q_first_name', 'step_personal_name', 1, 'text', 'Nama Depan', 'First Name', true, ['validation' => json_encode(['min_length' => 1, 'max_length' => 50]), 'placeholder' => json_encode(['id' => 'Contoh: Britania', 'en' => 'e.g. Thomas'])]),
+            $q('q_last_name', 'step_personal_name', 2, 'text', 'Nama Belakang', 'Last Name', false, ['placeholder' => json_encode(['id' => 'Contoh: Cheryl', 'en' => 'e.g. Wijaya'])]),
             $q('q_dob', 'step_personal_dob', 1, 'date', 'Tanggal Lahir', 'Date of Birth'),
             $q('q_location', 'step_personal_location', 1, 'searchable_dropdown', 'Pilih Kota/Negara', 'Select City/Country'),
             $q('q_open_remote', 'step_personal_location', 2, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
