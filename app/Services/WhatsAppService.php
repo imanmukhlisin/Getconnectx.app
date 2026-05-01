@@ -186,7 +186,7 @@ class WhatsAppService
             'to' => $formattedTo,
         ]);
 
-        return Http::asMultipart()->timeout(5)->post($url, [
+        return Http::asMultipart()->timeout(30)->post($url, [
             ['name' => 'appkey',  'contents' => $appKey],
             ['name' => 'authkey', 'contents' => $authKey],
             ['name' => 'to',      'contents' => $formattedTo],
