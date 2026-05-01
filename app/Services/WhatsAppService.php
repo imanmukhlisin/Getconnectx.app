@@ -38,7 +38,17 @@ class WhatsAppService
 
         $message = $this->buildMessage($otp->code);
 
-        $this->send($phoneNumber, $message);
+        try {
+            $this->send($phoneNumber, $message);
+        } catch (\Throwable $e) {
+            // OTP sudah tersimpan di DB. Kalau WA gagal/timeout (misal network Vercel → SaungWA),
+            // log warning saja — jangan batalkan flow. User tetap bisa verifikasi OTP.
+            Log::warning('WhatsApp delivery failed (non-fatal) — OTP still valid in DB', [
+                'user_id' => $user->id,
+                'phone'   => $phoneNumber,
+                'error'   => $e->getMessage(),
+            ]);
+        }
 
         // Persist phone number on user if not set
         if (! $user->whatsapp_number) {
@@ -186,7 +196,7 @@ class WhatsAppService
             'to' => $formattedTo,
         ]);
 
-        return Http::asMultipart()->timeout(30)->post($url, [
+        return Http::asMultipart()->timeout(10)->post($url, [
             ['name' => 'appkey',  'contents' => $appKey],
             ['name' => 'authkey', 'contents' => $authKey],
             ['name' => 'to',      'contents' => $formattedTo],
