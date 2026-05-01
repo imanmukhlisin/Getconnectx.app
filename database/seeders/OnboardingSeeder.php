@@ -1182,7 +1182,9 @@ class OnboardingSeeder extends Seeder
 
         // ── Business Models (grouped, for q_su_biz_model) ──
         $bizIdx = 0;
+        ksort($masterBizModels);
         foreach ($masterBizModels as $group => $models) {
+            usort($models, fn($a, $b) => strcmp($a[0], $b[0]));
             foreach ($models as [$label, $value]) {
                 $bizIdx++;
                 $opts[] = [
