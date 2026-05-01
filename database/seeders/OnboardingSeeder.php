@@ -1105,7 +1105,7 @@ class OnboardingSeeder extends Seeder
             $q('q_fdr_industry', 'step_fdr_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5])]),
 
             // ── FOUNDER → CF ──
-            $q('q_fdr_cf_type', 'step_fdr_cf_type', 1, 'multi_select_card', 'Tipe Co-Founder', 'Co-Founder Type'),
+            $q('q_fdr_cf_type', 'step_fdr_cf_type', 1, 'multi_select_card', '', ''),
             $q('q_fdr_cf_avail', 'step_fdr_cf_avail', 1, 'single_select_card', '', ''),
             $q('q_fdr_cf_remote', 'step_fdr_cf_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
             $q('q_fdr_cf_relocate', 'step_fdr_cf_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
@@ -1119,7 +1119,7 @@ class OnboardingSeeder extends Seeder
             $q('q_fdr_tm_linkedin', 'step_fdr_tm_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/...', 'en' => 'https://linkedin.com/in/...'])]),
 
             // ── FOUNDER → BOTH ──
-            $q('q_fdr_bt_cf', 'step_fdr_bt_cf', 1, 'multi_select_card', 'Tipe Co-Founder', 'Co-Founder Type'),
+            $q('q_fdr_bt_cf', 'step_fdr_bt_cf', 1, 'multi_select_card', '', ''),
             $q('q_fdr_bt_roles', 'step_fdr_bt_roles', 1, 'multi_select_chip', 'Peran yang dibutuhkan', 'Roles needed'),
             $q('q_fdr_bt_avail', 'step_fdr_bt_avail', 1, 'single_select_card', '', ''),
             $q('q_fdr_bt_remote', 'step_fdr_bt_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
