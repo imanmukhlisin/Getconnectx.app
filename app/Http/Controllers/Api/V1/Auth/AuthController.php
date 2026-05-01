@@ -177,24 +177,25 @@ class AuthController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+        $phoneNumber = $request->whatsapp_number ?? $user->whatsapp_number;
 
         if ($user->hasVerifiedWhatsApp()) {
             return $this->errorResponse(__('messages.whatsapp_already_verified'), 'WHATSAPP_ALREADY_VERIFIED', 409);
         }
 
         try {
-            $this->whatsAppService->sendOtp($user, $request->whatsapp_number);
+            $this->whatsAppService->sendOtp($user, $phoneNumber);
         } catch (WhatsAppDeliveryException $e) {
             return $this->errorResponse(__('messages.whatsapp_delivery_failed'), 'WHATSAPP_DELIVERY_FAILED', 502);
         }
 
         $user->update([
-            'whatsapp_number'   => $request->whatsapp_number,
+            'whatsapp_number'   => $phoneNumber,
             'registration_step' => max($user->registration_step, User::STEP_WHATSAPP_OTP_SENT),
         ]);
 
         return $this->successResponse(
-            message : __('messages.whatsapp_otp_sent', ['number' => $request->whatsapp_number]),
+            message : __('messages.whatsapp_otp_sent', ['number' => $phoneNumber]),
             nextStep: 'NEED_WHATSAPP_VERIFICATION',
         );
     }

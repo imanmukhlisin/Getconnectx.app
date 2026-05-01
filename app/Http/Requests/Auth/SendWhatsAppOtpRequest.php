@@ -13,10 +13,12 @@ class SendWhatsAppOtpRequest extends FormRequest
 
     public function rules(): array
     {
+        $user = $this->user();
+        
         return [
             // Format internasional: +[kode negara][nomor], contoh: +6281234567890
             'whatsapp_number' => [
-                'required',
+                $user && $user->whatsapp_number ? 'nullable' : 'required',
                 'string',
                 'regex:/^\+[1-9]\d{7,14}$/',
                 'max:16',
