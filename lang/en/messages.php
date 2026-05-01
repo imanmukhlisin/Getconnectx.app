@@ -5,6 +5,7 @@ return [
     'registration_success' => 'Registration successful. Please verify your email.',
     'email_already_verified' => 'Email has already been verified.',
     'email_otp_sent' => 'OTP Verification Code has been sent to :email. This code is valid for 10 minutes.',
+    'login_otp_sent' => 'Login code has been sent to :email.',
     'email_verify_success' => 'Email verified successfully.',
     'whatsapp_already_verified' => 'WhatsApp has already been verified.',
     'whatsapp_otp_sent' => 'OTP Verification Code has been sent to WhatsApp :number. This code is valid for 10 minutes.',

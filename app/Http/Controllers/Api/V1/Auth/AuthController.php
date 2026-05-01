@@ -280,7 +280,7 @@ class AuthController extends Controller
         $this->emailService->sendOtp($user);
 
         return $this->successResponse(
-            message : "Kode login telah dikirim ke {$user->email}.",
+            message : __('messages.login_otp_sent', ['email' => $user->email]),
             nextStep: 'NEED_LOGIN_VERIFICATION'
         );
     }
@@ -308,7 +308,7 @@ class AuthController extends Controller
         $nextStep = $user->nextStep();
 
         return $this->successResponse(
-            message : 'Login berhasil! Selamat datang kembali.',
+            message : __('messages.login_success'),
             nextStep: $nextStep,
             data    : ['user' => $user->registrationSummary()],
             token   : $token,

@@ -5,6 +5,7 @@ return [
     'registration_success' => 'Registrasi berhasil. Silakan verifikasi email Anda.',
     'email_already_verified' => 'Email telah terverifikasi sebelumnya.',
     'email_otp_sent' => 'Kode Verifikasi OTP telah dikirim ke :email. Kode ini berlaku selama 10 menit.',
+    'login_otp_sent' => 'Kode login telah dikirim ke :email.',
     'email_verify_success' => 'Email berhasil diverifikasi.',
     'whatsapp_already_verified' => 'WhatsApp telah terverifikasi sebelumnya.',
     'whatsapp_otp_sent' => 'Kode Verifikasi OTP telah dikirim ke WhatsApp :number. Kode ini berlaku selama 10 menit.',
