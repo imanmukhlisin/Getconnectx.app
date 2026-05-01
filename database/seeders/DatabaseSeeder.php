@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TagSeeder::class,
             OnboardingSeeder::class,
+            NotificationTemplateSeeder::class,
         ]);
 
         // User::factory()->create([
