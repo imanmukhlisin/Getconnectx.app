@@ -65,6 +65,27 @@ class WhatsAppService
                 default    => throw new WhatsAppDeliveryException("Provider '{$this->provider}' tidak didukung."),
             };
 
+            // SaungWA mengembalikan {"message_status":"Success","data":{...}}
+            // HTTP status-nya bisa non-2xx meskipun pesan terkirim sukses.
+            // Cek message_status di body untuk kebenaran mutlak.
+            if ($this->provider === 'saungwa') {
+                $body = $response->json();
+                if (($body['message_status'] ?? '') !== 'Success') {
+                    Log::error('WhatsApp send failed', [
+                        'provider' => $this->provider,
+                        'status'   => $response->status(),
+                        'body'     => $response->body(),
+                    ]);
+                    throw new WhatsAppDeliveryException('Gagal mengirim OTP WhatsApp. Coba kembali.');
+                }
+                // Sukses — log info saja
+                Log::info('WhatsApp OTP sent via SaungWA', [
+                    'to'   => $to,
+                    'from' => $body['data']['from'] ?? '-',
+                ]);
+                return;
+            }
+
             if (! $response->successful()) {
                 Log::error('WhatsApp send failed', [
                     'provider' => $this->provider,
