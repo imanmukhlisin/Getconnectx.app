@@ -985,17 +985,17 @@ class OnboardingSeeder extends Seeder
             $s('step_personal_gender', 'flow_common', 4, 'Data Diri', 'Jenis Kelamin', 'Gender', true),
             $s('step_role_selection', 'flow_common', 5, 'Tipe Akun', 'Bagaimana Anda ingin menggunakan ConnectX?', 'How do you want to use ConnectX?', true, 'Ini menentukan seluruh pengalaman Anda', 'This shapes your entire experience'),
 
-            // ── BUILDER COMMON (3 steps) ──
+            // ── BUILDER COMMON (2 steps) ──
             $s('step_bld_type', 'flow_builder_common', 1, 'Profil Builder', 'Apa yang paling menggambarkan kamu?', 'What best describes you?', true, 'Ini menentukan apa yang akan Anda lihat di feed', 'This determines what you\'ll see in your feed'),
             $s('step_bld_role', 'flow_builder_common', 2, 'Profil Builder', 'Peran apa yang paling mendeskripsikan Anda secara utama?', 'Which role best describes you primarily?'),
-            $s('step_bld_exp', 'flow_builder_common', 3, 'Profil Builder', 'Seberapa besar pengalaman startup Anda?', 'How much startup experience do you have?', true),
 
-            // ── FOUNDER (2 steps) ──
+            // ── FOUNDER (3 steps) ──
+            $s('step_fdr_exp', 'flow_founder', 0, 'Profil Builder', 'Apakah Anda memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?', true, 'Lebih lanjut tentang diri Anda', 'More about yourself'),
             $s('step_fdr_looking', 'flow_founder', 1, 'Tujuan Founder', 'Apa yang sedang kamu cari?', 'What are you looking for?', true, 'Siapa yang kamu butuhkan untuk maju?', 'Who do you need to move forward?'),
             $s('step_fdr_industry', 'flow_founder', 2, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?'),
 
             // ── FOUNDER → CF (4 steps) ──
-            $s('step_fdr_cf_type', 'flow_fdr_cf', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of Co-Founder do you need?'),
+            $s('step_fdr_cf_type', 'flow_fdr_cf', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of co-founder do you need?', false, 'Pilih semua yang sesuai', 'Select all that apply'),
             $s('step_fdr_cf_avail', 'flow_fdr_cf', 2, 'Ketersediaan', 'Availability apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_fdr_cf_remote', 'flow_fdr_cf', 3, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_fdr_cf_linkedin', 'flow_fdr_cf', 4, 'Profil Online', 'Connect LinkedIn', 'Connect LinkedIn'),
@@ -1007,13 +1007,14 @@ class OnboardingSeeder extends Seeder
             $s('step_fdr_tm_linkedin', 'flow_fdr_team', 4, 'Profil Online', 'Connect LinkedIn', 'Connect LinkedIn'),
 
             // ── FOUNDER → BOTH (5 steps) ──
-            $s('step_fdr_bt_cf', 'flow_fdr_both', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of Co-Founder do you need?'),
+            $s('step_fdr_bt_cf', 'flow_fdr_both', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of co-founder do you need?', false, 'Pilih semua yang sesuai', 'Select all that apply'),
             $s('step_fdr_bt_roles', 'flow_fdr_both', 2, 'Cari Anggota Tim', 'Peran apa yang kamu butuhkan?', 'What roles do you need?'),
             $s('step_fdr_bt_avail', 'flow_fdr_both', 3, 'Ketersediaan', 'Availability apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_fdr_bt_remote', 'flow_fdr_both', 4, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_fdr_bt_linkedin', 'flow_fdr_both', 5, 'Profil Online', 'Connect LinkedIn', 'Connect LinkedIn'),
 
-            // ── CO-FOUNDER JOINING (7 steps) ──
+            // ── CO-FOUNDER JOINING (8 steps) ──
+            $s('step_cf_exp', 'flow_cofounder', 0, 'Profil Builder', 'Apakah Anda memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?', true, 'Lebih lanjut tentang diri Anda', 'More about yourself'),
             $s('step_cf_industry', 'flow_cofounder', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?'),
             $s('step_cf_type', 'flow_cofounder', 2, 'Tipe Co-Founder', 'Kamu co-founder tipe apa?', 'What kind of co-founder are you?', true),
             $s('step_cf_avail', 'flow_cofounder', 3, 'Ketersediaan', 'Availability apa yang kamu miliki?', 'What availability do you have?', true, 'Berapa tingkat komitmen yang bisa kamu berikan?', 'What commitment level can you offer?'),
@@ -1021,7 +1022,8 @@ class OnboardingSeeder extends Seeder
             $s('step_cf_remote', 'flow_cofounder', 5, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_cf_linkedin', 'flow_cofounder', 6, 'Profil Online', 'Connect LinkedIn', 'Connect LinkedIn'),
 
-            // ── TEAM MEMBER JOINING (7 steps) ──
+            // ── TEAM MEMBER JOINING (8 steps) ──
+            $s('step_tm_exp', 'flow_team', 0, 'Profil Builder', 'Apakah Anda memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?', true, 'Lebih lanjut tentang diri Anda', 'More about yourself'),
             $s('step_tm_industry', 'flow_team', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?'),
             $s('step_tm_skills', 'flow_team', 2, 'Skill & Keahlian', 'Skill apa yang kamu miliki?', 'What skills do you have?'),
             $s('step_tm_avail', 'flow_team', 3, 'Ketersediaan', 'Availability apa yang kamu miliki?', 'What availability do you have?', true, 'Berapa tingkat komitmen yang bisa kamu berikan?', 'What commitment level can you offer?'),
@@ -1088,20 +1090,22 @@ class OnboardingSeeder extends Seeder
             $q('q_open_remote', 'step_personal_location', 2, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
             $q('q_remote_pref', 'step_personal_location', 3, 'dropdown', 'Preferensi remote', 'Remote preference', true, ['depends_on' => json_encode(['question_id' => 'q_open_remote', 'operator' => 'equals', 'value' => 'yes'])]),
             $q('q_gender', 'step_personal_gender', 1, 'single_select_card', 'Jenis Kelamin', 'Gender'),
-            $q('q_use_connectx', 'step_role_selection', 1, 'single_select_card', 'Bagaimana kamu ingin menggunakan ConnectX?', 'How do you want to use ConnectX?'),
+            $q('q_use_connectx', 'step_role_selection', 1, 'single_select_card', '', ''),
 
             // ── BUILDER COMMON ──
-            $q('q_bld_type', 'step_bld_type', 1, 'single_select_card', 'Apa yang paling menggambarkan kamu?', 'What best describes you?'),
+            $q('q_bld_type', 'step_bld_type', 1, 'single_select_card', '', ''),
             $q('q_bld_role', 'step_bld_role', 1, 'searchable_dropdown', 'Pilih peran utama Anda*', 'Select your primary role*'),
             $q('q_bld_years', 'step_bld_role', 2, 'number', 'Tahun Pengalaman', 'Years of Experience', true, ['placeholder' => json_encode(['id' => 'contoh: 3', 'en' => 'e.g. 3'])]),
-            $q('q_bld_exp', 'step_bld_exp', 1, 'single_select_card', 'Apakah kamu memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?'),
+            $q('q_fdr_exp', 'step_fdr_exp', 1, 'single_select_card', '', ''),
+            $q('q_cf_exp', 'step_cf_exp', 1, 'single_select_card', '', ''),
+            $q('q_tm_exp', 'step_tm_exp', 1, 'single_select_card', '', ''),
 
             // ── FOUNDER ──
-            $q('q_fdr_looking', 'step_fdr_looking', 1, 'single_select_card', 'Apa yang sedang kamu cari?', 'What are you looking for?'),
+            $q('q_fdr_looking', 'step_fdr_looking', 1, 'single_select_card', '', ''),
             $q('q_fdr_industry', 'step_fdr_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5])]),
 
             // ── FOUNDER → CF ──
-            $q('q_fdr_cf_type', 'step_fdr_cf_type', 1, 'multi_select_chip', 'Tipe Co-Founder yang dibutuhkan', 'Co-Founder type needed'),
+            $q('q_fdr_cf_type', 'step_fdr_cf_type', 1, 'multi_select_card', 'Tipe Co-Founder', 'Co-Founder Type'),
             $q('q_fdr_cf_avail', 'step_fdr_cf_avail', 1, 'single_select_card', 'Availability', 'Availability'),
             $q('q_fdr_cf_remote', 'step_fdr_cf_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
             $q('q_fdr_cf_relocate', 'step_fdr_cf_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
@@ -1115,7 +1119,7 @@ class OnboardingSeeder extends Seeder
             $q('q_fdr_tm_linkedin', 'step_fdr_tm_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/...', 'en' => 'https://linkedin.com/in/...'])]),
 
             // ── FOUNDER → BOTH ──
-            $q('q_fdr_bt_cf', 'step_fdr_bt_cf', 1, 'multi_select_chip', 'Tipe Co-Founder yang dibutuhkan', 'Co-Founder type needed'),
+            $q('q_fdr_bt_cf', 'step_fdr_bt_cf', 1, 'multi_select_card', 'Tipe Co-Founder', 'Co-Founder Type'),
             $q('q_fdr_bt_roles', 'step_fdr_bt_roles', 1, 'multi_select_chip', 'Peran yang dibutuhkan', 'Roles needed'),
             $q('q_fdr_bt_avail', 'step_fdr_bt_avail', 1, 'single_select_card', 'Availability', 'Availability'),
             $q('q_fdr_bt_remote', 'step_fdr_bt_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
@@ -1290,12 +1294,26 @@ class OnboardingSeeder extends Seeder
         // ── Primary Roles (grouped, for q_bld_role) ──
         $opts = array_merge($opts, $genGroupedOpts('opt_role', 'q_bld_role', $masterRoles));
 
-        // ── Experience Level ──
-        $opts[] = $o('opt_exp_1', 'q_bld_exp', 1, 'Pernah mendirikan startup', 'Founded a startup before', 'founded', null, null, 'exp_founded');
-        $opts[] = $o('opt_exp_2', 'q_bld_exp', 2, 'Pernah menjual startup', 'Sold a startup', 'sold', null, null, 'exp_sold');
-        $opts[] = $o('opt_exp_3', 'q_bld_exp', 3, 'Pernah bekerja di startup', 'Worked in a startup', 'worked', null, null, 'exp_worked');
-        $opts[] = $o('opt_exp_4', 'q_bld_exp', 4, 'Pernah membangun produk di startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
-        $opts[] = $o('opt_exp_5', 'q_bld_exp', 5, 'Tidak ada pengalaman startup sebelumnya', 'No Prior startup experience', 'none', null, null, 'exp_none');
+        // ── Experience Level (Dynamic per Role) ──
+        // Founder Experience
+        $opts[] = $o('opt_fdr_exp_1', 'q_fdr_exp', 1, 'Pernah mendirikan startup sebelumnya', 'Founded a startup before', 'founded', null, null, 'exp_founded');
+        $opts[] = $o('opt_fdr_exp_2', 'q_fdr_exp', 2, 'Pernah menjual startup', 'Sold a startup', 'sold', null, null, 'exp_sold');
+        $opts[] = $o('opt_fdr_exp_3', 'q_fdr_exp', 3, 'Pernah bekerja di startup', 'Worked in a startup', 'worked', null, null, 'exp_worked');
+        $opts[] = $o('opt_fdr_exp_4', 'q_fdr_exp', 4, 'Pernah membangun produk di startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
+        $opts[] = $o('opt_fdr_exp_5', 'q_fdr_exp', 5, 'Tidak ada pengalaman startup sebelumnya', 'No Prior startup experience', 'none', null, null, 'exp_none');
+
+        // Co-Founder Experience
+        $opts[] = $o('opt_cf_exp_1', 'q_cf_exp', 1, 'Mendirikan / co-founded sebuah perusahaan', 'Founder / co-founded a company', 'founded', null, null, 'exp_founded');
+        $opts[] = $o('opt_cf_exp_2', 'q_cf_exp', 2, 'Pernah menjual startup', 'Sold a startup', 'sold', null, null, 'exp_sold');
+        $opts[] = $o('opt_cf_exp_3', 'q_cf_exp', 3, 'Pernah bekerja di startup', 'Worked in a startup', 'worked', null, null, 'exp_worked');
+        $opts[] = $o('opt_cf_exp_4', 'q_cf_exp', 4, 'Pernah membangun produk di startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
+        $opts[] = $o('opt_cf_exp_5', 'q_cf_exp', 5, 'Tidak ada pengalaman startup sebelumnya', 'No Prior startup experience', 'none', null, null, 'exp_none');
+
+        // Team Experience
+        $opts[] = $o('opt_tm_exp_1', 'q_tm_exp', 1, 'Mendirikan / co-founded sebuah perusahaan', 'Founder / co-founded a company', 'founded', null, null, 'exp_founded');
+        $opts[] = $o('opt_tm_exp_2', 'q_tm_exp', 2, 'Pernah bekerja di startup', 'Worked in a startup', 'worked', null, null, 'exp_worked');
+        $opts[] = $o('opt_tm_exp_3', 'q_tm_exp', 3, 'Pernah membangun produk di startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
+        $opts[] = $o('opt_tm_exp_4', 'q_tm_exp', 4, 'Tidak ada pengalaman startup sebelumnya', 'No Prior startup experience', 'none', null, null, 'exp_none');
 
         // ── Founder: Looking For ──
         $opts[] = $o('opt_fdr_look_1', 'q_fdr_looking', 1, 'Co-Founder', 'Co-Founder', 'cofounder', 'Mencari partner untuk membangun bersama', 'Looking for a partner to build together', 'goal_cofounder');
@@ -1484,10 +1502,10 @@ class OnboardingSeeder extends Seeder
             $t('step_role_selection', ['question_id' => 'q_use_connectx', 'operator' => 'equals', 'value' => 'startup'], null, 'flow_startup', 10),
             $t('step_role_selection', null, null, 'flow_builder_common', 0),  // default: founder/cofounder/team all go to builder common
 
-            // ── step_bld_exp: branch by original role selection ──
-            $t('step_bld_exp', ['question_id' => 'q_bld_type', 'operator' => 'equals', 'value' => 'founder'], null, 'flow_founder', 10),
-            $t('step_bld_exp', ['question_id' => 'q_bld_type', 'operator' => 'equals', 'value' => 'cofounder'], null, 'flow_cofounder', 10),
-            $t('step_bld_exp', ['question_id' => 'q_bld_type', 'operator' => 'equals', 'value' => 'team'], null, 'flow_team', 10),
+            // ── step_bld_role: branch by original role selection ──
+            $t('step_bld_role', ['question_id' => 'q_bld_type', 'operator' => 'equals', 'value' => 'founder'], null, 'flow_founder', 10),
+            $t('step_bld_role', ['question_id' => 'q_bld_type', 'operator' => 'equals', 'value' => 'cofounder'], null, 'flow_cofounder', 10),
+            $t('step_bld_role', ['question_id' => 'q_bld_type', 'operator' => 'equals', 'value' => 'team'], null, 'flow_team', 10),
 
             // ── step_fdr_industry: branch by what founder is looking for ──
             $t('step_fdr_industry', ['question_id' => 'q_fdr_looking', 'operator' => 'equals', 'value' => 'cofounder'], null, 'flow_fdr_cf', 10),
