@@ -566,12 +566,8 @@ class OnboardingEngineService
         }
 
         // ── Startup Experience Level ──
-        $expQuestions = ['q_bld_exp_fdr', 'q_bld_exp_cf', 'q_bld_exp_tm'];
-        foreach ($expQuestions as $qid) {
-            if ($responses->has($qid)) {
-                $updateData['startup_experience'] = $this->getValue($responses[$qid]->value);
-                break;
-            }
+        if ($responses->has('q_bld_exp')) {
+            $updateData['startup_experience'] = $this->getValue($responses['q_bld_exp']->value);
         }
 
         // ── Co-Founder Type (for co-founder joining path) ──
