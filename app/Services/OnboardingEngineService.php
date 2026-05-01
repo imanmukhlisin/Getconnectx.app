@@ -166,10 +166,18 @@ class OnboardingEngineService
      * Akan melemparkan ValidationException jika ada yang tidak sesuai standar Frontend.
      * Pesan error dilokalisasi berdasarkan Accept-Language header (id/en).
      */
-    private function validateAnswersByStep(OnboardingStep $step, array $answers): void
+    private function validateAnswersByStep(OnboardingStep $step, array $answers, ?OnboardingSession $session = null): void
     {
         $errors = [];
         $locale = app()->getLocale();
+
+        // Load prior responses once (for cross-step depends_on lookups)
+        $priorResponses = null;
+        if ($session) {
+            $priorResponses = OnboardingResponse::where('session_id', $session->id)
+                ->get()
+                ->keyBy('question_id');
+        }
 
         foreach ($step->questions as $question) {
             $value = $answers[$question->id] ?? null;
@@ -183,7 +191,11 @@ class OnboardingEngineService
                 $depValue = $question->depends_on['value'] ?? null;
 
                 if ($depQuestionId) {
+                    // Check current step answers first, then fall back to prior session responses
                     $depAnswer = $answers[$depQuestionId] ?? null;
+                    if ($depAnswer === null && $priorResponses && isset($priorResponses[$depQuestionId])) {
+                        $depAnswer = $this->getValue($priorResponses[$depQuestionId]->value);
+                    }
                     $shouldShow = $this->evaluateDependsOn($depAnswer, $depOperator, $depValue);
                     if (!$shouldShow) {
                         continue; // Pertanyaan ini tersembunyi, skip validasi
@@ -275,8 +287,8 @@ class OnboardingEngineService
         // 0. Ambil current step dengan relasi questions (Cuma 1 Query)
         $currentStep = OnboardingStep::with('questions')->findOrFail($stepId);
 
-        // 1. Tembok Pengaman: Validasi input berdasarkan aturan pertanyaan (tanpa query DB lagi)
-        $this->validateAnswersByStep($currentStep, $answers);
+        // 1. Tembok Pengaman: Validasi input berdasarkan aturan pertanyaan
+        $this->validateAnswersByStep($currentStep, $answers, $session);
 
         // 2. Simpan jawaban (upsert per question_id agar tidak duplikat saat back-and-forth)
         foreach ($answers as $questionId => $value) {
@@ -547,8 +559,12 @@ class OnboardingEngineService
         }
 
         // ── Startup Experience Level ──
-        if ($responses->has('q_bld_exp')) {
-            $updateData['startup_experience'] = $this->getValue($responses['q_bld_exp']->value);
+        $expQuestions = ['q_bld_exp_fdr', 'q_bld_exp_cf', 'q_bld_exp_tm'];
+        foreach ($expQuestions as $qid) {
+            if ($responses->has($qid)) {
+                $updateData['startup_experience'] = $this->getValue($responses[$qid]->value);
+                break;
+            }
         }
 
         // ── Co-Founder Type (for co-founder joining path) ──
