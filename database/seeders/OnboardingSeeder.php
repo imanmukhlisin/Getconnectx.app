@@ -329,14 +329,38 @@ class OnboardingSeeder extends Seeder
         ];
 
         $masterCFTypes = [
-            ['Technical Co-Founder', 'tech', 'Saya membangun produk & teknologi', 'I build the product & tech', 'cofounder_technical'],
-            ['Product Co-Founder', 'product', 'Saya memimpin produk dan desain', 'I lead product & design', 'cofounder_product'],
-            ['Business Co-Founder', 'business', 'Saya menangani strategi dan operasional', 'I handle strategy & ops', 'cofounder_business'],
-            ['Growth Co-Founder', 'growth', 'Saya menggerakkan marketing dan growth', 'I drive marketing & growth', 'cofounder_growth'],
-            ['AI / Data Co-Founder', 'ai_data', 'Saya membangun AI, data & intelligence', 'I build AI, data & intelligence', 'cofounder_ai'],
-            ['Operations Co-Founder', 'operations', 'Saya mengeksekusi dan menskalakan operasional', 'I execute & scale operations', 'cofounder_operations'],
-            ['Finance Co-Founder', 'finance', 'Saya mengelola fundraising dan keuangan', 'I manage fundraising & finance', 'cofounder_finance'],
-            ['Partnerships Co-Founder', 'partnerships', 'Saya membangun deal dan partnership', 'I build deals & partnerships', 'cofounder_partnerships'],
+            ['Technical Co-Founder', 'tech', 
+                ['me' => 'Saya membangun produk & teknologi', 'need' => 'Rekayasa & arsitektur'], 
+                ['me' => 'I build the product & tech', 'need' => 'Engineering & architecture'], 
+                'cofounder_technical'],
+            ['Product Co-Founder', 'product', 
+                ['me' => 'Saya memimpin produk dan desain', 'need' => 'Visi produk & desain'], 
+                ['me' => 'I lead product & design', 'need' => 'Product vision & design'], 
+                'cofounder_product'],
+            ['Business Co-Founder', 'business', 
+                ['me' => 'Saya menangani strategi dan operasional', 'need' => 'Strategi & operasional'], 
+                ['me' => 'I handle strategy & ops', 'need' => 'Strategy & operations'], 
+                'cofounder_business'],
+            ['Growth Co-Founder', 'growth', 
+                ['me' => 'Saya menggerakkan marketing dan growth', 'need' => 'Marketing & distribusi'], 
+                ['me' => 'I drive marketing & growth', 'need' => 'Marketing & distribution'], 
+                'cofounder_growth'],
+            ['AI / Data Co-Founder', 'ai_data', 
+                ['me' => 'Saya membangun AI, data & intelligence', 'need' => 'Membangun AI, data & intelligence'], 
+                ['me' => 'I build AI, data & intelligence', 'need' => 'I build AI, data & intelligence'], 
+                'cofounder_ai'],
+            ['Operations Co-Founder', 'operations', 
+                ['me' => 'Saya mengeksekusi dan menskalakan operasional', 'need' => 'Mengeksekusi & menskalakan operasional'], 
+                ['me' => 'I execute & scale operations', 'need' => 'I execute & scale operations'], 
+                'cofounder_operations'],
+            ['Finance Co-Founder', 'finance', 
+                ['me' => 'Saya mengelola fundraising dan keuangan', 'need' => 'Fundraising & keuangan'], 
+                ['me' => 'I manage fundraising & finance', 'need' => 'Fundraising & finance'], 
+                'cofounder_finance'],
+            ['Partnerships Co-Founder', 'partnerships', 
+                ['me' => 'Saya membangun deal dan partnership', 'need' => 'Deal & partnership'], 
+                ['me' => 'I build deals & partnerships', 'need' => 'Deals & partnerships'], 
+                'cofounder_partnerships'],
         ];
 
         $masterBizModels = [
@@ -906,14 +930,17 @@ class OnboardingSeeder extends Seeder
         // Co-founder type options generator (reused in multiple questions)
         $genCFOpts = function (string $prefix, string $qid) use ($masterCFTypes, $now) {
             $opts = [];
+            $type = ($qid === 'q_cf_type') ? 'me' : 'need';
             foreach ($masterCFTypes as $i => [$label, $value, $subId, $subEn, $icon]) {
+                $finalSubId = is_array($subId) ? $subId[$type] : $subId;
+                $finalSubEn = is_array($subEn) ? $subEn[$type] : $subEn;
                 $opts[] = [
                     'id' => $prefix . '_' . ($i + 1),
                     'question_id' => $qid,
                     'order_index' => $i + 1,
                     'label' => json_encode(['id' => $label, 'en' => $label]),
                     'value' => $value,
-                    'sub_label' => json_encode(['id' => $subId, 'en' => $subEn]),
+                    'sub_label' => json_encode(['id' => $finalSubId, 'en' => $finalSubEn]),
                     'icon' => $icon,
                     'group_name' => null,
                     'created_at' => $now,
@@ -1016,7 +1043,7 @@ class OnboardingSeeder extends Seeder
             // ── CO-FOUNDER JOINING (8 steps) ──
             $s('step_cf_exp', 'flow_cofounder', 0, 'Profil Builder', 'Apakah Anda memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?', true, 'Lebih lanjut tentang diri Anda', 'More about yourself'),
             $s('step_cf_industry', 'flow_cofounder', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?'),
-            $s('step_cf_type', 'flow_cofounder', 2, 'Tipe Co-Founder', 'Kamu co-founder tipe apa?', 'What kind of co-founder are you?', true),
+            $s('step_cf_type', 'flow_cofounder', 2, 'Tipe Co-Founder', 'Kamu co-founder tipe apa?', 'What kind of co-founder are you?', false, 'Pilih semua yang sesuai', 'Select all that apply'),
             $s('step_cf_avail', 'flow_cofounder', 3, 'Ketersediaan', 'Availability apa yang kamu miliki?', 'What availability do you have?', true, 'Berapa tingkat komitmen yang bisa kamu berikan?', 'What commitment level can you offer?'),
             $s('step_cf_comp', 'flow_cofounder', 4, 'Ekspektasi Kompensasi', 'Bagaimana ekspektasimu untuk cash dan equity?', 'What are your cash & equity expectations?'),
             $s('step_cf_remote', 'flow_cofounder', 5, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
@@ -1128,7 +1155,7 @@ class OnboardingSeeder extends Seeder
 
             // ── CO-FOUNDER JOINING ──
             $q('q_cf_industry', 'step_cf_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5])]),
-            $q('q_cf_type', 'step_cf_type', 1, 'single_select_card', 'Kamu co-founder tipe apa?', 'What kind of co-founder are you?'),
+            $q('q_cf_type', 'step_cf_type', 1, 'multi_select_card', '', ''),
             $q('q_cf_avail', 'step_cf_avail', 1, 'single_select_card', '', ''),
             // Compensation
             $q('q_cf_equity', 'step_cf_comp', 1, 'single_select_card', 'Ekspektasi equity', 'Equity expectation'),
