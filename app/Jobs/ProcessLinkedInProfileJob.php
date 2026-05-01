@@ -55,43 +55,72 @@ class ProcessLinkedInProfileJob implements ShouldQueue
             return;
         }
 
-        // ── Step 1: Fetch Official LinkedIn API (OAuth 2.0) ─────────────────
-        $accessToken = env('API_OAUTH_LINKEDIN');
-        if (!$accessToken) {
-            Log::error("ProcessLinkedInProfileJob: API_OAUTH_LINKEDIN token is missing in .env.");
-            $this->fail(new \Exception("API_OAUTH_LINKEDIN is missing."));
+        // ── Step 1: Fetch Scrapin.io Dataset ─────────────────────────────────
+        $apiKey = env('SCRAPIN_API_KEY');
+        if (!$apiKey) {
+            Log::error("ProcessLinkedInProfileJob: SCRAPIN_API_KEY is missing.");
             return;
         }
 
-        $linkedInApi = app(\App\Services\LinkedInApiService::class);
-
-        try {
-            $profile     = $linkedInApi->fetchProfile($accessToken);
-            $experiences = $linkedInApi->fetchExperience($accessToken);
-            $educations  = $linkedInApi->fetchEducation($accessToken);
-            
-            Log::info("ProcessLinkedInProfileJob: Berhasil fetch data dari Official LinkedIn API.");
-        } catch (\Exception $e) {
-            Log::error("ProcessLinkedInProfileJob: Gagal fetch data dari Official LinkedIn API.", [
-                'error' => $e->getMessage()
+        $datasetUrl = "https://api.scrapin.io/enrichment/profile";
+        $response = Http::timeout(20)
+            ->get($datasetUrl, [
+                'linkedinUrl' => $this->linkedinUrl,
+                'apikey'      => $apiKey,
             ]);
-            $this->fail($e);
+
+        if (!$response->successful() || empty($response->json()) || isset($response->json()['error'])) {
+            Log::error("ProcessLinkedInProfileJob: Gagal baca atau kosong Scrapin.io Dataset.", [
+                'status' => $response->status(),
+                'body'   => $response->body()
+            ]);
+            $this->fail(new \Exception("Cannot fetch dataset from Scrapin.io."));
             return;
         }
 
-        // Simpan raw data untuk keperluan debugging/database
-        $personData = [
-            'profile'    => $profile,
-            'experience' => $experiences,
-            'education'  => $educations,
-        ];
+        $personData = $response->json()['person'] ?? null;
+        
+        if (!$personData) {
+            Log::error("ProcessLinkedInProfileJob: Array kosong dicoba dari dataset Scrapin.io.");
+            return;
+        }
+
+        // ── Step 2: Ekstrak Experience & Education ──────────────────────
+        // Normalisasi format experience
+        $rawExp = $personData['positions']['positionHistory'] ?? [];
+        $experiences = collect($rawExp)->take(3)->map(function ($item) {
+            $startYear = $item['startEndDate']['start']['year'] ?? '';
+            $endYear   = $item['startEndDate']['end']['year'] ?? 'Present';
+            $period    = trim("{$startYear} - {$endYear}", " -");
+
+            return [
+                'title'     => $item['title'] ?? null,
+                'company'   => $item['companyName'] ?? null,
+                'period'    => $period,
+                'isCurrent' => ($item['startEndDate']['end'] ?? null) === null,
+            ];
+        })->toArray();
+
+        // Normalisasi format education
+        $rawEdu = $personData['schools']['educationHistory'] ?? [];
+        $educations = collect($rawEdu)->map(function ($item) {
+            $startYear = $item['startEndDate']['start']['year'] ?? '';
+            $endYear   = $item['startEndDate']['end']['year'] ?? 'Present';
+            $period    = trim("{$startYear} - {$endYear}", " -");
+
+            return [
+                'degree' => $item['degreeName'] ?? null,
+                'school' => $item['schoolName'] ?? null,
+                'period' => $period,
+            ];
+        })->toArray();
 
         // ATURAN KETAT: jangan null.
         $experiences = is_array($experiences) ? $experiences : [];
         $educations  = is_array($educations)  ? $educations  : [];
 
         // ── Step 3: Generate biografi profesional via Gemini AI ───────
-        $headline = $profile['headline'] ?? ($user->position ?? '');
+        $headline = $personData['headline'] ?? ($user->position ?? '');
         $bio      = '';
 
         if (!empty($headline)) {
@@ -102,13 +131,15 @@ class ProcessLinkedInProfileJob implements ShouldQueue
         try {
             $updateData = [];
             
-            $fullName = $profile['full_name'] ?? '';
+            $firstName = $personData['firstName'] ?? '';
+            $lastName  = $personData['lastName'] ?? '';
+            $fullName  = trim("{$firstName} {$lastName}");
 
             if (!empty($fullName)) {
                 $updateData['name'] = $fullName;
             }
-            if (!empty($profile['avatar_url'])) {
-                $updateData['avatar_url'] = $profile['avatar_url'];
+            if (!empty($personData['photoUrl'])) {
+                $updateData['avatar_url'] = $personData['photoUrl'];
             }
             if (!empty($headline)) {
                 $updateData['position'] = $headline;
