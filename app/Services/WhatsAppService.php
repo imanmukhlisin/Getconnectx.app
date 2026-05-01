@@ -159,6 +159,12 @@ class WhatsAppService
             $formattedTo = '62' . substr($formattedTo, 1);
         }
 
+        \Illuminate\Support\Facades\Log::info("SAUNG_WA_PAYLOAD", [
+            'appkey' => $appKey,
+            'authkey' => $authKey,
+            'to' => $formattedTo,
+        ]);
+
         return Http::asMultipart()->post($url, [
             ['name' => 'appkey',  'contents' => $appKey],
             ['name' => 'authkey', 'contents' => $authKey],
@@ -171,6 +177,30 @@ class WhatsAppService
     private function buildMessage(string $code): string
     {
         $expiry = config('otp.expiry_minutes', 10);
-        return __('messages.wa_otp_message', ['code' => $code, 'expiry' => $expiry]);
+        $hour = (int) now()->timezone('Asia/Jakarta')->format('H');
+        
+        if ($hour >= 5 && $hour < 12) {
+            $greeting = 'Selamat Pagi / Good Morning';
+        } elseif ($hour >= 12 && $hour < 15) {
+            $greeting = 'Selamat Siang / Good Afternoon';
+        } elseif ($hour >= 15 && $hour < 18) {
+            $greeting = 'Selamat Sore / Good Evening';
+        } else {
+            $greeting = 'Selamat Malam / Good Night';
+        }
+
+        $messages = __('messages.wa_otp_messages');
+        if (!is_array($messages)) {
+            // Fallback just in case
+            return "Kode OTP Anda: {$code}. Berlaku {$expiry} menit.";
+        }
+
+        $randomTemplate = $messages[array_rand($messages)];
+
+        return str_replace(
+            [':greeting', ':code', ':expiry'],
+            [$greeting, $code, $expiry],
+            $randomTemplate
+        );
     }
 }

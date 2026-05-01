@@ -53,5 +53,16 @@ return [
     'val_provider_token_required' => 'Token dari provider OAuth wajib disertakan.',
     
     // WhatsApp Delivery Content
-    'wa_otp_message' => "Kode verifikasi ConnectX Anda adalah: *:code*\n\nBerlaku selama :expiry menit. Jangan bagikan kode ini kepada siapapun.",
+    'wa_otp_messages' => [
+        ":greeting! Selamat datang di ConnectX. Kode OTP Anda adalah: *:code*. Berlaku :expiry menit.",
+        "Halo, :greeting! Ini kode rahasia ConnectX Anda: *:code*. Jangan berikan ke siapa pun. Berlaku :expiry menit.",
+        ":greeting, ConnectXer! Masukkan kode OTP ini untuk melanjutkan: *:code*. Berlaku selama :expiry menit.",
+        "Hai! :greeting. Kode verifikasi akun ConnectX Anda: *:code*. Expired dalam :expiry menit.",
+        "Halo, :greeting! Anda selangkah lagi masuk ke ConnectX. Kode OTP Anda: *:code*. (Berlaku :expiry menit).",
+        ":greeting! Berikut adalah kode OTP ConnectX Anda: *:code*. Harap rahasikan kode ini. Berlaku :expiry menit.",
+        "Welcome to ConnectX! :greeting. Your verification code is: *:code*. Valid for :expiry minutes.",
+        ":greeting! Here is your ConnectX secret OTP: *:code*. Do not share this with anyone. Valid for :expiry minutes.",
+        "Hi, :greeting! Use this OTP to access your ConnectX account: *:code*. It expires in :expiry minutes.",
+        ":greeting from ConnectX! Your login code is: *:code*. Valid for :expiry minutes. Stay secure!",
+    ],
 ];
