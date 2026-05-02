@@ -1,0 +1,997 @@
+ID,Feature,Type,English Text,Indonesian Text,File Path,Notes / Context,Status,Revised English,Revised Indonesian,PIC
+  Onboarding,,,,,,,,,,Backend
+1,Onboarding,Heading,Find the right people to build with,Temukan orang yang tepat untuk membangun bersama,src/features/onboarding/mock/common-steps.ts,step_welcome title,INDO,v,Temukan orang yang tepat untuk membangun startupmu bersama ,Backend
+2,Onboarding,Subtitle,"ConnectX connects you with co-founders, teammates, and startups based on skills, goals, and compatibility.","ConnectX koneksikan kamu dengan co-founder, rekan tim, dan startup berdasarkan skill, tujuan, dan kecocokan.",src/features/onboarding/mock/common-steps.ts,step_welcome subtitle,INDO,v,v,Backend
+3,Onboarding,Button,Get Started,Mulai,src/features/onboarding/mock/common-steps.ts,step_welcome CTA,INDO,v,v,Backend
+4,Onboarding,Section,Let's get started,Mari mulai,src/features/onboarding/mock/common-steps.ts,step_welcome section,INDO,v,Yuk mulai,Backend
+5,Onboarding,Heading,Tell us about yourself,Ceritakan tentang dirimu,src/features/onboarding/mock/common-steps.ts,step_data_diri title,INDO,v,v,Backend
+6,Onboarding,Subtitle,The basics we need to personalize your connections,Data dasar yang kami butuhkan untuk mempersonalisasi koneksi kamu.,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+7,Onboarding,Section,Let's build your general profile,Mari bangun profil umum kamu,src/features/onboarding/mock/common-steps.ts,,INDO,v,Bangun profilmu dulu yah,Backend
+8,Onboarding,Label,First name,Nama depan,src/features/onboarding/mock/common-steps.ts,q_first_name label,INDO,v,v,Backend
+9,Onboarding,Placeholder,Your first name,Nama depan kamu,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+10,Onboarding,Label,Last name,Nama belakang,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+11,Onboarding,Placeholder,Your last name,Nama belakang kamu,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+12,Onboarding,Label,Date of birth,Tanggal lahir,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+13,Onboarding,Placeholder,YYYY-MM-DD,YYYY-MM-DD,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,Tahun-Bulan-tanggal,Backend
+14,Onboarding,Label,Where are you based?,Kamu berbasis di mana?,src/features/onboarding/mock/common-steps.ts,,INDO,v,Kamu sedang tinggal dimana?,Backend
+15,Onboarding,Placeholder,Search a city,Cari kota,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+16,Onboarding,Label,Gender,Gender,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,Kelamin,Backend
+17,Onboarding,Heading,How do you want to use ConnectX?,Bagaimana kamu ingin menggunakan ConnectX?,src/features/onboarding/mock/common-steps.ts,step_use_connectx title,INDO,v,Kamu mau pakai ConnectX buat apa?,Backend
+18,Onboarding,Subtitle,This shapes your entire experience,Ini akan membentuk seluruh pengalamanmu,src/features/onboarding/mock/common-steps.ts,,INDO,v,Ini bakal nentuin pengalaman kamu di sini.,Backend
+19,Onboarding,Option,I'm a Builder,Saya seorang Builder,src/features/onboarding/mock/common-steps.ts,useConnectxOptions - Builder,INDO,v,Aku seorang builder,Backend
+20,Onboarding,Sub-option,"Founder, co-founder, or team member","Founder, co-founder, atau anggota tim",src/features/onboarding/mock/common-steps.ts,,INDO,v,"Founder, co-founder atau sebagai tim",Backend
+21,Onboarding,Option,I represent a Startup,Saya mewakili Startup,src/features/onboarding/mock/common-steps.ts,useConnectxOptions - Startup,INDO,v, mewakili sebuah startup,Backend
+22,Onboarding,Sub-option,Building a team or hiring co-founders,Sedang membangun tim atau mencari co-founder,src/features/onboarding/mock/common-steps.ts,,INDO,v,sedang bangun tim atau cari co-founder,Backend
+23,Onboarding,Heading,What best describes you?,Apa yang paling menggambarkanmu?,src/features/onboarding/mock/common-steps.ts,builderIdentityDetailsStep title,INDO,v,Tolong diskirpsikan dirimu,Backend
+24,Onboarding,Subtitle,This determines what you'll see in your feed,Ini menentukan apa yang akan muncul di feed-mu,src/features/onboarding/mock/common-steps.ts,,INDO,v,ini akan menentukan apa yang akan muncul di feed-mu,Backend
+25,Onboarding,Option,Founder,Founder,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,founder,Backend
+26,Onboarding,Sub-option,I'm building something and looking for people,Saya sedang membangun sesuatu dan mencari orang,src/features/onboarding/mock/common-steps.ts,,INDO,"ini part mana ya ? (mending lngsung kayak mockup) 
+
+How do you want to use ConnectX?
+This shapes your entire experience
+
+
+I'm a Builder
+
+Founder, co-founder, or team member
+
+
+I represent a Startup
+
+Building a team or hiring co-founders
+
+",,Backend
+27,Onboarding,Option,Co-Founder,Co-Founder,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+28,Onboarding,Sub-option,I want to join a startup as a co-founder,Saya ingin bergabung sebagai co-founder,src/features/onboarding/mock/common-steps.ts,,INDO," ini part mana ya ? (mending lngsung kayak mockup) 
+
+How do you want to use ConnectX?
+This shapes your entire experience
+
+
+I'm a Builder
+
+Founder, co-founder, or team member
+
+
+I represent a Startup
+
+Building a team or hiring co-founders
+
+",,Backend
+29,Onboarding,Option,Team Member,Anggota Tim,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+30,Onboarding,Sub-option,I want to join a startup team,Saya ingin bergabung di tim startup,src/features/onboarding/mock/common-steps.ts,,INDO,"ini part mana ya ? (mending lngsung kayak mockup) 
+
+How do you want to use ConnectX?
+This shapes your entire experience
+
+
+I'm a Builder
+
+Founder, co-founder, or team member
+
+
+I represent a Startup
+
+Building a team or hiring co-founders
+
+",,Backend
+31,Onboarding,Heading,What are you looking for?,Apa yang sedang kamu cari?,src/features/onboarding/mock/common-steps.ts,founderGoalStep title,INDO,v,v,Backend
+32,Onboarding,Subtitle,Pick the most urgent hiring need for your startup,Pilih kebutuhan rekrutmen yang paling mendesak untuk startupmu,src/features/onboarding/mock/common-steps.ts,,INDO,v,Pilih kebutuhan tim paling urgent untuk startup kamu,Backend
+33,Onboarding,Option,Co-Founder,Co-Founder,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+34,Onboarding,Sub-option,Find someone to build with from day one,Temukan partner untuk membangun bersama sejak awal,src/features/onboarding/mock/common-steps.ts,,INDO,v,Cari orang buat bangun bareng startupmu dari hari pertama,Backend
+35,Onboarding,Option,Team Members,Anggota Tim,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+36,Onboarding,Sub-option,Recruit early members for your startup,Rekrut anggota awal untuk startupmu,src/features/onboarding/mock/common-steps.ts,,INDO,v,Rekrut tim awal untuk startup kamu,Backend
+37,Onboarding,Option,Both,Keduanya,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+38,Onboarding,Sub-option,I'm open to co-founders and team members,Saya terbuka untuk co-founder dan anggota tim,src/features/onboarding/mock/common-steps.ts,,INDO,v,terbuka untuk co-founder dan anggota tim,Backend
+39,Onboarding,Heading,What kind of co-founder do you need?,Co-founder seperti apa yang kamu butuhkan?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+40,Onboarding,Subtitle,Select all that apply,Pilih semua yang sesuai,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+41,Onboarding,Option,Technical Co-Founder,Co-Founder Teknis,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+42,Onboarding,Sub-option,Engineering & architecture,Engineering & arsitektur,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+43,Onboarding,Option,Business Co-Founder,Co-Founder Bisnis,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+44,Onboarding,Sub-option,Strategy & operations,Strategi & operasional,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+45,Onboarding,Option,Product Co-Founder,Co-Founder Produk,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+46,Onboarding,Sub-option,Product vision & design,Visi produk & desain,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+47,Onboarding,Option,Growth Co-Founder,Co-Founder Growth,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+48,Onboarding,Sub-option,Marketing & distribution,Marketing & distribusi,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+49,Onboarding,Option,AI / Data Co-Founder,Co-Founder AI / Data,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+50,Onboarding,Sub-option,AI systems & data intelligence,Sistem AI & data intelligence,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+51,Onboarding,Option,Operations Co-Founder,Co-Founder Operasional,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+52,Onboarding,Sub-option,Execution & scaling operations,Eksekusi & scaling operasional,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+53,Onboarding,Option,Finance Co-Founder,Co-Founder Keuangan,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+54,Onboarding,Sub-option,Fundraising & financial strategy,Fundraising & strategi keuangan,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+55,Onboarding,Option,Partnerships Co-Founder,Co-Founder Partnership,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+56,Onboarding,Sub-option,Strategic partnerships & business growth,Partnership strategis & pertumbuhan bisnis,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+57,Onboarding,Heading,What type of co-founder are you?,Kamu co-founder tipe apa?,src/features/onboarding/mock/common-steps.ts,,INDO,v,Kamu tipe co-founder yang seperti apa?,Backend
+58,Onboarding,Subtitle,Pick the area you can own from day one.,Pilih area yang bisa kamu pegang dari hari pertama.,src/features/onboarding/mock/common-steps.ts,,INDO,v,Pilih peran yang bisa kamu kerjakan dari awal,Backend
+59,Onboarding,Section,Your co-founder specialty,Spesialisasi co-founder kamu,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+60,Onboarding,Option,Technical Co-Founder,Co-Founder Teknis,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+61,Onboarding,Sub-option,I build the product & tech,Saya membangun produk & teknologi,src/features/onboarding/mock/common-steps.ts,,INDO,v,Aku membangun produk & teknologi,Backend
+62,Onboarding,Option,Product Co-Founder,Co-Founder Produk,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+63,Onboarding,Sub-option,I lead product & design,Saya memimpin produk & desain,src/features/onboarding/mock/common-steps.ts,,INDO,v,aku memimpin produk & Desain ,Backend
+64,Onboarding,Option,Business Co-Founder,Co-Founder Bisnis,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+65,Onboarding,Sub-option,I handle strategy & ops,Saya menangani strategi & operasional,src/features/onboarding/mock/common-steps.ts,,INDO,v,Aku menangani strategi & operasional,Backend
+66,Onboarding,Option,Growth Co-Founder,Co-Founder Growth,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+67,Onboarding,Sub-option,I drive marketing & growth,Saya menggerakkan marketing & growth,src/features/onboarding/mock/common-steps.ts,,INDO,v,Aku menggerakkan marketing & growth,Backend
+68,Onboarding,Option,AI / Data Co-Founder,Co-Founder AI / Data,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+69,Onboarding,Sub-option,"I build AI, data & intelligence","Saya membangun AI, data & intelligence",src/features/onboarding/mock/common-steps.ts,,INDO,v,"Aku membangun AI, data & intelligence",Backend
+70,Onboarding,Option,Operations Co-Founder,Co-Founder Operasional,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+71,Onboarding,Sub-option,I execute & scale operations,Saya mengeksekusi & menskalakan operasional,src/features/onboarding/mock/common-steps.ts,,INDO,v,Aku mengeksekusi & menskalakan operasional,Backend
+72,Onboarding,Option,Finance Co-Founder,Co-Founder Keuangan,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+73,Onboarding,Sub-option,I manage fundraising & finance,Saya mengelola fundraising & keuangan,src/features/onboarding/mock/common-steps.ts,,INDO,v,Aku mengelola fundraising & keuangan,Backend
+74,Onboarding,Option,Partnerships Co-Founder,Co-Founder Partnership,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+75,Onboarding,Sub-option,I build deals & partnerships,Saya membangun deal & partnership,src/features/onboarding/mock/common-steps.ts,,INDO,v,Aku membangun deal & partnership,Backend
+76,Onboarding,Heading,What roles do you need?,Peran apa yang kamu butuhkan?,src/features/onboarding/mock/common-steps.ts,,INDO,v,peran apa yang saat ini kamu butuhkan?,Backend
+77,Onboarding,Subtitle,Pick the roles you want to add to your team.,Pilih peran yang ingin kamu tambahkan ke tim.,src/features/onboarding/mock/common-steps.ts,,INDO,v,Pilih role yang mau kamu tambahin ke tim kamu,Backend
+78,Onboarding,Section,Who you are hiring,Siapa yang kamu cari,src/features/onboarding/mock/common-steps.ts,,INDO,v,Siapa yang lagi kamu cari?,Backend
+79,Onboarding,Placeholder,Search roles,Cari peran,src/features/onboarding/mock/common-steps.ts,,INDO,v,cari role,Backend
+80,Onboarding,Heading,Tell us about your startup,Ceritakan tentang startupmu,src/features/onboarding/mock/common-steps.ts,,INDO,v,Ceritakan tentang startup kamu secara singkat,Backend
+81,Onboarding,Subtitle,Give us a quick introduction to your company.,Kenalkan kami dengan startupmu secara singkat.,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+82,Onboarding,Section,Startup basics,Data dasar startup,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+83,Onboarding,Label,What's your startup called?,Apa nama startupmu?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+84,Onboarding,Placeholder,Startup name,Nama startup,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+85,Onboarding,Label,Tagline,Tagline,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+86,Onboarding,Placeholder,e.g. The fastest way to find co-founders,mis. Cara tercepat mencari co-founder,src/features/onboarding/mock/common-steps.ts,,INDO,v,cont: Cara paling cepat buat cari co-founder,Backend
+87,Onboarding,Label,Stage,Tahap,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+88,Onboarding,Option,Idea,Ide,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+89,Onboarding,Option,MVP,MVP,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+90,Onboarding,Option,Live,Sudah Launching,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+91,Onboarding,Option,Scale (Seed / Series A),Scale (Seed / Series A),src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+92,Onboarding,Heading,What are you building?,Apa yang sedang kamu bangun?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+93,Onboarding,Section,Your vision,Visi kamu,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+94,Onboarding,Label,Problem you're solving,Masalah yang kamu selesaikan,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+95,Onboarding,Placeholder,"Who hurts, and why?","Siapa yang kesulitan, dan kenapa?",src/features/onboarding/mock/common-steps.ts,,INDO,ini part mana ya ? kayaknya aku gk pernah nulis ini,Siapa yang merasakan kesusahannya dan kenapa?,Backend
+96,Onboarding,Label,Your solution,Solusimu,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+97,Onboarding,Placeholder,How does your product solve it?,Bagaimana produkmu menyelesaikannya?,src/features/onboarding/mock/common-steps.ts,,INDO,v,Bagaimana produkmu bisa mengatasi masalah ini?,Backend
+98,Onboarding,Label,Target users,Target pengguna,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+99,Onboarding,Placeholder,Describe the people you are building for,Siapa target penggunamu?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+100,Onboarding,Heading,Which industries are you in?,Industri apa yang kamu geluti?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+101,Onboarding,Section,Your industry,Industri kamu,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+102,Onboarding,Subtitle,Pick up to 5 industries that describe your startup.,Pilih hingga 5 industri yang menggambarkan startupmu.,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+103,Onboarding,Placeholder,Search industries,Cari industri,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+104,Onboarding,Heading,What's your business model?,Apa model bisnismu?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+105,Onboarding,Section,Business model,Model bisnis,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+106,Onboarding,Subtitle,Pick the model that best describes how you make money.,Pilih model yang paling menggambarkan cara kamu menghasilkan pendapatan.,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+107,Onboarding,Placeholder,Search a business model,Cari model bisnis,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+108,Onboarding,Heading,Your traction so far,Traction kamu sejauh ini,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+109,Onboarding,Section,Traction & milestones,Traction & milestones,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+110,Onboarding,Label,Do you have a prototype?,Apakah kamu punya prototipe?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+111,Onboarding,Option,Yes,Ya,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+112,Onboarding,Option,No,Tidak,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+113,Onboarding,Label,Prototype link,Link prototipe,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+114,Onboarding,Placeholder,https://figma.com/...,https://figma.com/...,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+115,Onboarding,Label,Waitlist size,Ukuran waitlist,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+116,Onboarding,Label,Validation so far,Validasi sejauh ini,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+117,Onboarding,Placeholder,"Interviews, surveys, landing page tests...","Wawancara, survei, landing page...",src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+118,Onboarding,Label,Users,Pengguna,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+119,Onboarding,Label,Monthly active users,Monthly active users,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+120,Onboarding,Label,Revenue (if any),Pendapatan (jika ada),src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+121,Onboarding,Placeholder,e.g. $500 MRR,misalnya $500 MRR,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+122,Onboarding,Label,Growth rate,Growth rate,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+123,Onboarding,Placeholder,e.g. 20% MoM,misalnya 20% MoM,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+124,Onboarding,Label,MRR,MRR,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+125,Onboarding,Placeholder,"e.g. $5,000","misalnya $5,000",src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+126,Onboarding,Label,Users / customers,Pengguna / pelanggan,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+127,Onboarding,Label,Retention,Retention,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+128,Onboarding,Placeholder,e.g. 80% 3-month retention,misalnya retensi 80% di bulan ke-3,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+129,Onboarding,Label,"Key metrics (GMV, etc.)","Metrik utama (GMV, dll.)",src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+130,Onboarding,Placeholder,Anything else worth highlighting?,Hal lain yang penting disorot?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+131,Onboarding,Label,Funding raised,Pendanaan,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+132,Onboarding,Placeholder,e.g. $2M seed,misalnya $2M seed,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+133,Onboarding,Label,Investors (optional),Investor (opsional),src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+134,Onboarding,Placeholder,"e.g. East Ventures, Alpha JWC","misalnya East Ventures, Alpha JWC",src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+135,Onboarding,Label,Team size,Ukuran tim,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+136,Onboarding,Label,Revenue / ARR,Pendapatan / ARR,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+137,Onboarding,Placeholder,e.g. $1.2M ARR,misalnya $1.2M ARR,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+138,Onboarding,Heading,Where can people find you?,Di mana orang bisa menemukanmu?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+139,Onboarding,Section,Online presence,Online presence,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+140,Onboarding,Label,Website,Website,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+141,Onboarding,Placeholder,https://yourstartup.com,https://startupkamu.com,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+142,Onboarding,Label,LinkedIn,LinkedIn,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+143,Onboarding,Placeholder,https://linkedin.com/company/...,https://linkedin.com/company/...,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+144,Onboarding,Label,Twitter / X,Twitter / X,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+145,Onboarding,Label,Instagram,Instagram,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+146,Onboarding,Label,Pitch deck,Pitch deck,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+147,Onboarding,Helper,"Optional, your pitch deck ","Opsional, tapi founder lain suka lihat deck kamu.",src/features/onboarding/mock/common-steps.ts,,INDO,v,"Opsional, bisa share pitch deck kamu",Backend
+148,Onboarding,Placeholder,https://pitch.com/...,https://pitch.com/...,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+149,Onboarding,Heading,How many founders are you?,Berapa jumlah foundermu?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+150,Onboarding,Section,Founder setup,Setup founder,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+151,Onboarding,Option,Solo Founder,Solo Founder,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+152,Onboarding,Sub-option,It's just me for now,Baru saya sendiri,src/features/onboarding/mock/common-steps.ts,,INDO,v,Aku saja,Backend
+153,Onboarding,Option,2 Founders,2 Founder,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+154,Onboarding,Sub-option,Me and one co-founder,Saya dan satu co-founder,src/features/onboarding/mock/common-steps.ts,,INDO,v,Aku dan satu co-founder,Backend
+155,Onboarding,Option,3+ Founders,3+ Founder,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+156,Onboarding,Sub-option,Three or more co-founders,Tiga atau lebih co-founder,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+157,Onboarding,Label,What roles are already covered?,Peran apa yang sudah ada?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+158,Onboarding,Option,Technical,Teknis,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+159,Onboarding,Option,Product,Produk,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+160,Onboarding,Option,Business,Bisnis,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+161,Onboarding,Option,Growth,Growth,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+162,Onboarding,Option,Operations,Operasional,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+163,Onboarding,Option,Finance,Keuangan,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+164,Onboarding,Option,Design,Design,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+165,Onboarding,Option,Other,Lainnya,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+166,Onboarding,Heading,Do you have a team beyond founders?,Apakah kamu punya tim di luar founder?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+167,Onboarding,Section,Team presence,Status tim,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+168,Onboarding,Option,Yes,Ya,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+169,Onboarding,Option,No,Tidak,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+170,Onboarding,Label,Team size,Ukuran tim,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+171,Onboarding,Option,1 to 3,1 sampai 3,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+172,Onboarding,Sub-option,Tight early team,Tim awal yang ramping,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+173,Onboarding,Option,4 to 10,4 sampai 10,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+174,Onboarding,Sub-option,Small but growing,Kecil tapi berkembang,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+175,Onboarding,Option,10+,10+,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+176,Onboarding,Sub-option,Already a real team,Sudah tim yang solid,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+177,Onboarding,Label,Team roles,Peran tim,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+178,Onboarding,Option,Engineering,Engineering,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+179,Onboarding,Option,Marketing,Marketing,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+180,Onboarding,Option,Sales,Sales,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+181,Onboarding,Option,Operations,Operasional,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+182,Onboarding,Option,Design,Design,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+183,Onboarding,Option,Finance,Keuangan,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+184,Onboarding,Option,Other,Lainnya,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+185,Onboarding,Heading,What skills are you missing?,Skill apa yang belum kamu punya?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+186,Onboarding,Section,Skills you need,Skill yang kamu butuhkan,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+187,Onboarding,Placeholder,Search skills,Cari skill,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+188,Onboarding,Heading,Are you open to working remotely?,Apakah kamu terbuka untuk kerja remote?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+189,Onboarding,Section,Work preferences,Preferensi kerja,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+190,Onboarding,Option,Yes,Ya,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+191,Onboarding,Option,No,Tidak,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+192,Onboarding,Heading,Are you willing to relocate?,Apakah kamu bersedia relokasi?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+193,Onboarding,Option,"Yes, if the fit is right","Ya, jika cocok",src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+194,Onboarding,Option,Maybe for the right role,Mungkin untuk peran yang tepat,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+195,Onboarding,Option,"No, I want to stay put","Tidak, saya ingin tetap di lokasi sekarang",src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+196,Onboarding,Heading,How much startup experience do you have?,Seberapa besar pengalaman startupmu?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+197,Onboarding,Section,Let's build your talent profile,Mari bangun profil talentamu,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+198,Onboarding,Option,Founded a startup,Pernah mendirikan startup,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+199,Onboarding,Sub-option,I started a company from scratch,Saya memulai perusahaan dari nol,src/features/onboarding/mock/common-steps.ts,,INDO,v,Mulai perusahaan dari nol,Backend
+200,Onboarding,Option,Built products at a startup,Pernah membangun produk di startup,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+201,Onboarding,Sub-option,I shipped real products inside a startup,Saya pernah merilis produk nyata di dalam startup,src/features/onboarding/mock/common-steps.ts,,INDO,v, pernah lauching produk startup,Backend
+202,Onboarding,Option,Worked in a startup team,Pernah bekerja di tim startup,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+203,Onboarding,Sub-option,I contributed to a startup team before,Saya pernah berkontribusi di tim startup,src/features/onboarding/mock/common-steps.ts,,INDO,v,pernah kontribusi di startup sebagai tim,Backend
+204,Onboarding,Option,New to startups,Baru di dunia startup,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+205,Onboarding,Sub-option,No direct startup experience yet,Belum punya pengalaman startup langsung,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+206,Onboarding,Heading,What industries interest you?,Industri apa yang menarik minatmu?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+207,Onboarding,Section,How and where you work,Bagaimana dan di mana kamu bekerja,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+208,Onboarding,Subtitle,Pick up to 5 industries to shape your feed.,Pilih hingga 5 industri untuk membentuk feed kamu.,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+209,Onboarding,Placeholder,Search industries,Cari industri,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+210,Onboarding,Heading,What availability do you expect?,Availability seperti apa yang kamu harapkan?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+211,Onboarding,Section,Work preferences,Preferensi kerja,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+212,Onboarding,Option,Full-time,Full-time,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+213,Onboarding,Sub-option,Candidates must be fully committed,Kandidat harus berkomitmen penuh,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+214,Onboarding,Option,Part-time,Part-time,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+215,Onboarding,Sub-option,Open to candidates with other commitments,Terbuka untuk kandidat dengan komitmen lain,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+216,Onboarding,Option,Flexible / Hybrid,Fleksibel / Hybrid,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+217,Onboarding,Sub-option,Open to discuss arrangement,Terbuka untuk diskusi pengaturan,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+218,Onboarding,Heading,Which role best describes you primarily?,Peran mana yang paling menggambarkanmu saat ini?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+219,Onboarding,Label,Select your primary role,Pilih peran utama kamu,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+220,Onboarding,Placeholder,Search your primary role,Cari peran utama kamu,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+221,Onboarding,Label,Years of experience,Jumlah tahun pengalaman,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+222,Onboarding,Placeholder,3,3,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+223,Onboarding,Heading,What skills do you have?,Skill apa yang kamu miliki?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+224,Onboarding,Section,Your skills,Skill kamu,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+225,Onboarding,Placeholder,Search skills,Cari skill,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+226,Onboarding,Heading,Your compensation,Ekspektasi kompensasi,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+227,Onboarding,Section,Compensation expectations,Ekspektasi kompensasi,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+228,Onboarding,Label,What's your cash-equity expectation?,Bagaimana ekspektasimu untuk cash dan equity?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+229,Onboarding,Option,Equity is very important,Equity sangat penting,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+230,Onboarding,Option,Interested in some equity,Tertarik dengan sebagian equity,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+231,Onboarding,Option,Cash-heavy compensation,Kompensasi berat di cash,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+232,Onboarding,Label,Do you have an expected minimum salary?,Apakah kamu punya ekspektasi minimum gaji?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+233,Onboarding,Option,"Yes, I do have a strict one","Ya, saya punya minimum yang tegas",src/features/onboarding/mock/common-steps.ts,,INDO,v,"ya, aku ada ekspetasi gaji dengan nominal tertentu",Backend
+234,Onboarding,Option,"Yes, though I may go lower depending on the opportunity","Ya, tapi saya bisa turun tergantung peluang",src/features/onboarding/mock/common-steps.ts,,INDO,v,ya tapi nominal gaji bisa dinegosiasikan tergantung peluang,Backend
+235,Onboarding,Option,"No, I'm flexible on my salary","Tidak, saya fleksibel soal gaji",src/features/onboarding/mock/common-steps.ts,,INDO,v,"tidak, gajiku fleksible ",Backend
+236,Onboarding,Label,What minimum salary are you looking for?,Berapa minimum gaji yang kamu harapkan?,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+237,Onboarding,Option,Annual,Tahunan,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+238,Onboarding,Option,Hourly,Per jam,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+239,Onboarding,Label,Currency,Currency,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+240,Onboarding,Label,Amount,Amount,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,nominal,Backend
+241,Onboarding,Option,IDR,IDR,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+242,Onboarding,Option,USD,USD,src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+243,Onboarding,Option,(pick other currency),(pilih mata uang lain),src/features/onboarding/mock/common-steps.ts,,NOT INDO,v,v,Backend
+244,Onboarding,Heading,Last step. Connect your LinkedIn,Langkah terakhir. Koneksikan LinkedIn-mu,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+245,Onboarding,Section,Finish up,Penutup,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+246,Onboarding,Label,LinkedIn URL,URL LinkedIn,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+247,Onboarding,Placeholder,https://linkedin.com/in/your-name,https://linkedin.com/in/namamu,src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+248,Onboarding,Helper,"We'll automatically fetch your experience, skills, and photo from LinkedIn so you can edit them next.","Kami akan otomatis mengambil pengalaman, skill, dan foto dari LinkedIn. Kamu bisa edit setelahnya.",src/features/onboarding/mock/common-steps.ts,,INDO,v,v,Backend
+249,Onboarding,Button,Finish,Selesai,src/features/onboarding/mock/common-steps.ts,credibility CTA,INDO,v,v,Backend
+250,Onboarding,Button,Continue,Lanjut,src/features/onboarding/mock/common-steps.ts,common CTA,INDO,v,v,Backend
+  Industries,,,,,,,,,,
+251,Industries,Option,AI,AI,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+252,Industries,Option,Generative Tech/AI,Generative Tech/AI,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+253,Industries,Option,DeepTech,DeepTech,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+254,Industries,Option,AR/VR,AR/VR,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+255,Industries,Option,IoT,IoT,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+256,Industries,Option,Robotics,Robotics,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+257,Industries,Option,Semiconductors,Semiconductors,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+258,Industries,Option,Cloud Infrastructure,Cloud Infrastructure,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+259,Industries,Option,Developer Tools,Developer Tools,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+260,Industries,Option,Security,Security,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+261,Industries,Option,Data Services,Data Services,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+262,Industries,Option,Analytics,Analytics,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+263,Industries,Option,SaaS,SaaS,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+264,Industries,Option,SMB Software,SMB Software,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+265,Industries,Option,Productivity Tools,Productivity Tools,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+266,Industries,Option,Sales & CRM,Sales & CRM,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+267,Industries,Option,Enterprise,Enterprise,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+268,Industries,Option,Messaging,Messaging,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+269,Industries,Option,Social Networks,Social Networks,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+270,Industries,Option,E-commerce,E-commerce,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+271,Industries,Option,Marketplaces,Marketplaces,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+272,Industries,Option,Direct-to-Consumer (DTC),Direct-to-Consumer (DTC),src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+273,Industries,Option,Retail,Retail,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+274,Industries,Option,Fashion,Fashion,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+275,Industries,Option,Cosmetics,Cosmetics,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+276,Industries,Option,Food and Beverage,Food and Beverage,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+277,Industries,Option,Creator/Passion Economy,Creator/Passion Economy,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+278,Industries,Option,FinTech,FinTech,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+279,Industries,Option,Payments,Payments,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+280,Industries,Option,Insurance,Insurance,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+281,Industries,Option,LegalTech,LegalTech,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+282,Industries,Option,Human Capital/HRTech,Human Capital/HRTech,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+283,Industries,Option,Healthcare,Healthcare,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+284,Industries,Option,Medical Devices,Medical Devices,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+285,Industries,Option,Pharmaceuticals,Pharmaceuticals,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+286,Industries,Option,Education,Education,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+287,Industries,Option,EnergyTech,EnergyTech,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+288,Industries,Option,ClimateTech/CleanTech,ClimateTech/CleanTech,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+289,Industries,Option,AgTech,AgTech,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+290,Industries,Option,ConstructionTech,ConstructionTech,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+291,Industries,Option,Manufacturing,Manufacturing,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+292,Industries,Option,Logistics,Logistics,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+293,Industries,Option,Supply Chain Tech,Supply Chain Tech,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+294,Industries,Option,TransportationTech,TransportationTech,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+295,Industries,Option,Real Estate/PropTech,Real Estate/PropTech,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+296,Industries,Option,GovTech,GovTech,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+297,Industries,Option,Gaming,Gaming,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+298,Industries,Option,Entertainment & Sports,Entertainment & Sports,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+299,Industries,Option,Media/Content,Media/Content,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+300,Industries,Option,Travel,Travel,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+301,Industries,Option,Lodging/Hospitality,Lodging/Hospitality,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+302,Industries,Option,Wellness & Fitness,Wellness & Fitness,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+303,Industries,Option,Mental Health,Mental Health,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+304,Industries,Option,Parenting/Families,Parenting/Families,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+305,Industries,Option,Web3/Blockchain,Web3/Blockchain,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+306,Industries,Option,Space,Space,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+307,Industries,Option,Smart Cities/UrbanTech,Smart Cities/UrbanTech,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+308,Industries,Option,Future of Work,Future of Work,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+309,Industries,Option,Gig Economy,Gig Economy,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+310,Industries,Option,Social Impact,Social Impact,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+311,Industries,Option,Hardware,Hardware,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+312,Industries,Option,Material Science,Material Science,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+313,Industries,Group,Core Technology,Teknologi Inti,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+314,Industries,Group,Software & Digital Products,Software & Produk Digital,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+315,Industries,Group,Consumer & Marketplace,Konsumen & Marketplace,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+316,Industries,Group,Finance & Business Infrastructure,Keuangan & Infrastruktur Bisnis,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+317,Industries,Group,Industry-Specific Solutions,Solusi Spesifik Industri,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+318,Industries,Group,"Media, Lifestyle & Experience","Media, Gaya Hidup & Pengalaman",src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+319,Industries,Group,Emerging & Future,Emerging & Masa Depan,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+  Roles,,,,,,,,,,
+320,Roles,Group,"Engineering, IT & Technical","Engineering, IT & Teknis",src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+321,Roles,Group,"Construction, Property & Engineering","Konstruksi, Properti & Engineering",src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+322,Roles,Group,F&B (Food & Beverage),F&B (Food & Beverage),src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+323,Roles,Group,Design & Creative,Desain & Kreatif,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+324,Roles,Group,Marketing & Growth,Marketing & Growth,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+325,Roles,Group,"Sales, Business Dev & Partnerships","Sales, BD & Partnership",src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+326,Roles,Group,Operations & Supply Chain,Operasional & Supply Chain,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+327,Roles,Group,"Finance, Investment & Legal","Finance, Investasi & Legal",src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+328,Roles,Group,"Data, AI & Analytics","Data, AI & Analitik",src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+329,Roles,Group,"Media, Content & Entertainment","Media, Konten & Hiburan",src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+330,Roles,Group,"HR, Talent & People","HR, Talent & People",src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+331,Roles,Group,Emerging & Specialized,Emerging & Spesialisasi,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+"  Cities (harusnya dimasukkan semua kota di seluruh dunia, dan negara karna ini wajib text dan muncul kota contoh Bandung, Indonesia)",,,,,,,,,,
+332,Cities,Option,"Jakarta, Indonesia","Jakarta, Indonesia",src/features/onboarding/mock/catalogs.ts,,NOT INDO,,,
+333,Cities,Group,Indonesia,Indonesia,src/features/onboarding/mock/catalogs.ts,,NOT INDO,,,
+334,Cities,Option,"Bandung, Indonesia","Bandung, Indonesia",src/features/onboarding/mock/catalogs.ts,,NOT INDO,,,
+335,Cities,Group,Indonesia,Indonesia,src/features/onboarding/mock/catalogs.ts,,NOT INDO,,,
+336,Cities,Option,"Yogyakarta, Indonesia","Yogyakarta, Indonesia",src/features/onboarding/mock/catalogs.ts,,NOT INDO,,,
+337,Cities,Group,Indonesia,Indonesia,src/features/onboarding/mock/catalogs.ts,,NOT INDO,,,
+338,Cities,Option,"Singapore, Singapore","Singapura, Singapura",src/features/onboarding/mock/catalogs.ts,,INDO,,,
+339,Cities,Group,Singapore,Singapura,src/features/onboarding/mock/catalogs.ts,,INDO,,,
+340,Cities,Option,"Bangalore, India","Bangalore, India",src/features/onboarding/mock/catalogs.ts,,NOT INDO,,,
+341,Cities,Group,India,India,src/features/onboarding/mock/catalogs.ts,,NOT INDO,,,
+342,Cities,Option,"Ho Chi Minh City, Vietnam","Ho Chi Minh City, Vietnam",src/features/onboarding/mock/catalogs.ts,,NOT INDO,,,
+343,Cities,Group,Vietnam,Vietnam,src/features/onboarding/mock/catalogs.ts,,NOT INDO,,,
+344,Cities,Option,"Dubai, United Arab Emirates","Dubai, Uni Emirat Arab",src/features/onboarding/mock/catalogs.ts,,INDO,,,
+345,Cities,Group,United Arab Emirates,Uni Emirat Arab,src/features/onboarding/mock/catalogs.ts,,INDO,,,
+  Business Models,,,,,,,,,,
+346,Business Models,Group,Digital & Software,Digital & Software,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+347,Business Models,Group,Financial & Transactional,Finansial & Transaksional,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+348,Business Models,Group,Media & Attention,Media & Atensi,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+349,Business Models,Group,Services & Offline,Layanan & Offline,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+350,Business Models,Group,Asset-Heavy / Industry,Aset Berat / Industri,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+351,Business Models,Group,Emerging / Tech-Forward,Emerging / Tech-Forward,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+352,Business Models,Group,Hybrid / Other,Hybrid / Lainnya,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+353,Business Models,Option,SaaS (Subscription software),SaaS (Subscription software),src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+354,Business Models,Option,Marketplace (2-sided platform),Marketplace (2-sided platform),src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+355,Business Models,Option,E-commerce (Online store),E-commerce (Online store),src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+356,Business Models,Option,Direct-to-Consumer (DTC brand),Direct-to-Consumer (DTC brand),src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+357,Business Models,Option,Mobile App (freemium / paid),Mobile App (freemium / paid),src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+358,Business Models,Option,API / Infrastructure (B2B tech),API / Infrastructure (B2B tech),src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+359,Business Models,Option,"FinTech (payments, lending, etc.)","FinTech (payments, lending, etc.)",src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+360,Business Models,Option,Transaction Fees (per use / commission),Transaction Fees (per use / commission),src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+361,Business Models,Option,Brokerage / Commission-based,Brokerage / Commission-based,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+362,Business Models,Option,Subscription + Transaction Hybrid,Subscription + Transaction Hybrid,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+363,Business Models,Option,Advertising-based,Advertising-based,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+364,Business Models,Option,Content / Media Platform,Content / Media Platform,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+365,Business Models,Option,"Creator Economy (subscriptions, tips, content)","Creator Economy (subscriptions, tips, content)",src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+366,Business Models,Option,"Service-based (agency, consulting)","Service-based (agency, consulting)",src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+367,Business Models,Option,"F&B (restaurant, cafe, cloud kitchen)","F&B (restaurant, cafe, cloud kitchen)",src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+368,Business Models,Option,Retail (offline / omnichannel),Retail (offline / omnichannel),src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+369,Business Models,Option,"Hospitality (hotel, lodging)","Hospitality (hotel, lodging)",src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+370,Business Models,Option,Events / Experiences,Events / Experiences,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+371,Business Models,Option,Real Estate / Property,Real Estate / Property,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+372,Business Models,Option,Construction / Infrastructure,Construction / Infrastructure,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+373,Business Models,Option,Manufacturing,Manufacturing,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+374,Business Models,Option,Logistics / Supply Chain,Logistics / Supply Chain,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+375,Business Models,Option,Energy / Climate,Energy / Climate,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+376,Business Models,Option,Web3 / Blockchain,Web3 / Blockchain,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+377,Business Models,Option,Token-based / Crypto economy,Token-based / Crypto economy,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+378,Business Models,Option,AI-first product,AI-first product,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+379,Business Models,Option,DeepTech / R&D,DeepTech / R&D,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+380,Business Models,Option,Franchise Model,Franchise Model,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+381,Business Models,Option,Licensing,Licensing,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+382,Business Models,Option,Aggregator,Aggregator,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+383,Business Models,Option,Platform + Service hybrid,Platform + Service hybrid,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+384,Business Models,Option,Other,Other,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,lainnya,
+  Skills,,,,,,,,,,
+385,Skills,Group,"Engineering, IT & Technical","Engineering, IT & Teknis",src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+386,Skills,Group,"Construction, Property & Engineering","Konstruksi, Properti & Engineering",src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+387,Skills,Group,F&B (Food & Beverage),F&B (Food & Beverage),src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+388,Skills,Group,Design & Creative,Desain & Kreatif,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+389,Skills,Group,Marketing & Growth,Marketing & Growth,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+390,Skills,Group,"Sales, Business Dev & Partnerships","Sales, BD & Partnership",src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+391,Skills,Group,Operations & Supply Chain,Operasional & Supply Chain,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+392,Skills,Group,"Finance, Investment & Legal","Finance, Investasi & Legal",src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+393,Skills,Group,"Data, AI & Analytics","Data, AI & Analitik",src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+394,Skills,Group,"Media, Content & Entertainment","Media, Konten & Hiburan",src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+395,Skills,Group,"HR, Talent & People","HR, Talent & People",src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+396,Skills,Group,Emerging & Specialized,Emerging & Spesialisasi,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+  Relocation,,,,,,,,,,
+397,Relocation,Option,"Yes, if the fit is right","Ya, jika cocok",src/features/onboarding/mock/catalogs.ts,,INDO,v,"ya, kalau cocok",
+398,Relocation,Option,Maybe for the right role,Mungkin untuk peran yang tepat,src/features/onboarding/mock/catalogs.ts,,INDO,v,"mungkin, kalau perannya ada yang tepat",
+399,Relocation,Option,"No, I want to stay put","Tidak, saya ingin tetap di lokasi sekarang",src/features/onboarding/mock/catalogs.ts,,INDO,v,"Tidak, aku mau di lokasi saat ini",
+  Remote Preference,,,,,,,,,,
+400,Remote Preference,Option,Hybrid,Hybrid,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+401,Remote Preference,Option,Onsite,Onsite,src/features/onboarding/mock/catalogs.ts,,NOT INDO,v,v,
+402,Remote Preference,Option,Remote preferred,Lebih suka remote,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+403,Remote Preference,Option,Remote only,Hanya remote,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+  Salary Preference,,,,,,,,,,
+404,Salary Preference,Option,Strict minimum,Minimum yang tegas,src/features/onboarding/mock/catalogs.ts,,INDO,v,Ada minimalnya,
+405,Salary Preference,Option,Flexible for the right fit,Fleksibel untuk peluang yang tepat,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+406,Salary Preference,Option,No minimum for now,Belum ada minimum,src/features/onboarding/mock/catalogs.ts,,INDO,v,v,
+  Equity Expectation,,,,,,,,,,
+407,Equity Expectation,Option,Cash only,Hanya cash,src/features/onboarding/mock/catalogs.ts,,INDO,v,Gaji saja,
+408,Equity Expectation,Option,Balanced cash + equity,Cash + equity seimbang,src/features/onboarding/mock/catalogs.ts,,INDO,v,Gaji dan saham ,
+409,Equity Expectation,Option,Equity-heavy,Lebih berat di equity,src/features/onboarding/mock/catalogs.ts,,INDO,v,Lebih condong ke saham,
+  Onboarding UI,,,,,,,,,,
+410,Onboarding UI,Brand,ConnectX,ConnectX,src/features/onboarding/components/onboarding-screen.tsx,Header logo,NOT INDO,v,v,
+411,Onboarding UI,Badge,V1 FREE,V1 FREE,src/features/onboarding/components/onboarding-screen.tsx,,NOT INDO,v,V1 GRATIS,
+412,Onboarding UI,Badge,Premium,Premium,src/features/onboarding/components/onboarding-screen.tsx,,NOT INDO,v,v,
+413,Onboarding UI,Progress,X of Y,X dari Y,src/features/onboarding/components/onboarding-screen.tsx,current of total,INDO,ini yang mana ya?,v,
+414,Onboarding UI,Button,Loading...,Loading...,src/features/onboarding/components/onboarding-screen.tsx,,NOT INDO,v,memuat,
+415,Onboarding UI,Button,Saving...,Saving...,src/features/onboarding/components/onboarding-screen.tsx,,NOT INDO,v,menyimpan,
+416,Onboarding UI,Label,Day,Hari,src/features/onboarding/components/question-renderer.tsx,Date picker,INDO,v,v,
+417,Onboarding UI,Label,Month,Bulan,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+418,Onboarding UI,Label,Year,Tahun,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+419,Onboarding UI,Placeholder,DD,DD,src/features/onboarding/components/question-renderer.tsx,,NOT INDO,v,Tanggal,
+420,Onboarding UI,Placeholder,MMM,MMM,src/features/onboarding/components/question-renderer.tsx,,NOT INDO,v,Bulan,
+421,Onboarding UI,Placeholder,YYYY,YYYY,src/features/onboarding/components/question-renderer.tsx,,NOT INDO,v,Tahun,
+422,Onboarding UI,Month,January,Januari,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+423,Onboarding UI,Month,February,Februari,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+424,Onboarding UI,Month,March,Maret,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+425,Onboarding UI,Month,April,April,src/features/onboarding/components/question-renderer.tsx,,NOT INDO,v,v,
+426,Onboarding UI,Month,May,Mei,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+427,Onboarding UI,Month,June,Juni,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+428,Onboarding UI,Month,July,Juli,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+429,Onboarding UI,Month,August,Agustus,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+430,Onboarding UI,Month,September,September,src/features/onboarding/components/question-renderer.tsx,,NOT INDO,v,v,
+431,Onboarding UI,Month,October,Oktober,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+432,Onboarding UI,Month,November,November,src/features/onboarding/components/question-renderer.tsx,,NOT INDO,v,v,
+433,Onboarding UI,Month,December,Desember,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+434,Onboarding UI,Label,X / Y selected,X / Y dipilih,src/features/onboarding/components/question-renderer.tsx,,INDO,ini yang mana ya?,,
+435,Onboarding UI,Message,Max reached,Batas maksimum,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+436,Onboarding UI,Empty,No results,Tidak ada hasil,src/features/onboarding/components/question-renderer.tsx,,INDO,v,belum ada hasil,
+437,Onboarding UI,Empty,"No results for ""query""","Tidak ada hasil untuk ""query""",src/features/onboarding/components/question-renderer.tsx,,INDO,v,Belum ada hasil untuk kata kunci “{keyword}”,
+438,Onboarding UI,Placeholder,Search...,Cari...,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+439,Onboarding UI,Placeholder,Select one,Pilih satu,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+440,Onboarding UI,Placeholder,Select,Pilih,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+441,Onboarding UI,Placeholder,Select multiple,Pilih beberapa,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+442,Onboarding UI,Validation,Required,Wajib diisi,src/features/onboarding/components/question-renderer.tsx,,INDO,v,v,
+443,Onboarding UI,Label,Currency,Currency,src/features/onboarding/components/question-renderer.tsx,,NOT INDO,v,mata uang,
+444,Onboarding UI,Label,Amount,Amount,src/features/onboarding/components/question-renderer.tsx,,NOT INDO,v,nominal,
+445,Onboarding UI,Placeholder,5000,5000,src/features/onboarding/components/question-renderer.tsx,,NOT INDO,v,v,
+  Auth,,,,,,,,,,
+446,Auth,Heading,Get Started now,Mulai sekarang,src/features/auth/components/login-screen.tsx,,INDO,v,v,
+447,Auth,Subtitle,Create an account or log in to explore ConnectX.,Buat akun atau masuk untuk menjelajahi ConnectX.,src/features/auth/components/login-screen.tsx,,INDO,v,v,
+448,Auth,Button,Sign in with Google,Masuk dengan Google,src/features/auth/components/login-screen.tsx,,INDO,v,v,
+449,Auth,Button,Preview onboarding,Pratinjau onboarding,src/features/auth/components/login-screen.tsx,,INDO,v,v,
+450,Auth,Label,Email,Email,src/features/auth/components/login-screen.tsx,,NOT INDO,v,v,
+451,Auth,Placeholder,you@company.com,you@company.com,src/features/auth/components/login-screen.tsx,,NOT INDO,v,v,
+452,Auth,Label,Password,Password,src/features/auth/components/login-screen.tsx,,NOT INDO,v,v,
+453,Auth,Placeholder,Enter your password,Masukkan password,src/features/auth/components/login-screen.tsx,,INDO,v,v,
+454,Auth,Checkbox,Remember me,Ingat saya,src/features/auth/components/login-screen.tsx,,INDO,v,Ingat aku yah,
+455,Auth,Link,Forgot Password?,Lupa Password?,src/features/auth/components/login-screen.tsx,,INDO,v,v,
+456,Auth,Button,Log In,Masuk,src/features/auth/components/login-screen.tsx,,INDO,v,v,
+457,Auth,Button,Signing in...,Sedang masuk...,src/features/auth/components/login-screen.tsx,,INDO,v,v,
+458,Auth,Text,Don't have an account?,Belum punya akun?,src/features/auth/components/login-screen.tsx,,INDO,v,v,
+459,Auth,Link,Sign Up,Daftar,src/features/auth/components/login-screen.tsx,,INDO,v,v,
+460,Auth,Text,or,atau,src/features/auth/components/login-screen.tsx,,INDO,v,v,
+461,Auth,Error,Login failed. Please try again.,Login gagal. Silakan coba lagi.,src/features/auth/components/login-screen.tsx,,INDO,v,v,
+462,Auth,Error,Google Sign-In failed. Please try again.,Sign-In Google gagal. Silakan coba lagi.,src/features/auth/components/login-screen.tsx,,INDO,v,v,
+463,Auth,Message,Forgot password flow is not connected yet.,Fitur lupa password belum terhubung.,src/features/auth/components/login-screen.tsx,,INDO,v,v,
+464,Auth,Heading,Create your account,Buat akun kamu,src/features/auth/components/register-screen.tsx,,INDO,v,v,
+465,Auth,Subtitle,"Join ConnectX and start meeting founders, teammates, and startups.","Bergabunglah dengan ConnectX dan mulai bertemu founder, rekan tim, dan startup.",src/features/auth/components/register-screen.tsx,,INDO,v,v,
+466,Auth,Placeholder,Use at least 8 characters,Gunakan minimal 8 karakter,src/features/auth/components/register-screen.tsx,,INDO,v,v,
+467,Auth,Label,Password,Password,src/features/auth/components/register-screen.tsx,,NOT INDO,v,v,
+468,Auth,Label,Repeat your password,Ulangi password,src/features/auth/components/register-screen.tsx,,INDO,v,v,
+469,Auth,Button,Create account,Buat akun,src/features/auth/components/register-screen.tsx,,INDO,v,v,
+470,Auth,Button,Creating account...,Membuat akun...,src/features/auth/components/register-screen.tsx,,INDO,v,v,
+471,Auth,Text,Already have an account?,Sudah punya akun?,src/features/auth/components/register-screen.tsx,,INDO,v,v,
+472,Auth,Link,Sign in,Masuk,src/features/auth/components/register-screen.tsx,,INDO,v,v,
+473,Auth,Error,Passwords must match.,Password harus cocok.,src/features/auth/components/register-screen.tsx,,INDO,v,v,
+474,Auth,Error,Could not create your account. Try again.,Tidak dapat membuat akun. Coba lagi.,src/features/auth/components/register-screen.tsx,,INDO,v,v,
+475,Auth,Badge,V1 FREE,V1 FREE,src/features/auth/components/register-screen.tsx,,NOT INDO,v,V1 GRATIS,
+476,Auth,Heading,Check your inbox,Periksa kotak masukmu,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+477,Auth,Description,Enter the code sent to {email} to continue to WhatsApp verification.,Masukkan kode yang dikirim ke {email} untuk melanjutkan ke verifikasi WhatsApp.,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+478,Auth,Pill,Verify Email,Verifikasi Email,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+479,Auth,Label,Verification Code,Kode Verifikasi,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+480,Auth,Hint,Enter the 6-character verification code,Masukkan kode verifikasi 6 karakter,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+481,Auth,Placeholder,Enter code,Masukkan kode,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+482,Auth,Button,Verify Email,Verifikasi Email,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+483,Auth,Button,Verifying...,Memverifikasi...,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+484,Auth,Detail,Next step: WhatsApp verification,Langkah berikutnya: verifikasi WhatsApp,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+485,Auth,Button,Resend Code,Kirim Ulang Kode,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+486,Auth,Button,Sending code...,Mengirim kode...,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+487,Auth,Detail,Request a new code,Minta kode baru,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+488,Auth,Detail,Try again in {seconds}s,Coba lagi dalam {seconds}dtk,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+489,Auth,Link,Log out,Keluar,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+490,Auth,Error,Email verification failed.,Verifikasi email gagal.,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+491,Auth,Error,Failed to send verification code.,Gagal mengirim kode verifikasi.,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+492,Auth,Error,Failed to resend verification code.,Gagal mengirim ulang kode verifikasi.,src/features/auth/components/verify-email-screen.tsx,,INDO,v,v,
+493,Auth,Heading,Enter WhatsApp Number,Masukkan Nomor WhatsApp,src/features/auth/components/verify-whatsapp-screen.tsx,,INDO,v,v,
+494,Auth,Subtitle,We'll send a 6-digit code to verify your identity.,Kami akan mengirim kode 6 digit untuk verifikasi identitas.,src/features/auth/components/verify-whatsapp-screen.tsx,,INDO,v,v,
+495,Auth,Placeholder,+62 812 3456 7890,+62 812 3456 7890,src/features/auth/components/verify-whatsapp-screen.tsx,,NOT INDO,v,v,
+496,Auth,Button,Continue,Lanjutkan,src/features/auth/components/verify-whatsapp-screen.tsx,,INDO,v,v,
+497,Auth,Button,Sending...,Mengirim...,src/features/auth/components/verify-whatsapp-screen.tsx,,INDO,v,v,
+498,Auth,Error,WhatsApp number is required.,Nomor WhatsApp wajib diisi.,src/features/auth/components/verify-whatsapp-screen.tsx,,INDO,v,v,
+499,Auth,Error,Use a format like +6281234567890.,Gunakan format seperti +6281234567890.,src/features/auth/components/verify-whatsapp-screen.tsx,,INDO,v,v,
+500,Auth,Error,Failed to send WhatsApp OTP.,Gagal mengirim OTP WhatsApp.,src/features/auth/components/verify-whatsapp-screen.tsx,,INDO,v,v,
+501,Auth,Link,Log out,Keluar,src/features/auth/components/verify-whatsapp-screen.tsx,,INDO,v,v,
+502,Auth,Terms,By entering your number you agree to our Terms & Privacy Policy,"Dengan memasukkan nomor kamu, kamu menyetujui Syarat & Kebijakan Privasi kami",src/features/auth/components/verify-whatsapp-screen.tsx,,INDO,v,v,
+503,Auth,Heading,Verify account with OTP,Verifikasi akun dengan OTP,src/features/auth/components/verify-otp-screen.tsx,,INDO,v,v,
+504,Auth,Subtitle,We've sent a 6-digit code to {whatsappNumber},Kami telah mengirim kode 6 digit ke {whatsappNumber},src/features/auth/components/verify-otp-screen.tsx,,INDO,v,v,
+505,Auth,Button,Continue,Lanjutkan,src/features/auth/components/verify-otp-screen.tsx,,INDO,v,v,
+506,Auth,Button,Verifying...,Memverifikasi...,src/features/auth/components/verify-otp-screen.tsx,,INDO,v,v,
+507,Auth,Message,Verifying your OTP...,Memverifikasi OTP kamu...,src/features/auth/components/verify-otp-screen.tsx,,INDO,v,v,
+508,Auth,Link,Resend code,Kirim ulang kode,src/features/auth/components/verify-otp-screen.tsx,,INDO,v,v,
+509,Auth,Detail,Resend code in {seconds}s,Kirim ulang kode dalam {seconds}dtk,src/features/auth/components/verify-otp-screen.tsx,,INDO,v,v,
+510,Auth,Error,WhatsApp verification failed.,Verifikasi WhatsApp gagal.,src/features/auth/components/verify-otp-screen.tsx,,INDO,v,v,
+511,Auth,Error,Failed to resend OTP.,Gagal mengirim ulang OTP.,src/features/auth/components/verify-otp-screen.tsx,,INDO,v,v,
+512,Auth,Heading,Verify your login,Verifikasi login kamu,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+513,Auth,Pill,Login Verification,Verifikasi Login,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+514,Auth,Description,Enter the code sent to {email} to finish signing in.,Masukkan kode yang dikirim ke {email} untuk menyelesaikan login.,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+515,Auth,Label,Login Code,Kode Login,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+516,Auth,Hint,Enter the 6-character login code,Masukkan kode login 6 karakter,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+517,Auth,Placeholder,Enter code,Masukkan kode,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+518,Auth,Button,Verify Login,Verifikasi Login,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+519,Auth,Button,Verifying...,Memverifikasi...,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+520,Auth,Detail,You'll be signed in after verification,Kamu akan masuk setelah verifikasi,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+521,Auth,Button,Resend Code,Kirim Ulang Kode,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+522,Auth,Button,Sending code...,Mengirim kode...,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+523,Auth,Detail,Request a new code,Minta kode baru,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+524,Auth,Detail,Try again in {seconds}s,Coba lagi dalam {seconds}dtk,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+525,Auth,Link,Back to login,Kembali ke login,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+526,Auth,Error,Login verification failed.,Verifikasi login gagal.,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+527,Auth,Error,Failed to send login code.,Gagal mengirim kode login.,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+528,Auth,Error,Failed to resend login code.,Gagal mengirim ulang kode login.,src/features/auth/components/verify-login-otp-screen.tsx,,INDO,v,v,
+529,Auth,Brand,ConnectX,ConnectX,src/features/auth/components/splash-screen.tsx,,NOT INDO,v,v,
+530,Auth,Message,Login berhasil. Silakan verifikasi OTP untuk melanjutkan.,Login berhasil. Silakan verifikasi OTP untuk melanjutkan.,src/features/auth/mock/auth.mock.ts,,NOT INDO,v,v,
+531,Auth,Message,OTP Verification Code has been sent to {email}. This code is valid for 10 minutes.,Kode Verifikasi OTP telah dikirim ke {email}. Kode ini berlaku selama 10 menit.,src/features/auth/mock/auth.mock.ts,,INDO,v,v,
+532,Auth,Message,Selamat! Registrasi kamu selesai! Selamat bergabung di ConnectX.,Selamat! Registrasi kamu selesai! Selamat bergabung di ConnectX.,src/features/auth/mock/auth.mock.ts,,NOT INDO,v,v,
+533,Auth,Message,Login berhasil.,Login berhasil.,src/features/auth/mock/auth.mock.ts,,NOT INDO,v,v,
+  Discovery,,,,,,,,,,
+534,Discovery,Option,Find Co-Founder,Cari Co-Founder,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+535,Discovery,Description,Search for your ideal co-founder,Cari co-founder ideal kamu,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+536,Discovery,Option,Building Team,Membangun Tim,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+537,Discovery,Description,Hire early team members,Rekrut anggota tim awal,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+538,Discovery,Option,Explore Startups,Jelajahi Startup,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+539,Discovery,Description,Find a startup to join,Temukan startup untuk diikuti,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+540,Discovery,Option,Joining Startups,Bergabung dengan Startup,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+541,Discovery,Description,Join an existing startup,Bergabung dengan startup yang ada,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+542,Discovery,Section,Goal,Tujuan,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+543,Discovery,Section,Skill Strength,Kekuatan Skill,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+544,Discovery,Section,Industry,Industri,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+545,Discovery,Section,Location & Availability,Lokasi & Ketersediaan,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+546,Discovery,Section,Work Arrangement,Arrangement Kerja,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+547,Discovery,Option,Onsite,Onsite,src/features/home/config/discovery-filters.ts,,NOT INDO,v,v,
+548,Discovery,Option,Hybrid,Hybrid,src/features/home/config/discovery-filters.ts,,NOT INDO,v,v,
+549,Discovery,Option,Remote,Remote,src/features/home/config/discovery-filters.ts,,NOT INDO,v,v,
+550,Discovery,Label,Available for remote work,Tersedia untuk kerja remote,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+551,Discovery,Label,Distance,Jarak,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+552,Discovery,Section,Commitment,Komitmen,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+553,Discovery,Option,Full-time,Full-time,src/features/home/config/discovery-filters.ts,,NOT INDO,v,v,
+554,Discovery,Option,Part-time,Part-time,src/features/home/config/discovery-filters.ts,,NOT INDO,v,v,
+555,Discovery,Option,Side Project,Side Project,src/features/home/config/discovery-filters.ts,,NOT INDO,v,v,
+556,Discovery,Section,Startup Stage,Tahap Startup,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+557,Discovery,Option,Idea,Ide,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+558,Discovery,Option,MVP,MVP,src/features/home/config/discovery-filters.ts,,NOT INDO,v,v,
+559,Discovery,Option,Pre-seed,Pra-seed,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+560,Discovery,Option,Seed,Seed,src/features/home/config/discovery-filters.ts,,NOT INDO,v,v,
+561,Discovery,Section,AI Match Precision,Presisi Match AI,src/features/home/config/discovery-filters.ts,,INDO,AI Connection Precision,Presisi kecocokan AI,
+562,Discovery,Label,Minimum Match Score,Skor Match Minimum,src/features/home/config/discovery-filters.ts,,INDO,Minimum Connection Score,Minimal skor kecocokan,
+563,Discovery,Section,Founder & Builder Quality,Kualitas Founder & Builder,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+564,Discovery,Section,Co-Founder Readiness,Kesiapan Co-Founder,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+565,Discovery,Section,Global Compatibility,Kompatibilitas Global,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+566,Discovery,Section,Skill Stack,Stack Skill,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+567,Discovery,Section,Role Needed,Peran yang Dibutuhkan,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+568,Discovery,Section,AI Talent Precision,Presisi Talent AI,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+569,Discovery,Section,Execution Quality,Kualitas Eksekusi,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+570,Discovery,Section,Hiring Readiness,Kesiapan Rekrutmen,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+571,Discovery,Section,Startup Quality,Kualitas Startup,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+572,Discovery,Section,Startup Readiness,Kesiapan Startup,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+573,Discovery,Section,Opportunity Fit,Kecocokan Peluang,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+574,Discovery,Section,AI Startup Fit,Fit Startup AI,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+575,Discovery,Section,Founder Type,Tipe Founder,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+576,Discovery,Section,Leadership Strength,Kekuatan Kepemimpinan,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+577,Discovery,Section,Equity & Commitment,Equity & Komitmen,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+578,Discovery,Section,Conditions,Kondisi,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+579,Discovery,Option,Technical,Teknis,src/features/home/config/discovery-filters.ts,,INDO,,,ini harusnya filter disesuaikan dgn opsi onboarding (type dan checked boxed)
+580,Discovery,Option,Product,Produk,src/features/home/config/discovery-filters.ts,,INDO,,,
+581,Discovery,Option,Business,Bisnis,src/features/home/config/discovery-filters.ts,,INDO,,,
+582,Discovery,Option,Sales,Sales,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+583,Discovery,Option,Marketing,Marketing,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+584,Discovery,Option,Design,Design,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+585,Discovery,Option,Operations,Operasional,src/features/home/config/discovery-filters.ts,,INDO,,,
+586,Discovery,Option,Finance,Finance,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+587,Discovery,Option,AI,AI,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+588,Discovery,Option,Fintech,Fintech,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+589,Discovery,Option,Healthtech,Healthtech,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+590,Discovery,Option,EdTech,EdTech,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+591,Discovery,Option,Web3,Web3,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+592,Discovery,Option,SaaS,SaaS,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+593,Discovery,Checkbox,Show AI Explain Why Match,Tampilkan AI Explain Why Match,src/features/home/config/discovery-filters.ts,,INDO,Show AI Explain for this Connection,Tampilkan alasan AI kenapa ini koneksi yang baik,
+594,Discovery,Option,First-time Founder,Founder Pertama Kali,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+595,Discovery,Option,Built 1 Startup,Pernah Bangun 1 Startup,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+596,Discovery,Option,Serial Founder,Founder Serial,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+597,Discovery,Option,Startup Exit Experience,Pengalaman Exit Startup,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+598,Discovery,Option,VC-backed Founder,Founder Didukung VC,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+599,Discovery,Option,Accelerator Alumni,Alumni Akselerator,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+600,Discovery,Option,Led Startup Team,Pimpin Tim Startup,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+601,Discovery,Option,Built Product from Zero,Bangun Produk dari Nol,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+602,Discovery,Option,Owned Revenue Target,Punya Target Revenue,src/features/home/config/discovery-filters.ts,,INDO,v,ada target pendapatan,
+603,Discovery,Option,Raised Capital,Sudah Raise Modal,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+604,Discovery,Option,Advisor / Mentor,Advisor / Mentor,src/features/home/config/discovery-filters.ts,,NOT INDO,v,v,
+605,Discovery,Option,Ready to Start Within 30 Days,Siap Mulai dalam 30 Hari,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+606,Discovery,Option,Exploring Startup Ideas,Menjelajahi Ide Startup,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+607,Discovery,Option,Open to Build From Zero,Terbuka Bangun dari Nol,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+608,Discovery,Option,Open to Existing Founder,Terbuka untuk Founder yang Ada,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+609,Discovery,Option,Equity-Based Build,Bangunan Berbasis Equity,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+610,Discovery,Option,Long-Term Commitment,Komitmen Jangka Panjang,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+611,Discovery,Option,English,English,src/features/home/config/discovery-filters.ts,,NOT INDO,,,"masukkan semua bahasa nasional yang available di seluruh dunia lalu pakai format ""type & checked boxed""
+
+atau 
+
+
+kalau mau lebih mudah bisa text available lalu klik enter "
+612,Discovery,Option,Bahasa Indonesia,Bahasa Indonesia,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+613,Discovery,Option,Mandarin Chinese,Mandarin,src/features/home/config/discovery-filters.ts,,INDO,,,
+614,Discovery,Option,Japanese,Japanese,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+615,Discovery,Option,Korean,Korean,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+616,Discovery,Option,Spanish,Spanish,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+617,Discovery,Option,Bachelor,Bachelor,src/features/home/config/discovery-filters.ts,,NOT INDO,v,Sarjana,
+618,Discovery,Option,Master,Master,src/features/home/config/discovery-filters.ts,,NOT INDO,v,Magister,
+619,Discovery,Option,MBA,MBA,src/features/home/config/discovery-filters.ts,,NOT INDO,v,Magister Bisnis Administrasi,
+620,Discovery,Option,PhD,PhD,src/features/home/config/discovery-filters.ts,,NOT INDO,v,Doktorat,
+621,Discovery,Option,Research Background,Latar Belakang Riset,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+622,Discovery,Option,React,React,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+623,Discovery,Option,Python,Python,src/features/home/config/discovery-filters.ts,,NOT INDO,,,ini harusnya filter disesuaikan dgn opsi onboarding (type dan checked boxed)
+624,Discovery,Option,Figma,Figma,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+625,Discovery,Option,Growth,Growth,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+626,Discovery,Option,SEO,SEO,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+627,Discovery,Option,Salesforce,Salesforce,src/features/home/config/discovery-filters.ts,,NOT INDO,,,
+628,Discovery,Option,Built MVP,Sudah Bangun MVP,src/features/home/config/discovery-filters.ts,,INDO,v,sudah ada mvp,
+629,Discovery,Option,Startup Experience,Pengalaman Startup,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+630,Discovery,Option,Product Shipped,Produk Sudah Diluncurkan,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+631,Discovery,Option,Lead Growth,Pimpin Growth,src/features/home/config/discovery-filters.ts,,INDO,v,pernah mimpin pertumbuhan bisnis,
+632,Discovery,Option,Built Systems,Sudah Bangun Sistem,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+633,Discovery,Option,Immediate Join,Langsung Bergabung,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+634,Discovery,Option,30 Days,30 Hari,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+635,Discovery,Option,Part-time First,Part-time Dulu,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+636,Discovery,Option,Equity Open,Equity Terbuka,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+637,Discovery,Option,Remote Ready,Siap Remote,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+638,Discovery,Option,Repeat Founder,Founder Berulang,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+639,Discovery,Option,Startup Exit,Exit Startup,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+640,Discovery,Option,VC-backed Founder,Founder Didukung VC,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+641,Discovery,Option,Strong Founder Background,Latar Belakang Founder Kuat,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+642,Discovery,Option,MVP Ready,MVP Siap,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+643,Discovery,Option,Product Live,Produk Sudah Live,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+644,Discovery,Option,Paying Users,Pengguna Berbayar,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+645,Discovery,Option,Existing Team,Tim Sudah Ada,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+646,Discovery,Option,Equity Offered,Equity Ditawarkan,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+647,Discovery,Option,Remote Team,Tim Remote,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+648,Discovery,Option,Fast Hiring,Rekrutmen Cepat,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+649,Discovery,Option,Early Core Role,Peran Inti Awal,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+650,Discovery,Option,Technical Founder,Founder Teknis,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+651,Discovery,Option,Business Founder,Founder Bisnis,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+652,Discovery,Option,Product Founder,Founder Produk,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+653,Discovery,Option,Operator Founder,Founder Operator,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+654,Discovery,Option,Startup Experience,Pengalaman Startup,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+655,Discovery,Option,Startup Exit,Exit Startup,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+656,Discovery,Option,Fundraising Exposure,Paparan Fundraising,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+657,Discovery,Option,Accelerator Background,Latar Belakang Akselerator,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+658,Discovery,Option,Built Team,Sudah Bangun Tim,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+659,Discovery,Option,Led Product,Pimpin Produk,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+660,Discovery,Option,Growth Ownership,Ownership Growth,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+661,Discovery,Option,Operations Leadership,Kepemimpinan Operasional,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+662,Discovery,Option,MVP Built,MVP Sudah Dibangun,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+663,Discovery,Option,Early Traction,Traction Awal,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+664,Discovery,Option,Co-founder Equity,Equity Co-founder,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+665,Discovery,Option,Full-time Expected,Diharapkan Full-time,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+666,Discovery,Option,Pre-revenue Build,Bangunan Pra-revenue,src/features/home/config/discovery-filters.ts,,INDO,v,v,
+667,Discovery,Heading,Candidate Filters,Filter Kandidat,src/features/home/components/discovery-filter-sheet.tsx,,INDO,v,v,
+668,Discovery,Subtitle,Tune the discovery deck and generate candidates from the filters you can use today,Sesuaikan deck discovery dan hasilkan kandidat dari filter yang bisa kamu gunakan hari ini,src/features/home/components/discovery-filter-sheet.tsx,,INDO,v,v,
+669,Discovery,Label,YOUR GOAL RIGHT NOW,TUJUANMU SEKARANG,src/features/home/components/discovery-filter-sheet.tsx,,INDO,v,v,
+670,Discovery,Label,ADVANCED FILTERS,FILTER LANJUTAN,src/features/home/components/discovery-filter-sheet.tsx,,INDO,v,v,
+671,Discovery,Button,Generate Candidate,Hasilkan Kandidat,src/features/home/components/discovery-filter-sheet.tsx,,INDO,v,cari kandidat,
+672,Discovery,Button,Generating...,Menghasilkan...,src/features/home/components/discovery-filter-sheet.tsx,,INDO,v,sedang mencari,
+673,Discovery,Message,ConnectX Pro is required to use this advanced filter section.,ConnectX Pro diperlukan untuk menggunakan bagian filter lanjutan ini.,src/features/home/components/discovery-filter-sheet.tsx,,INDO,v,Fitur filter lanjutan ini cuma bisa dipakai di ConnectX Pro.,
+674,Discovery,Error,Filters unavailable,Filter tidak tersedia,src/features/home/components/discovery-filter-sheet.tsx,,INDO,v,v,
+675,Discovery,Heading,Startup Journey,Journey Startup,src/features/home/components/discovery-deck.tsx,,INDO,v,perjalanan startup,
+676,Discovery,Section,Industries & Interests,Industri & Minat,src/features/home/components/discovery-deck.tsx,,INDO,v,v,
+677,Discovery,Section,Skills,Skill,src/features/home/components/discovery-deck.tsx,,INDO,v,v,
+678,Discovery,Section,Experience,Pengalaman,src/features/home/components/discovery-deck.tsx,,INDO,v,v,
+679,Discovery,Label,Match quality,Kualitas match,src/features/home/components/discovery-deck.tsx,,INDO,Connection Quality,Kualitas koneksi,
+680,Discovery,Label,Skip,Lewati,src/features/home/components/discovery-deck.tsx,,INDO,v,v,
+681,Discovery,Label,Connect,Koneksi,src/features/home/components/discovery-deck.tsx,,INDO,v,v,
+682,Discovery,Label,Strong Match,Cocok Kuat,src/features/home/components/discovery-deck.tsx,,INDO,Strong Connection,Koneksi yang kuat,
+683,Discovery,Section,Open Roles,Posisi Terbuka,src/features/home/components/discovery-deck.tsx,,INDO,v,v,
+684,Discovery,Section,Looking For,Mencari,src/features/home/components/discovery-deck.tsx,,INDO,v,v,
+685,Discovery,Label,Team Size,Ukuran Tim,src/features/home/components/discovery-deck.tsx,,INDO,v,v,
+686,Discovery,Label,Stage,Tahap,src/features/home/components/discovery-deck.tsx,,INDO,v,v,
+687,Discovery,Label,Industry,Industri,src/features/home/components/discovery-deck.tsx,,INDO,v,v,
+688,Discovery,Label,Hiring,Rekrutmen,src/features/home/components/discovery-deck.tsx,,INDO,v,v,
+689,Discovery,Empty,Loading more profiles...,Memuat lebih banyak kartu...,src/features/home/components/discovery-deck.tsx,,INDO,v,muat lebih banyak profil,
+690,Discovery,Empty,No more profiles right now.,Tidak ada kartu discovery lagi saat ini.,src/features/home/components/discovery-deck.tsx,,INDO,v,belum ada profil baru saat ini,
+691,Discovery,Empty,You reached the end of the current stack. Check back later for fresh matches.,Kamu sudah mencapai akhir tumpukan saat ini. Cek lagi nanti untuk match baru.,src/features/home/components/discovery-deck.tsx,,INDO,You reached the end of the current stack. Check back later for new people to connect with.,Kamu sudah mencapai koneksi terakhir saat ini. Cek lagi nanti yah ,
+692,Discovery,Button,Reload Profiles,Muat Ulang Deck Mock,src/features/home/components/discovery-deck.tsx,,INDO,v,muat ulang profil,
+693,Discovery,Toast,profile Match,Mock Match,src/features/home/components/discovery-deck.tsx,,NOT INDO,profile match,profile cocok,
+694,Discovery,Toast,"You're connected! 🎉
+You and (Mei Lin Chen) both want to build (edtech jenis startupnya) startups.","Kamu sudah terkoneksi! 🎉
+kamu dan (nama) kalian berdua tertarik untuk bangun (.... jenis) startups. ",src/features/home/components/discovery-deck.tsx,,INDO,v,v,
+695,Discovery,Error,Discovery action failed,Aksi discovery gagal,src/features/home/components/discovery-deck.tsx,,INDO,v,,
+696,Discovery,Message,Loading more profiles...,Memuat lebih banyak kartu...,src/features/home/components/discovery-deck.tsx,,INDO,v,muat lebih banyak profil,
+697,Discovery,Empty,Loading discovery profiles...,Memuat deck discovery...,src/features/home/components/discovery-deck.tsx,,INDO,v,memuat profile,
+698,Discovery,Empty,Pulling the latest discovery cards and match signals for this account.,Mengambil kartu discovery dan sinyal match terbaru untuk akun ini.,src/features/home/components/discovery-deck.tsx,,INDO,Pulling the latest discovery profiles and connection signals for your account.,Lagi menyiapkan profil terbaru yang cocok untuk kamu.,
+699,Discovery,Error,Premium subscription required to use advanced discovery filters.,Langganan premium diperlukan untuk menggunakan filter discovery lanjutan.,src/features/home/components/discovery-deck.tsx,,INDO,v,Filter discovery lanjutan hanya tersedia di ConnectX Pro.,
+700,Discovery,Badge,Top Match,Match Teratas,src/features/home/mock/discovery.mock.ts,,INDO,Top Connect ⭐,Koneksi Teratas ⭐,
+701,Discovery,Badge,Strong Connect,Cocok Kuat,src/features/home/mock/discovery.mock.ts,,INDO,Strong Connect,koneksi kuat,
+702,Discovery,Badge,High Signal,Sinyal Tinggi,src/features/home/mock/discovery.mock.ts,,INDO,Looks Promising,kayaknya cocok,
+703,Discovery,Badge,Warm Intro,Perkenalan Hangat,src/features/home/mock/discovery.mock.ts,,INDO,Warm Intro,kenalan yuk,
+704,Discovery,Badge,Warm Lead,Lead Hangat,src/features/home/mock/discovery.mock.ts,,INDO,good opportunity,kesempatan baik,
+705,Discovery,Badge,Perfect Match,Match Sempurna,src/features/home/mock/discovery.mock.ts,,INDO,Perfect Connection,Koneksi Paling Cocok,
+706,Discovery,Badge,High Potential,Potensi Tinggi,src/features/home/mock/discovery.mock.ts,,INDO,v,v,
+707,Discovery,Stage,Idea,Ide,src/features/home/mock/discovery.mock.ts,,INDO,v,v,
+708,Discovery,Stage,MVP,MVP,src/features/home/mock/discovery.mock.ts,,NOT INDO,v,v,
+709,Discovery,Stage,Pre-Seed,Pra-Seed,src/features/home/mock/discovery.mock.ts,,INDO,v,v,
+710,Discovery,Stage,Seed,Seed,src/features/home/mock/discovery.mock.ts,,NOT INDO,v,v,
+711,Discovery,Label,members,Anggota,src/features/home/mock/discovery.mock.ts,,INDO,v,v,
+  Connections,,,,,,,,,,
+712,Connections,Heading,Your Connects,Koneksi Kamu,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+713,Connections,Badge,0 new,0 baru,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+714,Connections,Button,Unlock Connects,Buka Koneksi,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+715,Connections,Button,View Connects,Lihat Koneksi,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+716,Connections,Error,Premium unlock unavailable here,Buka premium tidak tersedia di sini,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+717,Connections,Error,Could not open premium paywall,Tidak dapat membuka paywall premium,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+718,Connections,Button,Activate Spotlight,Aktifkan Spotlight,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+719,Connections,Button,Activating...,Mengaktifkan...,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+720,Connections,Label,Feature your profile for 1 hour,Tampilkan profil kamu selama 1 jam,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+721,Connections,Label,Active until {time},Aktif sampai {waktu},src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+722,Connections,Success,Spotlight is live,Spotlight sudah aktif,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+723,Connections,Error,No spotlight credits remaining,Tidak ada kredit spotlight tersisa,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+724,Connections,Error,Spotlight already active,Spotlight sudah aktif,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+725,Connections,Error,Your spotlight is already active until {time}.,Spotlight kamu sudah aktif sampai {waktu}.,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+726,Connections,Error,Your spotlight is already active right now.,Spotlight kamu sudah aktif sekarang.,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+727,Connections,Error,Spotlight activation failed,Aktivasi spotlight gagal,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+728,Connections,Error,Could not open spotlight paywall,Tidak dapat membuka paywall spotlight,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+729,Connections,Error,Likes You is locked,Suka Kamu terkunci,src/features/matches/components/matches-screen.tsx,,INDO,Wants to Connect is locked.,v,
+730,Connections,Error,Upgrade to ConnectX Pro to reveal who liked you.,Upgrade ke ConnectX Pro untuk melihat siapa yang menyukai kamu.,src/features/matches/components/matches-screen.tsx,,INDO,Upgrade to ConnectX Pro to reveal who wants to connect with you,Fitur “yang mau connect ke kamu” masih terkunci.,
+731,Connections,Heading,Your Matches,Match Kamu,src/features/matches/components/matches-screen.tsx,,INDO,Your connections,Koneksimu,
+732,Connections,Label,X matches,X match,src/features/matches/components/matches-screen.tsx,,INDO,x connections,x koneksi,
+733,Connections,Label,Expires in {days} days,Berakhir dalam {days} hari,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+734,Connections,Label,Expires today,Berakhir hari ini,src/features/matches/components/matches-screen.tsx,,INDO,v,v,
+735,Connections,Empty,Using development mock matches,Menggunakan match mock pengembangan,src/features/matches/components/matches-screen.tsx,,INDO,Using development mock connections,Lagi pakai data koneksi dummy buat development.,
+736,Connections,Empty,"Backend support is still in progress, so this screen is rendering the typed mock matches response in development.","Dukungan backend masih dalam pengembangan, jadi layar ini menampilkan response match mock di pengembangan.",src/features/matches/components/matches-screen.tsx,,INDO,"Backend support is still in progress, so this screen is rendering the typed mock connections data in development.","Backend masih dikembangin, jadi data yang tampil di sini masih dummy dulu ya.",
+737,Connections,Empty,Loading matches...,Memuat match...,src/features/matches/components/matches-screen.tsx,,INDO,Loading connections...,memuat koneksi......,
+738,Connections,Empty,Pulling your latest mutual matches now.,Mengambil match mutual terbaru kamu sekarang.,src/features/matches/components/matches-screen.tsx,,INDO,Pulling your latest connections now.,Lagi ambil koneksi terbaru kamu sekarang.,
+739,Connections,Error,Could not load matches,Tidak dapat memuat match,src/features/matches/components/matches-screen.tsx,,INDO,Could not load connections,gak bisa memuat koneksi,
+740,Connections,Error,The matches request failed.,Request match gagal.,src/features/matches/components/matches-screen.tsx,,INDO,The connection request failed.,request koneksi gagal,
+741,Connections,Empty,No matches yet,Belum ada match,src/features/matches/components/matches-screen.tsx,,INDO,No connections yet,belum ada koneksi,
+742,Connections,Empty,New mutual matches will show up here once they're available.,Match mutual baru akan muncul di sini setelah tersedia.,src/features/matches/components/matches-screen.tsx,,INDO,New mutual connections will show up here once they're available.,Koneksi baru bakal muncul di sini kalau udah ada.,
+743,Connections,Placeholder,A dedicated Likes You detail route is not wired yet.,Rute detail Suka Kamu belum dihubungkan.,src/features/matches/components/matches-screen.tsx,,INDO,A dedicated “Wants to Connect” detail page is not available yet.,Halaman detail “yang mau connect ke kamu” belum tersedia ya.,
+744,Connections,Heading,Startup Team Fit Analysis,Analisis Kesesuaian Tim Startup,src/features/matches/components/match-analysis-screen.tsx,,INDO,v,Analisis kecocokan tim startup,
+745,Connections,Message,Using fallback analysis,Menggunakan analisis fallback,src/features/matches/components/match-analysis-screen.tsx,,INDO,v,Lagi pakai analisis cadangan,
+746,Connections,Message,"The live analysis endpoint failed, so this detail screen is rendering the fallback contract response.","Endpoint analisis langsung gagal, jadi layar detail ini menampilkan response kontrak fallback.",src/features/matches/components/match-analysis-screen.tsx,,INDO,v,"Analisis real-time lagi gagal, jadi halaman ini pakai data cadangan dulu ya.",
+747,Connections,Empty,Loading analysis...,Memuat analisis...,src/features/matches/components/match-analysis-screen.tsx,,INDO,v,v,
+748,Connections,Empty,Preparing the fit breakdown for this match.,Menyiapkan breakdown fit untuk match ini.,src/features/matches/components/match-analysis-screen.tsx,,INDO,Preparing the fit breakdown for this connection.,sedang menyiapkan analisis kecocokan untuk koneksi ini.,
+749,Connections,Label,Compatibility,Kompatibilitas,src/features/matches/components/match-analysis-screen.tsx,,INDO,v,v,
+750,Connections,Label,You Bring,Kamu Bawa,src/features/matches/components/match-analysis-screen.tsx,,INDO,v,yang kamu bawa,
+751,Connections,Label,{name} BRINGS,{nama} BAWA,src/features/matches/components/match-analysis-screen.tsx,,INDO,v,(..) bawa,
+752,Connections,Section,Skill Complementarity,Komplementaritas Skill,src/features/matches/components/match-analysis-screen.tsx,,INDO,v,v,
+753,Connections,Section,Startup Vision Alignment,Keselarasan Visi Startup,src/features/matches/components/match-analysis-screen.tsx,,INDO,v,v,
+754,Connections,Label,Shared Interests,Minat Bersama,src/features/matches/components/match-analysis-screen.tsx,,INDO,v,v,
+755,Connections,Section,Commitment Compatibility,Kompatibilitas Komitmen,src/features/matches/components/match-analysis-screen.tsx,,INDO,v,v,
+756,Connections,Label,Work Style,Gaya Kerja,src/features/matches/components/match-analysis-screen.tsx,,INDO,v,v,
+757,Connections,Section,Potential Risks,Risiko Potensial,src/features/matches/components/match-analysis-screen.tsx,,INDO,v,potensi risiko,
+758,Connections,Section,Suggested Roles,Peran yang Disarankan,src/features/matches/components/match-analysis-screen.tsx,,INDO,v,v,
+759,Connections,Section,Suggested Team Structure,Struktur Tim yang Disarankan,src/features/matches/components/match-analysis-screen.tsx,,INDO,v,v,
+760,Connections,Section,Skill Complementarity,Komplementaritas Skill,src/features/matches/mock/matches.mock.ts,,INDO,v,v,
+761,Connections,Message,Your skills complement each other well for building a technology startup.,Skill kamu saling melengkapi dengan baik untuk membangun startup teknologi.,src/features/matches/mock/matches.mock.ts,,INDO,v,Skill kamu saling melengkapi dengan baik untuk membangun.... (startup teknologi.),
+  Profile,,,,,,,,,,
+762,Profile,Label,My profile,Profil saya,src/features/profile/components/profile-screen.tsx,,INDO,v,profilku,
+763,Profile,Label,Using fallback profile,Menggunakan profil fallback,src/features/profile/components/profile-screen.tsx,,INDO,v,lagi pakai analisis cadangan,
+764,Profile,Label,Syncing profile,Menyinkronkan profil,src/features/profile/components/profile-screen.tsx,,INDO,v,v,
+765,Profile,Button,Edit Profile,Edit Profil,src/features/profile/components/profile-screen.tsx,,INDO,v,v,
+766,Profile,Stat,Connections,Koneksi,src/features/profile/components/profile-screen.tsx,,INDO,v,v,
+767,Profile,Stat,Teams Joined,Tim yang Diikuti,src/features/profile/components/profile-screen.tsx,,INDO,v,v,
+768,Profile,Stat,Matches,Match,src/features/profile/components/profile-screen.tsx,,INDO,Connections,Koneksi ,
+769,Profile,Section,Startup Idea,Ide Startup,src/features/profile/components/profile-screen.tsx,,INDO,v,v,
+770,Profile,Section,Personality & Hobbies,Kepribadian & Hobby,src/features/profile/components/profile-screen.tsx,,INDO,v,kepribadian & minat,
+771,Profile,Section,Skills,Skill,src/features/profile/components/profile-screen.tsx,,INDO,v,v,
+772,Profile,Section,Interests,Minat,src/features/profile/components/profile-screen.tsx,,INDO,v,v,
+773,Profile,Button,Sign Out,Keluar,src/features/profile/components/profile-screen.tsx,,INDO,v,v,
+774,Profile,Heading,Edit Profile,Edit Profil,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+775,Profile,Label,Full Name,Nama Lengkap,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+776,Profile,Placeholder,Enter your full name,Masukkan nama lengkap kamu,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+777,Profile,Label,Title / Headline,Judul / Headline,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+778,Profile,Placeholder,Enter your headline,Masukkan headline kamu,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+779,Profile,Label,Location,Lokasi,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+780,Profile,Placeholder,"City, Country","Kota, Negara",src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+781,Profile,Label,Startup Idea,Ide Startup,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+782,Profile,Placeholder,Describe your startup idea,Jelaskan ide startup kamu,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+783,Profile,Section,Personality & Hobbies,Kepribadian & Hobby,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+784,Profile,Label,X/6 selected,X/6 dipilih,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+785,Profile,Button,Cancel,Batal,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+786,Profile,Button,Save Changes,Simpan Perubahan,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+787,Profile,Error,Full name is required.,Nama lengkap wajib diisi.,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+788,Profile,Error,Full name must be 100 characters or fewer.,Nama lengkap maksimal 100 karakter.,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+789,Profile,Error,Headline is required.,Headline wajib diisi.,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+790,Profile,Error,Headline must be 120 characters or fewer.,Headline maksimal 120 karakter.,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+791,Profile,Error,Location is required.,Lokasi wajib diisi.,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+792,Profile,Error,Location must be 120 characters or fewer.,Lokasi maksimal 120 karakter.,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+793,Profile,Error,Startup idea is required.,Ide startup wajib diisi.,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+794,Profile,Error,Startup idea must be 500 characters or fewer.,Ide startup maksimal 500 karakter.,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+795,Profile,Error,You can select up to 6 personality and hobby tags.,Kamu bisa memilih maksimal 6 tag kepribadian dan hobby.,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+796,Profile,Error,Unable to save profile changes.,Tidak dapat menyimpan perubahan profil.,src/features/profile/components/edit-profile-modal.tsx,,INDO,v,v,
+797,Profile,Badge,Startup Founder,Founder Startup,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+798,Profile,Badge,Top Builder,Builder Teratas,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+799,Profile,Badge,Open Source,Open Source,src/features/profile/mock/profile.mock.ts,,NOT INDO,v,v,
+800,Profile,Tag,Goal-Oriented,Berorientasi Tujuan,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+801,Profile,Tag,Problem Solver,Penyelesai Masalah,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+802,Profile,Tag,Coffee Enthusiast,Pecinta Kopi,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+803,Profile,Tag,Avid Reader,Pembaca Rajin,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+804,Profile,Tag,Marathon Runner,Pelari Maraton,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+805,Profile,Tag,Guitar Player,Pemain Gitar,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+806,Profile,Tag,High-Energy,Berenergi Tinggi,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+807,Profile,Tag,Competitive,Kompetitif,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+808,Profile,Tag,Metrics-Obsessed,Terobsesi Metrik,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+809,Profile,Tag,Creative,Kreatif,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+810,Profile,Tag,Hustler,Hustler,src/features/profile/mock/profile.mock.ts,,NOT INDO,v,v,
+811,Profile,Tag,Data-Driven,Berbasis Data,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+812,Profile,Tag,Connector,Penghubung,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+813,Profile,Tag,Mindful,Sadar,src/features/profile/mock/profile.mock.ts,,INDO,v,penuh kesadaran,
+814,Profile,Tag,Visionary,Visioner,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+815,Profile,Tag,Systems Thinker,Pemikir Sistem,src/features/profile/mock/profile.mock.ts,,INDO,v,berpikir sistematis,
+816,Profile,Highlight,5+ years startup experience,Pengalaman startup 5+ tahun,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+817,Profile,Highlight,"MBA, London Business School","MBA, London Business School",src/features/profile/mock/profile.mock.ts,,NOT INDO,v,v,
+818,Profile,Highlight,"English, Bahasa Indonesia","English, Bahasa Indonesia",src/features/profile/mock/profile.mock.ts,,NOT INDO,v,v,
+819,Profile,Skill,Strategy,Strategi,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+820,Profile,Skill,BD,BD,src/features/profile/mock/profile.mock.ts,,NOT INDO,v,v,
+821,Profile,Skill,Fundraising,Fundraising,src/features/profile/mock/profile.mock.ts,,NOT INDO,v,v,
+822,Profile,Skill,Product,Produk,src/features/profile/mock/profile.mock.ts,,INDO,v,v,
+823,Profile,Skill,GTM,GTM,src/features/profile/mock/profile.mock.ts,,NOT INDO,v,v,
+824,Profile,Interest,Fintech,Fintech,src/features/profile/mock/profile.mock.ts,,NOT INDO,v,v,
+825,Profile,Interest,AI/ML,AI/ML,src/features/profile/mock/profile.mock.ts,,NOT INDO,v,v,
+826,Profile,Interest,SaaS,SaaS,src/features/profile/mock/profile.mock.ts,,NOT INDO,v,v,
+827,Profile,Interest,B2B,B2B,src/features/profile/mock/profile.mock.ts,,NOT INDO,v,v,
+  Team,,,,,,,,,,
+828,Team,Heading,Startup Team Builder,Builder Tim Startup,src/features/team/components/team-screen.tsx,,INDO,v,v,
+829,Team,Label,Startup Name,Nama Startup,src/features/team/components/team-screen.tsx,,INDO,v,v,
+830,Team,Label,Startup Idea,Ide Startup,src/features/team/components/team-screen.tsx,,INDO,v,v,
+831,Team,Label,Industry,Industri,src/features/team/components/team-screen.tsx,,INDO,v,v,
+832,Team,Label,Stage,Tahap,src/features/team/components/team-screen.tsx,,INDO,v,v,
+833,Team,Section,Team Completeness,Kelengkapan Tim,src/features/team/components/team-screen.tsx,,INDO,v,v,
+834,Team,Section,Team Members,Anggota Tim,src/features/team/components/team-screen.tsx,,INDO,v,v,
+835,Team,Label,Equity: X%,Equity: X%,src/features/team/components/team-screen.tsx,,NOT INDO,v,v,
+836,Team,Label,You,Kamu,src/features/team/components/team-screen.tsx,,INDO,v,v,
+837,Team,Label,Early Team,Tim Awal,src/features/team/components/team-screen.tsx,,INDO,v,v,
+838,Team,Button,Find,Cari,src/features/team/components/team-screen.tsx,,INDO,v,v,
+839,Team,Label,Full-time,Full-time,src/features/team/components/team-screen.tsx,,NOT INDO,v,v,
+840,Team,Label,Part-time,Part-time,src/features/team/components/team-screen.tsx,,NOT INDO,v,v,
+841,Team,Label,Flexible,Fleksibel,src/features/team/components/team-screen.tsx,,INDO,v,v,
+842,Team,Button,Find Members,Cari Anggota,src/features/team/components/team-screen.tsx,,INDO,v,v,
+843,Team,Button,Invite,Undang,src/features/team/components/team-screen.tsx,,INDO,v,v,
+844,Team,Empty,Loading team,Memuat tim,src/features/team/components/team-screen.tsx,,INDO,v,v,
+845,Team,Empty,Pulling the latest startup details and team structure.,Mengambil detail startup dan struktur tim terbaru.,src/features/team/components/team-screen.tsx,,INDO,v,v,
+846,Team,Error,No startup team yet,Belum ada tim startup,src/features/team/components/team-screen.tsx,,INDO,v,v,
+847,Team,Error,"This account is not linked to an active startup yet. Once you create or join a startup team, it will show up here.","Akun ini belum terhubung dengan startup aktif. Setelah kamu membuat atau bergabung dengan tim startup, akan muncul di sini.",src/features/team/components/team-screen.tsx,,INDO,v,v,
+848,Team,Error,Unable to load team,Tidak dapat memuat tim,src/features/team/components/team-screen.tsx,,INDO,v,v,
+849,Team,Error,We could not load your startup team right now. Try again in a moment.,Kami tidak dapat memuat tim startup kamu saat ini. Coba lagi sebentar.,src/features/team/components/team-screen.tsx,,INDO,v,v,
+850,Team,Button,Try Again,Coba Lagi,src/features/team/components/team-screen.tsx,,INDO,v,v,
+851,Team,Button,Refreshing...,Menyegarkan...,src/features/team/components/team-screen.tsx,,INDO,v,memuat ulang..,
+852,Team,Section,Invite by email,Undang via email,src/features/team/components/team-screen.tsx,,INDO,v,v,
+853,Team,Description,Send a team invitation using the startup linked to your current account.,Kirim undangan tim menggunakan startup yang terhubung dengan akun kamu.,src/features/team/components/team-screen.tsx,,INDO,v,v,
+854,Team,Label,Email,Email,src/features/team/components/team-screen.tsx,,NOT INDO,v,v,
+855,Team,Placeholder,person@example.com,orang@contoh.com,src/features/team/components/team-screen.tsx,,INDO,v,v,
+856,Team,Button,Cancel,Batal,src/features/team/components/team-screen.tsx,,INDO,v,v,
+857,Team,Button,Send Invite,Kirim Undangan,src/features/team/components/team-screen.tsx,,INDO,v,v,
+858,Team,Button,Sending...,Mengirim...,src/features/team/components/team-screen.tsx,,INDO,v,v,
+859,Team,Error,Enter a valid email address.,Masukkan alamat email yang valid.,src/features/team/components/team-screen.tsx,,INDO,v,v,
+860,Team,Error,Unable to send invitation.,Tidak dapat mengirim undangan.,src/features/team/components/team-screen.tsx,,INDO,v,v,
+861,Team,Placeholder,No startup description yet.,Belum ada deskripsi startup.,src/features/team/components/team-screen.tsx,,INDO,v,v,
+862,Team,Message,Invitation sent to {email},Undangan dikirim ke {email},src/features/team/mock/team.mock.ts,,INDO,v,v,
+  RevenueCat,,,,,,,,,,
+863,RevenueCat,Heading,ConnectX Pro,ConnectX Pro,src/features/revenuecat/components/connectx-pro-card.tsx,,NOT INDO,v,v,
+864,RevenueCat,Badge,ConnectX Pro Active,ConnectX Pro Aktif,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+865,RevenueCat,Badge,Upgrade Available,Upgrade Tersedia,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+866,RevenueCat,Label,Entitlement,Hak Akses,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+867,RevenueCat,Label,Active,Aktif,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+868,RevenueCat,Label,Inactive,Tidak Aktif,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+869,RevenueCat,Label,RevenueCat customer,Pelanggan RevenueCat,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+870,RevenueCat,Label,Anonymous customer,Pelanggan anonim,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+871,RevenueCat,Label,No customer info loaded yet,Info pelanggan belum dimuat,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+872,RevenueCat,Label,Current offering,Penawaran saat ini,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+873,RevenueCat,Label,No offering returned,Tidak ada penawaran dikembalikan,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+874,RevenueCat,Option,Lifetime,Selamanya,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+875,RevenueCat,Option,Yearly,Tahunan,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+876,RevenueCat,Option,Monthly,Bulanan,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+877,RevenueCat,Detail,Permanent unlock,Buka kunci permanen,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+878,RevenueCat,Detail,Best long-term value,Nilai jangka panjang terbaik,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+879,RevenueCat,Detail,Most flexible option,Opsi paling fleksibel,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+880,RevenueCat,Message,"RevenueCat manages the paywall, offerings, purchases, restores, and the entitlement check for this account.","RevenueCat mengelola paywall, penawaran, pembelian, pemulihan, dan pemeriksaan hak akses untuk akun ini.",src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+881,RevenueCat,Message,No renewal date. This usually means lifetime access.,Tidak ada tanggal perpanjangan. Ini biasanya berarti akses seumur hidup.,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+882,RevenueCat,Message,Renews or expires on {date}.,Diperpanjang atau berakhir pada {tanggal}.,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+883,RevenueCat,Message,Renewal date available in RevenueCat customer info.,Tanggal perpanjangan tersedia di info pelanggan RevenueCat.,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+884,RevenueCat,Message,Not configured in the current offering,Tidak dikonfigurasi di penawaran saat ini,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+885,RevenueCat,Message,Add the {package} package to the current RevenueCat offering.,Tambahkan paket {paket} ke penawaran RevenueCat saat ini.,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+886,RevenueCat,Button,Manage Subscription,Kelola Langganan,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+887,RevenueCat,Button,Show Paywall,Tampilkan Paywall,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+888,RevenueCat,Button,Open Paywall Directly,Buka Paywall Langsung,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+889,RevenueCat,Button,Working...,Bekerja...,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,sedang memproses,
+890,RevenueCat,Button,Refresh Subscription State,Segarkan Status Langganan,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,muat ulang status langganan,
+891,RevenueCat,Button,Refreshing...,Menyegarkan...,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,memuat ulang,
+892,RevenueCat,Button,Restore Purchases,Pulihkan Pembelian,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+893,RevenueCat,Button,Restoring...,Memulihkan...,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+894,RevenueCat,Button,Buy Lifetime,Beli Selamanya,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+895,RevenueCat,Button,Buy Yearly,Beli Tahunan,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+896,RevenueCat,Button,Buy Monthly,Beli Bulanan,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+897,RevenueCat,Button,Processing...,Memproses...,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+898,RevenueCat,Detail,Open RevenueCat Customer Center,Buka Pusat Pelanggan RevenueCat,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+899,RevenueCat,Detail,Present the current RevenueCat paywall,Sajikan paywall RevenueCat saat ini,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+900,RevenueCat,Detail,Force-refresh customer info and offerings,Paksa segarkan info pelanggan dan penawaran,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+901,RevenueCat,Detail,Restore previous purchases for this customer,Pulihkan pembelian sebelumnya untuk pelanggan ini,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+902,RevenueCat,Detail,Present the paywall without entitlement gating,Sajikan paywall tanpa gerbang hak akses,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+903,RevenueCat,Message,ConnectX Pro is now active on this account.,ConnectX Pro sekarang aktif di akun ini.,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+904,RevenueCat,Message,Your previous purchase was restored successfully.,Pembelian sebelumnya kamu dipulihkan berhasil.,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+905,RevenueCat,Message,"You already have ConnectX Pro, so the paywall was skipped.","Kamu sudah punya ConnectX Pro, jadi paywall dilewati.",src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+906,RevenueCat,Message,The purchase could not be completed.,Pembelian tidak dapat diselesaikan.,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+907,RevenueCat,Message,ConnectX Pro was restored successfully.,ConnectX Pro dipulihkan berhasil.,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+908,RevenueCat,Error,"RevenueCat purchases are available in the iOS and Android native builds. Web keeps the rest of the account UI available, but does not initialize the purchase SDK.","Pembelian RevenueCat tersedia di build native iOS dan Android. Web menyimpan UI akun lainnya, tapi tidak menginisialisasi SDK pembelian.",src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+909,RevenueCat,Label,Available packages,Paket yang tersedia,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+910,RevenueCat,Error,RevenueCat error,Error RevenueCat,src/features/revenuecat/components/connectx-pro-card.tsx,,INDO,v,v,
+  Products,,,,,,,,,,
+911,Products,Badge,Market,Pasar,src/features/products/components/products-screen.tsx,,INDO,v,v,
+912,Products,Heading,"Curated offers, priced for quick decisions.","Penawaran kurasi, dihargai untuk keputusan cepat.",src/features/products/components/products-screen.tsx,,INDO,v,v,
+913,Products,Description,"Keep the summary numbers up top, then move into compact offer cards with only the details that influence action.","Pertahankan angka ringkasan di atas, lalu beralih ke kartu penawaran ringkas dengan detail yang memengaruhi tindakan saja.",src/features/products/components/products-screen.tsx,,INDO,v,v,
+914,Products,Empty,Loading market data,Memuat data pasar,src/features/products/components/products-screen.tsx,,INDO,v,v,
+915,Products,Empty,Offer inventory is syncing into the local view.,Inventaris penawaran disinkronkan ke tampilan lokal.,src/features/products/components/products-screen.tsx,,INDO,v,v,
+916,Products,Error,Could not load market data,Tidak dapat memuat data pasar,src/features/products/components/products-screen.tsx,,INDO,v,v,
+917,Products,Button,Retry,Coba Lagi,src/features/products/components/products-screen.tsx,,INDO,v,v,
+918,Products,Detail,Fetch the latest offers again,Ambil penawaran terbaru lagi,src/features/products/components/products-screen.tsx,,INDO,v,v,
+919,Products,Label,Total,Total,src/features/products/components/products-screen.tsx,,NOT INDO,v,v,
+920,Products,Label,Ticket,Tiket,src/features/products/components/products-screen.tsx,,INDO,v,v,
+921,Products,Label,Low Stock,Stok Rendah,src/features/products/components/products-screen.tsx,,INDO,v,v,
+922,Products,Detail,Tracked offers,Penawaran yang dilacak,src/features/products/components/products-screen.tsx,,INDO,v,v,
+923,Products,Detail,Average price,Harga rata-rata,src/features/products/components/products-screen.tsx,,INDO,v,v,
+924,Products,Detail,Need attention,Perlu perhatian,src/features/products/components/products-screen.tsx,,INDO,v,v,
+  Chat,,,,,,,,,,
+925,Chat,Heading,Chat,Chat,src/features/chat/components/chat-screen.tsx,,NOT INDO,v,chat,
