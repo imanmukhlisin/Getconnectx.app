@@ -174,17 +174,46 @@ class UserResource extends Resource
                     ->falseColor('gray'),
 
                 Tables\Columns\TextColumn::make('status')
-                    ->label('Status')
+                    ->label('Aktivitas')
                     ->badge()
                     ->getStateUsing(function (User $record) {
                         if ($record->is_blocked) return 'Diblokir';
-                        return $record->is_active ? 'Aktif' : 'Tidak Aktif';
+
+                        $latestToken = $record->tokens()->orderBy('last_used_at', 'desc')->first();
+                        $lastActive = $latestToken ? $latestToken->last_used_at : null;
+
+                        if (!$lastActive) {
+                            if (!$record->is_onboarded && $record->created_at && $record->created_at->diffInDays(now()) > 30) {
+                                return 'Tidak Aktif';
+                            }
+                            return 'Belum Login';
+                        }
+
+                        $diffDays = $lastActive->startOfDay()->diffInDays(now()->startOfDay());
+
+                        if ($diffDays == 0) {
+                            return 'Aktif Sekarang';
+                        } elseif ($diffDays == 1) {
+                            return 'Kemarin';
+                        } elseif ($diffDays < 7) {
+                            return "{$diffDays} hari yang lalu";
+                        } elseif ($diffDays < 30) {
+                            $weeks = floor($diffDays / 7);
+                            return "{$weeks} minggu yang lalu";
+                        } else {
+                            return 'Tidak Aktif (> 1 bln)';
+                        }
                     })
                     ->color(fn (string $state): string => match ($state) {
-                        'Aktif' => 'success',
-                        'Tidak Aktif' => 'warning',
-                        'Diblokir' => 'danger',
-                    }),
+                        'Aktif Sekarang' => 'success',
+                        'Kemarin' => 'info',
+                        'Diblokir', 'Tidak Aktif', 'Tidak Aktif (> 1 bln)', 'Belum Login' => 'danger',
+                        default => str_contains($state, 'hari') ? 'info' : 'warning',
+                    })
+                    ->icon(fn (string $state): ?string => $state === 'Aktif Sekarang' ? 'heroicon-s-sparkles' : null)
+                    ->extraAttributes(fn (string $state): array => $state === 'Aktif Sekarang' ? [
+                        'class' => 'animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.8)]',
+                    ] : []),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Tgl Daftar')

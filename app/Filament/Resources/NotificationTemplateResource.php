@@ -75,23 +75,7 @@ class NotificationTemplateResource extends Resource
                                 ->rows(4)
                                 ->required(),
                         ]),
-                    ])->columnSpan(2),
-
-                    // Kolom Kanan: Live Preview (Mobile)
-                    Forms\Components\Group::make()->schema([
-                        Forms\Components\Section::make('Live Preview (ID)')->schema([
-                            Forms\Components\Placeholder::make('live_preview')
-                                ->label('')
-                                ->content(function (\Filament\Forms\Get $get) {
-                                    return view('filament.components.notification-preview', [
-                                        'type' => $get('type') ?: 'push',
-                                        'subject' => $get('subject_id') ?: 'Judul Notifikasi...',
-                                        'body' => $get('body_id') ?: 'Isi pesan akan muncul secara otomatis di sini...',
-                                    ]);
-                                })
-                        ]),
-                    ])->columnSpan(1),
-                    
+                    ])->columnSpan(3),
                 ]),
             ]);
     }

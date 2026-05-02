@@ -36,6 +36,18 @@ class StatsOverviewWidget extends BaseWidget
             $sparkOnboarded[] = User::where('is_onboarded', true)->whereDate('updated_at', '<=', $date)->count();
             $sparkBlocked[] = User::where('is_blocked', true)->whereDate('updated_at', '<=', $date)->count();
         }
+        $activeToday = User::whereHas('tokens', function ($q) {
+            $q->whereDate('last_used_at', '>=', Carbon::today());
+        })->count();
+
+        $inactive = User::where(function ($query) {
+            $query->whereHas('tokens', function ($q) {
+                $q->where('last_used_at', '<', Carbon::now()->subDays(30));
+            })->orWhere(function ($q2) {
+                $q2->whereDoesntHave('tokens')
+                   ->where('created_at', '<', Carbon::now()->subDays(30));
+            });
+        })->count();
 
         return [
             Stat::make('Total User Terdaftar', number_format($totalUsers))
@@ -55,6 +67,21 @@ class StatsOverviewWidget extends BaseWidget
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->icon('heroicon-o-clipboard-document-check')
                 ->color('warning'),
+
+            Stat::make('Aktif Hari Ini', number_format($activeToday))
+                ->description('Login / Sesi dalam 24 jam terakhir')
+                ->descriptionIcon('heroicon-m-bolt')
+                ->icon('heroicon-o-sparkles')
+                ->color('success')
+                ->extraAttributes([
+                    'class' => $activeToday > 0 ? 'animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.6)]' : '',
+                ]),
+
+            Stat::make('Tidak Aktif', number_format($inactive))
+                ->description('> 1 bulan tanpa aktivitas')
+                ->descriptionIcon('heroicon-m-clock')
+                ->icon('heroicon-o-sleep')
+                ->color('danger'),
 
             Stat::make('Akun Diblokir', number_format($blocked))
                 ->description($blocked > 0 ? 'Perlu perhatian admin' : 'Tidak ada akun yang diblokir')
