@@ -147,7 +147,14 @@ class NotificationTemplateResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
-            ->recordClasses('transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_15px_30px_-5px_rgba(249,115,22,0.15)] hover:border-orange-500/40 cursor-pointer')
+            ->recordClasses(fn ($record) => match ($record->name) {
+                'account_created' => 'border-t-4 border-t-green-500 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_15px_30px_-5px_rgba(34,197,94,0.15)] hover:border-green-500/40 cursor-pointer',
+                'password_reset' => 'border-t-4 border-t-red-500 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_15px_30px_-5px_rgba(239,68,68,0.15)] hover:border-red-500/40 cursor-pointer',
+                'otp_login' => 'border-t-4 border-t-blue-500 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_15px_30px_-5px_rgba(59,130,246,0.15)] hover:border-blue-500/40 cursor-pointer',
+                'new_match' => 'border-t-4 border-t-purple-500 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_15px_30px_-5px_rgba(168,85,247,0.15)] hover:border-purple-500/40 cursor-pointer',
+                'new_message' => 'border-t-4 border-t-orange-500 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_15px_30px_-5px_rgba(249,115,22,0.15)] hover:border-orange-500/40 cursor-pointer',
+                default => 'border-t-4 border-t-gray-500 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_15px_30px_-5px_rgba(107,114,128,0.15)] hover:border-gray-500/40 cursor-pointer',
+            })
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     //
