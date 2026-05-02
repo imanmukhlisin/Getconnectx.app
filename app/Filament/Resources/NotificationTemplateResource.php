@@ -82,6 +82,7 @@ class NotificationTemplateResource extends Resource
                                 ->label('')
                                 ->content(function (\Filament\Forms\Get $get) {
                                     return view('filament.components.notification-preview', [
+                                        'type' => $get('type') ?: 'push',
                                         'subject' => $get('subject_id') ?: 'Judul Notifikasi...',
                                         'body' => $get('body_id') ?: 'Isi pesan akan muncul secara otomatis di sini...',
                                     ]);
