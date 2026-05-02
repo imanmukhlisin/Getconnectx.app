@@ -38,7 +38,6 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo('/images/logo.png')
             ->brandLogoHeight('2rem')
             ->favicon(asset('images/logo.png'))
-            ->globalSearchKeyBinding('command+k')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->renderHook(
                 'panels::head.done',
