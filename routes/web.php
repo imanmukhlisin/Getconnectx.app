@@ -49,3 +49,7 @@ Route::get('/reset-password/{token}', function (string $token, \Illuminate\Http\
         'isExpired' => $isExpired,
     ]);
 })->name('password.reset');
+
+Route::get('/admin', function () {
+    return view('admin.dashboard');
+})->name('admin.dashboard');

@@ -188,7 +188,15 @@ Route::prefix('v1')->group(function () {
         Route::post('{conversation}/typing', [MessageController::class, 'signalTyping'])
             ->name('conversations.typing');
     });
+
+    // ─── Admin API ────────────────────────────────────────────────────────────
+    Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
+        Route::get('stats',                  [\App\Http\Controllers\Admin\AdminUserController::class, 'stats']);
+        Route::get('users',                  [\App\Http\Controllers\Admin\AdminUserController::class, 'index']);
+        Route::get('users/{id}',             [\App\Http\Controllers\Admin\AdminUserController::class, 'show']);
+        Route::post('users/{id}/block',      [\App\Http\Controllers\Admin\AdminUserController::class, 'block']);
+        Route::post('users/{id}/unblock',    [\App\Http\Controllers\Admin\AdminUserController::class, 'unblock']);
+        Route::get('notifications',          [\App\Http\Controllers\Admin\AdminUserController::class, 'notifications']);
+        Route::patch('notifications/{id}',   [\App\Http\Controllers\Admin\AdminUserController::class, 'updateNotification']);
+    });
 });
-
-
-
