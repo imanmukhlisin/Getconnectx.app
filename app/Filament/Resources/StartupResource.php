@@ -116,7 +116,7 @@ class StartupResource extends Resource
                     ]),
                 Tables\Filters\SelectFilter::make('industry')
                     ->label('Industri')
-                    ->relationship('tags', 'name', fn (Builder $query) => $query->where('category', 'industry')),
+                    ->relationship('tags', 'name', fn (Builder $query) => $query->where('type', 'industry')),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
