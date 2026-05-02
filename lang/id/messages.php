@@ -15,6 +15,12 @@ return [
     'login_success' => 'Login berhasil! Selamat datang kembali.',
     'login_failed' => 'Email atau password salah. Silakan coba lagi.',
     'inactive_user' => 'Akun Anda belum aktif. Selesaikan proses registrasi atau verifikasi terlebih dahulu.',
+
+    // Password Reset
+    'reset_link_sent'        => 'Link reset password telah dikirim ke email Anda. Berlaku selama 60 menit.',
+    'reset_link_if_exists'   => 'Jika email terdaftar, link reset password akan dikirim.',
+    'reset_password_success' => 'Password berhasil diperbarui. Silakan login dengan password baru.',
+    'reset_token_expired'    => 'Link reset password telah kadaluarsa atau tidak valid. Silakan request ulang.',
     
     // OAuth Responses
     'oauth_provider_unsupported' => "Provider ':provider' tidak didukung. Gunakan: :allowed.",

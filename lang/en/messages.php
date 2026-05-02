@@ -15,6 +15,12 @@ return [
     'login_success' => 'Login successful! Welcome back.',
     'login_failed' => 'Invalid email or password. Please try again.',
     'inactive_user' => 'Your account is not active yet. Please complete the registration or verification process first.',
+
+    // Password Reset
+    'reset_link_sent'        => 'Password reset link has been sent to your email. Valid for 60 minutes.',
+    'reset_link_if_exists'   => 'If that email is registered, a reset link will be sent.',
+    'reset_password_success' => 'Password updated successfully. You can now log in with your new password.',
+    'reset_token_expired'    => 'The reset link has expired or is invalid. Please request a new one.',
     
     // OAuth Responses
     'oauth_provider_unsupported' => "Provider ':provider' is not supported. Use: :allowed.",

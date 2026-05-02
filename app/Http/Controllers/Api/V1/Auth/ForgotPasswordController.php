@@ -30,7 +30,7 @@ class ForgotPasswordController extends Controller
         if (! $user) {
             return response()->json([
                 'status'  => 'success',
-                'message' => 'Jika email terdaftar, link reset password akan dikirim.',
+                'message' => __('messages.reset_link_if_exists'),
             ]);
         }
 
@@ -38,7 +38,7 @@ class ForgotPasswordController extends Controller
 
         return response()->json([
             'status'  => 'success',
-            'message' => 'Link reset password telah dikirim ke email Anda. Berlaku selama 60 menit.',
+            'message' => __('messages.reset_link_sent'),
         ]);
     }
 
@@ -58,7 +58,7 @@ class ForgotPasswordController extends Controller
 
         return response()->json([
             'status'  => 'success',
-            'message' => 'Password berhasil diperbarui. Silakan login dengan password baru.',
+            'message' => __('messages.reset_password_success'),
         ]);
     }
 }
