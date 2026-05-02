@@ -37,6 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->authGuard('admin')
             ->brandLogo('/images/logo.png')
             ->brandLogoHeight('3rem')
+            ->favicon(asset('images/logo.png'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->pages([
                 Pages\Dashboard::class,

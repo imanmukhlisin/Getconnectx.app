@@ -80,7 +80,7 @@ class StatsOverviewWidget extends BaseWidget
             Stat::make('Tidak Aktif', number_format($inactive))
                 ->description('> 1 bulan tanpa aktivitas')
                 ->descriptionIcon('heroicon-m-clock')
-                ->icon('heroicon-o-sleep')
+                ->icon('heroicon-o-moon')
                 ->color('danger'),
 
             Stat::make('Akun Diblokir', number_format($blocked))
