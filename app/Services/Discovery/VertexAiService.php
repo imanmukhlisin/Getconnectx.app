@@ -92,34 +92,35 @@ PROMPT;
     // ═══════════════════════════════════════════════════════════════════
 
     /**
-     * Fetch a public LinkedIn profile page and use Gemini to extract
-     * structured professional data from it.
+     * Extract structured professional data from a LinkedIn public profile.
      *
-     * Returns a normalized array ready to be persisted to the database,
-     * or null if the page could not be fetched or parsed.
+     * Strategy — tries sources in order, stops at first success:
+     *   1. Direct fetch with LinkedIn-compatible User-Agent headers
+     *   2. Google Cache of the LinkedIn page
+     *   3. Mobile LinkedIn endpoint (often less aggressively blocked)
      *
-     * @param  string $linkedinUrl The public LinkedIn profile URL (e.g. https://www.linkedin.com/in/username)
-     * @return array|null
-     */
-    /**
-     * Use Gemini with Google Search Grounding to extract structured professional
-     * data directly from a LinkedIn public profile URL.
+     * The resulting plain text is then parsed by Gemini 1.5 Pro (no grounding
+     * required — uses the same credential infrastructure as Discovery insights).
      *
-     * This approach does NOT fetch LinkedIn HTML directly (which is blocked by
-     * LinkedIn on cloud/serverless IPs). Instead, it leverages Gemini's built-in
-     * Google Search grounding to retrieve and read the page through Google's
-     * own infrastructure, which is always allowed.
-     *
-     * @param  string $linkedinUrl The public LinkedIn profile URL.
-     * @return array|null Structured profile data, or null on failure.
+     * @param  string $linkedinUrl  Public LinkedIn profile URL.
+     * @return array|null           Structured profile data, or null if unavailable.
      */
     public function scrapeAndParseLinkedIn(string $linkedinUrl): ?array
     {
-        try {
-            $prompt  = $this->buildLinkedInExtractionPrompt($linkedinUrl);
-            $rawJson = $this->callVertexAiWithGrounding($prompt);
+        $plainText = $this->fetchLinkedInProfileText($linkedinUrl);
 
-            // Strip markdown code fences Gemini may add around the JSON
+        if (!$plainText) {
+            Log::warning('VertexAiService@scrapeAndParseLinkedIn: All fetch attempts failed, cannot parse profile.', [
+                'url' => $linkedinUrl,
+            ]);
+            return null;
+        }
+
+        try {
+            $prompt  = $this->buildLinkedInExtractionPrompt($plainText, $linkedinUrl);
+            $rawJson = $this->callGeminiForExtraction($prompt);
+
+            // Strip markdown code fences Gemini may add
             $rawJson = preg_replace('/^```(?:json)?\s*/i', '', trim($rawJson));
             $rawJson = preg_replace('/\s*```$/', '', $rawJson);
 
@@ -128,7 +129,7 @@ PROMPT;
             if (!is_array($parsed) || empty($parsed['headline'])) {
                 Log::warning('VertexAiService@scrapeAndParseLinkedIn: Gemini returned invalid or empty JSON.', [
                     'url'      => $linkedinUrl,
-                    'raw_json' => $rawJson,
+                    'raw_json' => substr($rawJson, 0, 500),
                 ]);
                 return null;
             }
@@ -155,7 +156,7 @@ PROMPT;
             ];
 
         } catch (\Throwable $e) {
-            Log::error('VertexAiService@scrapeAndParseLinkedIn: Gemini grounding call failed.', [
+            Log::error('VertexAiService@scrapeAndParseLinkedIn: Gemini extraction failed.', [
                 'url'   => $linkedinUrl,
                 'error' => $e->getMessage(),
             ]);
@@ -164,25 +165,84 @@ PROMPT;
     }
 
     /**
-     * Build the grounded extraction prompt for Gemini.
-     * No HTML text is needed — Gemini will search and read the page itself.
+     * Try multiple sources to get plain text from a LinkedIn profile page.
+     * Returns the first successful result, or null if all sources fail.
      */
-    private function buildLinkedInExtractionPrompt(string $linkedinUrl): string
+    private function fetchLinkedInProfileText(string $linkedinUrl): ?string
+    {
+        $attempts = [
+            // Attempt 1: Direct fetch — mimics LinkedIn's own bot crawler
+            fn() => \Illuminate\Support\Facades\Http::withHeaders([
+                'User-Agent'      => 'LinkedInBot/1.0 (compatible; LinkedInBot/1.0; +http://www.linkedin.com/)',
+                'Accept-Language' => 'en-US,en;q=0.9',
+                'Accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            ])->timeout(12)->get($linkedinUrl),
+
+            // Attempt 2: Google Cache — may contain an indexed snapshot
+            fn() => \Illuminate\Support\Facades\Http::withHeaders([
+                'User-Agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+            ])->timeout(12)->get(
+                'https://webcache.googleusercontent.com/search?q=cache:' . urlencode($linkedinUrl) . '&hl=en'
+            ),
+
+            // Attempt 3: LinkedIn mobile endpoint — sometimes has lighter bot protection
+            fn() => \Illuminate\Support\Facades\Http::withHeaders([
+                'User-Agent'      => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
+                'Accept-Language' => 'en-US,en;q=0.9',
+            ])->timeout(12)->get(str_replace('www.linkedin.com', 'm.linkedin.com', $linkedinUrl)),
+        ];
+
+        foreach ($attempts as $index => $attempt) {
+            try {
+                $response = $attempt();
+
+                if ($response->successful() && strlen($response->body()) > 500) {
+                    $html = $response->body();
+
+                    // Strip scripts, styles, and tags — keep readable text only
+                    $text = preg_replace('/<(script|style)[^>]*>.*?<\/\1>/si', '', $html);
+                    $text = strip_tags($text);
+                    $text = preg_replace('/\s+/', ' ', $text);
+                    $text = trim($text);
+                    $text = mb_substr($text, 0, 6000);
+
+                    if (strlen($text) > 200) {
+                        Log::info('VertexAiService@fetchLinkedInProfileText: Fetched successfully.', [
+                            'attempt' => $index + 1,
+                            'chars'   => strlen($text),
+                        ]);
+                        return $text;
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::debug('VertexAiService@fetchLinkedInProfileText: Attempt ' . ($index + 1) . ' failed.', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Build the extraction prompt for Gemini — plain text version (no grounding).
+     */
+    private function buildLinkedInExtractionPrompt(string $profileText, string $linkedinUrl): string
     {
         return <<<PROMPT
-You are a professional data extraction assistant with access to Google Search.
-Your task is to look up the following LinkedIn profile URL using your search capability and extract the person's professional data.
+You are a professional data extraction assistant.
+Extract structured professional information from the following LinkedIn profile page text.
 
-LinkedIn Profile URL: {$linkedinUrl}
-
-After retrieving the profile data, return it as a SINGLE valid JSON object.
+Profile URL: {$linkedinUrl}
 
 STRICT OUTPUT RULES:
-- Output ONLY the raw JSON. No markdown, no code fences, no explanation before or after.
+- Output ONLY the raw JSON object. No markdown, no code fences, no explanation.
 - If a field cannot be found, use null (for strings) or [] (for arrays).
 - For "experiences", include a maximum of 3 most recent roles.
-- For "photo_url", return null — profile photos are not publicly indexable.
-- For "bio_summary", write a compelling 3–4 sentence FIRST-PERSON professional summary that highlights the person's potential as a Startup Founder or Partner. Base it on their headline and work history. Do NOT copy their LinkedIn About section verbatim.
+- For "photo_url", always return null — image URLs are not parseable from text.
+- For "bio_summary", write a compelling 3-4 sentence FIRST-PERSON professional summary
+  highlighting the person's potential as a Startup Founder or Partner. Do NOT copy
+  the person's own About section verbatim.
 
 Required JSON structure (do not add or remove any keys):
 {
@@ -197,6 +257,11 @@ Required JSON structure (do not add or remove any keys):
   ],
   "bio_summary": "3-4 sentence first-person professional bio."
 }
+
+Profile text:
+---
+{$profileText}
+---
 PROMPT;
     }
 
@@ -322,23 +387,21 @@ PROMPT;
         return $data['candidates'][0]['content']['parts'][0]['text'] ?? 'AI insight unavailable.';
     }
 
+
     /**
-     * Call Vertex AI (Gemini 2.0 Flash) with built-in Google Search grounding.
-     * Used by: scrapeAndParseLinkedIn().
+     * Call Gemini 1.5 Pro for LinkedIn data extraction.
+     * Uses the same credential infrastructure as callVertexAi() (Discovery insights)
+     * but with a higher token limit appropriate for parsing profile text.
      *
-     * IMPORTANT: gemini-2.0-flash-001 supports native 'googleSearch' grounding
-     * without requiring Vertex AI Search service setup.
-     * gemini-1.5-pro uses 'googleSearchRetrieval' which needs Vertex AI Search
-     * configured separately — do NOT use 1.5 here.
+     * This intentionally does NOT use grounding tools — grounding requires
+     * additional Vertex AI Search project configuration that is not set up.
      */
-    private function callVertexAiWithGrounding(string $prompt): string
+    private function callGeminiForExtraction(string $prompt): string
     {
-        $client    = $this->buildVertexAiClient(45.0);
+        $client    = $this->buildVertexAiClient(30.0);
         $projectId = env('GOOGLE_CLOUD_PROJECT', 'connectx-app-482206');
         $location  = env('VERTEX_LOCATION', 'us-central1');
-
-        // Use Gemini 2.0 Flash — it supports built-in googleSearch grounding natively
-        $endpoint = "v1/projects/{$projectId}/locations/{$location}/publishers/google/models/gemini-2.0-flash-001:generateContent";
+        $endpoint  = "v1/projects/{$projectId}/locations/{$location}/publishers/google/models/gemini-1.5-pro:generateContent";
 
         $response = $client->post($endpoint, [
             'json' => [
@@ -348,12 +411,8 @@ PROMPT;
                         'parts' => [['text' => $prompt]],
                     ],
                 ],
-                // googleSearch is the correct built-in tool for Gemini 2.0 on Vertex AI
-                'tools' => [
-                    ['googleSearch' => (object) []],
-                ],
                 'generationConfig' => [
-                    'temperature'     => 0.1,
+                    'temperature'     => 0.1, // Low temperature for factual extraction
                     'maxOutputTokens' => 2048,
                 ],
             ],
@@ -364,4 +423,3 @@ PROMPT;
         return $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
     }
 }
-
