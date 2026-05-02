@@ -1009,7 +1009,7 @@ class OnboardingSeeder extends Seeder
             $s('step_personal_name', 'flow_common', 1, 'Data Diri', 'Siapa nama Anda?', 'What\'s your name?'),
             $s('step_personal_dob', 'flow_common', 2, 'Data Diri', 'Kapan tanggal lahir Anda?', 'When is your date of birth?'),
             $s('step_personal_location', 'flow_common', 3, 'Data Diri', 'Di mana Anda berlokasi?', 'Where are you based?'),
-            $s('step_personal_gender', 'flow_common', 4, 'Data Diri', 'Jenis Kelamin', 'Gender', true),
+            $s('step_personal_gender', 'flow_common', 4, 'Data Diri', 'Bagaimana kamu mengidentifikasi diri?', 'How do you identify?', true, 'Biar kami bisa menyesuaikan pengalamanmu.', 'To help us personalize your experience.'),
             $s('step_role_selection', 'flow_common', 5, 'Tipe Akun', 'Kamu mau pakai ConnectX buat apa?', 'How do you want to use ConnectX?', true, 'Ini bakal nentuin pengalaman kamu di sini.', 'This shapes your entire experience'),
 
             // ── BUILDER COMMON (2 steps) ──
@@ -1116,7 +1116,7 @@ class OnboardingSeeder extends Seeder
             $q('q_location', 'step_personal_location', 1, 'searchable_dropdown', 'Pilih Kota/Negara', 'Select City/Country', true, ['placeholder' => json_encode(['id' => 'Cari kota', 'en' => 'Search a city'])]),
             $q('q_open_remote', 'step_personal_location', 2, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
             $q('q_remote_pref', 'step_personal_location', 3, 'dropdown', 'Preferensi remote', 'Remote preference', true, ['depends_on' => json_encode(['question_id' => 'q_open_remote', 'operator' => 'equals', 'value' => 'yes'])]),
-            $q('q_gender', 'step_personal_gender', 1, 'single_select_card', 'Jenis Kelamin', 'Gender'),
+            $q('q_gender', 'step_personal_gender', 1, 'single_select_card', '', ''),
             $q('q_use_connectx', 'step_role_selection', 1, 'single_select_card', '', ''),
 
             // ── BUILDER COMMON ──
