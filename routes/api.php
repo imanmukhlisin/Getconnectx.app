@@ -125,11 +125,12 @@ Route::prefix('v1')->group(function () {
 
     // ─── Authenticated: Dynamic Onboarding Engine ─────────────────────────────
     Route::prefix('onboarding')->middleware('auth:sanctum')->group(function () {
-        Route::post('sessions', [OnboardingController::class, 'start'])->name('onboarding.sessions.start');
-        Route::get('sessions/{session}/current', [OnboardingController::class, 'current'])->name('onboarding.sessions.current');
-        Route::post('sessions/{session}/answer', [OnboardingController::class, 'answer'])->name('onboarding.sessions.answer');
-        Route::post('sessions/{session}/back', [OnboardingController::class, 'back'])->name('onboarding.sessions.back');
-        Route::get('sessions/{session}', [OnboardingController::class, 'show'])->name('onboarding.sessions.show');
+        Route::get('resume',                    [OnboardingController::class, 'resume'])->name('onboarding.resume');
+        Route::post('sessions',                 [OnboardingController::class, 'start'])->name('onboarding.sessions.start');
+        Route::get('sessions/{session}/current',[OnboardingController::class, 'current'])->name('onboarding.sessions.current');
+        Route::post('sessions/{session}/answer',[OnboardingController::class, 'answer'])->name('onboarding.sessions.answer');
+        Route::post('sessions/{session}/back',  [OnboardingController::class, 'back'])->name('onboarding.sessions.back');
+        Route::get('sessions/{session}',        [OnboardingController::class, 'show'])->name('onboarding.sessions.show');
     });
 
     // ─── Authenticated: Media Upload ──────────────────────────────────────────

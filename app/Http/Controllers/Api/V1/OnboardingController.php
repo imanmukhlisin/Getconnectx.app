@@ -45,6 +45,39 @@ class OnboardingController extends Controller
     }
 
     /**
+     * Resume onboarding — no session_id needed.
+     * GET /api/v1/onboarding/resume
+     *
+     * Called by Frontend on app launch to check if user has an active session.
+     * Returns the current step so user continues exactly where they left off.
+     */
+    public function resume(Request $request)
+    {
+        $user = $request->user();
+
+        $session = OnboardingSession::where('user_id', $user->id)
+            ->where('status', 'in_progress')
+            ->latest()
+            ->first();
+
+        // No active session — user needs to start fresh
+        if (!$session) {
+            return response()->json([
+                'has_active_session' => false,
+                'session_id'         => null,
+                'current_step'       => null,
+            ]);
+        }
+
+        return response()->json([
+            'has_active_session' => true,
+            'session_id'         => $session->id,
+            'status'             => $session->status,
+            'current_step'       => $this->engine->getCurrentStep($session),
+        ]);
+    }
+
+    /**
      * Start onboarding session.
      * POST /api/v1/onboarding/sessions
      * Body: { "locale": "en" }   (optional, also via Accept-Language header)
