@@ -15,6 +15,7 @@ class OnboardingFlowResource extends Resource
     protected static ?string $model = OnboardingFlow::class;
 
     protected static ?string $navigationIcon  = 'heroicon-o-arrow-path-rounded-square';
+    protected static bool $shouldRegisterNavigation = false;
     protected static ?string $navigationGroup = 'Onboarding Engine';
     public static function getNavigationLabel(): string
     {

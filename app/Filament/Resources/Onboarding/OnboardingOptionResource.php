@@ -16,6 +16,7 @@ class OnboardingOptionResource extends Resource
     protected static ?string $model = OnboardingOption::class;
 
     protected static ?string $navigationIcon  = 'heroicon-o-squares-plus';
+    protected static bool $shouldRegisterNavigation = false;
     protected static ?string $navigationGroup = 'Onboarding Engine';
     public static function getNavigationLabel(): string
     {

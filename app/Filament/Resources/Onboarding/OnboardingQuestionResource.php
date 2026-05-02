@@ -17,6 +17,7 @@ class OnboardingQuestionResource extends Resource
     protected static ?string $model = OnboardingQuestion::class;
 
     protected static ?string $navigationIcon  = 'heroicon-o-question-mark-circle';
+    protected static bool $shouldRegisterNavigation = false;
     protected static ?string $navigationGroup = 'Onboarding Engine';
     public static function getNavigationLabel(): string
     {
