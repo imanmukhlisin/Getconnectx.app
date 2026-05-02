@@ -87,6 +87,207 @@ PROMPT;
         }
     }
 
+    // ═══════════════════════════════════════════════════════════════════
+    //  Scrape & Parse LinkedIn Profile via Gemini AI
+    // ═══════════════════════════════════════════════════════════════════
+
+    /**
+     * Fetch a public LinkedIn profile page and use Gemini to extract
+     * structured professional data from it.
+     *
+     * Returns a normalized array ready to be persisted to the database,
+     * or null if the page could not be fetched or parsed.
+     *
+     * @param  string $linkedinUrl The public LinkedIn profile URL (e.g. https://www.linkedin.com/in/username)
+     * @return array|null
+     */
+    public function scrapeAndParseLinkedIn(string $linkedinUrl): ?array
+    {
+        // ── 1. Fetch the public profile HTML ─────────────────────────
+        try {
+            $httpResponse = \Illuminate\Support\Facades\Http::withHeaders([
+                    // Impersonate a real browser so LinkedIn returns the public page
+                    'User-Agent'      => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+                    'Accept-Language' => 'en-US,en;q=0.9',
+                    'Accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                ])
+                ->timeout(15)
+                ->get($linkedinUrl);
+
+            if (!$httpResponse->successful()) {
+                Log::warning('VertexAiService@scrapeAndParseLinkedIn: LinkedIn returned non-200.', [
+                    'url'    => $linkedinUrl,
+                    'status' => $httpResponse->status(),
+                ]);
+                return null;
+            }
+
+            $html = $httpResponse->body();
+        } catch (\Throwable $e) {
+            Log::warning('VertexAiService@scrapeAndParseLinkedIn: HTTP fetch failed.', [
+                'url'   => $linkedinUrl,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
+
+        // ── 2. Strip HTML to readable plain text ──────────────────────
+        // Remove script/style blocks entirely before stripping tags
+        $plainText = preg_replace('/<(script|style)[^>]*>.*?<\/\1>/si', '', $html);
+        $plainText = strip_tags($plainText);
+        // Collapse excess whitespace so we don't waste tokens
+        $plainText = preg_replace('/\s+/', ' ', $plainText);
+        $plainText = trim($plainText);
+        // Limit to first 6,000 characters — enough to capture the visible profile
+        $plainText = mb_substr($plainText, 0, 6000);
+
+        // ── 3. Ask Gemini to extract structured data ──────────────────
+        try {
+            $prompt = $this->buildLinkedInExtractionPrompt($plainText, $linkedinUrl);
+            $rawJson = $this->callVertexAiWithHighTokens($prompt);
+
+            // Gemini may wrap the JSON in a markdown code block — strip it
+            $rawJson = preg_replace('/^```(?:json)?\s*/i', '', trim($rawJson));
+            $rawJson = preg_replace('/\s*```$/', '', $rawJson);
+
+            $parsed = json_decode($rawJson, true);
+
+            if (!is_array($parsed) || empty($parsed['headline'])) {
+                Log::warning('VertexAiService@scrapeAndParseLinkedIn: Gemini returned invalid or empty JSON.', [
+                    'url'      => $linkedinUrl,
+                    'raw_json' => $rawJson,
+                ]);
+                return null;
+            }
+
+            // Ensure required keys exist with safe defaults
+            return [
+                'name'        => trim($parsed['name'] ?? ''),
+                'photo_url'   => $parsed['photo_url'] ?? null,
+                'headline'    => trim($parsed['headline'] ?? ''),
+                'experiences' => array_slice(array_map(function ($exp) {
+                    return [
+                        'title'   => $exp['title']   ?? null,
+                        'company' => $exp['company']  ?? null,
+                        'period'  => $exp['period']   ?? '',
+                    ];
+                }, $parsed['experiences'] ?? []), 0, 3),
+                'educations'  => array_map(function ($edu) {
+                    return [
+                        'degree' => $edu['degree'] ?? null,
+                        'school' => $edu['school'] ?? null,
+                        'period' => $edu['period'] ?? '',
+                    ];
+                }, $parsed['educations'] ?? []),
+                'bio_summary' => trim($parsed['bio_summary'] ?? ''),
+            ];
+
+        } catch (\Throwable $e) {
+            Log::error('VertexAiService@scrapeAndParseLinkedIn: Gemini parsing failed.', [
+                'url'   => $linkedinUrl,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Build the JSON-extraction prompt sent to Gemini for LinkedIn parsing.
+     */
+    private function buildLinkedInExtractionPrompt(string $profileText, string $linkedinUrl): string
+    {
+        return <<<PROMPT
+You are a professional data extraction assistant. You will receive raw text scraped from a LinkedIn public profile page.
+Your ONLY task is to extract the professional data and return it as a single, valid JSON object.
+
+STRICT RULES:
+- Output ONLY the raw JSON object. No markdown, no code fences, no explanation.
+- If a field cannot be found, use null (for strings) or [] (for arrays).
+- For "experiences", return a maximum of 3 most recent entries.
+- For "photo_url", extract the full URL of the profile picture if visible in the text.
+- For "bio_summary", write a compelling 3–4 sentence first-person professional summary highlighting the person's potential as a Startup Founder or Partner, based on their experience and headline. Do NOT copy the person's own "About" text verbatim.
+
+Required JSON structure (do not add or remove keys):
+{
+  "name": "Full Name",
+  "photo_url": "https://... or null",
+  "headline": "Current professional headline",
+  "experiences": [
+    { "title": "Job Title", "company": "Company Name", "period": "YYYY - YYYY or Present" }
+  ],
+  "educations": [
+    { "degree": "Degree Name", "school": "School Name", "period": "YYYY - YYYY" }
+  ],
+  "bio_summary": "3-4 sentence first-person professional bio."
+}
+
+Profile URL: {$linkedinUrl}
+
+Profile text to extract from:
+---
+{$profileText}
+---
+PROMPT;
+    }
+
+    /**
+     * Internal Vertex AI caller with higher token limit for LinkedIn parsing.
+     * Separate from the standard callVertexAi() to avoid changing discovery insights.
+     */
+    private function callVertexAiWithHighTokens(string $prompt): string
+    {
+        $envCreds = env('GOOGLE_CLOUD_CREDENTIALS_JSON');
+
+        if ($envCreds) {
+            $credentialPath = '/tmp/google-creds.json';
+            file_put_contents($credentialPath, $envCreds);
+        } else {
+            $credentialPath = base_path('storage/service-account.json');
+        }
+
+        if (!file_exists($credentialPath)) {
+            throw new \Exception('Vertex AI Credentials not found.');
+        }
+
+        putenv('GOOGLE_APPLICATION_CREDENTIALS=' . $credentialPath);
+
+        $projectId = env('GOOGLE_CLOUD_PROJECT', 'connectx-app-482206');
+        $location  = env('VERTEX_LOCATION', 'us-central1');
+        $scopes    = ['https://www.googleapis.com/auth/cloud-platform'];
+
+        $middleware = \Google\Auth\ApplicationDefaultCredentials::getMiddleware($scopes);
+        $stack      = \GuzzleHttp\HandlerStack::create();
+        $stack->push($middleware);
+
+        $client = new \GuzzleHttp\Client([
+            'handler'  => $stack,
+            'base_uri' => "https://{$location}-aiplatform.googleapis.com/",
+            'auth'     => 'google_auth',
+            'timeout'  => 30.0, // Higher timeout for parsing heavy HTML
+        ]);
+
+        $endpoint = "v1/projects/{$projectId}/locations/{$location}/publishers/google/models/gemini-1.5-pro:generateContent";
+
+        $response = $client->post($endpoint, [
+            'json' => [
+                'contents' => [
+                    [
+                        'role'  => 'user',
+                        'parts' => [['text' => $prompt]],
+                    ],
+                ],
+                'generationConfig' => [
+                    'temperature'     => 0.2, // Low temperature for factual extraction
+                    'maxOutputTokens' => 2048,
+                ],
+            ],
+        ]);
+
+        $data = json_decode($response->getBody()->getContents(), true);
+
+        return $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+    }
+
     /**
      * Build the contextual prompt for Gemini 1.5 Pro.
      */
