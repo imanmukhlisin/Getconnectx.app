@@ -244,8 +244,9 @@ PROMPT;
      */
     private function buildVertexAiClient(float $timeout = 10.0): Client
     {
-        // Resolve credentials
-        $envCreds = env('GOOGLE_CLOUD_CREDENTIALS_JSON');
+        // Support both variable names — .env.example uses GOOGLE_CLOUD_KEY_JSON,
+        // legacy code used GOOGLE_CLOUD_CREDENTIALS_JSON. Accept either.
+        $envCreds = env('GOOGLE_CLOUD_CREDENTIALS_JSON') ?: env('GOOGLE_CLOUD_KEY_JSON');
 
         if ($envCreds) {
             $credentialPath = '/tmp/google-creds.json';
@@ -257,7 +258,8 @@ PROMPT;
         if (!file_exists($credentialPath)) {
             throw new \Exception(
                 'Vertex AI Credentials not found. '
-                . 'Set GOOGLE_CLOUD_CREDENTIALS_JSON in env or provide storage/service-account.json.'
+                . 'Set GOOGLE_CLOUD_CREDENTIALS_JSON or GOOGLE_CLOUD_KEY_JSON in Vercel env, '
+                . 'or provide storage/service-account.json for local dev.'
             );
         }
 
