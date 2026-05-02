@@ -1017,31 +1017,31 @@ class OnboardingSeeder extends Seeder
             $s('step_bld_role', 'flow_builder_common', 2, 'Profil Builder', 'Peran mana yang paling menggambarkanmu saat ini?', 'Which role best describes you primarily?'),
 
             // ── FOUNDER (3 steps) ──
-            $s('step_fdr_exp', 'flow_founder', 0, 'Profil Builder', 'Seberapa besar pengalaman startupmu?', 'How much startup experience do you have?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
+            $s('step_fdr_exp', 'flow_founder', 0, 'Profil Builder', 'Apakah kamu memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
             $s('step_fdr_looking', 'flow_founder', 1, 'Tujuan Founder', 'Apa yang sedang kamu cari?', 'What are you looking for?', true, 'Pilih kebutuhan tim paling urgent untuk startup kamu', 'Pick the most urgent hiring need for your startup'),
             $s('step_fdr_industry', 'flow_founder', 2, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?', false, 'Pilih hingga 5 industri untuk membentuk feed kamu.', 'Pick up to 5 industries to shape your feed.'),
 
             // ── FOUNDER → CF (4 steps) ──
             $s('step_fdr_cf_type', 'flow_fdr_cf', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of co-founder do you need?', false, 'Pilih semua yang sesuai', 'Select all that apply'),
-            $s('step_fdr_cf_avail', 'flow_fdr_cf', 2, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
+            $s('step_fdr_cf_avail', 'flow_fdr_cf', 2, 'Ketersediaan', 'Kandidat seperti apa yang kamu inginkan?', 'What kind of commitment do you expect from candidate?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_fdr_cf_remote', 'flow_fdr_cf', 3, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_fdr_cf_linkedin', 'flow_fdr_cf', 4, 'Profil Online', 'Langkah terakhir. Koneksikan LinkedIn-mu', 'Last step. Connect your LinkedIn'),
 
             // ── FOUNDER → TEAM (4 steps) ──
             $s('step_fdr_tm_roles', 'flow_fdr_team', 1, 'Cari Anggota Tim', 'peran apa yang saat ini kamu butuhkan?', 'What roles do you need?', false, 'Pilih role yang mau kamu tambahin ke tim kamu', 'Pick the roles you want to add to your team.'),
-            $s('step_fdr_tm_avail', 'flow_fdr_team', 2, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
+            $s('step_fdr_tm_avail', 'flow_fdr_team', 2, 'Ketersediaan', 'Kandidat seperti apa yang kamu inginkan?', 'What kind of commitment do you expect from candidate?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_fdr_tm_remote', 'flow_fdr_team', 3, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_fdr_tm_linkedin', 'flow_fdr_team', 4, 'Profil Online', 'Langkah terakhir. Koneksikan LinkedIn-mu', 'Last step. Connect your LinkedIn'),
 
             // ── FOUNDER → BOTH (5 steps) ──
             $s('step_fdr_bt_cf', 'flow_fdr_both', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of co-founder do you need?', false, 'Pilih semua yang sesuai', 'Select all that apply'),
             $s('step_fdr_bt_roles', 'flow_fdr_both', 2, 'Cari Anggota Tim', 'peran apa yang saat ini kamu butuhkan?', 'What roles do you need?', false, 'Pilih role yang mau kamu tambahin ke tim kamu', 'Pick the roles you want to add to your team.'),
-            $s('step_fdr_bt_avail', 'flow_fdr_both', 3, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
+            $s('step_fdr_bt_avail', 'flow_fdr_both', 3, 'Ketersediaan', 'Kandidat seperti apa yang kamu inginkan?', 'What kind of commitment do you expect from candidate?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_fdr_bt_remote', 'flow_fdr_both', 4, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_fdr_bt_linkedin', 'flow_fdr_both', 5, 'Profil Online', 'Langkah terakhir. Koneksikan LinkedIn-mu', 'Last step. Connect your LinkedIn'),
 
             // ── CO-FOUNDER JOINING (8 steps) ──
-            $s('step_cf_exp', 'flow_cofounder', 0, 'Profil Builder', 'Seberapa besar pengalaman startupmu?', 'How much startup experience do you have?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
+            $s('step_cf_exp', 'flow_cofounder', 0, 'Profil Builder', 'Apakah kamu memiliki pengalaman startup sebelumnya?', 'DO YOU HAVE ANY PRIOR STARTUP EXPERIENCE?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
             $s('step_cf_industry', 'flow_cofounder', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?', false, 'Pilih hingga 5 industri untuk membentuk feed kamu.', 'Pick up to 5 industries to shape your feed.'),
             $s('step_cf_type', 'flow_cofounder', 2, 'Tipe Co-Founder', 'Kamu tipe co-founder yang seperti apa?', 'What type of co-founder are you?', false, 'Pilih peran yang bisa kamu kerjakan dari awal', 'Pick the area you can own from day one.'),
             $s('step_cf_avail', 'flow_cofounder', 3, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
@@ -1050,7 +1050,7 @@ class OnboardingSeeder extends Seeder
             $s('step_cf_linkedin', 'flow_cofounder', 6, 'Profil Online', 'Langkah terakhir. Koneksikan LinkedIn-mu', 'Last step. Connect your LinkedIn'),
 
             // ── TEAM MEMBER JOINING (8 steps) ──
-            $s('step_tm_exp', 'flow_team', 0, 'Profil Builder', 'Seberapa besar pengalaman startupmu?', 'How much startup experience do you have?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
+            $s('step_tm_exp', 'flow_team', 0, 'Profil Builder', 'Apakah kamu memiliki pengalaman startup sebelumnya?', 'DO YOU HAVE ANY PRIOR STARTUP EXPERIENCE?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
             $s('step_tm_industry', 'flow_team', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?', false, 'Pilih hingga 5 industri untuk membentuk feed kamu.', 'Pick up to 5 industries to shape your feed.'),
             $s('step_tm_skills', 'flow_team', 2, 'Skill & Keahlian', 'Skill apa yang kamu miliki?', 'What skills do you have?'),
             $s('step_tm_avail', 'flow_team', 3, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
@@ -1134,23 +1134,23 @@ class OnboardingSeeder extends Seeder
             // ── FOUNDER → CF ──
             $q('q_fdr_cf_type', 'step_fdr_cf_type', 1, 'multi_select_card', '', ''),
             $q('q_fdr_cf_avail', 'step_fdr_cf_avail', 1, 'single_select_card', '', ''),
-            $q('q_fdr_cf_remote', 'step_fdr_cf_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
-            $q('q_fdr_cf_relocate', 'step_fdr_cf_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
+            $q('q_fdr_cf_remote', 'step_fdr_cf_remote', 1, 'single_select_card', 'Terbuka untuk kerja remote?', 'Open to remote?'),
+            $q('q_fdr_cf_relocate', 'step_fdr_cf_remote', 2, 'single_select_card', 'Mencari kandidat yang mau relokasi?', 'Are you looking for someone willing to relocate?'),
             $q('q_fdr_cf_linkedin', 'step_fdr_cf_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/namamu', 'en' => 'https://linkedin.com/in/your-name']), 'helper_text' => json_encode(['id' => 'Kami akan otomatis ambil pengalaman, skill, dan foto dari LinkedIn. Kamu bisa edit setelahnya.', 'en' => "We'll automatically fetch your experience, skills, and photo from LinkedIn so you can edit them next."])]),
 
             // ── FOUNDER → TEAM ──
             $q('q_fdr_tm_roles', 'step_fdr_tm_roles', 1, 'multi_select_chip', 'Peran yang dibutuhkan', 'Roles needed', true, ['placeholder' => json_encode(['id' => 'cari role', 'en' => 'Search roles'])]),
             $q('q_fdr_tm_avail', 'step_fdr_tm_avail', 1, 'single_select_card', '', ''),
-            $q('q_fdr_tm_remote', 'step_fdr_tm_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
-            $q('q_fdr_tm_relocate', 'step_fdr_tm_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
+            $q('q_fdr_tm_remote', 'step_fdr_tm_remote', 1, 'single_select_card', 'Terbuka untuk kerja remote?', 'Open to remote?'),
+            $q('q_fdr_tm_relocate', 'step_fdr_tm_remote', 2, 'single_select_card', 'Mencari kandidat yang mau relokasi?', 'Are you looking for someone willing to relocate?'),
             $q('q_fdr_tm_linkedin', 'step_fdr_tm_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/namamu', 'en' => 'https://linkedin.com/in/your-name']), 'helper_text' => json_encode(['id' => 'Kami akan otomatis ambil pengalaman, skill, dan foto dari LinkedIn. Kamu bisa edit setelahnya.', 'en' => "We'll automatically fetch your experience, skills, and photo from LinkedIn so you can edit them next."])]),
 
             // ── FOUNDER → BOTH ──
             $q('q_fdr_bt_cf', 'step_fdr_bt_cf', 1, 'multi_select_card', '', ''),
             $q('q_fdr_bt_roles', 'step_fdr_bt_roles', 1, 'multi_select_chip', 'Peran yang dibutuhkan', 'Roles needed', true, ['placeholder' => json_encode(['id' => 'cari role', 'en' => 'Search roles'])]),
             $q('q_fdr_bt_avail', 'step_fdr_bt_avail', 1, 'single_select_card', '', ''),
-            $q('q_fdr_bt_remote', 'step_fdr_bt_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
-            $q('q_fdr_bt_relocate', 'step_fdr_bt_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
+            $q('q_fdr_bt_remote', 'step_fdr_bt_remote', 1, 'single_select_card', 'Terbuka untuk kerja remote?', 'Open to remote?'),
+            $q('q_fdr_bt_relocate', 'step_fdr_bt_remote', 2, 'single_select_card', 'Mencari kandidat yang mau relokasi?', 'Are you looking for someone willing to relocate?'),
             $q('q_fdr_bt_linkedin', 'step_fdr_bt_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/namamu', 'en' => 'https://linkedin.com/in/your-name']), 'helper_text' => json_encode(['id' => 'Kami akan otomatis ambil pengalaman, skill, dan foto dari LinkedIn. Kamu bisa edit setelahnya.', 'en' => "We'll automatically fetch your experience, skills, and photo from LinkedIn so you can edit them next."])]),
 
             // ── CO-FOUNDER JOINING ──
