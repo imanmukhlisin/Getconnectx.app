@@ -1006,7 +1006,7 @@ class OnboardingSeeder extends Seeder
 
         DB::table('onboarding_steps')->insert([
             // ── COMMON: Data Diri (5 steps) ──
-            $s('step_personal_name', 'flow_common', 1, 'Data Diri', 'Ceritakan tentang dirimu', 'Tell us about yourself'),
+            $s('step_personal_name', 'flow_common', 1, 'Data Diri', 'Ceritakan tentang dirimu', 'Tell us about yourself', false, 'Data dasar yang kami butuhkan untuk mempersonalisasi koneksi kamu.', 'The basics we need to personalize your connections'),
             $s('step_personal_dob', 'flow_common', 2, 'Data Diri', 'Kapan tanggal lahir Anda?', 'When is your date of birth?'),
             $s('step_personal_location', 'flow_common', 3, 'Data Diri', 'Kamu sedang tinggal dimana?', 'Where are you based?'),
             $s('step_personal_gender', 'flow_common', 4, 'Data Diri', 'Bagaimana kamu mengidentifikasi diri?', 'How do you identify?', true, 'Biar kami bisa menyesuaikan pengalamanmu.', 'To help us personalize your experience.'),
@@ -1019,7 +1019,7 @@ class OnboardingSeeder extends Seeder
             // ── FOUNDER (3 steps) ──
             $s('step_fdr_exp', 'flow_founder', 0, 'Profil Builder', 'Seberapa besar pengalaman startupmu?', 'How much startup experience do you have?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
             $s('step_fdr_looking', 'flow_founder', 1, 'Tujuan Founder', 'Apa yang sedang kamu cari?', 'What are you looking for?', true, 'Pilih kebutuhan tim paling urgent untuk startup kamu', 'Pick the most urgent hiring need for your startup'),
-            $s('step_fdr_industry', 'flow_founder', 2, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?'),
+            $s('step_fdr_industry', 'flow_founder', 2, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?', false, 'Pilih hingga 5 industri untuk membentuk feed kamu.', 'Pick up to 5 industries to shape your feed.'),
 
             // ── FOUNDER → CF (4 steps) ──
             $s('step_fdr_cf_type', 'flow_fdr_cf', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of co-founder do you need?', false, 'Pilih semua yang sesuai', 'Select all that apply'),
@@ -1042,7 +1042,7 @@ class OnboardingSeeder extends Seeder
 
             // ── CO-FOUNDER JOINING (8 steps) ──
             $s('step_cf_exp', 'flow_cofounder', 0, 'Profil Builder', 'Seberapa besar pengalaman startupmu?', 'How much startup experience do you have?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
-            $s('step_cf_industry', 'flow_cofounder', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?'),
+            $s('step_cf_industry', 'flow_cofounder', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?', false, 'Pilih hingga 5 industri untuk membentuk feed kamu.', 'Pick up to 5 industries to shape your feed.'),
             $s('step_cf_type', 'flow_cofounder', 2, 'Tipe Co-Founder', 'Kamu tipe co-founder yang seperti apa?', 'What type of co-founder are you?', false, 'Pilih peran yang bisa kamu kerjakan dari awal', 'Pick the area you can own from day one.'),
             $s('step_cf_avail', 'flow_cofounder', 3, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_cf_comp', 'flow_cofounder', 4, 'Ekspektasi Kompensasi', 'Bagaimana ekspektasimu untuk cash dan equity?', 'What are your cash & equity expectations?'),
@@ -1051,7 +1051,7 @@ class OnboardingSeeder extends Seeder
 
             // ── TEAM MEMBER JOINING (8 steps) ──
             $s('step_tm_exp', 'flow_team', 0, 'Profil Builder', 'Seberapa besar pengalaman startupmu?', 'How much startup experience do you have?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
-            $s('step_tm_industry', 'flow_team', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?'),
+            $s('step_tm_industry', 'flow_team', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?', false, 'Pilih hingga 5 industri untuk membentuk feed kamu.', 'Pick up to 5 industries to shape your feed.'),
             $s('step_tm_skills', 'flow_team', 2, 'Skill & Keahlian', 'Skill apa yang kamu miliki?', 'What skills do you have?'),
             $s('step_tm_avail', 'flow_team', 3, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_tm_comp', 'flow_team', 4, 'Ekspektasi Kompensasi', 'Bagaimana ekspektasimu untuk cash dan equity?', 'What are your cash & equity expectations?'),
@@ -1061,16 +1061,16 @@ class OnboardingSeeder extends Seeder
             // ── STARTUP (3 steps) ──
             $s('step_su_about', 'flow_startup', 1, 'Profil Startup', 'Ceritakan tentang startup kamu secara singkat', 'Tell us about your startup', false, 'Kenalkan kami dengan startupmu secara singkat.', 'Give us a quick introduction to your company.'),
             $s('step_su_problem', 'flow_startup', 2, 'Masalah & Solusi', 'Apa yang sedang kamu bangun?', 'What are you building?', false, 'Visi kamu', 'Your vision'),
-            $s('step_su_biz', 'flow_startup', 3, 'Industri & Model', 'Industri apa yang kamu geluti?', 'Which industries are you in?'),
+            $s('step_su_biz', 'flow_startup', 3, 'Industri & Model', 'Industri apa yang kamu geluti?', 'Which industries are you in?', false, 'Pilih industri dan model bisnis yang menggambarkan startup kamu.', 'Pick the industries and business model that describe your startup.'),
 
             // ── TRACTION (1 step each, 4 flows) ──
-            $s('step_su_tr_idea', 'flow_su_tr_idea', 1, 'Traction', 'Traction kamu sejauh ini', 'Your traction so far'),
-            $s('step_su_tr_mvp', 'flow_su_tr_mvp', 1, 'Traction', 'Traction kamu sejauh ini', 'Your traction so far'),
-            $s('step_su_tr_live', 'flow_su_tr_live', 1, 'Traction', 'Traction kamu sejauh ini', 'Your traction so far'),
-            $s('step_su_tr_scale', 'flow_su_tr_scale', 1, 'Traction', 'Traction kamu sejauh ini', 'Your traction so far'),
+            $s('step_su_tr_idea', 'flow_su_tr_idea', 1, 'Traction & Milestones', 'Traction kamu sejauh ini', 'Your traction so far', false, 'Ceritakan sejauh mana progress startup kamu.', 'Share how far your startup has come.'),
+            $s('step_su_tr_mvp', 'flow_su_tr_mvp', 1, 'Traction & Milestones', 'Traction kamu sejauh ini', 'Your traction so far', false, 'Ceritakan sejauh mana progress startup kamu.', 'Share how far your startup has come.'),
+            $s('step_su_tr_live', 'flow_su_tr_live', 1, 'Traction & Milestones', 'Traction kamu sejauh ini', 'Your traction so far', false, 'Ceritakan sejauh mana progress startup kamu.', 'Share how far your startup has come.'),
+            $s('step_su_tr_scale', 'flow_su_tr_scale', 1, 'Traction & Milestones', 'Traction kamu sejauh ini', 'Your traction so far', false, 'Ceritakan sejauh mana progress startup kamu.', 'Share how far your startup has come.'),
 
             // ── STARTUP FINISH (4 steps) ──
-            $s('step_su_presence', 'flow_su_finish', 1, 'Online Presence', 'Di mana orang bisa menemukanmu?', 'Where can people find you?'),
+            $s('step_su_presence', 'flow_su_finish', 1, 'Online Presence', 'Di mana orang bisa menemukanmu?', 'Where can people find you?', false, 'Biar orang mudah nemuin startup kamu secara online.', 'Help people discover your startup online.'),
             $s('step_su_founders', 'flow_su_finish', 2, 'Tim Founder', 'Berapa jumlah foundermu?', 'How many founders are you?', false, 'Setup founder', 'Founder setup'),
             $s('step_su_team', 'flow_su_finish', 3, 'Status Tim', 'Apakah kamu punya tim di luar founder?', 'Do you have a team beyond founders?', false, 'Status tim', 'Team presence'),
             $s('step_su_need', 'flow_su_finish', 4, 'Kebutuhan', 'Apa yang sedang kamu cari?', 'What are you looking for?', true, 'Pilih kebutuhan tim paling urgent untuk startup kamu', 'Pick the most urgent hiring need for your startup'),
@@ -1082,7 +1082,7 @@ class OnboardingSeeder extends Seeder
             $s('step_su_need_bt_tm', 'flow_su_need_both', 2, 'Cari Anggota Tim', 'Skill apa yang belum kamu punya?', 'What skills are you missing?', false, 'Skill yang kamu butuhkan', 'Skills you need'),
 
             // ── STARTUP END (2 steps) ──
-            $s('step_su_commit', 'flow_su_end', 1, 'Komitmen', 'Commitment level', 'Commitment level', true),
+            $s('step_su_commit', 'flow_su_end', 1, 'Komitmen', 'Kandidat seperti apa yang kamu inginkan?', 'What kind of commitment do you expect?', true, 'Pilih tingkat komitmen yang paling cocok untuk startup kamu saat ini.', 'Choose the commitment level that fits your startup right now.'),
             $s('step_su_equity', 'flow_su_end', 2, 'Kompensasi', 'Equity & kompensasi yang ditawarkan', 'Equity & compensation offered'),
         ]);
 
@@ -1170,7 +1170,7 @@ class OnboardingSeeder extends Seeder
 
             // ── TEAM MEMBER JOINING ──
             $q('q_tm_industry', 'step_tm_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5]), 'placeholder' => json_encode(['id' => 'Cari industri', 'en' => 'Search industries'])]),
-            $q('q_tm_skills', 'step_tm_skills', 1, 'multi_select_chip', 'Skill yang kamu miliki', 'Skills you have', true, ['placeholder' => json_encode(['id' => 'Cari skill', 'en' => 'Search skills'])]),
+            $q('q_tm_skills', 'step_tm_skills', 1, 'multi_select_chip', '', '', true, ['placeholder' => json_encode(['id' => 'Cari skill', 'en' => 'Search skills'])]),
             $q('q_tm_avail', 'step_tm_avail', 1, 'single_select_card', '', ''),
             // Compensation
             $q('q_tm_equity', 'step_tm_comp', 1, 'single_select_card', 'Ekspektasi equity', 'Equity expectation'),
@@ -1226,30 +1226,30 @@ class OnboardingSeeder extends Seeder
             $q('q_su_linkedin', 'step_su_presence', 2, 'url', 'LinkedIn', 'LinkedIn', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/company/...', 'en' => 'https://linkedin.com/company/...'])]),
             $q('q_su_twitter', 'step_su_presence', 3, 'url', 'Twitter / X', 'Twitter / X', false, ['placeholder' => json_encode(['id' => 'https://x.com/...', 'en' => 'https://x.com/...'])]),
             $q('q_su_instagram', 'step_su_presence', 4, 'url', 'Instagram', 'Instagram', false, ['placeholder' => json_encode(['id' => 'https://instagram.com/...', 'en' => 'https://instagram.com/...'])]),
-            $q('q_su_pitchdeck', 'step_su_presence', 5, 'url', 'Pitch Deck (opsional 🔥)', 'Pitch Deck (optional 🔥)', false, ['placeholder' => json_encode(['id' => 'https://pitch.com/...', 'en' => 'https://pitch.com/...'])]),
+            $q('q_su_pitchdeck', 'step_su_presence', 5, 'url', 'Pitch Deck', 'Pitch Deck', false, ['placeholder' => json_encode(['id' => 'https://pitch.com/...', 'en' => 'https://pitch.com/...']), 'helper_text' => json_encode(['id' => 'Opsional, bisa share pitch deck kamu — founder lain suka lihat deck kamu!', 'en' => 'Optional, but founders love seeing your deck!'])]),
 
             // ── STARTUP FINISH: Founder Setup ──
-            $q('q_su_founder_count', 'step_su_founders', 1, 'single_select_card', 'Berapa banyak founder?', 'How many founders?'),
+            $q('q_su_founder_count', 'step_su_founders', 1, 'single_select_card', '', ''),
             $q('q_su_founder_roles', 'step_su_founders', 2, 'multi_select_chip', 'Peran apa yang sudah terisi?', 'What roles are already covered?', false, ['depends_on' => json_encode(['question_id' => 'q_su_founder_count', 'operator' => 'not_equals', 'value' => 'solo']), 'placeholder' => json_encode(['id' => 'cari role', 'en' => 'Search roles'])]),
 
             // ── STARTUP FINISH: Team Status ──
-            $q('q_su_have_team', 'step_su_team', 1, 'single_select_card', 'Apakah kamu punya tim selain founder?', 'Do you have a team beyond founders?'),
+            $q('q_su_have_team', 'step_su_team', 1, 'single_select_card', '', ''),
             $q('q_su_team_size', 'step_su_team', 2, 'single_select_card', 'Ukuran tim', 'Team size', true, ['depends_on' => json_encode(['question_id' => 'q_su_have_team', 'operator' => 'equals', 'value' => 'yes'])]),
             $q('q_su_team_roles', 'step_su_team', 3, 'multi_select_chip', 'Departemen/peran di tim', 'Team departments/roles', true, ['depends_on' => json_encode(['question_id' => 'q_su_have_team', 'operator' => 'equals', 'value' => 'yes']), 'placeholder' => json_encode(['id' => 'cari role', 'en' => 'Search roles'])]),
 
             // ── STARTUP FINISH: What You Need ──
-            $q('q_su_need', 'step_su_need', 1, 'single_select_card', 'Apa yang sedang kamu cari?', 'What are you looking for?'),
+            $q('q_su_need', 'step_su_need', 1, 'single_select_card', '', ''),
 
             // ── STARTUP NEED: CF ──
             $q('q_su_need_cf_type', 'step_su_need_cf', 1, 'multi_select_card', '', ''),
             // ── STARTUP NEED: Team ──
-            $q('q_su_need_tm_skills', 'step_su_need_tm', 1, 'multi_select_chip', 'Skill apa yang belum dipunyai di tim?', 'What skills are missing in the team?', true, ['placeholder' => json_encode(['id' => 'Cari skill', 'en' => 'Search skills'])]),
+            $q('q_su_need_tm_skills', 'step_su_need_tm', 1, 'multi_select_chip', '', '', true, ['placeholder' => json_encode(['id' => 'Cari skill', 'en' => 'Search skills'])]),
             // ── STARTUP NEED: Both ──
             $q('q_su_need_bt_cf', 'step_su_need_bt_cf', 1, 'multi_select_card', '', ''),
-            $q('q_su_need_bt_tm', 'step_su_need_bt_tm', 1, 'multi_select_chip', 'Skill yang belum dipunyai', 'Missing skills', true, ['placeholder' => json_encode(['id' => 'Cari skill', 'en' => 'Search skills'])]),
+            $q('q_su_need_bt_tm', 'step_su_need_bt_tm', 1, 'multi_select_chip', '', '', true, ['placeholder' => json_encode(['id' => 'Cari skill', 'en' => 'Search skills'])]),
 
             // ── STARTUP END: Commitment ──
-            $q('q_su_commitment', 'step_su_commit', 1, 'single_select_card', 'Commitment Level', 'Commitment Level'),
+            $q('q_su_commitment', 'step_su_commit', 1, 'single_select_card', '', ''),
 
             // ── STARTUP END: Equity & Comp ──
             $q('q_su_equity_range', 'step_su_equity', 1, 'text', 'Equity yang ditawarkan (% range)', 'Equity offered (% range)', true, ['placeholder' => json_encode(['id' => 'misalnya 5-15%', 'en' => 'e.g. 5-15%'])]),
