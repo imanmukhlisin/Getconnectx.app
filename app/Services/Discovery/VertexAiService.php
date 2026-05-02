@@ -323,18 +323,22 @@ PROMPT;
     }
 
     /**
-     * Call Vertex AI (Gemini) with Google Search Grounding enabled.
+     * Call Vertex AI (Gemini 2.0 Flash) with built-in Google Search grounding.
      * Used by: scrapeAndParseLinkedIn().
      *
-     * With grounding, Gemini autonomously searches the web through Google's
-     * infrastructure — bypassing LinkedIn's block of cloud server IPs.
+     * IMPORTANT: gemini-2.0-flash-001 supports native 'googleSearch' grounding
+     * without requiring Vertex AI Search service setup.
+     * gemini-1.5-pro uses 'googleSearchRetrieval' which needs Vertex AI Search
+     * configured separately — do NOT use 1.5 here.
      */
     private function callVertexAiWithGrounding(string $prompt): string
     {
         $client    = $this->buildVertexAiClient(45.0);
         $projectId = env('GOOGLE_CLOUD_PROJECT', 'connectx-app-482206');
         $location  = env('VERTEX_LOCATION', 'us-central1');
-        $endpoint  = "v1/projects/{$projectId}/locations/{$location}/publishers/google/models/gemini-1.5-pro:generateContent";
+
+        // Use Gemini 2.0 Flash — it supports built-in googleSearch grounding natively
+        $endpoint = "v1/projects/{$projectId}/locations/{$location}/publishers/google/models/gemini-2.0-flash-001:generateContent";
 
         $response = $client->post($endpoint, [
             'json' => [
@@ -344,14 +348,12 @@ PROMPT;
                         'parts' => [['text' => $prompt]],
                     ],
                 ],
-                // Enable Google Search Retrieval so Gemini can browse the LinkedIn URL.
-                // NOTE: Vertex AI (gemini-1.5-pro) uses 'googleSearchRetrieval', NOT 'googleSearch'.
-                // 'googleSearch' is only valid for the Gemini Developer API (AI Studio).
+                // googleSearch is the correct built-in tool for Gemini 2.0 on Vertex AI
                 'tools' => [
-                    ['googleSearchRetrieval' => (object) []],
+                    ['googleSearch' => (object) []],
                 ],
                 'generationConfig' => [
-                    'temperature'     => 0.1, // Very low — factual extraction
+                    'temperature'     => 0.1,
                     'maxOutputTokens' => 2048,
                 ],
             ],
