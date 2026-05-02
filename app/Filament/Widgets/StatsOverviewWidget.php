@@ -28,6 +28,15 @@ class StatsOverviewWidget extends BaseWidget
             $spark[] = User::whereDate('created_at', Carbon::now()->subDays($i))->count();
         }
 
+        // Spark data arrays for visualization
+        $sparkOnboarded = [];
+        $sparkBlocked = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $sparkOnboarded[] = User::where('is_onboarded', true)->whereDate('updated_at', '<=', $date)->count();
+            $sparkBlocked[] = User::where('is_blocked', true)->whereDate('updated_at', '<=', $date)->count();
+        }
+
         return [
             Stat::make('Total User Terdaftar', number_format($totalUsers))
                 ->description("{$thisWeek} user baru minggu ini")
@@ -40,18 +49,21 @@ class StatsOverviewWidget extends BaseWidget
                 ->description('Registrasi baru hari ini')
                 ->descriptionIcon('heroicon-m-user-plus')
                 ->icon('heroicon-o-calendar-days')
+                ->chart(array_slice($spark, -3)) // Just a small line for today's trend
                 ->color('success'),
 
             Stat::make('Sudah Onboarding', "{$onboardingRate}%")
                 ->description("{$onboarded} dari {$totalUsers} user sudah mengisi onboarding")
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->icon('heroicon-o-clipboard-document-check')
+                ->chart($sparkOnboarded)
                 ->color('warning'),
 
             Stat::make('Akun Diblokir', number_format($blocked))
                 ->description($blocked > 0 ? 'Perlu perhatian admin' : 'Tidak ada akun yang diblokir')
                 ->descriptionIcon($blocked > 0 ? 'heroicon-m-exclamation-triangle' : 'heroicon-m-shield-check')
                 ->icon('heroicon-o-no-symbol')
+                ->chart($sparkBlocked)
                 ->color($blocked > 0 ? 'danger' : 'gray'),
         ];
     }

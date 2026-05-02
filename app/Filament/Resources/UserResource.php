@@ -70,6 +70,10 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ViewColumn::make('avatar_url')
+                    ->label('Foto')
+                    ->view('filament.tables.columns.avatar-with-pro'),
+                    
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
                     ->searchable()
