@@ -36,9 +36,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authGuard('admin')
             ->brandLogo('/images/logo.png')
-            ->brandLogoHeight('2.5rem')
+            ->brandLogoHeight('2rem')
             ->favicon(asset('images/logo.png'))
-            ->sidebarCollapsible()
             ->globalSearchKeyBinding('command+k')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->renderHook(
