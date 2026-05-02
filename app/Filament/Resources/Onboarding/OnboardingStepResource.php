@@ -16,6 +16,7 @@ class OnboardingStepResource extends Resource
     protected static ?string $model = OnboardingStep::class;
 
     protected static ?string $navigationIcon  = 'heroicon-o-list-bullet';
+    protected static bool $shouldRegisterNavigation = false;
     protected static ?string $navigationGroup = 'Onboarding Engine';
     public static function getNavigationLabel(): string
     {

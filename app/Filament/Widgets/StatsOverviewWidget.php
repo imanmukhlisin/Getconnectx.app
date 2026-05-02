@@ -42,28 +42,24 @@ class StatsOverviewWidget extends BaseWidget
                 ->description("{$thisWeek} user baru minggu ini")
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->icon('heroicon-o-users')
-                ->chart($spark)
                 ->color('info'),
 
             Stat::make('Daftar Hari Ini', number_format($today))
                 ->description('Registrasi baru hari ini')
                 ->descriptionIcon('heroicon-m-user-plus')
                 ->icon('heroicon-o-calendar-days')
-                ->chart(array_slice($spark, -3)) // Just a small line for today's trend
                 ->color('success'),
 
             Stat::make('Sudah Onboarding', "{$onboardingRate}%")
                 ->description("{$onboarded} dari {$totalUsers} user sudah mengisi onboarding")
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->icon('heroicon-o-clipboard-document-check')
-                ->chart($sparkOnboarded)
                 ->color('warning'),
 
             Stat::make('Akun Diblokir', number_format($blocked))
                 ->description($blocked > 0 ? 'Perlu perhatian admin' : 'Tidak ada akun yang diblokir')
                 ->descriptionIcon($blocked > 0 ? 'heroicon-m-exclamation-triangle' : 'heroicon-m-shield-check')
                 ->icon('heroicon-o-no-symbol')
-                ->chart($sparkBlocked)
                 ->color($blocked > 0 ? 'danger' : 'gray'),
         ];
     }
