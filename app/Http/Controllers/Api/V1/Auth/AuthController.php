@@ -183,20 +183,44 @@ class AuthController extends Controller
             return $this->errorResponse(__('messages.whatsapp_already_verified'), 'WHATSAPP_ALREADY_VERIFIED', 409);
         }
 
-        try {
-            $this->whatsAppService->sendOtp($user, $phoneNumber);
-        } catch (WhatsAppDeliveryException $e) {
-            return $this->errorResponse(__('messages.whatsapp_delivery_failed'), 'WHATSAPP_DELIVERY_FAILED', 502);
-        }
+        // --- BYPASS WHATSAPP VERIFICATION TEMPORARILY ---
+        // try {
+        //     $this->whatsAppService->sendOtp($user, $phoneNumber);
+        // } catch (WhatsAppDeliveryException $e) {
+        //     return $this->errorResponse(__('messages.whatsapp_delivery_failed'), 'WHATSAPP_DELIVERY_FAILED', 502);
+        // }
 
-        $user->update([
-            'whatsapp_number'   => $phoneNumber,
-            'registration_step' => max($user->registration_step, User::STEP_WHATSAPP_OTP_SENT),
+        // Instead of waiting for OTP, complete registration right away
+        DB::transaction(function () use ($user, $phoneNumber) {
+            $user->update([
+                'whatsapp_number'   => $phoneNumber,
+                // 'whatsapp_verified_at' => now(), // Do not set as verified (is_wa_verified=false)
+                'registration_step' => User::STEP_WHATSAPP_VERIFIED,
+                'is_active'         => true,
+            ]);
+
+            // Revoke all temporary registration tokens
+            $user->tokens()->where('name', 'registration-token')->delete();
+        });
+
+        // Sinkronisasi ke Supabase Auth (auth.users)
+        $this->supabaseAuth->syncUserToSupabase($user);
+
+        // Issue permanent (full-access) token
+        $finalToken = $user->createToken('auth-token', ['*'])->plainTextToken;
+        $supabaseToken = $this->supabaseAuth->generateSupabaseToken($user);
+
+        Log::info('Registration completed (Bypass WA Verify)', [
+            'user_id'     => $user->id,
+            'email'       => $user->email,
         ]);
 
         return $this->successResponse(
-            message : __('messages.whatsapp_otp_sent', ['number' => $phoneNumber]),
-            nextStep: 'NEED_WHATSAPP_VERIFICATION',
+            message : __('messages.registration_complete'),
+            nextStep: $user->fresh()->nextStep(),
+            data    : ['user' => $user->fresh()->registrationSummary()],
+            token   : $finalToken,
+            extra   : ['supabase_token' => $supabaseToken]
         );
     }
 
