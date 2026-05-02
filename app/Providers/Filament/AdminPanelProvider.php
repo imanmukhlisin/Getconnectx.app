@@ -29,7 +29,6 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->registration()
             ->passwordReset()
             ->colors([
                 'primary' => Color::Orange,
@@ -43,6 +42,7 @@ class AdminPanelProvider extends PanelProvider
                 'panels::head.done',
                 fn () => new \Illuminate\Support\HtmlString("
                     <style>
+                        /* Sidebar Vercel-like */
                         .fi-sidebar-item-button {
                             padding-top: 0.4rem !important;
                             padding-bottom: 0.4rem !important;
@@ -62,18 +62,45 @@ class AdminPanelProvider extends PanelProvider
                         .fi-sidebar-nav {
                             gap: 0.25rem !important;
                         }
-                        /* Scrollbar minimalis ala Vercel */
-                        ::-webkit-scrollbar {
-                            width: 5px;
+                        ::-webkit-scrollbar { width: 5px; }
+                        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+                        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+                        
+                        /* Antigravity Hover Background untuk Login Page */
+                        .fi-simple-layout {
+                            background-color: #0b0d10 !important;
+                            position: relative;
+                            overflow: hidden;
                         }
-                        ::-webkit-scrollbar-thumb {
-                            background: rgba(255, 255, 255, 0.1);
-                            border-radius: 10px;
+                        .fi-simple-layout::before {
+                            content: '';
+                            position: absolute;
+                            top: 0; left: 0; right: 0; bottom: 0;
+                            z-index: 0;
+                            background: radial-gradient(800px circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh), rgba(249, 115, 22, 0.15), transparent 40%);
+                            pointer-events: none;
+                            transition: background 0.1s ease;
                         }
-                        ::-webkit-scrollbar-thumb:hover {
-                            background: rgba(255, 255, 255, 0.2);
+                        /* Bikin form login agak transparan kayak kaca (Glassmorphism) */
+                        .fi-simple-main {
+                            z-index: 1;
+                            position: relative;
+                        }
+                        .fi-simple-main > div {
+                            background: rgba(30, 32, 38, 0.6) !important;
+                            backdrop-filter: blur(12px) !important;
+                            -webkit-backdrop-filter: blur(12px) !important;
+                            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+                            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
                         }
                     </style>
+                    <script>
+                        // JS buat ngikutin mouse hover
+                        document.addEventListener('mousemove', (e) => {
+                            document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
+                            document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
+                        });
+                    </script>
                 ")
             )
             ->pages([

@@ -42,13 +42,6 @@ class AppServiceProvider extends ServiceProvider
     {
         \URL::forceScheme('https');
 
-        if (class_exists(\BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch::class)) {
-            \BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch::configureUsing(function (\BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch $switch) {
-                $switch
-                    ->locales(['id', 'en'])
-                    ->visible(outsidePanels: true);
-            });
-        }
 
 
         if (class_exists(\Livewire\Livewire::class)) {
