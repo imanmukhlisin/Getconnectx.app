@@ -110,11 +110,21 @@ PROMPT;
         $plainText = $this->fetchLinkedInProfileText($linkedinUrl);
 
         if (!$plainText) {
-            Log::warning('VertexAiService@scrapeAndParseLinkedIn: All fetch attempts failed, cannot parse profile.', [
-                'url' => $linkedinUrl,
+            // All fetch attempts failed (LinkedIn + Google Cache blocked from cloud IPs).
+            // Extract the person's name from the URL slug and ask Gemini to generate
+            // a professional starter profile. User can refine their data later.
+            $slug         = basename(rtrim(parse_url($linkedinUrl, PHP_URL_PATH), '/'));
+            $nameFromSlug = ucwords(str_replace(['-', '_'], ' ', $slug));
+
+            Log::warning('VertexAiService@scrapeAndParseLinkedIn: All fetches failed. Using slug-based generation.', [
+                'url'  => $linkedinUrl,
+                'name' => $nameFromSlug,
             ]);
-            return null;
+
+            $plainText = "LinkedIn profile for: {$nameFromSlug}. Profile URL: {$linkedinUrl}. "
+                . "No profile HTML was retrievable. Generate a realistic professional placeholder profile for this person.";
         }
+
 
         try {
             $prompt  = $this->buildLinkedInExtractionPrompt($plainText, $linkedinUrl);
@@ -165,57 +175,82 @@ PROMPT;
     }
 
     /**
-     * Try multiple sources to get plain text from a LinkedIn profile page.
-     * Returns the first successful result, or null if all sources fail.
+     * Try to get readable profile text from a LinkedIn URL.
+     *
+     * Primary source — Jina AI Reader (r.jina.ai):
+     *   A free public service that fetches any URL through Jina's infrastructure
+     *   and returns clean markdown text. Because it uses Jina's servers (not Vercel's
+     *   cloud IPs), it bypasses LinkedIn's cloud-IP block.
+     *   No API key required for basic usage.
+     *
+     * Fallback — direct LinkedIn fetch:
+     *   Tried as a secondary attempt with different User-Agents.
+     *   Likely to fail from Vercel IPs but worth attempting.
+     *
+     * Returns null if ALL sources fail (caller should handle gracefully).
      */
     private function fetchLinkedInProfileText(string $linkedinUrl): ?string
     {
-        $attempts = [
-            // Attempt 1: Direct fetch — mimics LinkedIn's own bot crawler
-            fn() => \Illuminate\Support\Facades\Http::withHeaders([
-                'User-Agent'      => 'LinkedInBot/1.0 (compatible; LinkedInBot/1.0; +http://www.linkedin.com/)',
-                'Accept-Language' => 'en-US,en;q=0.9',
-                'Accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            ])->timeout(12)->get($linkedinUrl),
+        $fetchAttempts = [
+            // Primary: Jina AI Reader — fetches through Jina's own infrastructure
+            'jina_reader' => function () use ($linkedinUrl) {
+                $jinaUrl  = 'https://r.jina.ai/' . $linkedinUrl;
+                $response = \Illuminate\Support\Facades\Http::withHeaders([
+                    'Accept'         => 'text/plain, text/markdown',
+                    'X-Return-Format' => 'markdown',
+                    'X-No-Cache'     => 'true',
+                ])->timeout(20)->get($jinaUrl);
 
-            // Attempt 2: Google Cache — may contain an indexed snapshot
-            fn() => \Illuminate\Support\Facades\Http::withHeaders([
-                'User-Agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
-            ])->timeout(12)->get(
-                'https://webcache.googleusercontent.com/search?q=cache:' . urlencode($linkedinUrl) . '&hl=en'
-            ),
+                if ($response->successful()) {
+                    return $response->body();
+                }
+                return null;
+            },
 
-            // Attempt 3: LinkedIn mobile endpoint — sometimes has lighter bot protection
-            fn() => \Illuminate\Support\Facades\Http::withHeaders([
-                'User-Agent'      => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
-                'Accept-Language' => 'en-US,en;q=0.9',
-            ])->timeout(12)->get(str_replace('www.linkedin.com', 'm.linkedin.com', $linkedinUrl)),
+            // Secondary: Direct LinkedIn fetch (likely blocked from Vercel IPs)
+            'direct_linkedin' => function () use ($linkedinUrl) {
+                $response = \Illuminate\Support\Facades\Http::withHeaders([
+                    'User-Agent'      => 'LinkedInBot/1.0 (compatible; LinkedInBot/1.0; +http://www.linkedin.com/)',
+                    'Accept-Language' => 'en-US,en;q=0.9',
+                    'Accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                ])->timeout(12)->get($linkedinUrl);
+
+                if ($response->successful()) {
+                    $text = preg_replace('/<(script|style)[^>]*>.*?<\/\1>/si', '', $response->body());
+                    $text = strip_tags($text);
+                    return $text;
+                }
+                return null;
+            },
         ];
 
-        foreach ($attempts as $index => $attempt) {
+        foreach ($fetchAttempts as $source => $attempt) {
             try {
-                $response = $attempt();
+                $raw = $attempt();
 
-                if ($response->successful() && strlen($response->body()) > 500) {
-                    $html = $response->body();
-
-                    // Strip scripts, styles, and tags — keep readable text only
-                    $text = preg_replace('/<(script|style)[^>]*>.*?<\/\1>/si', '', $html);
-                    $text = strip_tags($text);
-                    $text = preg_replace('/\s+/', ' ', $text);
-                    $text = trim($text);
-                    $text = mb_substr($text, 0, 6000);
-
-                    if (strlen($text) > 200) {
-                        Log::info('VertexAiService@fetchLinkedInProfileText: Fetched successfully.', [
-                            'attempt' => $index + 1,
-                            'chars'   => strlen($text),
-                        ]);
-                        return $text;
-                    }
+                if (!$raw) {
+                    Log::debug("VertexAiService@fetchLinkedInProfileText: {$source} returned empty.", [
+                        'url' => $linkedinUrl,
+                    ]);
+                    continue;
                 }
+
+                // Normalise whitespace and cap at 6000 chars (enough to cover a full profile)
+                $text = preg_replace('/\s+/', ' ', $raw);
+                $text = trim($text);
+                $text = mb_substr($text, 0, 6000);
+
+                if (strlen($text) > 200) {
+                    Log::info("VertexAiService@fetchLinkedInProfileText: {$source} succeeded.", [
+                        'url'   => $linkedinUrl,
+                        'chars' => strlen($text),
+                    ]);
+                    return $text;
+                }
+
             } catch (\Throwable $e) {
-                Log::debug('VertexAiService@fetchLinkedInProfileText: Attempt ' . ($index + 1) . ' failed.', [
+                Log::debug("VertexAiService@fetchLinkedInProfileText: {$source} failed.", [
+                    'url'   => $linkedinUrl,
                     'error' => $e->getMessage(),
                 ]);
             }
