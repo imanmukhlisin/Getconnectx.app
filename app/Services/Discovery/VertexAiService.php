@@ -453,7 +453,7 @@ PROMPT;
      */
     private function callGeminiApiDirect(string $prompt, string $apiKey): string
     {
-        $model    = 'gemini-1.5-flash'; // Flash is faster and cheaper than Pro for extraction
+        $model    = 'gemini-1.5-pro'; // Changed from flash to pro to avoid 404s
         $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
 
         $response = \Illuminate\Support\Facades\Http::withHeaders([
