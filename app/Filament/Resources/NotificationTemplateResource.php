@@ -36,6 +36,7 @@ class NotificationTemplateResource extends Resource
                                     'whatsapp' => 'WhatsApp',
                                 ])
                                 ->disabled()
+                                ->extraAttributes(['class' => 'cursor-not-allowed opacity-70'])
                                 ->required(),
                             Forms\Components\Select::make('name')
                                 ->label('Nama Event (Trigger)')
@@ -47,6 +48,7 @@ class NotificationTemplateResource extends Resource
                                     'new_message' => 'Pesan Masuk',
                                 ])
                                 ->disabled()
+                                ->extraAttributes(['class' => 'cursor-not-allowed opacity-70'])
                                 ->required(),
                         ])->columns(2),
 
@@ -97,18 +99,63 @@ class NotificationTemplateResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->contentGrid([
+                'md' => 2,
+                'xl' => 3,
+            ])
             ->columns([
-                Tables\Columns\TextColumn::make('type')
-                    ->label('Tipe')
-                    ->badge()
-                    ->color('primary')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('name')
-                    ->label('Nama')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('subject_id')
-                    ->label('Subjek (ID)')
-                    ->limit(40),
+                Tables\Columns\Layout\Stack::make([
+                    Tables\Columns\TextColumn::make('name')
+                        ->weight('bold')
+                        ->size(Tables\Columns\TextColumn\TextColumnSize::Large)
+                        ->formatStateUsing(fn ($state) => match ($state) {
+                            'account_created' => 'Pendaftaran Akun Baru',
+                            'password_reset'  => 'Permintaan Reset Password',
+                            'otp_login'       => 'Kode OTP / Verifikasi',
+                            'new_match'       => 'Koneksi Match Baru',
+                            'new_message'     => 'Pesan Masuk Baru',
+                            default           => $state,
+                        }),
+
+                    Tables\Columns\TextColumn::make('description')
+                        ->state(fn ($record) => match ($record->name) {
+                            'account_created' => 'Terkirim secara otomatis saat user baru saja berhasil menyelesaikan proses onboarding untuk pertama kalinya.',
+                            'password_reset'  => 'Dikirim saat user menekan tombol "Lupa Password" untuk memberikan tautan pemulihan akses.',
+                            'otp_login'       => 'Sistem mengirimkan 6 digit kode OTP rahasia untuk proses verifikasi login via WhatsApp.',
+                            'new_match'       => 'Ditampilkan ketika algoritma ConnectX berhasil menemukan kecocokan profil / Co-Founder potensial.',
+                            'new_message'     => 'Memberitahu user bahwa ada pesan masuk baru dari koneksi mereka yang belum terbaca.',
+                            default           => 'Template notifikasi standar sistem.',
+                        })
+                        ->color('gray')
+                        ->size(Tables\Columns\TextColumn\TextColumnSize::Small)
+                        ->wrap()
+                        ->extraAttributes(['class' => 'mt-1 mb-4 leading-relaxed']),
+
+                    Tables\Columns\Layout\Split::make([
+                        Tables\Columns\TextColumn::make('type')
+                            ->badge()
+                            ->color(fn ($state) => match ($state) {
+                                'push'     => 'info',
+                                'whatsapp' => 'success',
+                                'email'    => 'warning',
+                                default    => 'primary',
+                            })
+                            ->formatStateUsing(fn ($state) => match ($state) {
+                                'push'     => '📱 Push Notif',
+                                'whatsapp' => '💬 WhatsApp',
+                                'email'    => '✉️ Email',
+                                default    => $state,
+                            })
+                            ->grow(false),
+
+                        Tables\Columns\TextColumn::make('subject_id')
+                            ->icon('heroicon-m-chat-bubble-left-ellipsis')
+                            ->color('gray')
+                            ->size(Tables\Columns\TextColumn\TextColumnSize::ExtraSmall)
+                            ->limit(25)
+                            ->alignRight(),
+                    ]),
+                ])->space(3)
             ])
             ->filters([
                 //
@@ -116,6 +163,7 @@ class NotificationTemplateResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
+            ->recordClasses('transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_15px_30px_-5px_rgba(249,115,22,0.15)] hover:border-orange-500/40 cursor-pointer')
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     //
