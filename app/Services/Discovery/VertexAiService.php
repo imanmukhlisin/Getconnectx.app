@@ -344,9 +344,11 @@ PROMPT;
                         'parts' => [['text' => $prompt]],
                     ],
                 ],
-                // Enable Google Search so Gemini can browse the LinkedIn URL itself
+                // Enable Google Search Retrieval so Gemini can browse the LinkedIn URL.
+                // NOTE: Vertex AI (gemini-1.5-pro) uses 'googleSearchRetrieval', NOT 'googleSearch'.
+                // 'googleSearch' is only valid for the Gemini Developer API (AI Studio).
                 'tools' => [
-                    ['googleSearch' => (object) []],
+                    ['googleSearchRetrieval' => (object) []],
                 ],
                 'generationConfig' => [
                     'temperature'     => 0.1, // Very low — factual extraction
