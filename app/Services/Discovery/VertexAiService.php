@@ -424,14 +424,67 @@ PROMPT;
 
 
     /**
-     * Call Gemini 1.5 Pro for LinkedIn data extraction.
-     * Uses the same credential infrastructure as callVertexAi() (Discovery insights)
-     * but with a higher token limit appropriate for parsing profile text.
+     * Call Gemini for LinkedIn profile data extraction.
      *
-     * This intentionally does NOT use grounding tools — grounding requires
-     * additional Vertex AI Search project configuration that is not set up.
+     * Primary: Google Gemini API (generativelanguage.googleapis.com)
+     *   Uses a simple GEMINI_API_KEY env var — no service account, no Vertex AI
+     *   permissions required. Get a free key at https://ai.google.dev
+     *
+     * Fallback: Vertex AI endpoint (same as Discovery insights).
+     *   Only used if GEMINI_API_KEY is not set.
      */
     private function callGeminiForExtraction(string $prompt): string
+    {
+        $apiKey = env('GEMINI_API_KEY');
+
+        if ($apiKey) {
+            return $this->callGeminiApiDirect($prompt, $apiKey);
+        }
+
+        // Fallback: Vertex AI (requires aiplatform.user role on service account)
+        Log::warning('VertexAiService@callGeminiForExtraction: GEMINI_API_KEY not set, falling back to Vertex AI.');
+        return $this->callGeminiViaVertexAi($prompt);
+    }
+
+    /**
+     * Call the public Google Gemini API with an API key.
+     * Simple, reliable, no service account or Vertex AI setup required.
+     * Free tier at https://ai.google.dev supports up to 1500 requests/day.
+     */
+    private function callGeminiApiDirect(string $prompt, string $apiKey): string
+    {
+        $model    = 'gemini-1.5-flash'; // Flash is faster and cheaper than Pro for extraction
+        $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
+
+        $response = \Illuminate\Support\Facades\Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->timeout(30)->post($endpoint, [
+            'contents' => [
+                [
+                    'role'  => 'user',
+                    'parts' => [['text' => $prompt]],
+                ],
+            ],
+            'generationConfig' => [
+                'temperature'     => 0.1,
+                'maxOutputTokens' => 2048,
+            ],
+        ]);
+
+        if (!$response->successful()) {
+            throw new \Exception('Gemini API error: ' . $response->status() . ' ' . $response->body());
+        }
+
+        $data = $response->json();
+
+        return $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+    }
+
+    /**
+     * Call Gemini via Vertex AI endpoint.
+     * Requires the service account to have roles/aiplatform.user.
+     */
+    private function callGeminiViaVertexAi(string $prompt): string
     {
         $client    = $this->buildVertexAiClient(30.0);
         $projectId = env('GOOGLE_CLOUD_PROJECT', 'connectx-app-482206');
@@ -447,7 +500,7 @@ PROMPT;
                     ],
                 ],
                 'generationConfig' => [
-                    'temperature'     => 0.1, // Low temperature for factual extraction
+                    'temperature'     => 0.1,
                     'maxOutputTokens' => 2048,
                 ],
             ],
@@ -458,3 +511,4 @@ PROMPT;
         return $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
     }
 }
+
