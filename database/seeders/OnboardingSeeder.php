@@ -1006,80 +1006,80 @@ class OnboardingSeeder extends Seeder
 
         DB::table('onboarding_steps')->insert([
             // ── COMMON: Data Diri (5 steps) ──
-            $s('step_personal_name', 'flow_common', 1, 'Data Diri', 'Siapa nama Anda?', 'What\'s your name?'),
+            $s('step_personal_name', 'flow_common', 1, 'Data Diri', 'Ceritakan tentang dirimu', 'Tell us about yourself'),
             $s('step_personal_dob', 'flow_common', 2, 'Data Diri', 'Kapan tanggal lahir Anda?', 'When is your date of birth?'),
-            $s('step_personal_location', 'flow_common', 3, 'Data Diri', 'Di mana Anda berlokasi?', 'Where are you based?'),
+            $s('step_personal_location', 'flow_common', 3, 'Data Diri', 'Kamu sedang tinggal dimana?', 'Where are you based?'),
             $s('step_personal_gender', 'flow_common', 4, 'Data Diri', 'Bagaimana kamu mengidentifikasi diri?', 'How do you identify?', true, 'Biar kami bisa menyesuaikan pengalamanmu.', 'To help us personalize your experience.'),
             $s('step_role_selection', 'flow_common', 5, 'Tipe Akun', 'Kamu mau pakai ConnectX buat apa?', 'How do you want to use ConnectX?', true, 'Ini bakal nentuin pengalaman kamu di sini.', 'This shapes your entire experience'),
 
             // ── BUILDER COMMON (2 steps) ──
-            $s('step_bld_type', 'flow_builder_common', 1, 'Profil Builder', 'Apa yang paling menggambarkan kamu?', 'What best describes you?', true, 'Ini menentukan apa yang akan Anda lihat di feed', 'This determines what you\'ll see in your feed'),
-            $s('step_bld_role', 'flow_builder_common', 2, 'Profil Builder', 'Peran apa yang paling mendeskripsikan Anda secara utama?', 'Which role best describes you primarily?'),
+            $s('step_bld_type', 'flow_builder_common', 1, 'Profil Builder', 'Tolong deskripsikan dirimu', 'What best describes you?', true, 'ini akan menentukan apa yang akan muncul di feed-mu', 'This determines what you\'ll see in your feed'),
+            $s('step_bld_role', 'flow_builder_common', 2, 'Profil Builder', 'Peran mana yang paling menggambarkanmu saat ini?', 'Which role best describes you primarily?'),
 
             // ── FOUNDER (3 steps) ──
-            $s('step_fdr_exp', 'flow_founder', 0, 'Profil Builder', 'Apakah Anda memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?', true, 'Lebih lanjut tentang diri Anda', 'More about yourself'),
-            $s('step_fdr_looking', 'flow_founder', 1, 'Tujuan Founder', 'Apa yang sedang kamu cari?', 'What are you looking for?', true, 'Siapa yang kamu butuhkan untuk maju?', 'Who do you need to move forward?'),
+            $s('step_fdr_exp', 'flow_founder', 0, 'Profil Builder', 'Seberapa besar pengalaman startupmu?', 'How much startup experience do you have?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
+            $s('step_fdr_looking', 'flow_founder', 1, 'Tujuan Founder', 'Apa yang sedang kamu cari?', 'What are you looking for?', true, 'Pilih kebutuhan tim paling urgent untuk startup kamu', 'Pick the most urgent hiring need for your startup'),
             $s('step_fdr_industry', 'flow_founder', 2, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?'),
 
             // ── FOUNDER → CF (4 steps) ──
             $s('step_fdr_cf_type', 'flow_fdr_cf', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of co-founder do you need?', false, 'Pilih semua yang sesuai', 'Select all that apply'),
-            $s('step_fdr_cf_avail', 'flow_fdr_cf', 2, 'Ketersediaan', 'Availability apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
+            $s('step_fdr_cf_avail', 'flow_fdr_cf', 2, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_fdr_cf_remote', 'flow_fdr_cf', 3, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_fdr_cf_linkedin', 'flow_fdr_cf', 4, 'Profil Online', 'Connect LinkedIn', 'Connect LinkedIn'),
 
             // ── FOUNDER → TEAM (4 steps) ──
-            $s('step_fdr_tm_roles', 'flow_fdr_team', 1, 'Cari Anggota Tim', 'Peran apa yang kamu butuhkan?', 'What roles do you need?'),
-            $s('step_fdr_tm_avail', 'flow_fdr_team', 2, 'Ketersediaan', 'Availability apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
+            $s('step_fdr_tm_roles', 'flow_fdr_team', 1, 'Cari Anggota Tim', 'peran apa yang saat ini kamu butuhkan?', 'What roles do you need?', false, 'Pilih role yang mau kamu tambahin ke tim kamu', 'Pick the roles you want to add to your team.'),
+            $s('step_fdr_tm_avail', 'flow_fdr_team', 2, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_fdr_tm_remote', 'flow_fdr_team', 3, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_fdr_tm_linkedin', 'flow_fdr_team', 4, 'Profil Online', 'Connect LinkedIn', 'Connect LinkedIn'),
 
             // ── FOUNDER → BOTH (5 steps) ──
             $s('step_fdr_bt_cf', 'flow_fdr_both', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of co-founder do you need?', false, 'Pilih semua yang sesuai', 'Select all that apply'),
-            $s('step_fdr_bt_roles', 'flow_fdr_both', 2, 'Cari Anggota Tim', 'Peran apa yang kamu butuhkan?', 'What roles do you need?'),
-            $s('step_fdr_bt_avail', 'flow_fdr_both', 3, 'Ketersediaan', 'Availability apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
+            $s('step_fdr_bt_roles', 'flow_fdr_both', 2, 'Cari Anggota Tim', 'peran apa yang saat ini kamu butuhkan?', 'What roles do you need?', false, 'Pilih role yang mau kamu tambahin ke tim kamu', 'Pick the roles you want to add to your team.'),
+            $s('step_fdr_bt_avail', 'flow_fdr_both', 3, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_fdr_bt_remote', 'flow_fdr_both', 4, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_fdr_bt_linkedin', 'flow_fdr_both', 5, 'Profil Online', 'Connect LinkedIn', 'Connect LinkedIn'),
 
             // ── CO-FOUNDER JOINING (8 steps) ──
-            $s('step_cf_exp', 'flow_cofounder', 0, 'Profil Builder', 'Apakah Anda memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?', true, 'Lebih lanjut tentang diri Anda', 'More about yourself'),
+            $s('step_cf_exp', 'flow_cofounder', 0, 'Profil Builder', 'Seberapa besar pengalaman startupmu?', 'How much startup experience do you have?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
             $s('step_cf_industry', 'flow_cofounder', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?'),
-            $s('step_cf_type', 'flow_cofounder', 2, 'Tipe Co-Founder', 'Kamu co-founder tipe apa?', 'What kind of co-founder are you?', false, 'Pilih semua yang sesuai', 'Select all that apply'),
-            $s('step_cf_avail', 'flow_cofounder', 3, 'Ketersediaan', 'Availability apa yang kamu miliki?', 'What availability do you have?', true, 'Berapa tingkat komitmen yang bisa kamu berikan?', 'What commitment level can you offer?'),
+            $s('step_cf_type', 'flow_cofounder', 2, 'Tipe Co-Founder', 'Kamu tipe co-founder yang seperti apa?', 'What type of co-founder are you?', false, 'Pilih peran yang bisa kamu kerjakan dari awal', 'Pick the area you can own from day one.'),
+            $s('step_cf_avail', 'flow_cofounder', 3, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_cf_comp', 'flow_cofounder', 4, 'Ekspektasi Kompensasi', 'Bagaimana ekspektasimu untuk cash dan equity?', 'What are your cash & equity expectations?'),
             $s('step_cf_remote', 'flow_cofounder', 5, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_cf_linkedin', 'flow_cofounder', 6, 'Profil Online', 'Connect LinkedIn', 'Connect LinkedIn'),
 
             // ── TEAM MEMBER JOINING (8 steps) ──
-            $s('step_tm_exp', 'flow_team', 0, 'Profil Builder', 'Apakah Anda memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?', true, 'Lebih lanjut tentang diri Anda', 'More about yourself'),
+            $s('step_tm_exp', 'flow_team', 0, 'Profil Builder', 'Seberapa besar pengalaman startupmu?', 'How much startup experience do you have?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
             $s('step_tm_industry', 'flow_team', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?'),
             $s('step_tm_skills', 'flow_team', 2, 'Skill & Keahlian', 'Skill apa yang kamu miliki?', 'What skills do you have?'),
-            $s('step_tm_avail', 'flow_team', 3, 'Ketersediaan', 'Availability apa yang kamu miliki?', 'What availability do you have?', true, 'Berapa tingkat komitmen yang bisa kamu berikan?', 'What commitment level can you offer?'),
+            $s('step_tm_avail', 'flow_team', 3, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
             $s('step_tm_comp', 'flow_team', 4, 'Ekspektasi Kompensasi', 'Bagaimana ekspektasimu untuk cash dan equity?', 'What are your cash & equity expectations?'),
             $s('step_tm_remote', 'flow_team', 5, 'Lokasi Kerja', 'Preferensi kerja', 'Work preferences'),
             $s('step_tm_linkedin', 'flow_team', 6, 'Profil Online', 'Connect LinkedIn', 'Connect LinkedIn'),
 
             // ── STARTUP (3 steps) ──
-            $s('step_su_about', 'flow_startup', 1, 'Profil Startup', 'Ceritakan tentang startup kamu', 'Tell us about your startup'),
-            $s('step_su_problem', 'flow_startup', 2, 'Masalah & Solusi', 'Apa yang sedang kamu bangun?', 'What are you building?'),
-            $s('step_su_biz', 'flow_startup', 3, 'Industri & Model', 'Industri dan model bisnis', 'Industry and business model'),
+            $s('step_su_about', 'flow_startup', 1, 'Profil Startup', 'Ceritakan tentang startup kamu secara singkat', 'Tell us about your startup', false, 'Kenalkan kami dengan startupmu secara singkat.', 'Give us a quick introduction to your company.'),
+            $s('step_su_problem', 'flow_startup', 2, 'Masalah & Solusi', 'Apa yang sedang kamu bangun?', 'What are you building?', false, 'Visi kamu', 'Your vision'),
+            $s('step_su_biz', 'flow_startup', 3, 'Industri & Model', 'Industri apa yang kamu geluti?', 'Which industries are you in?'),
 
             // ── TRACTION (1 step each, 4 flows) ──
-            $s('step_su_tr_idea', 'flow_su_tr_idea', 1, 'Traction', 'Validasi tahap Idea', 'Idea stage validation'),
-            $s('step_su_tr_mvp', 'flow_su_tr_mvp', 1, 'Traction', 'Traction tahap MVP', 'MVP stage traction'),
-            $s('step_su_tr_live', 'flow_su_tr_live', 1, 'Traction', 'Traction tahap Live', 'Live stage traction'),
-            $s('step_su_tr_scale', 'flow_su_tr_scale', 1, 'Traction', 'Traction tahap Scale', 'Scale stage traction'),
+            $s('step_su_tr_idea', 'flow_su_tr_idea', 1, 'Traction', 'Traction kamu sejauh ini', 'Your traction so far'),
+            $s('step_su_tr_mvp', 'flow_su_tr_mvp', 1, 'Traction', 'Traction kamu sejauh ini', 'Your traction so far'),
+            $s('step_su_tr_live', 'flow_su_tr_live', 1, 'Traction', 'Traction kamu sejauh ini', 'Your traction so far'),
+            $s('step_su_tr_scale', 'flow_su_tr_scale', 1, 'Traction', 'Traction kamu sejauh ini', 'Your traction so far'),
 
             // ── STARTUP FINISH (4 steps) ──
-            $s('step_su_presence', 'flow_su_finish', 1, 'Online Presence', 'Di mana orang bisa menemukan kamu?', 'Where can people find you?'),
-            $s('step_su_founders', 'flow_su_finish', 2, 'Tim Founder', 'Setup founder', 'Founder setup'),
-            $s('step_su_team', 'flow_su_finish', 3, 'Status Tim', 'Status tim kamu', 'Your team status'),
-            $s('step_su_need', 'flow_su_finish', 4, 'Kebutuhan', 'Apa yang sedang kamu cari?', 'What are you looking for?', true),
+            $s('step_su_presence', 'flow_su_finish', 1, 'Online Presence', 'Di mana orang bisa menemukanmu?', 'Where can people find you?'),
+            $s('step_su_founders', 'flow_su_finish', 2, 'Tim Founder', 'Berapa jumlah foundermu?', 'How many founders are you?', false, 'Setup founder', 'Founder setup'),
+            $s('step_su_team', 'flow_su_finish', 3, 'Status Tim', 'Apakah kamu punya tim di luar founder?', 'Do you have a team beyond founders?', false, 'Status tim', 'Team presence'),
+            $s('step_su_need', 'flow_su_finish', 4, 'Kebutuhan', 'Apa yang sedang kamu cari?', 'What are you looking for?', true, 'Pilih kebutuhan tim paling urgent untuk startup kamu', 'Pick the most urgent hiring need for your startup'),
 
             // ── STARTUP NEED SUB-FLOWS ──
             $s('step_su_need_cf', 'flow_su_need_cf', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of co-founder do you need?', false, 'Pilih semua yang sesuai', 'Select all that apply'),
-            $s('step_su_need_tm', 'flow_su_need_team', 1, 'Cari Anggota Tim', 'Skill apa yang belum dipunyai di tim?', 'What skills are you missing?'),
+            $s('step_su_need_tm', 'flow_su_need_team', 1, 'Cari Anggota Tim', 'Skill apa yang belum kamu punya?', 'What skills are you missing?', false, 'Skill yang kamu butuhkan', 'Skills you need'),
             $s('step_su_need_bt_cf', 'flow_su_need_both', 1, 'Cari Co-Founder', 'Co-Founder seperti apa yang kamu butuhkan?', 'What kind of co-founder do you need?', false, 'Pilih semua yang sesuai', 'Select all that apply'),
-            $s('step_su_need_bt_tm', 'flow_su_need_both', 2, 'Cari Anggota Tim', 'Skill yang belum dipunyai di tim', 'Skills missing in team'),
+            $s('step_su_need_bt_tm', 'flow_su_need_both', 2, 'Cari Anggota Tim', 'Skill apa yang belum kamu punya?', 'What skills are you missing?', false, 'Skill yang kamu butuhkan', 'Skills you need'),
 
             // ── STARTUP END (2 steps) ──
             $s('step_su_commit', 'flow_su_end', 1, 'Komitmen', 'Commitment level', 'Commitment level', true),
