@@ -330,36 +330,36 @@ class OnboardingSeeder extends Seeder
 
         $masterCFTypes = [
             ['Technical Co-Founder', 'tech', 
-                ['me' => 'Saya membangun produk & teknologi', 'need' => 'Rekayasa & arsitektur'], 
+                ['me' => 'Aku membangun produk & teknologi', 'need' => 'Engineering & arsitektur'], 
                 ['me' => 'I build the product & tech', 'need' => 'Engineering & architecture'], 
                 'cofounder_technical'],
             ['Product Co-Founder', 'product', 
-                ['me' => 'Saya memimpin produk dan desain', 'need' => 'Visi produk & desain'], 
+                ['me' => 'Aku memimpin produk & desain', 'need' => 'Visi produk & desain'], 
                 ['me' => 'I lead product & design', 'need' => 'Product vision & design'], 
                 'cofounder_product'],
             ['Business Co-Founder', 'business', 
-                ['me' => 'Saya menangani strategi dan operasional', 'need' => 'Strategi & operasional'], 
+                ['me' => 'Aku menangani strategi & operasional', 'need' => 'Strategi & operasional'], 
                 ['me' => 'I handle strategy & ops', 'need' => 'Strategy & operations'], 
                 'cofounder_business'],
             ['Growth Co-Founder', 'growth', 
-                ['me' => 'Saya menggerakkan marketing dan growth', 'need' => 'Marketing & distribusi'], 
+                ['me' => 'Aku menggerakkan marketing & growth', 'need' => 'Marketing & distribusi'], 
                 ['me' => 'I drive marketing & growth', 'need' => 'Marketing & distribution'], 
                 'cofounder_growth'],
             ['AI / Data Co-Founder', 'ai_data', 
-                ['me' => 'Saya membangun AI, data & intelligence', 'need' => 'Membangun AI, data & intelligence'], 
-                ['me' => 'I build AI, data & intelligence', 'need' => 'I build AI, data & intelligence'], 
+                ['me' => 'Aku membangun AI, data & intelligence', 'need' => 'Sistem AI & data intelligence'], 
+                ['me' => 'I build AI, data & intelligence', 'need' => 'AI systems & data intelligence'], 
                 'cofounder_ai'],
             ['Operations Co-Founder', 'operations', 
-                ['me' => 'Saya mengeksekusi dan menskalakan operasional', 'need' => 'Mengeksekusi & menskalakan operasional'], 
-                ['me' => 'I execute & scale operations', 'need' => 'I execute & scale operations'], 
+                ['me' => 'Aku mengeksekusi & menskalakan operasional', 'need' => 'Eksekusi & scaling operasional'], 
+                ['me' => 'I execute & scale operations', 'need' => 'Execution & scaling operations'], 
                 'cofounder_operations'],
             ['Finance Co-Founder', 'finance', 
-                ['me' => 'Saya mengelola fundraising dan keuangan', 'need' => 'Fundraising & keuangan'], 
-                ['me' => 'I manage fundraising & finance', 'need' => 'Fundraising & finance'], 
+                ['me' => 'Aku mengelola fundraising & keuangan', 'need' => 'Fundraising & strategi keuangan'], 
+                ['me' => 'I manage fundraising & finance', 'need' => 'Fundraising & financial strategy'], 
                 'cofounder_finance'],
             ['Partnerships Co-Founder', 'partnerships', 
-                ['me' => 'Saya membangun deal dan partnership', 'need' => 'Deal & partnership'], 
-                ['me' => 'I build deals & partnerships', 'need' => 'Deals & partnerships'], 
+                ['me' => 'Aku membangun deal & partnership', 'need' => 'Partnership strategis & pertumbuhan bisnis'], 
+                ['me' => 'I build deals & partnerships', 'need' => 'Strategic partnerships & business growth'], 
                 'cofounder_partnerships'],
         ];
 
@@ -1010,7 +1010,7 @@ class OnboardingSeeder extends Seeder
             $s('step_personal_dob', 'flow_common', 2, 'Data Diri', 'Kapan tanggal lahir Anda?', 'When is your date of birth?'),
             $s('step_personal_location', 'flow_common', 3, 'Data Diri', 'Di mana Anda berlokasi?', 'Where are you based?'),
             $s('step_personal_gender', 'flow_common', 4, 'Data Diri', 'Jenis Kelamin', 'Gender', true),
-            $s('step_role_selection', 'flow_common', 5, 'Tipe Akun', 'Bagaimana Anda ingin menggunakan ConnectX?', 'How do you want to use ConnectX?', true, 'Ini menentukan seluruh pengalaman Anda', 'This shapes your entire experience'),
+            $s('step_role_selection', 'flow_common', 5, 'Tipe Akun', 'Kamu mau pakai ConnectX buat apa?', 'How do you want to use ConnectX?', true, 'Ini bakal nentuin pengalaman kamu di sini.', 'This shapes your entire experience'),
 
             // ── BUILDER COMMON (2 steps) ──
             $s('step_bld_type', 'flow_builder_common', 1, 'Profil Builder', 'Apa yang paling menggambarkan kamu?', 'What best describes you?', true, 'Ini menentukan apa yang akan Anda lihat di feed', 'This determines what you\'ll see in your feed'),
@@ -1110,10 +1110,10 @@ class OnboardingSeeder extends Seeder
 
         DB::table('onboarding_questions')->insert([
             // ── COMMON: Data Diri ──
-            $q('q_first_name', 'step_personal_name', 1, 'text', 'Nama Depan', 'First Name', true, ['validation' => json_encode(['min_length' => 1, 'max_length' => 50]), 'placeholder' => json_encode(['id' => 'Contoh: Britania', 'en' => 'e.g. Thomas'])]),
-            $q('q_last_name', 'step_personal_name', 2, 'text', 'Nama Belakang', 'Last Name', false, ['placeholder' => json_encode(['id' => 'Contoh: Cheryl', 'en' => 'e.g. Wijaya'])]),
-            $q('q_dob', 'step_personal_dob', 1, 'date', 'Tanggal Lahir', 'Date of Birth'),
-            $q('q_location', 'step_personal_location', 1, 'searchable_dropdown', 'Pilih Kota/Negara', 'Select City/Country'),
+            $q('q_first_name', 'step_personal_name', 1, 'text', 'Nama Depan', 'First Name', true, ['validation' => json_encode(['min_length' => 1, 'max_length' => 50]), 'placeholder' => json_encode(['id' => 'Nama depan kamu', 'en' => 'Your first name'])]),
+            $q('q_last_name', 'step_personal_name', 2, 'text', 'Nama Belakang', 'Last Name', false, ['placeholder' => json_encode(['id' => 'Nama belakang kamu', 'en' => 'Your last name'])]),
+            $q('q_dob', 'step_personal_dob', 1, 'date', 'Tanggal Lahir', 'Date of Birth', true, ['placeholder' => json_encode(['id' => 'Tahun-Bulan-tanggal', 'en' => 'YYYY-MM-DD'])]),
+            $q('q_location', 'step_personal_location', 1, 'searchable_dropdown', 'Pilih Kota/Negara', 'Select City/Country', true, ['placeholder' => json_encode(['id' => 'Cari kota', 'en' => 'Search a city'])]),
             $q('q_open_remote', 'step_personal_location', 2, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
             $q('q_remote_pref', 'step_personal_location', 3, 'dropdown', 'Preferensi remote', 'Remote preference', true, ['depends_on' => json_encode(['question_id' => 'q_open_remote', 'operator' => 'equals', 'value' => 'yes'])]),
             $q('q_gender', 'step_personal_gender', 1, 'single_select_card', 'Jenis Kelamin', 'Gender'),
@@ -1121,40 +1121,40 @@ class OnboardingSeeder extends Seeder
 
             // ── BUILDER COMMON ──
             $q('q_bld_type', 'step_bld_type', 1, 'single_select_card', '', ''),
-            $q('q_bld_role', 'step_bld_role', 1, 'searchable_dropdown', 'Pilih peran utama Anda*', 'Select your primary role*'),
-            $q('q_bld_years', 'step_bld_role', 2, 'number', 'Tahun Pengalaman', 'Years of Experience', true, ['placeholder' => json_encode(['id' => 'contoh: 3', 'en' => 'e.g. 3'])]),
+            $q('q_bld_role', 'step_bld_role', 1, 'searchable_dropdown', 'Pilih peran utama Anda*', 'Select your primary role*', true, ['placeholder' => json_encode(['id' => 'Cari peran utama kamu', 'en' => 'Search your primary role'])]),
+            $q('q_bld_years', 'step_bld_role', 2, 'number', 'Tahun Pengalaman', 'Years of Experience', true, ['placeholder' => json_encode(['id' => '3', 'en' => '3'])]),
             $q('q_fdr_exp', 'step_fdr_exp', 1, 'single_select_card', '', ''),
             $q('q_cf_exp', 'step_cf_exp', 1, 'single_select_card', '', ''),
             $q('q_tm_exp', 'step_tm_exp', 1, 'single_select_card', '', ''),
 
             // ── FOUNDER ──
             $q('q_fdr_looking', 'step_fdr_looking', 1, 'single_select_card', '', ''),
-            $q('q_fdr_industry', 'step_fdr_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5])]),
+            $q('q_fdr_industry', 'step_fdr_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5]), 'placeholder' => json_encode(['id' => 'Cari industri', 'en' => 'Search industries'])]),
 
             // ── FOUNDER → CF ──
             $q('q_fdr_cf_type', 'step_fdr_cf_type', 1, 'multi_select_card', '', ''),
             $q('q_fdr_cf_avail', 'step_fdr_cf_avail', 1, 'single_select_card', '', ''),
             $q('q_fdr_cf_remote', 'step_fdr_cf_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
             $q('q_fdr_cf_relocate', 'step_fdr_cf_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
-            $q('q_fdr_cf_linkedin', 'step_fdr_cf_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/...', 'en' => 'https://linkedin.com/in/...'])]),
+            $q('q_fdr_cf_linkedin', 'step_fdr_cf_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/namamu', 'en' => 'https://linkedin.com/in/your-name'])]),
 
             // ── FOUNDER → TEAM ──
-            $q('q_fdr_tm_roles', 'step_fdr_tm_roles', 1, 'multi_select_chip', 'Peran yang dibutuhkan', 'Roles needed'),
+            $q('q_fdr_tm_roles', 'step_fdr_tm_roles', 1, 'multi_select_chip', 'Peran yang dibutuhkan', 'Roles needed', true, ['placeholder' => json_encode(['id' => 'cari role', 'en' => 'Search roles'])]),
             $q('q_fdr_tm_avail', 'step_fdr_tm_avail', 1, 'single_select_card', '', ''),
             $q('q_fdr_tm_remote', 'step_fdr_tm_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
             $q('q_fdr_tm_relocate', 'step_fdr_tm_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
-            $q('q_fdr_tm_linkedin', 'step_fdr_tm_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/...', 'en' => 'https://linkedin.com/in/...'])]),
+            $q('q_fdr_tm_linkedin', 'step_fdr_tm_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/namamu', 'en' => 'https://linkedin.com/in/your-name'])]),
 
             // ── FOUNDER → BOTH ──
             $q('q_fdr_bt_cf', 'step_fdr_bt_cf', 1, 'multi_select_card', '', ''),
-            $q('q_fdr_bt_roles', 'step_fdr_bt_roles', 1, 'multi_select_chip', 'Peran yang dibutuhkan', 'Roles needed'),
+            $q('q_fdr_bt_roles', 'step_fdr_bt_roles', 1, 'multi_select_chip', 'Peran yang dibutuhkan', 'Roles needed', true, ['placeholder' => json_encode(['id' => 'cari role', 'en' => 'Search roles'])]),
             $q('q_fdr_bt_avail', 'step_fdr_bt_avail', 1, 'single_select_card', '', ''),
             $q('q_fdr_bt_remote', 'step_fdr_bt_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
             $q('q_fdr_bt_relocate', 'step_fdr_bt_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
-            $q('q_fdr_bt_linkedin', 'step_fdr_bt_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/...', 'en' => 'https://linkedin.com/in/...'])]),
+            $q('q_fdr_bt_linkedin', 'step_fdr_bt_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/namamu', 'en' => 'https://linkedin.com/in/your-name'])]),
 
             // ── CO-FOUNDER JOINING ──
-            $q('q_cf_industry', 'step_cf_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5])]),
+            $q('q_cf_industry', 'step_cf_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5]), 'placeholder' => json_encode(['id' => 'Cari industri', 'en' => 'Search industries'])]),
             $q('q_cf_type', 'step_cf_type', 1, 'multi_select_card', '', ''),
             $q('q_cf_avail', 'step_cf_avail', 1, 'single_select_card', '', ''),
             // Compensation
@@ -1162,80 +1162,80 @@ class OnboardingSeeder extends Seeder
             $q('q_cf_salary_type', 'step_cf_comp', 2, 'single_select_card', 'Apakah kamu punya ekspektasi minimum gaji?', 'Do you have a minimum salary expectation?'),
             $q('q_cf_salary_period', 'step_cf_comp', 3, 'dropdown', 'Periode gaji', 'Salary period', true, ['depends_on' => json_encode(['question_id' => 'q_cf_salary_type', 'operator' => 'in', 'value' => ['strict', 'flexible']])]),
             $q('q_cf_salary_currency', 'step_cf_comp', 4, 'dropdown', 'Mata uang', 'Currency', true, ['depends_on' => json_encode(['question_id' => 'q_cf_salary_type', 'operator' => 'in', 'value' => ['strict', 'flexible']])]),
-            $q('q_cf_salary_amount', 'step_cf_comp', 5, 'number', 'Berapa minimum gaji?', 'Minimum salary amount?', true, ['depends_on' => json_encode(['question_id' => 'q_cf_salary_type', 'operator' => 'in', 'value' => ['strict', 'flexible']]), 'placeholder' => json_encode(['id' => 'e.g. 10000000', 'en' => 'e.g. 10000000'])]),
+            $q('q_cf_salary_amount', 'step_cf_comp', 5, 'number', 'Berapa minimum gaji?', 'Minimum salary amount?', true, ['depends_on' => json_encode(['question_id' => 'q_cf_salary_type', 'operator' => 'in', 'value' => ['strict', 'flexible']]), 'placeholder' => json_encode(['id' => '5000', 'en' => '5000'])]),
             // Remote + LinkedIn
             $q('q_cf_remote', 'step_cf_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
             $q('q_cf_relocate', 'step_cf_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
-            $q('q_cf_linkedin', 'step_cf_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/...', 'en' => 'https://linkedin.com/in/...'])]),
+            $q('q_cf_linkedin', 'step_cf_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/namamu', 'en' => 'https://linkedin.com/in/your-name'])]),
 
             // ── TEAM MEMBER JOINING ──
-            $q('q_tm_industry', 'step_tm_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5])]),
-            $q('q_tm_skills', 'step_tm_skills', 1, 'multi_select_chip', 'Skill yang kamu miliki', 'Skills you have'),
+            $q('q_tm_industry', 'step_tm_industry', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5]), 'placeholder' => json_encode(['id' => 'Cari industri', 'en' => 'Search industries'])]),
+            $q('q_tm_skills', 'step_tm_skills', 1, 'multi_select_chip', 'Skill yang kamu miliki', 'Skills you have', true, ['placeholder' => json_encode(['id' => 'Cari skill', 'en' => 'Search skills'])]),
             $q('q_tm_avail', 'step_tm_avail', 1, 'single_select_card', '', ''),
             // Compensation
             $q('q_tm_equity', 'step_tm_comp', 1, 'single_select_card', 'Ekspektasi equity', 'Equity expectation'),
             $q('q_tm_salary_type', 'step_tm_comp', 2, 'single_select_card', 'Apakah kamu punya ekspektasi minimum gaji?', 'Do you have a minimum salary expectation?'),
             $q('q_tm_salary_period', 'step_tm_comp', 3, 'dropdown', 'Periode gaji', 'Salary period', true, ['depends_on' => json_encode(['question_id' => 'q_tm_salary_type', 'operator' => 'in', 'value' => ['strict', 'flexible']])]),
             $q('q_tm_salary_currency', 'step_tm_comp', 4, 'dropdown', 'Mata uang', 'Currency', true, ['depends_on' => json_encode(['question_id' => 'q_tm_salary_type', 'operator' => 'in', 'value' => ['strict', 'flexible']])]),
-            $q('q_tm_salary_amount', 'step_tm_comp', 5, 'number', 'Berapa minimum gaji?', 'Minimum salary amount?', true, ['depends_on' => json_encode(['question_id' => 'q_tm_salary_type', 'operator' => 'in', 'value' => ['strict', 'flexible']]), 'placeholder' => json_encode(['id' => 'e.g. 10000000', 'en' => 'e.g. 10000000'])]),
+            $q('q_tm_salary_amount', 'step_tm_comp', 5, 'number', 'Berapa minimum gaji?', 'Minimum salary amount?', true, ['depends_on' => json_encode(['question_id' => 'q_tm_salary_type', 'operator' => 'in', 'value' => ['strict', 'flexible']]), 'placeholder' => json_encode(['id' => '5000', 'en' => '5000'])]),
             // Remote + LinkedIn
             $q('q_tm_remote', 'step_tm_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
             $q('q_tm_relocate', 'step_tm_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
-            $q('q_tm_linkedin', 'step_tm_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/...', 'en' => 'https://linkedin.com/in/...'])]),
+            $q('q_tm_linkedin', 'step_tm_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/namamu', 'en' => 'https://linkedin.com/in/your-name'])]),
 
             // ── STARTUP: About ──
-            $q('q_su_name', 'step_su_about', 1, 'text', 'Nama Startup', 'Startup Name', true, ['validation' => json_encode(['min_length' => 2, 'max_length' => 100]), 'placeholder' => json_encode(['id' => 'contoh: ConnectX', 'en' => 'e.g. ConnectX'])]),
-            $q('q_su_tagline', 'step_su_about', 2, 'text', 'Tagline (1 kalimat)', 'Tagline (1 sentence)', true, ['validation' => json_encode(['max_length' => 150]), 'placeholder' => json_encode(['id' => 'contoh: Platform matchmaking untuk startup founders', 'en' => 'e.g. Matchmaking platform for startup founders'])]),
+            $q('q_su_name', 'step_su_about', 1, 'text', 'Nama Startup', 'Startup Name', true, ['validation' => json_encode(['min_length' => 2, 'max_length' => 100]), 'placeholder' => json_encode(['id' => 'Nama startup', 'en' => 'Startup name'])]),
+            $q('q_su_tagline', 'step_su_about', 2, 'text', 'Tagline (1 kalimat)', 'Tagline (1 sentence)', true, ['validation' => json_encode(['max_length' => 150]), 'placeholder' => json_encode(['id' => 'cont: Cara paling cepat buat cari co-founder', 'en' => 'e.g. The fastest way to find co-founders'])]),
             $q('q_su_stage', 'step_su_about', 3, 'dropdown', 'Tahap Startup', 'Startup Stage'),
 
             // ── STARTUP: Problem & Solution ──
-            $q('q_su_problem', 'step_su_problem', 1, 'textarea', 'Masalah yang kamu selesaikan', 'Problem you\'re solving', true, ['placeholder' => json_encode(['id' => 'contoh: Susah mencari co-founder yang satu visi dan saling melengkapi skill.', 'en' => 'e.g. It is hard to find co-founders with aligned vision and complementary skills.'])]),
-            $q('q_su_solution', 'step_su_problem', 2, 'textarea', 'Solusi kamu', 'Your solution', true, ['placeholder' => json_encode(['id' => 'contoh: Kami membuat aplikasi Tinder for Founders untuk mempermudah matchmaking.', 'en' => 'e.g. We are building a Tinder for Founders app to streamline matchmaking.'])]),
-            $q('q_su_target', 'step_su_problem', 3, 'textarea', 'Target pengguna', 'Target users', true, ['placeholder' => json_encode(['id' => 'contoh: Mahasiswa, profesional muda, dan serial entrepreneur.', 'en' => 'e.g. University students, young professionals, and serial entrepreneurs.'])]),
+            $q('q_su_problem', 'step_su_problem', 1, 'textarea', 'Masalah yang kamu selesaikan', 'Problem you\'re solving', true, ['placeholder' => json_encode(['id' => 'Siapa yang merasakan kesusahannya dan kenapa?', 'en' => 'Who hurts, and why?'])]),
+            $q('q_su_solution', 'step_su_problem', 2, 'textarea', 'Solusi kamu', 'Your solution', true, ['placeholder' => json_encode(['id' => 'Bagaimana produkmu bisa mengatasi masalah ini?', 'en' => 'How does your product solve it?'])]),
+            $q('q_su_target', 'step_su_problem', 3, 'textarea', 'Target pengguna', 'Target users', true, ['placeholder' => json_encode(['id' => 'Siapa target penggunamu?', 'en' => 'Describe the people you are building for'])]),
 
             // ── STARTUP: Industry & Biz Model ──
-            $q('q_su_industry', 'step_su_biz', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5])]),
-            $q('q_su_biz_model', 'step_su_biz', 2, 'multi_select_chip', 'Model Bisnis', 'Business Model'),
+            $q('q_su_industry', 'step_su_biz', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5]), 'placeholder' => json_encode(['id' => 'Cari industri', 'en' => 'Search industries'])]),
+            $q('q_su_biz_model', 'step_su_biz', 2, 'multi_select_chip', 'Model Bisnis', 'Business Model', true, ['placeholder' => json_encode(['id' => 'Cari model bisnis', 'en' => 'Search a business model'])]),
 
             // ── TRACTION: Idea ──
             $q('q_su_tri_prototype', 'step_su_tr_idea', 1, 'single_select_card', 'Apakah kamu punya prototype?', 'Do you have a prototype?'),
-            $q('q_su_tri_prototype_link', 'step_su_tr_idea', 2, 'url', 'Link Prototype', 'Prototype Link', false, ['depends_on' => json_encode(['question_id' => 'q_su_tri_prototype', 'operator' => 'equals', 'value' => 'yes'])]),
-            $q('q_su_tri_waitlist', 'step_su_tr_idea', 3, 'number', 'Ukuran Waitlist', 'Waitlist Size', false, ['placeholder' => json_encode(['id' => 'contoh: 150', 'en' => 'e.g. 150'])]),
-            $q('q_su_tri_validation', 'step_su_tr_idea', 4, 'text', 'Validasi (interview, survey, dll)', 'Validation (interviews, surveys, etc.)', false, ['placeholder' => json_encode(['id' => 'contoh: 50+ interview dengan target user', 'en' => 'e.g. 50+ user interviews conducted'])]),
+            $q('q_su_tri_prototype_link', 'step_su_tr_idea', 2, 'url', 'Link Prototype', 'Prototype Link', false, ['depends_on' => json_encode(['question_id' => 'q_su_tri_prototype', 'operator' => 'equals', 'value' => 'yes']), 'placeholder' => json_encode(['id' => 'https://figma.com/...', 'en' => 'https://figma.com/...'])]),
+            $q('q_su_tri_waitlist', 'step_su_tr_idea', 3, 'number', 'Ukuran Waitlist', 'Waitlist Size', false, ['placeholder' => json_encode(['id' => '5000', 'en' => '5000'])]),
+            $q('q_su_tri_validation', 'step_su_tr_idea', 4, 'text', 'Validasi (interview, survey, dll)', 'Validation (interviews, surveys, etc.)', false, ['placeholder' => json_encode(['id' => 'Wawancara, survei, landing page...', 'en' => 'Interviews, surveys, landing page tests...'])]),
 
             // ── TRACTION: MVP ──
-            $q('q_su_trm_users', 'step_su_tr_mvp', 1, 'number', 'Jumlah Users', 'Number of Users', false),
-            $q('q_su_trm_mau', 'step_su_tr_mvp', 2, 'number', 'Monthly Active Users (MAU)', 'Monthly Active Users (MAU)', false),
-            $q('q_su_trm_revenue', 'step_su_tr_mvp', 3, 'number', 'Revenue (jika ada)', 'Revenue (if any)', false),
-            $q('q_su_trm_growth', 'step_su_tr_mvp', 4, 'text', 'Growth Rate', 'Growth Rate', false),
+            $q('q_su_trm_users', 'step_su_tr_mvp', 1, 'number', 'Jumlah Users', 'Number of Users', false, ['placeholder' => json_encode(['id' => '5000', 'en' => '5000'])]),
+            $q('q_su_trm_mau', 'step_su_tr_mvp', 2, 'number', 'Monthly Active Users (MAU)', 'Monthly Active Users (MAU)', false, ['placeholder' => json_encode(['id' => '5000', 'en' => '5000'])]),
+            $q('q_su_trm_revenue', 'step_su_tr_mvp', 3, 'number', 'Revenue (jika ada)', 'Revenue (if any)', false, ['placeholder' => json_encode(['id' => '5000', 'en' => '5000'])]),
+            $q('q_su_trm_growth', 'step_su_tr_mvp', 4, 'text', 'Growth Rate', 'Growth Rate', false, ['placeholder' => json_encode(['id' => 'misalnya 20% MoM', 'en' => 'e.g. 20% MoM'])]),
 
             // ── TRACTION: Live ──
-            $q('q_su_trl_mrr', 'step_su_tr_live', 1, 'number', 'Monthly Recurring Revenue (MRR)', 'MRR', false),
-            $q('q_su_trl_customers', 'step_su_tr_live', 2, 'number', 'Jumlah Pelanggan', 'Number of Customers', false),
-            $q('q_su_trl_retention', 'step_su_tr_live', 3, 'text', 'Retention Rate', 'Retention Rate', false),
-            $q('q_su_trl_metrics', 'step_su_tr_live', 4, 'text', 'Key Metrics (GMV, dll)', 'Key Metrics (GMV, etc.)', false),
+            $q('q_su_trl_mrr', 'step_su_tr_live', 1, 'number', 'Monthly Recurring Revenue (MRR)', 'MRR', false, ['placeholder' => json_encode(['id' => 'misalnya $500 MRR', 'en' => 'e.g. $500 MRR'])]),
+            $q('q_su_trl_customers', 'step_su_tr_live', 2, 'number', 'Jumlah Pelanggan', 'Number of Customers', false, ['placeholder' => json_encode(['id' => '5000', 'en' => '5000'])]),
+            $q('q_su_trl_retention', 'step_su_tr_live', 3, 'text', 'Retention Rate', 'Retention Rate', false, ['placeholder' => json_encode(['id' => 'misalnya retensi 80% di bulan ke-3', 'en' => 'e.g. 80% 3-month retention'])]),
+            $q('q_su_trl_metrics', 'step_su_tr_live', 4, 'text', 'Key Metrics (GMV, dll)', 'Key Metrics (GMV, etc.)', false, ['placeholder' => json_encode(['id' => 'Hal lain yang penting disorot?', 'en' => 'Anything else worth highlighting?'])]),
 
             // ── TRACTION: Scale ──
-            $q('q_su_trs_funding', 'step_su_tr_scale', 1, 'text', 'Funding yang sudah didapat', 'Funding raised', false),
-            $q('q_su_trs_investors', 'step_su_tr_scale', 2, 'text', 'Investor (opsional)', 'Investors (optional)', false),
-            $q('q_su_trs_teamsize', 'step_su_tr_scale', 3, 'number', 'Ukuran Tim', 'Team Size', false),
-            $q('q_su_trs_arr', 'step_su_tr_scale', 4, 'number', 'Annual Recurring Revenue (ARR)', 'ARR', false),
+            $q('q_su_trs_funding', 'step_su_tr_scale', 1, 'text', 'Funding yang sudah didapat', 'Funding raised', false, ['placeholder' => json_encode(['id' => 'misalnya $2M seed', 'en' => 'e.g. $2M seed'])]),
+            $q('q_su_trs_investors', 'step_su_tr_scale', 2, 'text', 'Investor (opsional)', 'Investors (optional)', false, ['placeholder' => json_encode(['id' => 'misalnya East Ventures, Alpha JWC', 'en' => 'e.g. East Ventures, Alpha JWC'])]),
+            $q('q_su_trs_teamsize', 'step_su_tr_scale', 3, 'number', 'Ukuran Tim', 'Team Size', false, ['placeholder' => json_encode(['id' => '5000', 'en' => '5000'])]),
+            $q('q_su_trs_arr', 'step_su_tr_scale', 4, 'number', 'Annual Recurring Revenue (ARR)', 'ARR', false, ['placeholder' => json_encode(['id' => 'misalnya $1.2M ARR', 'en' => 'e.g. $1.2M ARR'])]),
 
             // ── STARTUP FINISH: Online Presence ──
-            $q('q_su_website', 'step_su_presence', 1, 'url', 'Website', 'Website', false),
-            $q('q_su_linkedin', 'step_su_presence', 2, 'url', 'LinkedIn', 'LinkedIn', false),
-            $q('q_su_twitter', 'step_su_presence', 3, 'url', 'Twitter / X', 'Twitter / X', false),
-            $q('q_su_instagram', 'step_su_presence', 4, 'url', 'Instagram', 'Instagram', false),
-            $q('q_su_pitchdeck', 'step_su_presence', 5, 'url', 'Pitch Deck (opsional 🔥)', 'Pitch Deck (optional 🔥)', false),
+            $q('q_su_website', 'step_su_presence', 1, 'url', 'Website', 'Website', false, ['placeholder' => json_encode(['id' => 'https://startupkamu.com', 'en' => 'https://yourstartup.com'])]),
+            $q('q_su_linkedin', 'step_su_presence', 2, 'url', 'LinkedIn', 'LinkedIn', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/company/...', 'en' => 'https://linkedin.com/company/...'])]),
+            $q('q_su_twitter', 'step_su_presence', 3, 'url', 'Twitter / X', 'Twitter / X', false, ['placeholder' => json_encode(['id' => 'https://x.com/...', 'en' => 'https://x.com/...'])]),
+            $q('q_su_instagram', 'step_su_presence', 4, 'url', 'Instagram', 'Instagram', false, ['placeholder' => json_encode(['id' => 'https://instagram.com/...', 'en' => 'https://instagram.com/...'])]),
+            $q('q_su_pitchdeck', 'step_su_presence', 5, 'url', 'Pitch Deck (opsional 🔥)', 'Pitch Deck (optional 🔥)', false, ['placeholder' => json_encode(['id' => 'https://pitch.com/...', 'en' => 'https://pitch.com/...'])]),
 
             // ── STARTUP FINISH: Founder Setup ──
             $q('q_su_founder_count', 'step_su_founders', 1, 'single_select_card', 'Berapa banyak founder?', 'How many founders?'),
-            $q('q_su_founder_roles', 'step_su_founders', 2, 'multi_select_chip', 'Peran apa yang sudah terisi?', 'What roles are already covered?', false, ['depends_on' => json_encode(['question_id' => 'q_su_founder_count', 'operator' => 'not_equals', 'value' => 'solo'])]),
+            $q('q_su_founder_roles', 'step_su_founders', 2, 'multi_select_chip', 'Peran apa yang sudah terisi?', 'What roles are already covered?', false, ['depends_on' => json_encode(['question_id' => 'q_su_founder_count', 'operator' => 'not_equals', 'value' => 'solo']), 'placeholder' => json_encode(['id' => 'cari role', 'en' => 'Search roles'])]),
 
             // ── STARTUP FINISH: Team Status ──
             $q('q_su_have_team', 'step_su_team', 1, 'single_select_card', 'Apakah kamu punya tim selain founder?', 'Do you have a team beyond founders?'),
             $q('q_su_team_size', 'step_su_team', 2, 'single_select_card', 'Ukuran tim', 'Team size', true, ['depends_on' => json_encode(['question_id' => 'q_su_have_team', 'operator' => 'equals', 'value' => 'yes'])]),
-            $q('q_su_team_roles', 'step_su_team', 3, 'multi_select_chip', 'Departemen/peran di tim', 'Team departments/roles', true, ['depends_on' => json_encode(['question_id' => 'q_su_have_team', 'operator' => 'equals', 'value' => 'yes'])]),
+            $q('q_su_team_roles', 'step_su_team', 3, 'multi_select_chip', 'Departemen/peran di tim', 'Team departments/roles', true, ['depends_on' => json_encode(['question_id' => 'q_su_have_team', 'operator' => 'equals', 'value' => 'yes']), 'placeholder' => json_encode(['id' => 'cari role', 'en' => 'Search roles'])]),
 
             // ── STARTUP FINISH: What You Need ──
             $q('q_su_need', 'step_su_need', 1, 'single_select_card', 'Apa yang sedang kamu cari?', 'What are you looking for?'),
@@ -1243,18 +1243,18 @@ class OnboardingSeeder extends Seeder
             // ── STARTUP NEED: CF ──
             $q('q_su_need_cf_type', 'step_su_need_cf', 1, 'multi_select_card', '', ''),
             // ── STARTUP NEED: Team ──
-            $q('q_su_need_tm_skills', 'step_su_need_tm', 1, 'multi_select_chip', 'Skill apa yang belum dipunyai di tim?', 'What skills are missing in the team?'),
+            $q('q_su_need_tm_skills', 'step_su_need_tm', 1, 'multi_select_chip', 'Skill apa yang belum dipunyai di tim?', 'What skills are missing in the team?', true, ['placeholder' => json_encode(['id' => 'Cari skill', 'en' => 'Search skills'])]),
             // ── STARTUP NEED: Both ──
             $q('q_su_need_bt_cf', 'step_su_need_bt_cf', 1, 'multi_select_card', '', ''),
-            $q('q_su_need_bt_tm', 'step_su_need_bt_tm', 1, 'multi_select_chip', 'Skill yang belum dipunyai', 'Missing skills'),
+            $q('q_su_need_bt_tm', 'step_su_need_bt_tm', 1, 'multi_select_chip', 'Skill yang belum dipunyai', 'Missing skills', true, ['placeholder' => json_encode(['id' => 'Cari skill', 'en' => 'Search skills'])]),
 
             // ── STARTUP END: Commitment ──
             $q('q_su_commitment', 'step_su_commit', 1, 'single_select_card', 'Commitment Level', 'Commitment Level'),
 
             // ── STARTUP END: Equity & Comp ──
-            $q('q_su_equity_range', 'step_su_equity', 1, 'text', 'Equity yang ditawarkan (% range)', 'Equity offered (% range)', true, ['placeholder' => json_encode(['id' => 'contoh: 5-15%', 'en' => 'e.g. 5-15%'])]),
+            $q('q_su_equity_range', 'step_su_equity', 1, 'text', 'Equity yang ditawarkan (% range)', 'Equity offered (% range)', true, ['placeholder' => json_encode(['id' => 'misalnya 5-15%', 'en' => 'e.g. 5-15%'])]),
             $q('q_su_paid', 'step_su_equity', 2, 'single_select_card', 'Apakah posisi ini dibayar?', 'Is this a paid position?'),
-            $q('q_su_salary_range', 'step_su_equity', 3, 'text', 'Range gaji per tahun', 'Annual salary range', false, ['depends_on' => json_encode(['question_id' => 'q_su_paid', 'operator' => 'equals', 'value' => 'paid']), 'placeholder' => json_encode(['id' => 'contoh: IDR 100-200jt/thn', 'en' => 'e.g. USD 30-60k/yr'])]),
+            $q('q_su_salary_range', 'step_su_equity', 3, 'text', 'Range gaji per tahun', 'Annual salary range', false, ['depends_on' => json_encode(['question_id' => 'q_su_paid', 'operator' => 'equals', 'value' => 'paid']), 'placeholder' => json_encode(['id' => 'misalnya IDR 100-200jt/thn', 'en' => 'e.g. USD 30-60k/yr'])]),
         ]);
 
         // ════════════════════════════════════════════════════════════════
