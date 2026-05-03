@@ -381,11 +381,21 @@ PROMPT;
 
         $data = $response->json();
 
-        if (!isset($data['candidates'][0]['content']['parts'][0]['text'])) {
-            \Illuminate\Support\Facades\Log::error('Gemini returned unexpected structure', ['data' => $data]);
+        $extractedText = '';
+        if (isset($data['candidates'][0]['content']['parts'])) {
+            foreach ($data['candidates'][0]['content']['parts'] as $part) {
+                if (isset($part['text'])) {
+                    $extractedText .= $part['text'];
+                }
+            }
         }
 
-        return $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+        if (empty(trim($extractedText))) {
+            \Illuminate\Support\Facades\Log::error('Gemini returned unexpected structure or empty text', ['data' => $data]);
+            return '{}';
+        }
+
+        return $extractedText;
     }
 
     /**
