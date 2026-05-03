@@ -56,6 +56,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Webhook Base URL
+    |--------------------------------------------------------------------------
+    |
+    | This URL is used to generate absolute URLs for webhooks, particularly
+    | when the application is running locally (where APP_URL is localhost)
+    | but needs external services like Apify to callback to a production URL.
+    |
+    */
+
+    'webhook_base_url' => env('WEBHOOK_BASE_URL', env('APP_URL', 'http://localhost')),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

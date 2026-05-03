@@ -57,16 +57,32 @@ class ProfileResource extends JsonResource
         if ($this->relationLoaded('credentials')) {
             $cred = $this->credentials->where('provider', 'linkedin')->first();
             if ($cred) {
-                // Tampilkan Job Terakhir
+                // Tampilkan Job Terakhir secara fleksibel
                 $exp = collect($cred->experience ?? [])->first();
-                if ($exp && !empty($exp['title']) && !empty($exp['company'])) {
-                    $highlights[] = $exp['title'] . ' at ' . $exp['company'];
+                if ($exp) {
+                    $title = $exp['title'] ?? '';
+                    $company = $exp['company'] ?? '';
+                    if (!empty($title) && !empty($company)) {
+                        $highlights[] = $title . ' at ' . $company;
+                    } elseif (!empty($title)) {
+                        $highlights[] = $title;
+                    } elseif (!empty($company)) {
+                        $highlights[] = 'Worked at ' . $company;
+                    }
                 }
 
-                // Tampilkan Pendidikan Terakhir
+                // Tampilkan Pendidikan Terakhir secara fleksibel
                 $edu = collect($cred->education ?? [])->first();
-                if ($edu && !empty($edu['degree']) && !empty($edu['school'])) {
-                    $highlights[] = $edu['degree'] . ', ' . $edu['school'];
+                if ($edu) {
+                    $degree = $edu['degree'] ?? '';
+                    $school = $edu['school'] ?? '';
+                    if (!empty($degree) && !empty($school)) {
+                        $highlights[] = $degree . ', ' . $school;
+                    } elseif (!empty($degree)) {
+                        $highlights[] = $degree;
+                    } elseif (!empty($school)) {
+                        $highlights[] = 'Studied at ' . $school;
+                    }
                 }
             }
         }
