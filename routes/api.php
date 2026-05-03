@@ -209,4 +209,10 @@ Route::prefix('v1')->group(function () {
         Route::get('notifications',          [\App\Http\Controllers\Admin\AdminUserController::class, 'notifications']);
         Route::patch('notifications/{id}',   [\App\Http\Controllers\Admin\AdminUserController::class, 'updateNotification']);
     });
+
+    // ─── Webhooks ─────────────────────────────────────────────────────────────
+    Route::prefix('webhooks')->group(function () {
+        Route::post('apify/linkedin', [\App\Http\Controllers\Api\V1\WebhookController::class, 'apifyLinkedIn'])
+            ->name('webhooks.apify.linkedin');
+    });
 });
