@@ -121,7 +121,7 @@ PROMPT;
 
             $parsed = json_decode($rawJson, true);
 
-            if (!is_array($parsed) || empty($parsed['headline'])) {
+            if (!is_array($parsed) || (empty($parsed['headline']) && empty($parsed['bio_summary']))) {
                 Log::warning('VertexAiService@scrapeAndParseLinkedIn: Gemini returned invalid or empty JSON.', [
                     'url'      => $linkedinUrl,
                     'raw_json' => substr($rawJson, 0, 500),
@@ -370,7 +370,7 @@ PROMPT;
                 ]
             ],
             'generationConfig' => [
-                'temperature'     => 0.1,
+                'temperature'     => 0.7, // Higher temp allows better synthesis of Google Search results
                 'maxOutputTokens' => 2048,
             ],
         ]);
