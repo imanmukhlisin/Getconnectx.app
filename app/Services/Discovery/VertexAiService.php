@@ -195,11 +195,7 @@ Required JSON structure (do not add or remove any keys):
   ],
   "bio_summary": "3-4 sentence first-person professional bio."
 }
-
-Profile text:
----
-{$profileText}
----
+}
 PROMPT;
     }
 
