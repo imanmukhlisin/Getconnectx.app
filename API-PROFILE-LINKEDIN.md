@@ -167,8 +167,7 @@ Authorization: Bearer <access_token>
       }
     },
     "createdAt": "2026-04-12T10:00:00.000Z",
-    "updatedAt": "2026-04-12T10:00:00.000Z",
-    "isLinkedInSynced": true
+    "updatedAt": "2026-04-12T10:00:00.000Z"
   }
 }
 ```
@@ -295,8 +294,7 @@ The frontend sends only the about text as `about`. Backend determines whether it
         ]
       }
     },
-    "updatedAt": "2026-04-12T10:00:00.000Z",
-    "isLinkedInSynced": true
+    "updatedAt": "2026-04-12T10:00:00.000Z"
   }
 }
 ```
@@ -441,7 +439,6 @@ export interface MyProfileResponse {
     };
     createdAt: string;
     updatedAt: string;
-    isLinkedInSynced: boolean;
   };
 }
 

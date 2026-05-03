@@ -1041,7 +1041,7 @@ class OnboardingSeeder extends Seeder
             $s('step_fdr_bt_linkedin', 'flow_fdr_both', 5, 'Profil Online', 'Langkah terakhir. Koneksikan LinkedIn-mu', 'Last step. Connect your LinkedIn'),
 
             // ── CO-FOUNDER JOINING (8 steps) ──
-            $s('step_cf_exp', 'flow_cofounder', 0, 'Profil Builder', 'Apakah kamu memiliki pengalaman startup sebelumnya?', 'DO YOU HAVE ANY PRIOR STARTUP EXPERIENCE?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
+            $s('step_cf_exp', 'flow_cofounder', 0, 'Profil Builder', 'Apakah kamu memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
             $s('step_cf_industry', 'flow_cofounder', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?', false, 'Pilih hingga 5 industri untuk membentuk feed kamu.', 'Pick up to 5 industries to shape your feed.'),
             $s('step_cf_type', 'flow_cofounder', 2, 'Tipe Co-Founder', 'Kamu tipe co-founder yang seperti apa?', 'What type of co-founder are you?', false, 'Pilih peran yang bisa kamu kerjakan dari awal', 'Pick the area you can own from day one.'),
             $s('step_cf_avail', 'flow_cofounder', 3, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),
@@ -1050,7 +1050,7 @@ class OnboardingSeeder extends Seeder
             $s('step_cf_linkedin', 'flow_cofounder', 6, 'Profil Online', 'Langkah terakhir. Koneksikan LinkedIn-mu', 'Last step. Connect your LinkedIn'),
 
             // ── TEAM MEMBER JOINING (8 steps) ──
-            $s('step_tm_exp', 'flow_team', 0, 'Profil Builder', 'Apakah kamu memiliki pengalaman startup sebelumnya?', 'DO YOU HAVE ANY PRIOR STARTUP EXPERIENCE?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
+            $s('step_tm_exp', 'flow_team', 0, 'Profil Builder', 'Apakah kamu memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
             $s('step_tm_industry', 'flow_team', 1, 'Minat & Industri', 'Industri apa yang menarik minatmu?', 'What industries interest you?', false, 'Pilih hingga 5 industri untuk membentuk feed kamu.', 'Pick up to 5 industries to shape your feed.'),
             $s('step_tm_skills', 'flow_team', 2, 'Skill & Keahlian', 'Skill apa yang kamu miliki?', 'What skills do you have?'),
             $s('step_tm_avail', 'flow_team', 3, 'Ketersediaan', 'Availability seperti apa yang kamu harapkan?', 'What availability do you expect?', true, 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?', 'What commitment level should candidates have?'),

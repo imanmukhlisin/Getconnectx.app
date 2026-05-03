@@ -196,7 +196,6 @@ class ProfileResource extends JsonResource
 
         $response['createdAt'] = $this->created_at ? $this->created_at->toIso8601String() : null;
         $response['updatedAt'] = $this->updated_at ? $this->updated_at->toIso8601String() : null;
-        $response['isLinkedInSynced'] = !empty($this->linkedin_url) || ($this->relationLoaded('credentials') && $this->credentials->where('provider', 'linkedin')->isNotEmpty());
 
         return $response;
     }
