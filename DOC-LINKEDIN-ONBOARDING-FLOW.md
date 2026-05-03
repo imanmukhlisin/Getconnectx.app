@@ -121,7 +121,8 @@ Ketika sinkronisasi selesai dan Frontend melakukan pemanggilan data User, respon
       }
     },
     "createdAt": "2026-05-03T10:00:00.000Z",
-    "updatedAt": "2026-05-03T10:00:00.000Z"
+    "updatedAt": "2026-05-03T10:00:00.000Z",
+    "isLinkedInSynced": true
   }
 }
 ```
