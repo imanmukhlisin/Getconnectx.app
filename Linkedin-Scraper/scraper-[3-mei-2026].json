@@ -1,0 +1,83 @@
+{
+  "success": true,
+  "message": "Profile fetched successfully",
+  "data": {
+    "id": "ACoAAFIO-GwB4cHcjdK7g5o7_elTrhlA7YXP5Os",
+    "teamId": null,
+    "profileType": "builder",
+    "name": "Ananda Dimas Octavian Prasetyo, S.Kom (KPH Yudhaputra)",
+    "headline": "💻 IT Software Engineer (Web Mobile and App Developer) and Cybersecurity Specialist. I am the Founder, Director and CEO of the MonsterRover’s Technology, technology group of companies based in Yogyakarta, Indonesia 🇮🇩",
+    "photoUrl": "https://media.licdn.com/dms/image/v2/D4E03AQEj--73Gb-JcA/profile-displayphoto-crop_800_800/B4EZoxddm8IIAI-/0/1761766399771?e=1779321600&v=beta&t=HcLg5SARoZa_R5s7LKa6owV0lBynIgGEUiiN6ks7g3o",
+    "location": {
+      "city": "Yogyakarta",
+      "country": "Indonesia",
+      "display": "Yogyakarta, Indonesia"
+    },
+    "stats": {
+      "connections": 426,
+      "teamsJoined": 0,
+      "matches": 0
+    },
+    "badges": [],
+    "sections": {
+      "about": {
+        "kind": "personalDescription",
+        "title": "Description",
+        "value": "Hallo everyone👋, I am Dimas Octavian Prasetyo or Adimas Angga, an accomplished IT and Computer Science professional with extensive experience in creating cutting-edge software solutions and overseeing intricate projects. Proficient in a wide range of programming languages, system design, and data analysis. My expertise lies in addressing complex challenges and advancing technological innovation to align with organizational objectives. Dedicated to lifelong learning and staying ahead of industry developments."
+      },
+      "skills": {
+        "title": "Skills",
+        "items": [
+          {
+            "id": "sk_1",
+            "name": "Android Studio"
+          },
+          {
+            "id": "sk_2",
+            "name": "Presentation Skills"
+          },
+          {
+            "id": "sk_3",
+            "name": "Platform as a Service (PAAS)"
+          },
+          {
+            "id": "sk_4",
+            "name": "Cloud Computing"
+          },
+          {
+            "id": "sk_5",
+            "name": "Agile Methodologies"
+          },
+          {
+            "id": "sk_6",
+            "name": "Scrum"
+          },
+          {
+            "id": "sk_7",
+            "name": "Application Programming Interfaces (API)"
+          },
+          {
+            "id": "sk_8",
+            "name": "API Development"
+          },
+          {
+            "id": "sk_9",
+            "name": "API Testing"
+          },
+          {
+            "id": "sk_10",
+            "name": "API Documentation"
+          }
+        ]
+      },
+      "highlights": {
+        "items": [
+          "President of the Board of Commissioners and Chairman at Codevits",
+          "Engineer's degree, University of Indonesia"
+        ]
+      }
+    },
+    "createdAt": "2026-05-03T15:47:50.749Z",
+    "updatedAt": "2026-05-03T15:47:50.777Z"
+  }
+}

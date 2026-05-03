@@ -72,10 +72,83 @@ class ProfileResource extends JsonResource
             $highlights[] = $this->languages;
         }
 
-        return [
+        // ── Startup Metadata (Optional) ──────────────────────────
+        $startupData = null;
+        if ($hasStartup) {
+            $startup = $this->startup;
+
+            $session = \App\Models\Onboarding\OnboardingSession::where('user_id', $this->id)
+                ->where('status', 'completed')
+                ->latest('completed_at')
+                ->first();
+
+            $links = [];
+            $stageDetails = [];
+            
+            if ($session) {
+                $responses = \App\Models\Onboarding\OnboardingResponse::where('session_id', $session->id)->get()->keyBy('question_id');
+                
+                $getVal = fn($key) => isset($responses[$key]) ? (is_array($responses[$key]->value) ? ($responses[$key]->value[0] ?? null) : $responses[$key]->value) : null;
+                
+                $stageValue = strtolower($startup->stage ?? '');
+                
+                $detailKeys = [];
+                if ($stageValue === 'idea') $detailKeys = ['q_has_prototype' => 'Has prototype', 'q_prototype_link' => 'Prototype link', 'q_waitlist_size' => 'Waitlist size', 'q_validation_methods' => 'Validation methods'];
+                if ($stageValue === 'mvp') $detailKeys = ['q_user_count' => 'Users', 'q_mau' => 'Monthly active users', 'q_mvp_revenue' => 'Revenue', 'q_growth_rate' => 'Growth rate'];
+                if ($stageValue === 'live') $detailKeys = ['q_mrr' => 'MRR', 'q_live_users' => 'Live users', 'q_retention' => 'Retention', 'q_key_metrics' => 'Key metrics'];
+                if ($stageValue === 'scale') $detailKeys = ['q_funding_raised' => 'Funding raised', 'q_scale_team_size' => 'Team size', 'q_arr' => 'ARR', 'q_investors' => 'Investors'];
+                
+                foreach ($detailKeys as $qId => $label) {
+                    $val = $getVal($qId);
+                    if ($val !== null && $val !== '') {
+                        $stageDetails[] = ['id' => $qId, 'label' => $label, 'value' => $val];
+                    }
+                }
+
+                $linkMappings = [
+                    'q_website' => 'Website',
+                    'q_startup_linkedin' => 'LinkedIn',
+                    'q_twitter' => 'Twitter / X',
+                    'q_instagram' => 'Instagram',
+                    'q_pitch_deck' => 'Pitch deck'
+                ];
+                foreach ($linkMappings as $qId => $label) {
+                    $val = $getVal($qId);
+                    if ($val) {
+                        if (str_starts_with($val, '@')) {
+                            if ($qId === 'q_twitter') $val = 'https://x.com/' . ltrim($val, '@');
+                            elseif ($qId === 'q_instagram') $val = 'https://instagram.com/' . ltrim($val, '@');
+                        }
+                        $links[] = ['label' => $label, 'url' => $val];
+                    }
+                }
+            }
+
+            $industries = [];
+            if (!empty($startup->industry)) {
+                $industries[] = ['id' => \Illuminate\Support\Str::slug($startup->industry), 'name' => $startup->industry];
+            }
+            if (!empty($startup->secondary_industry)) {
+                $industries[] = ['id' => \Illuminate\Support\Str::slug($startup->secondary_industry), 'name' => $startup->secondary_industry];
+            }
+
+            $startupData = [
+                'name' => $startup->name ?? '',
+                'tagline' => $startup->tagline ?? '',
+                'stage' => [
+                    'value' => $startup->stage ?? '',
+                    'label' => ucfirst($startup->stage ?? ''),
+                    'details' => $stageDetails
+                ],
+                'industries' => $industries,
+                'links' => $links,
+            ];
+        }
+
+        $response = [
             'id'          => $this->id,
             'teamId'      => $this->startup->id ?? 'no_team',
-            'profileType' => $this->role_category ?? 'builder',
+            'profileType' => $this->role_category ? strtolower($this->role_category) : 'builder',
             'name'        => $this->name,
             'headline'    => $this->position ?? 'Professional',
             'photoUrl'    => $this->avatar_url,
@@ -91,31 +164,40 @@ class ProfileResource extends JsonResource
             ],
             'badges' => [
                 ['id' => 'connectx-user', 'label' => 'ConnectX User']
-            ],
-            'sections' => [
-                'about' => [
-                    'kind'  => $aboutKind,
-                    'title' => $aboutTitle,
-                    'value' => $aboutValue,
-                ],
-                'personalityAndHobbies' => [
-                    'title' => 'Personality & Hobbies',
-                    'items' => $hobbies,
-                ],
-                'skills' => [
-                    'title' => 'Skills',
-                    'items' => $skills,
-                ],
-                'interests' => [
-                    'title' => 'Interests',
-                    'items' => $interests,
-                ],
-                'highlights' => [
-                    'items' => $highlights,
-                ],
-            ],
-            'createdAt' => $this->created_at ? $this->created_at->toIso8601String() : null,
-            'updatedAt' => $this->updated_at ? $this->updated_at->toIso8601String() : null,
+            ]
         ];
+
+        if ($hasStartup) {
+            $response['startup'] = $startupData;
+        }
+
+        $response['sections'] = [
+            'about' => [
+                'kind'  => $aboutKind,
+                'title' => $aboutTitle,
+                'value' => $aboutValue,
+            ],
+            'personalityAndHobbies' => [
+                'title' => 'Personality & Hobbies',
+                'items' => $hobbies,
+            ],
+            'skills' => [
+                'title' => 'Skills',
+                'items' => $skills,
+            ],
+            'interests' => [
+                'title' => 'Interests',
+                'items' => $interests,
+            ],
+            'highlights' => [
+                'items' => $highlights,
+            ],
+        ];
+
+        $response['createdAt'] = $this->created_at ? $this->created_at->toIso8601String() : null;
+        $response['updatedAt'] = $this->updated_at ? $this->updated_at->toIso8601String() : null;
+        $response['isLinkedInSynced'] = !empty($this->linkedin_url) || ($this->relationLoaded('credentials') && $this->credentials->where('provider', 'linkedin')->isNotEmpty());
+
+        return $response;
     }
 }
