@@ -381,6 +381,10 @@ PROMPT;
 
         $data = $response->json();
 
+        if (!isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+            \Illuminate\Support\Facades\Log::error('Gemini returned unexpected structure', ['data' => $data]);
+        }
+
         return $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
     }
 
