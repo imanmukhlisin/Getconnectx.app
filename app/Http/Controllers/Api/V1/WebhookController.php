@@ -56,16 +56,28 @@ class WebhookController extends Controller
                         return response()->json(['message' => 'No URL found in dataset'], 200);
                     }
 
-                    // Cari user yang punya linkedin_url == $urlScraped
-                    // Apify kadang memodifikasi trailing slash, pastikan pencarian flexible
-                    $user = User::where('linkedin_url', 'LIKE', "%{$urlScraped}%")->first();
+                    // Normalize the scraped URL to just the slug/publicIdentifier.
+                    // Apify sometimes returns just the slug (e.g. "ananda-dimas-octavian-prasetyo")
+                    // or a full URL. We extract only the path segment for comparison.
+                    $scrapedSlug = rtrim(basename(parse_url(
+                        str_starts_with($urlScraped, 'http') ? $urlScraped : "https://linkedin.com/in/{$urlScraped}"
+                    , PHP_URL_PATH)), '/');
+
+                    // Find user by matching the slug inside their stored linkedin_url.
+                    // Using a normalized LIKE so that www vs non-www differences don't matter.
+                    // We also order by created_at to prefer the OLDEST (real) account over duplicates.
+                    $user = User::where('linkedin_url', 'LIKE', "%/{$scrapedSlug}%")
+                                ->orderBy('created_at', 'asc')
+                                ->first();
 
                     if ($user) {
                         $scraperService->syncToUserProfile($user, $scrapedData);
-                        Log::info('Webhook apifyLinkedIn: Sycned profile for User ID: ' . $user->id);
-                        return response()->json(['message' => 'Sycned']);
+                        Log::info('Webhook apifyLinkedIn: Synced profile for User ID: ' . $user->id, [
+                            'slug' => $scrapedSlug,
+                        ]);
+                        return response()->json(['message' => 'Synced']);
                     } else {
-                        Log::warning('Webhook apifyLinkedIn: User not found for linkedin_url: ' . $urlScraped);
+                        Log::warning('Webhook apifyLinkedIn: User not found for LinkedIn slug: ' . $scrapedSlug);
                     }
                 }
             } else {
