@@ -262,6 +262,12 @@ class UserResource extends Resource
                         ]);
                         // Hapus token session
                         $record->tokens()->delete();
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Berhasil diblokir')
+                            ->body("Pengguna {$record->name} berhasil diblokir.")
+                            ->success()
+                            ->send();
                     })
                     ->visible(fn (User $record): bool => ! $record->is_blocked),
 
@@ -279,6 +285,12 @@ class UserResource extends Resource
                             'blocked_at' => null,
                             'is_active' => true,
                         ]);
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Blokir dibuka')
+                            ->body("Akses pengguna {$record->name} berhasil dipulihkan.")
+                            ->success()
+                            ->send();
                     })
                     ->visible(fn (User $record): bool => $record->is_blocked),
             ])
