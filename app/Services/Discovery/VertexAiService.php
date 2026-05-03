@@ -352,7 +352,7 @@ PROMPT;
      */
     private function callGeminiApiDirect(string $prompt, string $apiKey): string
     {
-        $model    = 'gemini-1.5-pro'; // Pro supports googleSearch grounding best
+        $model    = 'gemini-2.5-flash'; // Confirmed to work with googleSearch grounding on user's API key
         $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
 
         $response = \Illuminate\Support\Facades\Http::withHeaders([
