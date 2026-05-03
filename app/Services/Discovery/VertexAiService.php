@@ -107,27 +107,12 @@ PROMPT;
      */
     public function scrapeAndParseLinkedIn(string $linkedinUrl): ?array
     {
-        $plainText = $this->fetchLinkedInProfileText($linkedinUrl);
-
-        if (!$plainText) {
-            // All fetch attempts failed (LinkedIn + Google Cache blocked from cloud IPs).
-            // Extract the person's name from the URL slug and ask Gemini to generate
-            // a professional starter profile. User can refine their data later.
-            $slug         = basename(rtrim(parse_url($linkedinUrl, PHP_URL_PATH), '/'));
-            $nameFromSlug = ucwords(str_replace(['-', '_'], ' ', $slug));
-
-            Log::warning('VertexAiService@scrapeAndParseLinkedIn: All fetches failed. Using slug-based generation.', [
-                'url'  => $linkedinUrl,
-                'name' => $nameFromSlug,
-            ]);
-
-            $plainText = "LinkedIn profile for: {$nameFromSlug}. Profile URL: {$linkedinUrl}. "
-                . "No profile HTML was retrievable. Generate a realistic professional placeholder profile for this person.";
-        }
-
+        Log::info('VertexAiService@scrapeAndParseLinkedIn: Extracting profile via Gemini Google Search Grounding.', [
+            'url' => $linkedinUrl,
+        ]);
 
         try {
-            $prompt  = $this->buildLinkedInExtractionPrompt($plainText, $linkedinUrl);
+            $prompt  = $this->buildLinkedInExtractionPrompt($linkedinUrl);
             $rawJson = $this->callGeminiForExtraction($prompt);
 
             // Strip markdown code fences Gemini may add
@@ -174,101 +159,19 @@ PROMPT;
         }
     }
 
-    /**
-     * Try to get readable profile text from a LinkedIn URL.
-     *
-     * Primary source — Jina AI Reader (r.jina.ai):
-     *   A free public service that fetches any URL through Jina's infrastructure
-     *   and returns clean markdown text. Because it uses Jina's servers (not Vercel's
-     *   cloud IPs), it bypasses LinkedIn's cloud-IP block.
-     *   No API key required for basic usage.
-     *
-     * Fallback — direct LinkedIn fetch:
-     *   Tried as a secondary attempt with different User-Agents.
-     *   Likely to fail from Vercel IPs but worth attempting.
-     *
-     * Returns null if ALL sources fail (caller should handle gracefully).
-     */
-    private function fetchLinkedInProfileText(string $linkedinUrl): ?string
-    {
-        $fetchAttempts = [
-            // Primary: Jina AI Reader — fetches through Jina's own infrastructure
-            'jina_reader' => function () use ($linkedinUrl) {
-                $jinaUrl  = 'https://r.jina.ai/' . $linkedinUrl;
-                $response = \Illuminate\Support\Facades\Http::withHeaders([
-                    'Accept'         => 'text/plain, text/markdown',
-                    'X-Return-Format' => 'markdown',
-                    'X-No-Cache'     => 'true',
-                ])->timeout(20)->get($jinaUrl);
 
-                if ($response->successful()) {
-                    return $response->body();
-                }
-                return null;
-            },
-
-            // Secondary: Direct LinkedIn fetch (likely blocked from Vercel IPs)
-            'direct_linkedin' => function () use ($linkedinUrl) {
-                $response = \Illuminate\Support\Facades\Http::withHeaders([
-                    'User-Agent'      => 'LinkedInBot/1.0 (compatible; LinkedInBot/1.0; +http://www.linkedin.com/)',
-                    'Accept-Language' => 'en-US,en;q=0.9',
-                    'Accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                ])->timeout(12)->get($linkedinUrl);
-
-                if ($response->successful()) {
-                    $text = preg_replace('/<(script|style)[^>]*>.*?<\/\1>/si', '', $response->body());
-                    $text = strip_tags($text);
-                    return $text;
-                }
-                return null;
-            },
-        ];
-
-        foreach ($fetchAttempts as $source => $attempt) {
-            try {
-                $raw = $attempt();
-
-                if (!$raw) {
-                    Log::debug("VertexAiService@fetchLinkedInProfileText: {$source} returned empty.", [
-                        'url' => $linkedinUrl,
-                    ]);
-                    continue;
-                }
-
-                // Normalise whitespace and cap at 6000 chars (enough to cover a full profile)
-                $text = preg_replace('/\s+/', ' ', $raw);
-                $text = trim($text);
-                $text = mb_substr($text, 0, 6000);
-
-                if (strlen($text) > 200) {
-                    Log::info("VertexAiService@fetchLinkedInProfileText: {$source} succeeded.", [
-                        'url'   => $linkedinUrl,
-                        'chars' => strlen($text),
-                    ]);
-                    return $text;
-                }
-
-            } catch (\Throwable $e) {
-                Log::debug("VertexAiService@fetchLinkedInProfileText: {$source} failed.", [
-                    'url'   => $linkedinUrl,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-
-        return null;
-    }
 
     /**
-     * Build the extraction prompt for Gemini — plain text version (no grounding).
+     * Build the extraction prompt for Gemini — Google Search Grounding version.
      */
-    private function buildLinkedInExtractionPrompt(string $profileText, string $linkedinUrl): string
+    private function buildLinkedInExtractionPrompt(string $linkedinUrl): string
     {
         return <<<PROMPT
 You are a professional data extraction assistant.
-Extract structured professional information from the following LinkedIn profile page text.
-
+I need you to extract structured professional information for the person at this LinkedIn profile:
 Profile URL: {$linkedinUrl}
+
+Use the Google Search tool to find information about this person's professional background, current role, past experiences, and education based on their public LinkedIn footprint or other professional directories.
 
 STRICT OUTPUT RULES:
 - Output ONLY the raw JSON object. No markdown, no code fences, no explanation.
@@ -453,17 +356,22 @@ PROMPT;
      */
     private function callGeminiApiDirect(string $prompt, string $apiKey): string
     {
-        $model    = 'gemini-1.5-pro'; // Changed from flash to pro to avoid 404s
+        $model    = 'gemini-1.5-pro'; // Pro supports googleSearch grounding best
         $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
 
         $response = \Illuminate\Support\Facades\Http::withHeaders([
             'Content-Type' => 'application/json',
-        ])->timeout(30)->post($endpoint, [
+        ])->timeout(45)->post($endpoint, [
             'contents' => [
                 [
                     'role'  => 'user',
                     'parts' => [['text' => $prompt]],
                 ],
+            ],
+            'tools' => [
+                [
+                    'googleSearch' => new \stdClass()
+                ]
             ],
             'generationConfig' => [
                 'temperature'     => 0.1,
