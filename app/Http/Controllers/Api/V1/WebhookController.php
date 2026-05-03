@@ -20,10 +20,10 @@ class WebhookController extends Controller
         $eventType = $request->input('eventType');
         
         // Cek custom token/signature kalau ada (untuk security opsional)
-        // Apify mengirim data body (json): { "eventData": { "actorRunId": "...", "defaultDatasetId": "..." }, ... }
-        $eventData = $request->input('eventData');
-        $datasetId = $eventData['defaultDatasetId'] ?? null;
-        $runId = $eventData['actorRunId'] ?? null;
+        // Apify mengirim data body (json) dimana ID dataset ada di object "resource"
+        $resource = $request->input('resource', []);
+        $datasetId = $resource['defaultDatasetId'] ?? $request->input('eventData.defaultDatasetId'); // fallback
+        $runId = $request->input('eventData.actorRunId');
 
         // Kami mengirim user_id lewat state atau record info kalau kita pakai webhook per run
         // Atau kita bisa gunakan endpoint pass-through parameter `passthrough` yang kita inject
