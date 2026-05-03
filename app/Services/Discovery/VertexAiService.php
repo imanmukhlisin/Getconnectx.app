@@ -122,11 +122,11 @@ PROMPT;
             $parsed = json_decode($rawJson, true);
 
             if (!is_array($parsed) || (empty($parsed['headline']) && empty($parsed['bio_summary']))) {
-                Log::warning('VertexAiService@scrapeAndParseLinkedIn: Gemini returned invalid or empty JSON.', [
+                Log::warning('VertexAiService@scrapeAndParseLinkedIn: Gemini returned invalid or empty JSON. Falling back to slug generation.', [
                     'url'      => $linkedinUrl,
                     'raw_json' => substr($rawJson, 0, 500),
                 ]);
-                return null;
+                return $this->generateFallbackProfile($linkedinUrl);
             }
 
             return [
@@ -151,12 +151,31 @@ PROMPT;
             ];
 
         } catch (\Throwable $e) {
-            Log::error('VertexAiService@scrapeAndParseLinkedIn: Gemini extraction failed.', [
+            Log::error('VertexAiService@scrapeAndParseLinkedIn: Gemini extraction failed. Falling back to slug generation.', [
                 'url'   => $linkedinUrl,
                 'error' => $e->getMessage(),
             ]);
-            return null;
+            return $this->generateFallbackProfile($linkedinUrl);
         }
+    }
+
+    /**
+     * Fallback to generate a placeholder profile from the URL slug
+     * Used when the LinkedIn profile is hidden from Google Search.
+     */
+    private function generateFallbackProfile(string $linkedinUrl): array
+    {
+        $slug         = basename(rtrim(parse_url($linkedinUrl, PHP_URL_PATH), '/'));
+        $nameFromSlug = ucwords(str_replace(['-', '_'], ' ', $slug));
+
+        return [
+            'name'        => $nameFromSlug,
+            'photo_url'   => null,
+            'headline'    => 'Professional at LinkedIn',
+            'experiences' => [],
+            'educations'  => [],
+            'bio_summary' => "I am a professional on LinkedIn. My profile data is currently private or not fully indexed by search engines. Please connect with me to learn more about my background and experience.",
+        ];
     }
 
 
