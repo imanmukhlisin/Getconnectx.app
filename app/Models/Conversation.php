@@ -24,7 +24,16 @@ class Conversation extends Model
     public function participants()
     {
         return $this->belongsToMany(User::class, 'conversation_participants')
+                    ->withPivot('last_read_message_id')
                     ->withTimestamps();
+    }
+
+    /**
+     * Pivot rows for this conversation's participants (for per-user reads).
+     */
+    public function participantPivot()
+    {
+        return $this->hasMany(\App\Models\ConversationParticipant::class);
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Auth\LinkedInSyncController;
 use App\Http\Controllers\Api\V1\Auth\OAuthController;
 use App\Http\Controllers\Api\V1\Profile\ProfileController;
 use App\Http\Controllers\Api\V1\Chat\MessageController;
+use App\Http\Controllers\Api\V1\MediaUploadController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\Discovery\FeedController;
 use App\Http\Controllers\Api\V1\Discovery\SwipeController;
@@ -168,26 +169,35 @@ Route::prefix('v1')->group(function () {
         Route::post('swipes/rewind',         [DiscoveryController::class, 'rewind'])->name('discovery.rewind');
     });
 
+    // ─── Authenticated: Media Upload (Chat) ───────────────────────────────────
+    Route::middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
+        Route::post('upload', [MediaUploadController::class, 'upload'])
+            ->name('media.upload');
+    });
+
     // ─── Authenticated: Chat System ───────────────────────────────────────────
     Route::prefix('conversations')->middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
+        // 1. GET /conversations — list conversations (paginated)
         Route::get('/', [MessageController::class, 'index'])
             ->name('conversations.index');
-        Route::post('/', [MessageController::class, 'storeConversation'])
-            ->name('conversations.store');
-        
+
+        // 2. GET /conversations/{id}/messages — cursor-based history
         Route::get('{conversation}/messages', [MessageController::class, 'messages'])
             ->name('conversations.messages');
+
+        // 3. POST /conversations/{id}/messages — send a message
         Route::post('{conversation}/messages', [MessageController::class, 'sendMessage'])
             ->name('conversations.messages.send');
 
-        // New requirements from image
+        // 4. POST /conversations/{id}/read — mark as read
+        Route::post('{conversation}/read', [MessageController::class, 'markRead'])
+            ->name('conversations.read');
+
+        // 5. GET /conversations/{id}/media — shared media gallery
         Route::get('{conversation}/media', [MessageController::class, 'media'])
             ->name('conversations.media');
-        Route::post('{conversation}/media', [MessageController::class, 'sendMedia'])
-            ->name('conversations.media.send');
-        Route::post('{conversation}/typing', [MessageController::class, 'signalTyping'])
-            ->name('conversations.typing');
     });
+
 
     // ─── Admin API ────────────────────────────────────────────────────────────
     Route::prefix('admin')->middleware('auth:sanctum')->group(function () {

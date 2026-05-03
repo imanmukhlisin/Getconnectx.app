@@ -17,10 +17,14 @@ class Message extends Model
         'content',
         'type',
         'is_read',
+        'media',
+        'read_at',
     ];
 
     protected $casts = [
         'is_read' => 'boolean',
+        'media'   => 'array',
+        'read_at' => 'datetime',
     ];
 
     /**
