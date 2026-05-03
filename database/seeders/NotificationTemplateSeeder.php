@@ -25,7 +25,18 @@ class NotificationTemplateSeeder extends Seeder
                     'id' => 'Hi, [nama] Selamat datang di ConnectX, Mulai temukan koneksi dengan orang yang sevisi denganmu 🚀',
                 ],
             ],
-            // Tambahkan template lain di sini nanti
+            [
+                'name' => 'linkedin_sync_complete',
+                'type' => 'push',
+                'title' => [
+                    'en' => 'LinkedIn Sync Selesai! 🎉', // We can use english or mixed here
+                    'id' => 'LinkedIn Sync Selesai! 🎉',
+                ],
+                'body' => [
+                    'en' => 'Hi [name], your LinkedIn profile has been successfully retrieved and synchronized to ConnectX.',
+                    'id' => 'Halo [nama], profil LinkedIn kamu sudah berhasil ditarik dan disinkronisasi ke ConnectX.',
+                ],
+            ],
 
             [
                 'name' => 'new_message',

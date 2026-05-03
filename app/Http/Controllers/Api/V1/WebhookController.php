@@ -75,6 +75,16 @@ class WebhookController extends Controller
                         Log::info('Webhook apifyLinkedIn: Synced profile for User ID: ' . $user->id, [
                             'slug' => $scrapedSlug,
                         ]);
+
+                        // Kirim Push Notification ke Frontend untuk trigger Auto-Refresh (GET /api/v1/me/profile)
+                        if ($user->fcm_token) {
+                            try {
+                                app(\App\Services\PushNotificationService::class)->sendFromTemplate($user, 'linkedin_sync_complete');
+                            } catch (\Exception $e) {
+                                Log::error('Webhook apifyLinkedIn: Failed to send FCM trigger', ['error' => $e->getMessage()]);
+                            }
+                        }
+
                         return response()->json(['message' => 'Synced']);
                     } else {
                         Log::warning('Webhook apifyLinkedIn: User not found for LinkedIn slug: ' . $scrapedSlug);

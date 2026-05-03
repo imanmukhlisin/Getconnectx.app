@@ -1312,42 +1312,42 @@ class OnboardingSeeder extends Seeder
         $opts[] = $o('opt_gen_f', 'q_gender', 2, 'Wanita', 'Female', 'female');
 
         // ── Role Selection (Builder vs Startup) ──
-        $opts[] = $o('opt_uc_1', 'q_use_connectx', 1, 'Saya seorang Builder', 'I\'m a Builder', 'builder', 'Founder, co-founder, atau anggota tim', 'Founder, co-founder, or team member', 'team');
-        $opts[] = $o('opt_uc_2', 'q_use_connectx', 2, 'Saya mewakili Startup', 'I represent a Startup', 'startup', 'Membangun tim atau mencari co-founder', 'Building a team or hiring co-founders', 'rocket');
+        $opts[] = $o('opt_uc_1', 'q_use_connectx', 1, 'Aku seorang builder', 'I\'m a Builder', 'builder', 'Founder, co-founder atau sebagai tim', 'Founder, co-founder, or team member', 'team');
+        $opts[] = $o('opt_uc_2', 'q_use_connectx', 2, 'Aku mewakili sebuah startup', 'I represent a Startup', 'startup', 'Sedang bangun tim atau cari co-founder', 'Building a team or hiring co-founders', 'rocket');
 
         // ── Builder Sub-Type (Founder / Co-Founder / Team Member) ──
-        $opts[] = $o('opt_bt_1', 'q_bld_type', 1, 'Founder', 'Founder', 'founder', 'Saya sedang membangun sesuatu dan mencari orang', 'I\'m building something and looking for people', 'founder_rocket');
-        $opts[] = $o('opt_bt_2', 'q_bld_type', 2, 'Co-Founder', 'Co-Founder', 'cofounder', 'Saya ingin bergabung ke startup sebagai co-founder', 'I want to join a startup as a co-founder', 'cofounder_handshake');
-        $opts[] = $o('opt_bt_3', 'q_bld_type', 3, 'Anggota Tim', 'Team Member', 'team', 'Saya ingin bergabung ke tim startup', 'I want to join a startup team', 'team_member_group');
+        $opts[] = $o('opt_bt_1', 'q_bld_type', 1, 'Founder', 'Founder', 'founder', 'Aku sedang membangun sesuatu dan mencari orang', 'I\'m building something and looking for people', 'founder_rocket');
+        $opts[] = $o('opt_bt_2', 'q_bld_type', 2, 'Co-Founder', 'Co-Founder', 'cofounder', 'Aku ingin bergabung ke startup sebagai co-founder', 'I want to join a startup as a co-founder', 'cofounder_handshake');
+        $opts[] = $o('opt_bt_3', 'q_bld_type', 3, 'Anggota Tim', 'Team Member', 'team', 'Aku ingin bergabung ke tim startup', 'I want to join a startup team', 'team_member_group');
 
         // ── Primary Roles (grouped, for q_bld_role) ──
         $opts = array_merge($opts, $genGroupedOpts('opt_role', 'q_bld_role', $masterRoles));
 
         // ── Experience Level (Dynamic per Role) ──
         // Founder Experience
-        $opts[] = $o('opt_fdr_exp_1', 'q_fdr_exp', 1, 'Pernah mendirikan startup sebelumnya', 'Founded a startup before', 'founded', null, null, 'exp_founded');
-        $opts[] = $o('opt_fdr_exp_2', 'q_fdr_exp', 2, 'Pernah menjual startup', 'Sold a startup', 'sold', null, null, 'exp_sold');
-        $opts[] = $o('opt_fdr_exp_3', 'q_fdr_exp', 3, 'Pernah bekerja di startup', 'Worked in a startup', 'worked', null, null, 'exp_worked');
-        $opts[] = $o('opt_fdr_exp_4', 'q_fdr_exp', 4, 'Pernah membangun produk di startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
-        $opts[] = $o('opt_fdr_exp_5', 'q_fdr_exp', 5, 'Tidak ada pengalaman startup sebelumnya', 'No Prior startup experience', 'none', null, null, 'exp_none');
+        $opts[] = $o('opt_fdr_exp_1', 'q_fdr_exp', 1, 'Pernah mendirikan startup', 'Founded a startup', 'founded', null, null, 'exp_founded');
+        $opts[] = $o('opt_fdr_exp_2', 'q_fdr_exp', 2, 'Pernah jual startup', 'Sold a startup', 'sold', null, null, 'exp_sold');
+        $opts[] = $o('opt_fdr_exp_3', 'q_fdr_exp', 3, 'Pernah kerja di startup', 'Worked in a startup', 'worked', null, null, 'exp_worked');
+        $opts[] = $o('opt_fdr_exp_4', 'q_fdr_exp', 4, 'Pernah launching produk startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
+        $opts[] = $o('opt_fdr_exp_5', 'q_fdr_exp', 5, 'Belum ada pengalaman startup', 'No Prior startup experience', 'none', null, null, 'exp_none');
 
         // Co-Founder Experience
         $opts[] = $o('opt_cf_exp_1', 'q_cf_exp', 1, 'Mendirikan / co-founded sebuah perusahaan', 'Founder / co-founded a company', 'founded', null, null, 'exp_founded');
-        $opts[] = $o('opt_cf_exp_2', 'q_cf_exp', 2, 'Pernah menjual startup', 'Sold a startup', 'sold', null, null, 'exp_sold');
-        $opts[] = $o('opt_cf_exp_3', 'q_cf_exp', 3, 'Pernah bekerja di startup', 'Worked in a startup', 'worked', null, null, 'exp_worked');
-        $opts[] = $o('opt_cf_exp_4', 'q_cf_exp', 4, 'Pernah membangun produk di startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
-        $opts[] = $o('opt_cf_exp_5', 'q_cf_exp', 5, 'Tidak ada pengalaman startup sebelumnya', 'No Prior startup experience', 'none', null, null, 'exp_none');
+        $opts[] = $o('opt_cf_exp_2', 'q_cf_exp', 2, 'Pernah jual startup', 'Sold a startup', 'sold', null, null, 'exp_sold');
+        $opts[] = $o('opt_cf_exp_3', 'q_cf_exp', 3, 'Pernah kerja di startup', 'Worked in a startup', 'worked', null, null, 'exp_worked');
+        $opts[] = $o('opt_cf_exp_4', 'q_cf_exp', 4, 'Pernah launching produk startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
+        $opts[] = $o('opt_cf_exp_5', 'q_cf_exp', 5, 'Belum ada pengalaman startup', 'No Prior startup experience', 'none', null, null, 'exp_none');
 
         // Team Experience
         $opts[] = $o('opt_tm_exp_1', 'q_tm_exp', 1, 'Mendirikan / co-founded sebuah perusahaan', 'Founder / co-founded a company', 'founded', null, null, 'exp_founded');
-        $opts[] = $o('opt_tm_exp_2', 'q_tm_exp', 2, 'Pernah bekerja di startup', 'Worked in a startup', 'worked', null, null, 'exp_worked');
-        $opts[] = $o('opt_tm_exp_3', 'q_tm_exp', 3, 'Pernah membangun produk di startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
-        $opts[] = $o('opt_tm_exp_4', 'q_tm_exp', 4, 'Tidak ada pengalaman startup sebelumnya', 'No Prior startup experience', 'none', null, null, 'exp_none');
+        $opts[] = $o('opt_tm_exp_2', 'q_tm_exp', 2, 'Pernah kerja di startup', 'Worked in a startup', 'worked', null, null, 'exp_worked');
+        $opts[] = $o('opt_tm_exp_3', 'q_tm_exp', 3, 'Pernah launching produk startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
+        $opts[] = $o('opt_tm_exp_4', 'q_tm_exp', 4, 'Belum ada pengalaman startup', 'No Prior startup experience', 'none', null, null, 'exp_none');
 
         // ── Founder: Looking For ──
-        $opts[] = $o('opt_fdr_look_1', 'q_fdr_looking', 1, 'Co-Founder', 'Co-Founder', 'cofounder', 'Mencari partner untuk membangun bersama', 'Looking for a partner to build together', 'goal_cofounder');
-        $opts[] = $o('opt_fdr_look_2', 'q_fdr_looking', 2, 'Anggota Tim', 'Team Members', 'team', 'Mencari anggota tim untuk startup saya', 'Looking for team members for my startup', 'goal_team_members');
-        $opts[] = $o('opt_fdr_look_3', 'q_fdr_looking', 3, 'Keduanya', 'Both', 'both', 'Mencari co-founder dan anggota tim', 'Looking for both co-founder and team members', 'goal_both');
+        $opts[] = $o('opt_fdr_look_1', 'q_fdr_looking', 1, 'Co-Founder', 'Co-Founder', 'cofounder', 'Cari orang buat bangun bareng startupmu dari hari pertama', 'Looking for a partner to build together', 'goal_cofounder');
+        $opts[] = $o('opt_fdr_look_2', 'q_fdr_looking', 2, 'Anggota Tim', 'Team Members', 'team', 'Rekrut tim awal untuk startup kamu', 'Looking for team members for my startup', 'goal_team_members');
+        $opts[] = $o('opt_fdr_look_3', 'q_fdr_looking', 3, 'Keduanya', 'Both', 'both', 'Terbuka untuk co-founder dan anggota tim', 'Looking for both co-founder and team members', 'goal_both');
 
         // ── Industries (for all industry questions) ──
         $industryQuestions = ['q_fdr_industry', 'q_cf_industry', 'q_tm_industry', 'q_su_industry'];
