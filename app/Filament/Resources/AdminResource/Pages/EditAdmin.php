@@ -16,4 +16,12 @@ class EditAdmin extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function getSavedNotification(): ?\Filament\Notifications\Notification
+    {
+        return \Filament\Notifications\Notification::make()
+            ->success()
+            ->title('Data Berhasil Diubah')
+            ->body('Perubahan data admin berhasil disimpan.');
+    }
 }
