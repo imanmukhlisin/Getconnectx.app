@@ -57,10 +57,13 @@ class ProfileResource extends JsonResource
         if ($this->relationLoaded('credentials')) {
             $cred = $this->credentials->where('provider', 'linkedin')->first();
             if ($cred) {
-                $expCount = count($cred->experience ?? []);
-                if ($expCount > 0) {
-                    $highlights[] = $expCount . '+ years startup experience';
+                // Tampilkan Job Terakhir
+                $exp = collect($cred->experience ?? [])->first();
+                if ($exp && !empty($exp['title']) && !empty($exp['company'])) {
+                    $highlights[] = $exp['title'] . ' at ' . $exp['company'];
                 }
+
+                // Tampilkan Pendidikan Terakhir
                 $edu = collect($cred->education ?? [])->first();
                 if ($edu && !empty($edu['degree']) && !empty($edu['school'])) {
                     $highlights[] = $edu['degree'] . ', ' . $edu['school'];
