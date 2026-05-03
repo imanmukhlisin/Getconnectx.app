@@ -26,6 +26,31 @@ class NotificationTemplateSeeder extends Seeder
                 ],
             ],
             // Tambahkan template lain di sini nanti
+
+            [
+                'name' => 'new_message',
+                'type' => 'push',
+                'title' => [
+                    'en' => '💬 New message from [sender_name]',
+                    'id' => '💬 Pesan baru dari [sender_name]',
+                ],
+                'body' => [
+                    'en' => '[message]',
+                    'id' => '[message]',
+                ],
+            ],
+            [
+                'name' => 'new_match',
+                'type' => 'push',
+                'title' => [
+                    'en' => "🎉 It's a Match!",
+                    'id' => '🎉 Kamu Match!',
+                ],
+                'body' => [
+                    'en' => 'You and [name] have connected. Start the conversation now!',
+                    'id' => 'Kamu dan [name] sudah terhubung. Mulai obrolan sekarang!',
+                ],
+            ],
         ];
 
         foreach ($templates as $template) {

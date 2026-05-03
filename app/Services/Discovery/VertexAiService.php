@@ -121,12 +121,12 @@ PROMPT;
 
             $parsed = json_decode($rawJson, true);
 
-            if (!is_array($parsed) || empty($parsed['headline'])) {
-                Log::warning('VertexAiService@scrapeAndParseLinkedIn: Gemini returned invalid or empty JSON.', [
+            if (!is_array($parsed) || (empty($parsed['headline']) && empty($parsed['bio_summary']))) {
+                Log::warning('VertexAiService@scrapeAndParseLinkedIn: Gemini returned invalid or empty JSON. Falling back to slug generation.', [
                     'url'      => $linkedinUrl,
                     'raw_json' => substr($rawJson, 0, 500),
                 ]);
-                return null;
+                return $this->generateFallbackProfile($linkedinUrl);
             }
 
             return [
@@ -151,12 +151,31 @@ PROMPT;
             ];
 
         } catch (\Throwable $e) {
-            Log::error('VertexAiService@scrapeAndParseLinkedIn: Gemini extraction failed.', [
+            Log::error('VertexAiService@scrapeAndParseLinkedIn: Gemini extraction failed. Falling back to slug generation.', [
                 'url'   => $linkedinUrl,
                 'error' => $e->getMessage(),
             ]);
-            return null;
+            return $this->generateFallbackProfile($linkedinUrl);
         }
+    }
+
+    /**
+     * Fallback to generate a placeholder profile from the URL slug
+     * Used when the LinkedIn profile is hidden from Google Search.
+     */
+    private function generateFallbackProfile(string $linkedinUrl): array
+    {
+        $slug         = basename(rtrim(parse_url($linkedinUrl, PHP_URL_PATH), '/'));
+        $nameFromSlug = ucwords(str_replace(['-', '_'], ' ', $slug));
+
+        return [
+            'name'        => $nameFromSlug,
+            'photo_url'   => null,
+            'headline'    => 'Professional at LinkedIn',
+            'experiences' => [],
+            'educations'  => [],
+            'bio_summary' => "I am a professional on LinkedIn. My profile data is currently private or not fully indexed by search engines. Please connect with me to learn more about my background and experience.",
+        ];
     }
 
 
@@ -370,7 +389,7 @@ PROMPT;
                 ]
             ],
             'generationConfig' => [
-                'temperature'     => 0.1,
+                'temperature'     => 0.7, // Higher temp allows better synthesis of Google Search results
                 'maxOutputTokens' => 2048,
             ],
         ]);
@@ -381,7 +400,21 @@ PROMPT;
 
         $data = $response->json();
 
-        return $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+        $extractedText = '';
+        if (isset($data['candidates'][0]['content']['parts'])) {
+            foreach ($data['candidates'][0]['content']['parts'] as $part) {
+                if (isset($part['text'])) {
+                    $extractedText .= $part['text'];
+                }
+            }
+        }
+
+        if (empty(trim($extractedText))) {
+            \Illuminate\Support\Facades\Log::error('Gemini returned unexpected structure or empty text', ['data' => $data]);
+            return '{}';
+        }
+
+        return $extractedText;
     }
 
     /**
