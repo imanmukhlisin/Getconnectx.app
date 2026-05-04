@@ -104,6 +104,10 @@ Route::prefix('v1')->group(function () {
         Route::post('refresh', [AuthController::class, 'refreshToken'])
             ->name('auth.refresh');
 
+        // ── Session ───────────────────────────────────────────────────────────
+        Route::get('session', [AuthController::class, 'session'])
+            ->name('auth.session');
+
         // ── LinkedIn Sync (Async Background Job) ──────────────────────────────
         // Terima linkedin_url LinkedIn, trigger Apify
         // Response langsung dalam < 100ms

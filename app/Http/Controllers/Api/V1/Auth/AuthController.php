@@ -405,6 +405,55 @@ class AuthController extends Controller
     }
 
     // =========================================================================
+    //  SESSION
+    // =========================================================================
+
+    /**
+     * GET /api/v1/auth/session
+     *
+     * Return the authenticated user's normalized app session.
+     */
+    public function session(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Default discovery mode mapping
+        $discoveryMode = null;
+        if ($user->is_onboarded) {
+            if (in_array($user->role_category, ['Founder', 'Co-Founder'])) {
+                $discoveryMode = 'finding_cofounder'; // or building_team
+            } else {
+                $discoveryMode = 'joining_startups'; // or explore_startups
+            }
+        }
+
+        return $this->successResponse(
+            message: 'Session loaded.',
+            data: [
+                'user' => [
+                    'id'                   => $user->id,
+                    'entity_type'          => null,
+                    'email'                => $user->email,
+                    'email_verified_at'    => $user->email_verified_at,
+                    'whatsapp_number'      => $user->whatsapp_number,
+                    'whatsapp_verified_at' => $user->whatsapp_verified_at,
+                    'registration_step'    => $user->registration_step,
+                    'is_active'            => $user->is_active,
+                    'is_onboarded'         => (bool) $user->is_onboarded,
+                ],
+                'discovery_preferences' => [
+                    'default_discovery_mode' => $discoveryMode,
+                ],
+                'premium' => [
+                    'boost'     => 3,
+                    'spotlight' => 1,
+                    'isPremium' => (bool) $user->is_pro,
+                ],
+            ]
+        );
+    }
+
+    // =========================================================================
 
     private function successResponse(
         string  $message,
