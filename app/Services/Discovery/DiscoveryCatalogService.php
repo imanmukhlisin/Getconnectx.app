@@ -9,7 +9,7 @@ use App\Services\Discovery\CityCatalog;
 class DiscoveryCatalogService
 {
     private const CACHE_TTL = 3600; // 1 hour
-    private const CACHE_PREFIX = 'connectx:discovery:catalogs:v2:';
+    private const CACHE_PREFIX = 'connectx:discovery:catalogs:v3:';
 
     /**
      * Get grouped filter options for a discovery mode.
@@ -28,7 +28,7 @@ class DiscoveryCatalogService
                 try {
                     $options = \Illuminate\Support\Facades\DB::table('onboarding_options')
                         ->whereIn('question_id', $questionIds)
-                        ->orderBy('sort_order')
+                        ->orderBy('order_index')
                         ->get();
 
                     if ($options->isEmpty()) return [];
