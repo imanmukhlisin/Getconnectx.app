@@ -202,7 +202,7 @@ class ProfileResource extends JsonResource
             'teamId'      => $this->startup->id ?? 'no_team',
             'profileType' => $this->role_category ? strtolower($this->role_category) : 'builder',
             'name'        => $this->name,
-            'headline'    => $this->position ?? 'Professional',
+            'headline'    => $this->position ?? ($hasStartup ? 'Startup Founder' : 'Professional'),
             'photoUrl'    => $this->avatar_url,
             'location'    => [
                 'city'    => $this->city ?? '',
@@ -221,6 +221,8 @@ class ProfileResource extends JsonResource
 
         if ($hasStartup) {
             $response['startup'] = $startupData;
+            // Auto-add badge for startup founder if not present
+            $response['badges'][] = ['id' => 'startup-founder', 'label' => 'Startup Founder'];
         }
 
         $response['sections'] = [
@@ -229,21 +231,28 @@ class ProfileResource extends JsonResource
                 'title' => $aboutTitle,
                 'value' => $aboutValue,
             ],
-            'personalityAndHobbies' => [
+        ];
+
+        // Hide Personality & Hobbies for Startup profiles as per feedback
+        if (!$hasStartup) {
+            $response['sections']['personalityAndHobbies'] = [
                 'title' => 'Personality & Hobbies',
                 'items' => $hobbies,
-            ],
-            'skills' => [
-                'title' => 'Skills',
-                'items' => $skills,
-            ],
-            'interests' => [
-                'title' => 'Interests',
-                'items' => $interests,
-            ],
-            'highlights' => [
-                'items' => $highlights,
-            ],
+            ];
+        }
+
+        $response['sections']['skills'] = [
+            'title' => 'Expertise',
+            'items' => $skills,
+        ];
+
+        $response['sections']['interests'] = [
+            'title' => 'Focus',
+            'items' => $interests,
+        ];
+
+        $response['sections']['highlights'] = [
+            'items' => $highlights,
         ];
 
         $response['createdAt'] = $this->created_at ? $this->created_at->toIso8601String() : null;
