@@ -21,8 +21,8 @@ class DiscoveryCatalogService
         $cacheKey = self::CACHE_PREFIX . $mode;
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($mode) {
-            // Helper to fetch and format options from onboarding_options
-            $fetchOnboardingOptions = function ($questionIds, $groupLabel) {
+            // Helper to fetch and format options from onboarding_options with DYNAMIC GROUPING
+            $fetchOnboardingOptions = function ($questionIds, $fallbackLabel) {
                 if (is_string($questionIds)) $questionIds = [$questionIds];
                 
                 try {
@@ -33,11 +33,15 @@ class DiscoveryCatalogService
 
                     if ($options->isEmpty()) return [];
 
-                    return [
-                        [
-                            'id'      => 'grp_' . $questionIds[0],
-                            'label'   => $groupLabel,
-                            'options' => $options->unique('value')->map(function ($opt) {
+                    // Group by group_name column from database
+                    $grouped = $options->groupBy(fn($opt) => $opt->group_name ?: $fallbackLabel);
+
+                    $result = [];
+                    foreach ($grouped as $groupName => $items) {
+                        $result[] = [
+                            'id'      => 'grp_' . \Illuminate\Support\Str::slug($groupName, '_'),
+                            'label'   => $groupName,
+                            'options' => $items->unique('value')->map(function ($opt) {
                                 $labelStr = $opt->label ?? '';
                                 $labels = json_decode($labelStr, true);
                                 
@@ -51,8 +55,9 @@ class DiscoveryCatalogService
                                     'label' => $displayName,
                                 ];
                             })->values()->toArray(),
-                        ]
-                    ];
+                        ];
+                    }
+                    return $result;
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error("Discovery Filter Error: " . $e->getMessage());
                     return [];
