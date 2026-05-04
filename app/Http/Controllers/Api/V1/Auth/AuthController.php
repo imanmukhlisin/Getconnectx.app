@@ -417,13 +417,33 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        // Default discovery mode mapping
-        $discoveryMode = null;
+        // Dynamic discovery mode mapping from onboarding
+        $discoveryMode = 'explore_startups';
         if ($user->is_onboarded) {
-            if (in_array($user->role_category, ['Founder', 'Co-Founder'])) {
-                $discoveryMode = 'finding_cofounder'; // or building_team
-            } else {
-                $discoveryMode = 'joining_startups'; // or explore_startups
+            $session = \App\Models\Onboarding\OnboardingSession::where('user_id', $user->id)
+                ->where('status', 'completed')
+                ->latest('completed_at')
+                ->first();
+
+            if ($session) {
+                $responses = \App\Models\Onboarding\OnboardingResponse::where('session_id', $session->id)
+                    ->get()
+                    ->keyBy('question_id');
+
+                $getVal = fn($key) => isset($responses[$key]) ? (is_array($responses[$key]->value) ? ($responses[$key]->value[0] ?? null) : $responses[$key]->value) : null;
+
+                $action = $getVal('q_use_connectx');
+                if ($action === 'startup') {
+                    $lookingFor = $getVal('q_su_need_type') ?? $getVal('q_fdr_looking');
+                    $discoveryMode = match ($lookingFor) {
+                        'cofounder' => 'finding_cofounder',
+                        'team'      => 'building_team',
+                        'both'      => 'building_team',
+                        default     => 'finding_cofounder'
+                    };
+                } else {
+                    $discoveryMode = 'joining_startups';
+                }
             }
         }
 
