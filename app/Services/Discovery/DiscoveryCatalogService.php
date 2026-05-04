@@ -9,7 +9,7 @@ use App\Services\Discovery\CityCatalog;
 class DiscoveryCatalogService
 {
     private const CACHE_TTL = 3600; // 1 hour
-    private const CACHE_PREFIX = 'connectx:discovery:catalogs:';
+    private const CACHE_PREFIX = 'connectx:discovery:catalogs:v2:';
 
     /**
      * Get grouped filter options for a discovery mode.
