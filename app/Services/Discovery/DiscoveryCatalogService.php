@@ -22,10 +22,12 @@ class DiscoveryCatalogService
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($mode) {
             // Helper to fetch and format options from onboarding_options
-            $fetchOnboardingOptions = function ($questionId, $groupLabel) {
+            $fetchOnboardingOptions = function ($questionIds, $groupLabel) {
+                if (is_string($questionIds)) $questionIds = [$questionIds];
+                
                 try {
                     $options = \Illuminate\Support\Facades\DB::table('onboarding_options')
-                        ->where('question_id', $questionId)
+                        ->whereIn('question_id', $questionIds)
                         ->orderBy('sort_order')
                         ->get();
 
@@ -33,13 +35,12 @@ class DiscoveryCatalogService
 
                     return [
                         [
-                            'id'      => 'grp_' . $questionId,
+                            'id'      => 'grp_' . $questionIds[0],
                             'label'   => $groupLabel,
-                            'options' => $options->map(function ($opt) {
+                            'options' => $options->unique('value')->map(function ($opt) {
                                 $labelStr = $opt->label ?? '';
                                 $labels = json_decode($labelStr, true);
                                 
-                                // Fallback if JSON is invalid or label is empty
                                 $displayName = $opt->value;
                                 if (json_last_error() === JSON_ERROR_NONE && is_array($labels)) {
                                     $displayName = $labels['id'] ?? $labels['en'] ?? $opt->value;
@@ -53,10 +54,17 @@ class DiscoveryCatalogService
                         ]
                     ];
                 } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error("Discovery Filter Error for {$questionId}: " . $e->getMessage());
+                    \Illuminate\Support\Facades\Log::error("Discovery Filter Error: " . $e->getMessage());
                     return [];
                 }
             };
+
+            // Mapping question IDs based on context
+            $isStartupContext = in_array($mode, ['explore_startups', 'joining_startups']);
+            
+            $industryQ = ['q_su_industry', 'q_fdr_industry', 'q_cf_industry', 'q_tm_industry'];
+            $skillQ    = ['q_tm_skills', 'q_su_need_tm_skills', 'q_su_need_bt_tm'];
+            $roleQ     = ['q_bld_role', 'q_fdr_tm_roles', 'q_su_founder_roles'];
 
             return [
                 'mode' => $mode,
@@ -68,10 +76,19 @@ class DiscoveryCatalogService
                     'meta'        => ['searchable' => true],
                     'options'     => CityCatalog::all(),
                 ],
-                'industries' => $fetchOnboardingOptions('q_su_industry', 'All Industries'),
-                'skills'     => $fetchOnboardingOptions('q_bld_skills', 'All Skills'),
-                'roles'      => $fetchOnboardingOptions('q_bld_role', 'Available Roles'),
-                'languages'  => $fetchOnboardingOptions('q_languages', 'Languages'),
+                'industries' => $fetchOnboardingOptions($industryQ, 'Industries'),
+                'skills'     => $fetchOnboardingOptions($skillQ, 'Skills & Expertise'),
+                'roles'      => $fetchOnboardingOptions($roleQ, 'Roles'),
+                'languages'  => [
+                    [
+                        'id' => 'grp_languages',
+                        'label' => 'Languages',
+                        'options' => [
+                            ['id' => 'id', 'label' => 'Bahasa Indonesia'],
+                            ['id' => 'en', 'label' => 'English'],
+                        ]
+                    ]
+                ],
             ];
         });
     }
@@ -83,18 +100,17 @@ class DiscoveryCatalogService
     {
         if (empty($ids)) return;
 
-        $questionId = match ($type) {
-            'industry' => 'q_su_industry',
-            'skill'    => 'q_bld_skills',
-            'role'     => 'q_bld_role',
-            'language' => 'q_languages',
-            default    => null,
+        $questionIds = match ($type) {
+            'industry' => ['q_su_industry', 'q_fdr_industry', 'q_cf_industry', 'q_tm_industry'],
+            'skill'    => ['q_tm_skills', 'q_su_need_tm_skills', 'q_su_need_bt_tm'],
+            'role'     => ['q_bld_role', 'q_fdr_tm_roles', 'q_su_founder_roles'],
+            default    => [],
         };
 
-        if (!$questionId) return;
+        if (empty($questionIds)) return;
 
         $validIds = \Illuminate\Support\Facades\DB::table('onboarding_options')
-            ->where('question_id', $questionId)
+            ->whereIn('question_id', $questionIds)
             ->pluck('value')
             ->toArray();
 
