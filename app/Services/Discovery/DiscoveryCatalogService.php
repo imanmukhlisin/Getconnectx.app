@@ -60,11 +60,14 @@ class DiscoveryCatalogService
             };
 
             // Mapping question IDs based on context
-            $isStartupContext = in_array($mode, ['explore_startups', 'joining_startups']);
+            $industryQ     = ['q_su_industry', 'q_fdr_industry', 'q_cf_industry', 'q_tm_industry'];
+            $skillQ        = ['q_tm_skills', 'q_su_need_tm_skills', 'q_su_need_bt_tm'];
             
-            $industryQ = ['q_su_industry', 'q_fdr_industry', 'q_cf_industry', 'q_tm_industry'];
-            $skillQ    = ['q_tm_skills', 'q_su_need_tm_skills', 'q_su_need_bt_tm'];
-            $roleQ     = ['q_bld_role', 'q_fdr_tm_roles', 'q_su_founder_roles'];
+            // For finding_cofounder, 'roles' will represent 'Co-Founder Types' (Technical, Business, etc)
+            $roleQ         = ['q_cf_type', 'q_fdr_cf_type', 'q_su_need_cf_type', 'q_bld_role'];
+            
+            $availabilityQ = ['q_cf_avail', 'q_fdr_cf_avail', 'q_tm_avail'];
+            $equityQ       = ['q_cf_equity', 'q_su_equity_range'];
 
             return [
                 'mode' => $mode,
@@ -76,10 +79,12 @@ class DiscoveryCatalogService
                     'meta'        => ['searchable' => true],
                     'options'     => CityCatalog::all(),
                 ],
-                'industries' => $fetchOnboardingOptions($industryQ, 'Industries'),
-                'skills'     => $fetchOnboardingOptions($skillQ, 'Skills & Expertise'),
-                'roles'      => $fetchOnboardingOptions($roleQ, 'Roles'),
-                'languages'  => [
+                'industries'   => $fetchOnboardingOptions($industryQ, 'Industries'),
+                'roles'        => $fetchOnboardingOptions($roleQ, 'Co-Founder Type / Skill Strength'),
+                'skills'       => $fetchOnboardingOptions($skillQ, 'Technical Skills'),
+                'availability' => $fetchOnboardingOptions($availabilityQ, 'Availability'),
+                'equity'       => $fetchOnboardingOptions($equityQ, 'Equity Commitment'),
+                'languages'    => [
                     [
                         'id' => 'grp_languages',
                         'label' => 'Languages',
@@ -101,10 +106,12 @@ class DiscoveryCatalogService
         if (empty($ids)) return;
 
         $questionIds = match ($type) {
-            'industry' => ['q_su_industry', 'q_fdr_industry', 'q_cf_industry', 'q_tm_industry'],
-            'skill'    => ['q_tm_skills', 'q_su_need_tm_skills', 'q_su_need_bt_tm'],
-            'role'     => ['q_bld_role', 'q_fdr_tm_roles', 'q_su_founder_roles'],
-            default    => [],
+            'industry'     => ['q_su_industry', 'q_fdr_industry', 'q_cf_industry', 'q_tm_industry'],
+            'skill'        => ['q_tm_skills', 'q_su_need_tm_skills', 'q_su_need_bt_tm'],
+            'role'         => ['q_cf_type', 'q_fdr_cf_type', 'q_su_need_cf_type', 'q_bld_role'],
+            'availability' => ['q_cf_avail', 'q_fdr_cf_avail', 'q_tm_avail'],
+            'equity'       => ['q_cf_equity', 'q_su_equity_range'],
+            default        => [],
         };
 
         if (empty($questionIds)) return;
