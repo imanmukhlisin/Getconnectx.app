@@ -196,12 +196,31 @@ class ProfileResource extends JsonResource
                 }
             }
 
+            $getOnboardingLabel = function ($questionId, $value) {
+                if (empty($value)) return $value;
+                $option = \Illuminate\Support\Facades\DB::table('onboarding_options')
+                    ->where('question_id', $questionId)
+                    ->where('value', $value)
+                    ->first();
+                if ($option) {
+                    $labels = json_decode($option->label, true);
+                    return $labels['id'] ?? $labels['en'] ?? $value;
+                }
+                return ucwords(str_replace(['_', '-'], ' ', $value));
+            };
+
             $industries = [];
             if (!empty($startup->industry)) {
-                $industries[] = ['id' => \Illuminate\Support\Str::slug($startup->industry), 'name' => $startup->industry];
+                $industries[] = [
+                    'id'   => $startup->industry,
+                    'name' => $getOnboardingLabel('q_su_industry', $startup->industry)
+                ];
             }
             if (!empty($startup->secondary_industry)) {
-                $industries[] = ['id' => \Illuminate\Support\Str::slug($startup->secondary_industry), 'name' => $startup->secondary_industry];
+                $industries[] = [
+                    'id'   => $startup->secondary_industry,
+                    'name' => $getOnboardingLabel('q_su_industry', $startup->secondary_industry)
+                ];
             }
 
             $startupData = [
@@ -209,7 +228,7 @@ class ProfileResource extends JsonResource
                 'tagline' => $startup->tagline ?? '',
                 'stage' => [
                     'value' => $startup->stage ?? '',
-                    'label' => ucfirst($startup->stage ?? ''),
+                    'label' => $getOnboardingLabel('q_su_stage', $startup->stage),
                     'details' => $stageDetails
                 ],
                 'industries' => $industries,
