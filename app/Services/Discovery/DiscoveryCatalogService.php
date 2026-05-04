@@ -23,26 +23,39 @@ class DiscoveryCatalogService
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($mode) {
             // Helper to fetch and format options from onboarding_options
             $fetchOnboardingOptions = function ($questionId, $groupLabel) {
-                $options = \Illuminate\Support\Facades\DB::table('onboarding_options')
-                    ->where('question_id', $questionId)
-                    ->orderBy('sort_order')
-                    ->get();
+                try {
+                    $options = \Illuminate\Support\Facades\DB::table('onboarding_options')
+                        ->where('question_id', $questionId)
+                        ->orderBy('sort_order')
+                        ->get();
 
-                if ($options->isEmpty()) return [];
+                    if ($options->isEmpty()) return [];
 
-                return [
-                    [
-                        'id'      => 'grp_' . $questionId,
-                        'label'   => $groupLabel,
-                        'options' => $options->map(function ($opt) {
-                            $labels = json_decode($opt->label, true);
-                            return [
-                                'id'    => $opt->value,
-                                'label' => $labels['id'] ?? $labels['en'] ?? $opt->value,
-                            ];
-                        })->values()->toArray(),
-                    ]
-                ];
+                    return [
+                        [
+                            'id'      => 'grp_' . $questionId,
+                            'label'   => $groupLabel,
+                            'options' => $options->map(function ($opt) {
+                                $labelStr = $opt->label ?? '';
+                                $labels = json_decode($labelStr, true);
+                                
+                                // Fallback if JSON is invalid or label is empty
+                                $displayName = $opt->value;
+                                if (json_last_error() === JSON_ERROR_NONE && is_array($labels)) {
+                                    $displayName = $labels['id'] ?? $labels['en'] ?? $opt->value;
+                                }
+
+                                return [
+                                    'id'    => $opt->value,
+                                    'label' => $displayName,
+                                ];
+                            })->values()->toArray(),
+                        ]
+                    ];
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Discovery Filter Error for {$questionId}: " . $e->getMessage());
+                    return [];
+                }
             };
 
             return [
