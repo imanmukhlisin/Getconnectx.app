@@ -429,6 +429,7 @@ class AuthController extends Controller
 
         return $this->successResponse(
             message: 'Session loaded.',
+            nextStep: $user->nextStep(),
             data: [
                 'user' => [
                     'id'                   => $user->id,
