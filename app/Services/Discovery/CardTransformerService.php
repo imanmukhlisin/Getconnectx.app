@@ -29,19 +29,19 @@ class CardTransformerService
             $matchResult = $this->scoringService->computeScore($authUser, $user, 'finding_cofounder');
         }
 
-        // Build interests from user tags
+        // Build interests from user tags (Industries)
         $interests = [];
         if ($user->relationLoaded('tags')) {
             $interests = $user->tags->where('type', 'industry')->map(fn($tag) => [
                 'id'   => 'in_' . $tag->id,
-                'name' => $tag->name,
+                'name' => $this->getOnboardingLabel(['q_su_industry', 'q_fdr_industry'], $tag->name),
             ])->values()->toArray();
 
             // Add availability as interest item
             if ($user->commitment_level) {
                 $interests[] = [
                     'id'   => 'avail_' . $user->id,
-                    'name' => ucfirst(str_replace('-', ' ', $user->commitment_level)),
+                    'name' => $this->getOnboardingLabel(['q_cf_avail', 'q_fdr_cf_avail', 'q_tm_avail'], $user->commitment_level),
                     'type' => 'availability',
                 ];
             }
@@ -52,7 +52,7 @@ class CardTransformerService
         if ($user->relationLoaded('tags')) {
             $skills = $user->tags->where('type', 'skill')->map(fn($tag) => [
                 'id'   => 'sk_' . $tag->id,
-                'name' => $tag->name,
+                'name' => $this->getOnboardingLabel('q_tm_skills', $tag->name),
             ])->values()->toArray();
         }
 
@@ -67,7 +67,7 @@ class CardTransformerService
             'location'    => [
                 'city'       => $user->city,
                 'country'    => $user->country,
-                'display'    => $this->buildLocationDisplay($user->city, $user->country),
+                'display'    => $this->buildLocationDisplay($user),
                 'distanceKm' => $distanceKm,
             ],
             'match' => $matchResult,
@@ -98,6 +98,9 @@ class CardTransformerService
             $matchResult = $this->scoringService->computeScore($authUser, $owner, 'explore_startups');
         }
 
+        $industryDisplay = $this->buildIndustryDisplay($startup->industry, $startup->secondary_industry);
+        $stageLabel      = $this->getOnboardingLabel('q_su_stage', $startup->stage);
+
         return [
             'entityType' => 'startup',
             'id'         => 'startup_card_' . substr(md5($startup->id . $index), 0, 8),
@@ -105,7 +108,7 @@ class CardTransformerService
             'name'       => $startup->name,
             'logoUrl'    => $startup->logo_url,
             'badge'      => [
-                'label' => $startup->stage ? strtoupper(str_replace('-', ' ', $startup->stage)) : null,
+                'label' => $stageLabel,
             ],
             'founder' => $owner ? [
                 'name'  => $owner->name,
@@ -115,7 +118,7 @@ class CardTransformerService
             'industry' => [
                 'primary'   => $startup->industry,
                 'secondary' => $startup->secondary_industry,
-                'display'   => $this->buildIndustryDisplay($startup->industry, $startup->secondary_industry),
+                'display'   => $industryDisplay,
             ],
             'team' => [
                 'memberCount' => $startup->team_size,
@@ -126,8 +129,8 @@ class CardTransformerService
             'lookingFor' => $startup->looking_for ?? [],
             'teamStage' => [
                 'teamSize'    => $startup->team_size,
-                'stage'       => $startup->stage ? strtoupper(str_replace('-', ' ', $startup->stage)) : null,
-                'industry'    => $this->buildIndustryDisplay($startup->industry, $startup->secondary_industry),
+                'stage'       => $stageLabel,
+                'industry'    => $industryDisplay,
                 'hiringCount' => count($startup->open_roles ?? []),
             ],
             'journey' => $this->buildJourney($startup->stage),
@@ -137,6 +140,29 @@ class CardTransformerService
     // ═══════════════════════════════════════════════════════════════════
     //  Private Helpers
     // ═══════════════════════════════════════════════════════════════════
+
+    private function getOnboardingLabel($questionIds, ?string $value): string
+    {
+        if (empty($value)) return '';
+        
+        if (is_string($questionIds)) $questionIds = [$questionIds];
+
+        return \Illuminate\Support\Facades\Cache::remember("onboarding_label_{$value}", 3600, function() use ($questionIds, $value) {
+            $option = \Illuminate\Support\Facades\DB::table('onboarding_options')
+                ->whereIn('question_id', $questionIds)
+                ->where('value', $value)
+                ->first();
+
+            if ($option) {
+                $labels = json_encode($option->label, true);
+                if (is_string($labels)) $labels = json_decode($labels, true);
+                return $labels['id'] ?? $labels['en'] ?? $value;
+            }
+
+            // Final fallback: beautify the slug
+            return ucwords(str_replace(['_', '-'], ' ', $value));
+        });
+    }
 
     private function buildMatchLabel(int $score): string
     {
@@ -149,21 +175,33 @@ class CardTransformerService
         };
     }
 
-    private function buildLocationDisplay(?string $city, ?string $country): string
+    private function buildLocationDisplay(User $user): string
     {
-        return collect([$city, $country])->filter()->implode(', ') ?: 'Unknown';
+        // Try to get dynamic label from onboarding if city is a slug
+        if ($user->city && !str_contains($user->city, ',')) {
+            $label = $this->getOnboardingLabel('q_location', $user->city);
+            if ($label !== ucwords(str_replace(['_', '-'], ' ', $user->city))) {
+                return $label;
+            }
+        }
+
+        return collect([$user->city, $user->country])->filter()->implode(', ') ?: 'Unknown';
     }
 
     private function buildIndustryDisplay(?string $primary, ?string $secondary): string
     {
-        return collect([$primary, $secondary])->filter()->implode(' / ') ?: 'General';
+        $primaryLabel   = $this->getOnboardingLabel(['q_su_industry', 'q_fdr_industry'], $primary);
+        $secondaryLabel = $this->getOnboardingLabel(['q_su_industry', 'q_fdr_industry'], $secondary);
+
+        return collect([$primaryLabel, $secondaryLabel])->filter()->implode(' / ') ?: 'General';
     }
 
     private function buildBadges(User $user): array
     {
         $badges = [];
         if ($user->startup_stage) {
-            $badges[] = ['id' => 'badge_' . $user->startup_stage, 'label' => strtoupper($user->startup_stage), 'icon' => 'rocket'];
+            $label = $this->getOnboardingLabel('q_su_stage', $user->startup_stage);
+            $badges[] = ['id' => 'badge_' . $user->startup_stage, 'label' => $label, 'icon' => 'rocket'];
         }
         if ($user->is_pro) {
             $badges[] = ['id' => 'badge_pro', 'label' => 'Pro', 'icon' => 'sparkles'];
