@@ -21,11 +21,32 @@ class DiscoveryCatalogService
         $cacheKey = self::CACHE_PREFIX . $mode;
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($mode) {
-            $catalogs = DiscoveryCatalog::forMode($mode)
-                ->orderBy('sort_order')
-                ->get();
+            // Helper to fetch and format options from onboarding_options
+            $fetchOnboardingOptions = function ($questionId, $groupLabel) {
+                $options = \Illuminate\Support\Facades\DB::table('onboarding_options')
+                    ->where('question_id', $questionId)
+                    ->orderBy('sort_order')
+                    ->get();
 
-            $result = [
+                if ($options->isEmpty()) return [];
+
+                return [
+                    [
+                        'id'      => 'grp_' . $questionId,
+                        'label'   => $groupLabel,
+                        'options' => $options->map(function ($opt) {
+                            $labels = json_decode($opt->label, true);
+                            return [
+                                'id'    => $opt->value,
+                                'label' => $labels['id'] ?? $labels['en'] ?? $opt->value,
+                            ];
+                        })->values()->toArray(),
+                    ]
+                ];
+            };
+
+            return [
+                'mode' => $mode,
                 'city' => [
                     'id'          => 'q_city',
                     'type'        => 'searchable_dropdown',
@@ -34,56 +55,34 @@ class DiscoveryCatalogService
                     'meta'        => ['searchable' => true],
                     'options'     => CityCatalog::all(),
                 ],
-                'industries' => [],
-                'skills'     => [],
-                'roles'      => [],
-                'languages'  => [],
+                'industries' => $fetchOnboardingOptions('q_su_industry', 'All Industries'),
+                'skills'     => $fetchOnboardingOptions('q_bld_skills', 'All Skills'),
+                'roles'      => $fetchOnboardingOptions('q_bld_role', 'Available Roles'),
+                'languages'  => $fetchOnboardingOptions('q_languages', 'Languages'),
             ];
-
-            $typeMap = [
-                'industry' => 'industries',
-                'skill'    => 'skills',
-                'role'     => 'roles',
-                'language' => 'languages',
-            ];
-
-            // Group catalogs by type + group_id
-            $grouped = $catalogs->groupBy(fn($item) => $item->type . '|' . $item->group_id);
-
-            foreach ($grouped as $key => $items) {
-                [$type, $groupId] = explode('|', $key);
-                $collectionKey = $typeMap[$type] ?? null;
-
-                if (!$collectionKey) continue;
-
-                $first = $items->first();
-
-                $result[$collectionKey][] = [
-                    'id'      => $groupId,
-                    'label'   => $first->group_label,
-                    'options' => $items->map(fn($item) => [
-                        'id'    => $item->id,
-                        'label' => $item->label,
-                    ])->values()->toArray(),
-                ];
-            }
-
-            return $result;
         });
     }
 
     /**
-     * Validate that submitted IDs exist in the catalog for the given mode.
-     *
-     * @throws \InvalidArgumentException
+     * Validate that submitted IDs exist in the onboarding options for the given type.
      */
     public function validateCatalogIds(array $ids, string $type, string $mode): void
     {
         if (empty($ids)) return;
 
-        $validIds = DiscoveryCatalog::forMode($mode)
-            ->ofType($type)
-            ->pluck('id')
+        $questionId = match ($type) {
+            'industry' => 'q_su_industry',
+            'skill'    => 'q_bld_skills',
+            'role'     => 'q_bld_role',
+            'language' => 'q_languages',
+            default    => null,
+        };
+
+        if (!$questionId) return;
+
+        $validIds = \Illuminate\Support\Facades\DB::table('onboarding_options')
+            ->where('question_id', $questionId)
+            ->pluck('value')
             ->toArray();
 
         $invalid = array_diff($ids, $validIds);
