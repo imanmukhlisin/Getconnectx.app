@@ -531,12 +531,30 @@ class OnboardingEngineService
 
         // ── Lokasi ──
         if ($responses->has('q_location')) {
-            $updateData['location'] = $this->getValue($responses['q_location']->value);
+            $val = $this->getValue($responses['q_location']->value);
+            // Ambil label dari onboarding_options jika memungkinkan untuk parsing city, country
+            $option = \Illuminate\Support\Facades\DB::table('onboarding_options')
+                ->where('question_id', 'q_location')
+                ->where('value', $val)
+                ->first();
+            
+            if ($option) {
+                $labels = json_decode($option->label, true);
+                $display = $labels['id'] ?? $labels['en'] ?? $val;
+                $parts = explode(',', $display);
+                $updateData['city'] = trim($parts[0] ?? '');
+                $updateData['country'] = trim($parts[1] ?? '');
+            }
         }
 
         // ── Gender ──
         if ($responses->has('q_gender')) {
             $updateData['gender'] = $this->getValue($responses['q_gender']->value);
+        }
+
+        // ── Startup Idea / Bio ──
+        if ($responses->has('q_su_problem')) {
+            $updateData['startup_idea'] = $this->getValue($responses['q_su_problem']->value);
         }
 
         // ── Role Category ──
@@ -565,9 +583,13 @@ class OnboardingEngineService
             $updateData['years_experience'] = $this->getValue($responses['q_bld_years']->value);
         }
 
-        // ── Startup Experience Level ──
-        if ($responses->has('q_bld_exp')) {
-            $updateData['startup_experience'] = $this->getValue($responses['q_bld_exp']->value);
+        // ── Startup Experience Level (Checking q_fdr_exp, q_cf_exp, q_tm_exp) ──
+        $expQuestions = ['q_fdr_exp', 'q_cf_exp', 'q_tm_exp'];
+        foreach ($expQuestions as $qid) {
+            if ($responses->has($qid)) {
+                $updateData['startup_experience'] = $this->getValue($responses[$qid]->value);
+                break;
+            }
         }
 
         // ── Co-Founder Type (for co-founder joining path) ──

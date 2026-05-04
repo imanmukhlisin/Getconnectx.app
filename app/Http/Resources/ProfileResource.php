@@ -112,10 +112,38 @@ class ProfileResource extends JsonResource
                 $stageValue = strtolower($startup->stage ?? '');
                 
                 $detailKeys = [];
-                if ($stageValue === 'idea') $detailKeys = ['q_has_prototype' => 'Has prototype', 'q_prototype_link' => 'Prototype link', 'q_waitlist_size' => 'Waitlist size', 'q_validation_methods' => 'Validation methods'];
-                if ($stageValue === 'mvp') $detailKeys = ['q_user_count' => 'Users', 'q_mau' => 'Monthly active users', 'q_mvp_revenue' => 'Revenue', 'q_growth_rate' => 'Growth rate'];
-                if ($stageValue === 'live') $detailKeys = ['q_mrr' => 'MRR', 'q_live_users' => 'Live users', 'q_retention' => 'Retention', 'q_key_metrics' => 'Key metrics'];
-                if ($stageValue === 'scale') $detailKeys = ['q_funding_raised' => 'Funding raised', 'q_scale_team_size' => 'Team size', 'q_arr' => 'ARR', 'q_investors' => 'Investors'];
+                if ($stageValue === 'idea') {
+                    $detailKeys = [
+                        'q_su_tri_prototype' => 'Has prototype',
+                        'q_su_tri_prototype_link' => 'Prototype link',
+                        'q_su_tri_waitlist' => 'Waitlist size',
+                        'q_su_tri_validation' => 'Validation methods'
+                    ];
+                }
+                if ($stageValue === 'mvp') {
+                    $detailKeys = [
+                        'q_su_trm_users' => 'Users',
+                        'q_su_trm_mau' => 'Monthly active users',
+                        'q_su_trm_revenue' => 'Revenue',
+                        'q_su_trm_growth' => 'Growth rate'
+                    ];
+                }
+                if ($stageValue === 'live') {
+                    $detailKeys = [
+                        'q_su_trl_mrr' => 'MRR',
+                        'q_su_trl_customers' => 'Live users',
+                        'q_su_trl_retention' => 'Retention',
+                        'q_su_trl_metrics' => 'Key metrics'
+                    ];
+                }
+                if ($stageValue === 'scale') {
+                    $detailKeys = [
+                        'q_su_trs_funding' => 'Funding raised',
+                        'q_su_trs_teamsize' => 'Team size',
+                        'q_su_trs_arr' => 'ARR',
+                        'q_su_trs_investors' => 'Investors'
+                    ];
+                }
                 
                 foreach ($detailKeys as $qId => $label) {
                     $val = $getVal($qId);
@@ -125,11 +153,11 @@ class ProfileResource extends JsonResource
                 }
 
                 $linkMappings = [
-                    'q_website' => 'Website',
-                    'q_startup_linkedin' => 'LinkedIn',
-                    'q_twitter' => 'Twitter / X',
-                    'q_instagram' => 'Instagram',
-                    'q_pitch_deck' => 'Pitch deck'
+                    'q_su_website' => 'Website',
+                    'q_su_linkedin' => 'LinkedIn',
+                    'q_su_twitter' => 'Twitter / X',
+                    'q_su_instagram' => 'Instagram',
+                    'q_su_pitchdeck' => 'Pitch deck'
                 ];
                 foreach ($linkMappings as $qId => $label) {
                     $val = $getVal($qId);
@@ -140,6 +168,11 @@ class ProfileResource extends JsonResource
                         }
                         $links[] = ['label' => $label, 'url' => $val];
                     }
+                }
+
+                // Fallback for aboutValue if empty (Startup path)
+                if (empty($aboutValue)) {
+                    $aboutValue = $getVal('q_su_problem') ?? $getVal('q_su_solution') ?? '';
                 }
             }
 
