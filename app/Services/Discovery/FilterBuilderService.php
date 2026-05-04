@@ -7,6 +7,7 @@ use App\Models\Like;
 use App\Models\Startup;
 use App\Models\User;
 use App\Models\UserMatch;
+use App\Services\Discovery\CityCatalog;
 use Illuminate\Database\Eloquent\Builder;
 
 class FilterBuilderService
@@ -247,6 +248,14 @@ class FilterBuilderService
         $lat = $locFilter['latitude'] ?? $authUser->latitude;
         $lng = $locFilter['longitude'] ?? $authUser->longitude;
         $radiusKm = $locFilter['distanceKm'] ?? null;
+        $city = $locFilter['city'] ?? null;
+
+        if ($city) {
+            if (!in_array($city, CityCatalog::values())) {
+                throw new \InvalidArgumentException("Unknown city: {$city}");
+            }
+            $query->where("{$table}.city", $city);
+        }
 
         if ($lat && $lng) {
             $haversine = sprintf(

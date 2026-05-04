@@ -4,6 +4,7 @@ namespace App\Services\Discovery;
 
 use App\Models\DiscoveryCatalog;
 use Illuminate\Support\Facades\Cache;
+use App\Services\Discovery\CityCatalog;
 
 class DiscoveryCatalogService
 {
@@ -13,7 +14,7 @@ class DiscoveryCatalogService
     /**
      * Get grouped filter options for a discovery mode.
      *
-     * @return array{industries: array, skills: array, roles: array, languages: array}
+     * @return array{city: array, industries: array, skills: array, roles: array, languages: array}
      */
     public function getFilterOptions(string $mode): array
     {
@@ -25,6 +26,14 @@ class DiscoveryCatalogService
                 ->get();
 
             $result = [
+                'city' => [
+                    'id'          => 'q_city',
+                    'type'        => 'searchable_dropdown',
+                    'placeholder' => 'Search a city',
+                    'required'    => true,
+                    'meta'        => ['searchable' => true],
+                    'options'     => CityCatalog::all(),
+                ],
                 'industries' => [],
                 'skills'     => [],
                 'roles'      => [],
