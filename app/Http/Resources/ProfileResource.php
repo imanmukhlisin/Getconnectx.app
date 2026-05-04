@@ -21,11 +21,6 @@ class ProfileResource extends JsonResource
         $aboutValue  = $hasStartup ? ($this->startup_idea ?? '') : ($this->bio ?? '');
 
         // ── Manipulasi Lokasi ──────────────────────────────────
-        $locationDisplay = trim(($this->city ?? '') . ', ' . ($this->country ?? ''), ', ');
-        if (empty($locationDisplay)) {
-            $locationDisplay = 'Location not set';
-        }
-
         // ── Mapping Tags per Tipe ───────────────────────────────
         $hobbies   = [];
         $skills    = [];
@@ -91,24 +86,49 @@ class ProfileResource extends JsonResource
             $highlights[] = $this->languages;
         }
 
+        // ── Lokasi ──
+        $city = $this->city;
+        $country = $this->country;
+        $locationDisplay = trim(($city ?? '') . ', ' . ($country ?? ''), ', ');
+
         // ── Startup Metadata (Optional) ──────────────────────────
         $startupData = null;
+        $session = \App\Models\Onboarding\OnboardingSession::where('user_id', $this->id)
+            ->where('status', 'completed')
+            ->latest('completed_at')
+            ->first();
+        
+        $getVal = null;
+        if ($session) {
+            $responses = \App\Models\Onboarding\OnboardingResponse::where('session_id', $session->id)->get()->keyBy('question_id');
+            $getVal = fn($key) => isset($responses[$key]) ? (is_array($responses[$key]->value) ? ($responses[$key]->value[0] ?? null) : $responses[$key]->value) : null;
+            
+            // Fallback for location from onboarding if DB columns are empty
+            if (empty($locationDisplay) || $locationDisplay === 'Location not set') {
+                $locVal = $getVal('q_location');
+                if ($locVal) {
+                    $option = \Illuminate\Support\Facades\DB::table('onboarding_options')
+                        ->where('question_id', 'q_location')
+                        ->where('value', $locVal)
+                        ->first();
+                    if ($option) {
+                        $labels = json_decode($option->label, true);
+                        $locationDisplay = $labels['id'] ?? $labels['en'] ?? $locVal;
+                    }
+                }
+            }
+        }
+
+        if (empty($locationDisplay)) {
+            $locationDisplay = 'Location not set';
+        }
+
         if ($hasStartup) {
             $startup = $this->startup;
-
-            $session = \App\Models\Onboarding\OnboardingSession::where('user_id', $this->id)
-                ->where('status', 'completed')
-                ->latest('completed_at')
-                ->first();
-
             $links = [];
             $stageDetails = [];
             
             if ($session) {
-                $responses = \App\Models\Onboarding\OnboardingResponse::where('session_id', $session->id)->get()->keyBy('question_id');
-                
-                $getVal = fn($key) => isset($responses[$key]) ? (is_array($responses[$key]->value) ? ($responses[$key]->value[0] ?? null) : $responses[$key]->value) : null;
-                
                 $stageValue = strtolower($startup->stage ?? '');
                 
                 $detailKeys = [];
@@ -205,8 +225,8 @@ class ProfileResource extends JsonResource
             'headline'    => $this->position ?? ($hasStartup ? 'Startup Founder' : 'Professional'),
             'photoUrl'    => $this->avatar_url,
             'location'    => [
-                'city'    => $this->city ?? '',
-                'country' => $this->country ?? '',
+                'city'    => $this->city ?? ($city ?? ''),
+                'country' => $this->country ?? ($country ?? ''),
                 'display' => $locationDisplay,
             ],
             'stats' => [
@@ -214,14 +234,11 @@ class ProfileResource extends JsonResource
                 'teamsJoined' => $this->teams_joined_count ?? 0,
                 'matches'     => $this->matches_count ?? 0,
             ],
-            'badges' => [
-                ['id' => 'connectx-user', 'label' => 'ConnectX User']
-            ]
+            'badges' => []
         ];
 
         if ($hasStartup) {
             $response['startup'] = $startupData;
-            // Auto-add badge for startup founder if not present
             $response['badges'][] = ['id' => 'startup-founder', 'label' => 'Startup Founder'];
         }
 
@@ -233,23 +250,21 @@ class ProfileResource extends JsonResource
             ],
         ];
 
-        // Hide Personality & Hobbies for Startup profiles as per feedback
+        // Hide personal sections for Startup profiles as per feedback
         if (!$hasStartup) {
             $response['sections']['personalityAndHobbies'] = [
                 'title' => 'Personality & Hobbies',
                 'items' => $hobbies,
             ];
+            $response['sections']['skills'] = [
+                'title' => 'Expertise',
+                'items' => $skills,
+            ];
+            $response['sections']['interests'] = [
+                'title' => 'Focus',
+                'items' => $interests,
+            ];
         }
-
-        $response['sections']['skills'] = [
-            'title' => 'Expertise',
-            'items' => $skills,
-        ];
-
-        $response['sections']['interests'] = [
-            'title' => 'Focus',
-            'items' => $interests,
-        ];
 
         $response['sections']['highlights'] = [
             'items' => $highlights,
