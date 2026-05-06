@@ -164,7 +164,7 @@ class MessageController extends Controller
             return $msg;
         });
 
-        // ─── FCM Branching: Offline vs Online ────────────────────────────────
+        // ─── FCM: Always fire — Supabase Realtime not yet implemented on Flutter ─
         $target = $conversation->participants()
             ->where('users.id', '!=', $authUser->id)
             ->with('tokens')
@@ -175,25 +175,24 @@ class MessageController extends Controller
                 ->where('last_used_at', '>=', now()->subMinutes(self::ONLINE_THRESHOLD_MINUTES))
                 ->isNotEmpty();
 
-            if (!$isOnline) {
-                // Target is offline — fire FCM push notification
-                $senderName = $authUser->name ?? 'Someone';
-                $this->pushNotificationService->sendFromTemplate(
-                    $target,
-                    'new_message',
-                    [
-                        '[sender_name]' => $senderName,
-                        '[sender]'      => $senderName,
-                        '[message]'     => $type === 'text' ? ($content ?? '') : '📷 Image',
-                    ]
-                );
-            } else {
-                Log::debug('MessageController@sendMessage: Target is online via Supabase Realtime. Skipping FCM.', [
-                    'conversation_id' => $conversation->id,
-                    'target_user_id'  => $target->id,
-                ]);
-            }
+            $senderName = $authUser->name ?? 'Someone';
+            $this->pushNotificationService->sendFromTemplate(
+                $target,
+                'new_message',
+                [
+                    '[sender_name]' => $senderName,
+                    '[sender]'      => $senderName,
+                    '[message]'     => $type === 'text' ? ($content ?? '') : '📷 Image',
+                ]
+            );
+
+            Log::debug('MessageController@sendMessage: FCM sent (realtime not yet active).', [
+                'conversation_id' => $conversation->id,
+                'target_user_id'  => $target->id,
+                'target_online'   => $isOnline,
+            ]);
         }
+
 
         return response()->json($this->formatMessage($message), 201);
     }
