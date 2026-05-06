@@ -211,15 +211,17 @@ class DiscoveryController extends Controller
                 'success' => true,
                 'message' => 'Swipe action recorded successfully',
                 'data'    => [
-                    'id'        => 'card_' . substr(md5($targetId), 0, 6),
-                    'targetId'  => $targetId,
-                    'profileId' => $isStartup ? null : $resolvedUserId,
-                    'startupId' => $isStartup ? $actualTargetId : null,
-                    'action'    => $action,
-                    'isMatch'   => $isMatch,
-                    'matchId'   => $result['matchId'] ?? null,
+                    'id'             => 'card_' . substr(md5($targetId), 0, 6),
+                    'targetId'       => $targetId,
+                    'profileId'      => $isStartup ? null : $resolvedUserId,
+                    'startupId'      => $isStartup ? $actualTargetId : null,
+                    'action'         => $action,
+                    'isMatch'        => $isMatch,
+                    'matchId'        => $result['matchId']        ?? null,
+                    'conversationId' => $result['conversationId'] ?? null,
                 ],
             ]);
+
 
         } catch (\InvalidArgumentException $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 400);
