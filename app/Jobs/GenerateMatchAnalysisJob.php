@@ -82,8 +82,8 @@ class GenerateMatchAnalysisJob implements ShouldQueue
 
         // 5. Work Style Match (5%)
         $workStyleScore = 0;
-        $wsA = $userA->preference->work_style ?? [];
-        $wsB = $userB->preference->work_style ?? [];
+        $wsA = $userA->preference?->work_style ?? [];
+        $wsB = $userB->preference?->work_style ?? [];
         
         $wsIntersect = array_intersect_assoc($wsA, $wsB);
         if (count($wsA) > 0 && count($wsB) > 0) {

@@ -8,6 +8,7 @@ use App\Models\Like;
 use App\Models\UserMatch;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Exception;
 
 class SwipeService
@@ -41,7 +42,8 @@ class SwipeService
     {
         $this->guardSelfSwipe($fromUserId, $targetUserId);
 
-        return DB::transaction(function () use ($fromUserId, $targetUserId) {
+        // Run DB operations in transaction (excluding job dispatch — see below)
+        $result = DB::transaction(function () use ($fromUserId, $targetUserId) {
 
             // 1. Prevent duplicate — if already swiped, return existing result
             $existing = Like::where('from_user_id', $fromUserId)
@@ -61,7 +63,7 @@ class SwipeService
             $isMutual = $reverseLike !== null;
 
             // 3. Persist the new like
-            $like = Like::create([
+            Like::create([
                 'from_user_id' => $fromUserId,
                 'to_user_id'   => $targetUserId,
                 'type'         => Like::TYPE_CONNECT,
@@ -81,9 +83,6 @@ class SwipeService
                 app(FeedService::class)->invalidateUserFeedCache($fromUserId);
                 app(FeedService::class)->invalidateUserFeedCache($targetUserId);
 
-                // 4d. Dispatch async match analysis
-                GenerateMatchAnalysisJob::dispatch($match->id, $fromUserId, $targetUserId);
-
             } else {
                 // Still invalidate own feed (target disappears from feed)
                 app(FeedService::class)->invalidateUserFeedCache($fromUserId);
@@ -95,6 +94,21 @@ class SwipeService
                 'conversationId' => $match?->conversation_id,
             ];
         });
+
+        // 4d. Dispatch analysis job OUTSIDE the transaction so a sync-queue
+        //     failure (QUEUE_CONNECTION=sync on Vercel) cannot roll back the match.
+        if (!empty($result['matchId'])) {
+            try {
+                GenerateMatchAnalysisJob::dispatch($result['matchId'], $fromUserId, $targetUserId);
+            } catch (\Throwable $e) {
+                Log::error('SwipeService: GenerateMatchAnalysisJob failed (non-fatal)', [
+                    'match_id' => $result['matchId'],
+                    'error'    => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $result;
     }
 
     /**
