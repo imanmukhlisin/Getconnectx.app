@@ -51,12 +51,21 @@ class ProfileResource extends JsonResource
 
         if ($this->relationLoaded('credentials')) {
             $cred = $this->credentials->where('provider', 'linkedin')->first();
+
+            // DEBUG: log raw structure to diagnose key mismatch
+            \Illuminate\Support\Facades\Log::info('ProfileResource: linkedin cred', [
+                'user_id'   => $this->id,
+                'has_cred'  => !is_null($cred),
+                'exp_first' => $cred ? collect($cred->experience ?? [])->first() : null,
+                'edu_first' => $cred ? collect($cred->education ?? [])->first() : null,
+            ]);
+
             if ($cred) {
-                // Tampilkan Job Terakhir secara fleksibel
+                // Tampilkan Job Terakhir — support both normalized keys and raw Apify keys
                 $exp = collect($cred->experience ?? [])->first();
                 if ($exp) {
-                    $title = $exp['title'] ?? '';
-                    $company = $exp['company'] ?? '';
+                    $title   = $exp['title']       ?? $exp['position']    ?? '';
+                    $company = $exp['company']      ?? $exp['companyName'] ?? '';
                     if (!empty($title) && !empty($company)) {
                         $highlights[] = $title . ' at ' . $company;
                     } elseif (!empty($title)) {
@@ -66,11 +75,11 @@ class ProfileResource extends JsonResource
                     }
                 }
 
-                // Tampilkan Pendidikan Terakhir secara fleksibel
+                // Tampilkan Pendidikan Terakhir — support both normalized keys and raw Apify keys
                 $edu = collect($cred->education ?? [])->first();
                 if ($edu) {
-                    $degree = $edu['degree'] ?? '';
-                    $school = $edu['school'] ?? '';
+                    $degree = $edu['degree']     ?? '';
+                    $school = $edu['school']     ?? $edu['schoolName'] ?? '';
                     if (!empty($degree) && !empty($school)) {
                         $highlights[] = $degree . ', ' . $school;
                     } elseif (!empty($degree)) {
@@ -81,6 +90,7 @@ class ProfileResource extends JsonResource
                 }
             }
         }
+
 
         if (!empty($this->languages)) {
             $highlights[] = $this->languages;
