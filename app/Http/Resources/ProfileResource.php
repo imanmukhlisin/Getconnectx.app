@@ -52,14 +52,6 @@ class ProfileResource extends JsonResource
         if ($this->relationLoaded('credentials')) {
             $cred = $this->credentials->where('provider', 'linkedin')->first();
 
-            // DEBUG: log raw structure to diagnose key mismatch
-            \Illuminate\Support\Facades\Log::info('ProfileResource: linkedin cred', [
-                'user_id'   => $this->id,
-                'has_cred'  => !is_null($cred),
-                'exp_first' => $cred ? collect($cred->experience ?? [])->first() : null,
-                'edu_first' => $cred ? collect($cred->education ?? [])->first() : null,
-            ]);
-
             if ($cred) {
                 // Tampilkan Job Terakhir — support both normalized keys and raw Apify keys
                 $exp = collect($cred->experience ?? [])->first();
