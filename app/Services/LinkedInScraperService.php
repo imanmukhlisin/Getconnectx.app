@@ -25,7 +25,13 @@ class LinkedInScraperService
         }
 
         $actorId = 'harvestapi~linkedin-profile-scraper';
-        $webhookUrl = url('/api/v1/webhooks/apify/linkedin');
+
+        // IMPORTANT: Use WEBHOOK_BASE_URL env var (set to Vercel production URL).
+        // url() helper reads APP_URL which may be localhost in dev, making Apify unable to callback.
+        $webhookBase = rtrim(config('app.webhook_base_url', config('app.url')), '/');
+        $webhookUrl  = $webhookBase . '/api/v1/webhooks/apify/linkedin';
+
+        Log::info('LinkedInScraperService: Using webhook URL', ['url' => $webhookUrl]);
         
         // Encode webhook configuration
         $webhooks = base64_encode(json_encode([
