@@ -82,35 +82,48 @@ class LinkedInScraperService
 
         // 1. Mapping Nama Lengkap
         $firstName = $scrapedData['firstName'] ?? '';
-        $lastName = $scrapedData['lastName'] ?? '';
-        $fullName = trim($firstName . ' ' . $lastName);
+        $lastName  = $scrapedData['lastName']  ?? '';
+        $fullName  = trim($firstName . ' ' . $lastName);
         if (!empty($fullName)) {
             $updateData['name'] = $fullName;
         }
 
-        // 2. Mapping Foto Profil
-        $photoUrl = $scrapedData['profilePicture']['url'] ?? $scrapedData['photo'] ?? null;
+        // 2. Foto Profil — Apify returns 'photo' (string) AND 'profilePicture' (object{url,...})
+        $photoUrl = $scrapedData['photo']
+                 ?? $scrapedData['profilePicture']['url']
+                 ?? null;
         if (!empty($photoUrl)) {
             $updateData['avatar_url'] = $photoUrl;
         }
 
-        // 3. Mapping Headline/Position
-        if (!empty($scrapedData['headline'])) {
-            $updateData['position'] = $scrapedData['headline'];
+        // 3. Headline / Position
+        // Apify returns 'headline' (string) or fallback via 'multiLocaleHeadline[0].headline'
+        $headline = $scrapedData['headline'] ?? null;
+        if (empty($headline) && !empty($scrapedData['multiLocaleHeadline'][0]['headline'])) {
+            $headline = $scrapedData['multiLocaleHeadline'][0]['headline'];
+        }
+        if (!empty($headline)) {
+            $updateData['position'] = trim($headline);
         }
 
-        // 4. Mapping About/Bio
+        // 4. About / Bio
         if (!empty($scrapedData['about'])) {
             $updateData['bio'] = $scrapedData['about'];
         }
 
-        // 5. Mapping Location
-        if (!empty($scrapedData['location']['parsed'])) {
-            $updateData['city'] = $scrapedData['location']['parsed']['city'] ?? $updateData['city'] ?? null;
-            $updateData['country'] = $scrapedData['location']['parsed']['country'] ?? $updateData['country'] ?? null;
+        // 5. Location — Apify returns 'location' as string e.g. "Yogyakarta, Indonesia"
+        //    OR nested under 'location.parsed.city' / 'location.parsed.country'
+        $locationStr = is_string($scrapedData['location'] ?? null) ? $scrapedData['location'] : null;
+        if ($locationStr) {
+            $parts = array_map('trim', explode(',', $locationStr));
+            $updateData['city']    = $parts[0] ?? null;
+            $updateData['country'] = $parts[1] ?? null;
+        } elseif (!empty($scrapedData['location']['parsed'])) {
+            $updateData['city']    = $scrapedData['location']['parsed']['city']    ?? null;
+            $updateData['country'] = $scrapedData['location']['parsed']['country'] ?? null;
         }
 
-        // 6. Mapping Stats (Connections)
+        // 6. Stats: connections & followers
         if (isset($scrapedData['connectionsCount'])) {
             $updateData['connections_count'] = $scrapedData['connectionsCount'];
         }
@@ -121,31 +134,33 @@ class LinkedInScraperService
             Log::info('LinkedInScraperService: user profile updated.', ['fields' => array_keys($updateData)]);
         }
 
-        // 7. Mapping Experience & Education ke UserCredential
-        $experiences = $scrapedData['experience'] ?? [];
-        $educations = $scrapedData['education'] ?? [];
-
-        // Format experience agar sesuai dengan format yang biasa dipakai frontend/backend jika perlu
+        // 7. Experience — Apify key: 'experience[].position', 'experience[].companyName'
+        $experiences = is_array($scrapedData['experience'] ?? null) ? $scrapedData['experience'] : [];
         $formattedExperiences = array_map(function ($exp) {
             return [
-                'title' => $exp['position'] ?? null,
-                'company' => $exp['companyName'] ?? null,
-                'period' => ($exp['startDate']['text'] ?? '') . ' - ' . ($exp['endDate']['text'] ?? 'Present'),
-                'isCurrent' => !isset($exp['endDate']['year']),
-                'location' => $exp['location'] ?? null,
-                'description' => $exp['description'] ?? null
+                'title'       => $exp['position']           ?? null,
+                'company'     => $exp['companyName']         ?? null,
+                'companyLogo' => $exp['companyLogo']['url']  ?? null,
+                'period'      => ($exp['startDate']['text']  ?? '') . ' - ' . ($exp['endDate']['text'] ?? 'Present'),
+                'isCurrent'   => !isset($exp['endDate']['year']),
+                'location'    => $exp['location']            ?? null,
+                'description' => $exp['description']         ?? null,
             ];
-        }, is_array($experiences) ? $experiences : []);
+        }, $experiences);
 
+        // 8. Education — Apify key: 'education[].schoolName', 'education[].degree'
+        $educations = is_array($scrapedData['education'] ?? null) ? $scrapedData['education'] : [];
         $formattedEducations = array_map(function ($edu) {
             return [
-                'school' => $edu['schoolName'] ?? null,
-                'degree' => $edu['degree'] ?? null,
-                'field' => $edu['fieldOfStudy'] ?? null,
-                'period' => ($edu['startDate']['text'] ?? '') . ' - ' . ($edu['endDate']['text'] ?? 'Present'),
-                'description' => $edu['description'] ?? null
+                'school'     => $edu['schoolName']          ?? null,
+                'schoolLogo' => $edu['schoolLogo']['url']   ?? null,
+                'degree'     => $edu['degree']              ?? null,
+                'field'      => $edu['fieldOfStudy']        ?? null,
+                'period'     => ($edu['startDate']['text']  ?? '') . ' - ' . ($edu['endDate']['text'] ?? 'Present'),
+                'description' => $edu['description']        ?? null,
             ];
-        }, is_array($educations) ? $educations : []);
+        }, $educations);
+
 
         try {
             UserCredential::updateOrCreate(
