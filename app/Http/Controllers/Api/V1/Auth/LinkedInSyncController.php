@@ -56,9 +56,9 @@ class LinkedInSyncController extends Controller
             'last_device_id' => $validated['device_id'],
         ]);
 
-        // ── Trigger Proxycurl API & AI (Async) ─────────────────────────────────
-        // Dispatch Job untuk fetching Proxycurl API dan memanggil Gemini secara async di background.
-        \App\Jobs\ProcessLinkedInProfileJob::dispatch($user->id, $validated['linkedin_url']);
+        // ── Trigger Apify Scraper (Async) ─────────────────────────────────
+        // Memanggil Apify secara async. Apify akan memanggil endpoint webhook kita setelah selesai.
+        app(\App\Services\LinkedInScraperService::class)->triggerScrapeAsync($user, $validated['linkedin_url']);
 
         // ── Return Langsung (< 100ms) ─────────────────────────────────
         // Frontend tidak perlu menunggu proses LinkedIn API & AI selesai.
