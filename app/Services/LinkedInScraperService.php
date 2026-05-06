@@ -18,7 +18,10 @@ class LinkedInScraperService
     {
         Log::info('LinkedInScraperService: Triggering Apify for', ['user_id' => $user->id, 'url' => $linkedinUrl]);
 
-        $token = config('services.apify.token') ?? env('APIFY_API_TOKEN');
+        // Try all common Apify token env var names
+        $token = config('services.apify.token')      // APIFY_TOKEN via services.php
+              ?? env('APIFY_API_TOKEN')              // Legacy name
+              ?? env('APIFY_TOKEN');                 // Direct fallback
         if (!$token) {
             Log::error('LinkedInScraperService: APIFY_API_TOKEN is missing.');
             return;
