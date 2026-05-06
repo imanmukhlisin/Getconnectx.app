@@ -19,6 +19,9 @@ class WebhookController extends Controller
         // 1. Verifikasi tipe event (biasanya ACTOR.RUN.SUCCEEDED dari Apify Webhook)
         $eventType = $request->input('eventType');
         
+        // Log full payload for debugging
+        Log::info('Webhook apifyLinkedIn: Full payload received', $request->all());
+
         // Cek custom token/signature kalau ada (untuk security opsional)
         // Apify mengirim data body (json) dimana ID dataset ada di object "resource"
         $resource = $request->input('resource', []);
