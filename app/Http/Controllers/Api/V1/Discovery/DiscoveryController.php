@@ -168,6 +168,14 @@ class DiscoveryController extends Controller
             'action' => 'required|string|in:like,pass,super_like',
         ]);
 
+        // Guard: targetId must be a valid UUID — not a card display ID like "card_xxxx"
+        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $targetId)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid targetId. Use profileId (UUID) from the cards response, not the card display id.',
+            ], 422);
+        }
+
         $authUser = $request->user();
         $action   = $request->input('action');
 
