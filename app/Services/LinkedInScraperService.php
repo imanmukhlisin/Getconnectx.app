@@ -16,58 +16,56 @@ class LinkedInScraperService
      */
     public function triggerScrapeAsync(User $user, string $linkedinUrl): void
     {
-        Log::info('LinkedInScraperService: Triggering Apify for', ['user_id' => $user->id, 'url' => $linkedinUrl]);
+        Log::info('LinkedInScraperService: Triggering Apify (sync) for', ['user_id' => $user->id, 'url' => $linkedinUrl]);
 
         // Try all common Apify token env var names
-        $token = config('services.apify.token')      // APIFY_TOKEN via services.php
-              ?? env('APIFY_API_TOKEN')              // Legacy name
-              ?? env('APIFY_TOKEN');                 // Direct fallback
-
-        // DEBUG: log token presence (REMOVE AFTER DEBUGGING)
-        Log::info('LinkedInScraperService: Token check', [
-            'has_token'   => !empty($token),
-            'token_start' => $token ? substr($token, 0, 15) . '...' : 'NULL',
-        ]);
+        $token = config('services.apify.token')
+              ?? env('APIFY_API_TOKEN')
+              ?? env('APIFY_TOKEN');
 
         if (!$token) {
-            Log::error('LinkedInScraperService: APIFY_API_TOKEN is missing.');
+            Log::error('LinkedInScraperService: Apify token is missing. Set APIFY_TOKEN in env.');
             return;
         }
 
         $actorId = 'harvestapi~linkedin-profile-scraper';
 
-        // IMPORTANT: Use WEBHOOK_BASE_URL env var (set to Vercel production URL).
-        // url() helper reads APP_URL which may be localhost in dev, making Apify unable to callback.
-        $webhookBase = rtrim(config('app.webhook_base_url', config('app.url')), '/');
-        $webhookUrl  = $webhookBase . '/api/v1/webhooks/apify/linkedin';
-
-        Log::info('LinkedInScraperService: Using webhook URL', ['url' => $webhookUrl]);
-        
-        // Encode webhook configuration
-        $webhooks = base64_encode(json_encode([
-            [
-                'eventTypes' => ['ACTOR.RUN.SUCCEEDED'],
-                'requestUrl' => $webhookUrl
-            ]
-        ]));
-
-        $url = "https://api.apify.com/v2/acts/{$actorId}/runs?token={$token}&webhooks={$webhooks}";
+        // ── Synchronous Run ──────────────────────────────────────────────
+        // The actor finishes in ~10s. Using run-sync-get-dataset-items so we
+        // get the results directly in the HTTP response — no webhook needed.
+        // Vercel Pro functions support up to 60s timeout; 45s is safe.
+        $url = "https://api.apify.com/v2/acts/{$actorId}/run-sync-get-dataset-items?token={$token}";
 
         try {
-            $response = Http::post($url, [
+            Log::info('LinkedInScraperService: Calling Apify run-sync...', ['url' => $linkedinUrl]);
+
+            $response = Http::timeout(45)->post($url, [
                 'urls' => [$linkedinUrl]
             ]);
 
             if (!$response->successful()) {
-                Log::error('LinkedInScraperService: Failed to trigger Apify', [
+                Log::error('LinkedInScraperService: Apify sync failed', [
                     'status' => $response->status(),
-                    'body' => $response->body()
+                    'body'   => $response->body(),
                 ]);
-            } else {
-                Log::info('LinkedInScraperService: Successfully triggered Apify', [
-                    'run_id' => $response->json('data.id')
-                ]);
+                return;
             }
+
+            $items = $response->json();
+
+            if (empty($items) || !is_array($items) || empty($items[0])) {
+                Log::warning('LinkedInScraperService: Apify returned no items.', ['user_id' => $user->id]);
+                return;
+            }
+
+            Log::info('LinkedInScraperService: Apify sync succeeded, processing data.', [
+                'user_id'    => $user->id,
+                'item_count' => count($items),
+            ]);
+
+            // Process & save the scraping result directly
+            $this->syncToUserProfile($user, $items[0]);
+
         } catch (\Exception $e) {
             Log::error('LinkedInScraperService: Exception triggering Apify', ['error' => $e->getMessage()]);
         }
