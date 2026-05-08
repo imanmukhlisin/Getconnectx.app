@@ -17,8 +17,10 @@ class SendStartupInvitationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email',
-            'roleId' => 'required|string',
+            'user_id' => 'nullable|string|uuid',
+            'email' => 'required_without:user_id|email|nullable',
+            'roleId' => 'nullable|string', // Support roleId
+            'role' => 'nullable|string', // Support role from old contract
             'equityPercent' => 'required|numeric|min:0|max:100',
             'commitment' => 'required|string|in:full_time,part_time,advisor',
         ];

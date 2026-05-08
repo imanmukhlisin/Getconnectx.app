@@ -51,18 +51,30 @@ class StartupInvitationController extends Controller
             return response()->json(['success' => false, 'message' => 'No active startup'], 403);
         }
 
+        $email = $request->email;
+        if ($request->has('user_id') && $request->user_id) {
+            $targetUser = User::find($request->user_id);
+            if ($targetUser) {
+                $email = $targetUser->email;
+            }
+        }
+
+        if (!$email) {
+            return response()->json(['success' => false, 'message' => 'Email is required or user_id is invalid'], 400);
+        }
+
         $invitation = StartupInvitation::create([
             'startup_id' => $startup->id,
             'sender_id' => $user->id,
-            'recipient_email' => strtolower($request->email),
-            'role_id' => $request->roleId,
+            'recipient_email' => strtolower($email),
+            'role_id' => $request->roleId ?? $request->role,
             'equity_percent' => $request->equityPercent,
             'commitment' => $request->commitment,
             'status' => 'pending',
         ]);
 
         // If user with this email exists, send push notification
-        $recipientUser = User::where('email', strtolower($request->email))->first();
+        $recipientUser = User::where('email', strtolower($email))->first();
         if ($recipientUser) {
             SendTeamInviteReceivedPush::dispatch($invitation, $recipientUser);
         }
