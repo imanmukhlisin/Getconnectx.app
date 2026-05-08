@@ -76,9 +76,10 @@ class CardTransformerService
             'startupIdea' => $user->startup_idea,
             'interests'   => $interests,
             'skills'      => $skills,
-            'experience'  => $this->buildExperience($user),
-            'education'   => $user->education ?? [],
-            'languages'   => $user->languages ?? [],
+            'experience'     => $this->buildExperience($user),
+            'education'      => $this->buildEducation($user),
+            'certifications' => [], // Placeholder for future use
+            'languages'      => $user->languages ?? [],
         ];
     }
 
@@ -211,6 +212,15 @@ class CardTransformerService
 
     private function buildExperience(User $user): array
     {
+        // Try to get data from LinkedIn Sync first
+        if ($user->relationLoaded('credentials')) {
+            $linkedIn = $user->credentials->where('provider', 'linkedin')->first();
+            if ($linkedIn && !empty($linkedIn->experience)) {
+                return $linkedIn->experience;
+            }
+        }
+
+        // Fallback to basic profile data
         $exp = [];
         if ($user->position) {
             $exp[] = [
@@ -221,6 +231,20 @@ class CardTransformerService
             ];
         }
         return $exp;
+    }
+
+    private function buildEducation(User $user): array
+    {
+        // Try to get data from LinkedIn Sync first
+        if ($user->relationLoaded('credentials')) {
+            $linkedIn = $user->credentials->where('provider', 'linkedin')->first();
+            if ($linkedIn && !empty($linkedIn->education)) {
+                return $linkedIn->education;
+            }
+        }
+
+        // Fallback to basic profile data
+        return $user->education ?? [];
     }
 
     private function buildJourney(?string $currentStage): array
