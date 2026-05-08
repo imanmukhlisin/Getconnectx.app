@@ -216,7 +216,7 @@ class CardTransformerService
             $exp[] = [
                 'id'           => 'exp_' . substr(md5($user->id . '_position'), 0, 4),
                 'title'        => $user->position,
-                'organization' => $user->startup_name ?? 'ConnectX',
+                'organization' => $user->startup_name,
                 'period'       => 'Current',
             ];
         }
