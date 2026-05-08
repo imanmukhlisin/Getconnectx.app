@@ -339,6 +339,18 @@ Remove a member from the resolved startup team.
 * changing startup identity from the Team tab
 * complex invitation lifecycle beyond pending/revoked/accepted/denied unless already supported
 
+## Implementation Status
+**Status:** ✅ Implemented
+**Date:** 2026-05-08
+
+**Details:**
+- **Database:** Created `startup_members`, `startup_invitations`, and `startup_applications` tables with UUID primary keys. RLS disabled (and API Data Access revoked for `service_role`, `anon`, and `authenticated`) to rely solely on Laravel validation, matching existing platform architecture.
+- **Controllers:** Implemented `TeamOverviewController` covering the context-aware logic for both `person` and `startup_owner` viewers.
+- **Team Management:** Implemented `TeamMemberController` to allow `PATCH` and `DELETE` on team members.
+- **Invitations:** Implemented `StartupInvitationController` to fetch options, send invites, and revoke pending invites.
+- **Models & Relationships:** Set up UUID-based traits and attached `hasMany` relationships to the `User` and `Startup` models.
+- **Push Notifications:** Setup Firebase push notifications (`SendTeamInviteReceivedPush`, `SendTeamInviteAcceptedPush`, `SendTeamMemberAddedPush`, `SendApplicationStatusUpdatedPush`) triggered via Laravel Jobs (`ShouldQueue`) using the existing `PushNotificationService`.
+
 ## Metadata
 - URL: [https://linear.app/summondev/issue/CON-61/api-contract-create-team-screen-api-contract-for-startup-overview](https://linear.app/summondev/issue/CON-61/api-contract-create-team-screen-api-contract-for-startup-overview)
 - Identifier: CON-61

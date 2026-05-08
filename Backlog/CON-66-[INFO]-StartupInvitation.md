@@ -121,6 +121,16 @@ See:
 * After a successful `deny`, FE removes or de-emphasizes the invitation in the inbox.
 * If BE adds extra fields later, FE will ignore unknown keys as long as the documented shape remains intact.
 
+## Implementation Status
+**Status:** ✅ Implemented
+**Date:** 2026-05-08
+
+**Details:**
+- **Database:** Created `startup_invitations` to manage invitation state (`pending`, `accepted`, `denied`, `revoked`).
+- **Controllers:** Implemented `IncomingInvitationController` covering `GET /api/v1/me/startup-invitations` and `POST /api/v1/me/startup-invitations/{id}/respond`.
+- **State Logic:** Implemented transactional logic. If decision is `accept`, automatically provisions the user into `startup_members` with the role and equity specified in the invitation, then notifies the founder.
+- **Push Notifications:** Set up `SendTeamInviteAcceptedPush` job.
+
 ## Metadata
 - URL: [https://linear.app/summondev/issue/CON-66/be-api-contract-startup-invitation](https://linear.app/summondev/issue/CON-66/be-api-contract-startup-invitation)
 - Identifier: CON-66
