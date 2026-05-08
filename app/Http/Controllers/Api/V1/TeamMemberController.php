@@ -15,8 +15,18 @@ class TeamMemberController extends Controller
     {
         $user = Auth::user();
 
-        // Check if user is the startup owner
+        // Check if user is the startup owner or an active member
         $startup = Startup::where('id', $startupId)->where('owner_id', $user->id)->first();
+        if (!$startup) {
+            $membership = \App\Models\StartupMember::where('user_id', $user->id)
+                ->where('startup_id', $startupId)
+                ->where('is_active', true)
+                ->first();
+            if ($membership) {
+                $startup = Startup::find($startupId);
+            }
+        }
+
         if (!$startup) {
             return response()->json(['success' => false, 'message' => 'Unauthorized or startup not found'], 403);
         }
@@ -44,8 +54,18 @@ class TeamMemberController extends Controller
     {
         $user = Auth::user();
 
-        // Check if user is the startup owner
+        // Check if user is the startup owner or an active member
         $startup = Startup::where('id', $startupId)->where('owner_id', $user->id)->first();
+        if (!$startup) {
+            $membership = \App\Models\StartupMember::where('user_id', $user->id)
+                ->where('startup_id', $startupId)
+                ->where('is_active', true)
+                ->first();
+            if ($membership) {
+                $startup = Startup::find($startupId);
+            }
+        }
+
         if (!$startup) {
             return response()->json(['success' => false, 'message' => 'Unauthorized or startup not found'], 403);
         }

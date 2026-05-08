@@ -47,6 +47,16 @@ class StartupInvitationController extends Controller
         $user = Auth::user();
         $startup = Startup::where('owner_id', $user->id)->first();
 
+        // If not owner, check if they are an active member
+        if (!$startup) {
+            $membership = \App\Models\StartupMember::where('user_id', $user->id)
+                ->where('is_active', true)
+                ->first();
+            if ($membership) {
+                $startup = Startup::find($membership->startup_id);
+            }
+        }
+
         if (!$startup) {
             return response()->json(['success' => false, 'message' => 'No active startup'], 403);
         }
@@ -82,6 +92,16 @@ class StartupInvitationController extends Controller
     {
         $user = Auth::user();
         $startup = Startup::where('owner_id', $user->id)->first();
+
+        // If not owner, check if they are an active member
+        if (!$startup) {
+            $membership = \App\Models\StartupMember::where('user_id', $user->id)
+                ->where('is_active', true)
+                ->first();
+            if ($membership) {
+                $startup = Startup::find($membership->startup_id);
+            }
+        }
 
         if (!$startup) {
             return response()->json(['success' => false, 'message' => 'No active startup'], 403);
