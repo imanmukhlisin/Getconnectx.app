@@ -70,3 +70,16 @@ When a user selects a city, frontend sends it here:
 }
 ```
 Backend should validate filters.locationAvailability.city against the supported city option values for the selected mode.
+
+---
+
+## Backend Implementation Status
+**Status: ✅ Done**
+
+City catalog sudah include 200+ kota di:
+- Indonesia (lengkap semua ibu kota provinsi + kota besar)
+- Asia Tenggara (SG, MY, TH, VN, PH, KH, MM, TL)
+- Asia Selatan, Asia Timur, Timur Tengah
+- Eropa Barat/Utara/Selatan/Timur
+- Amerika Utara & Latin, Afrika, Oseania
+- `remote` (opsi "Mana Saja")

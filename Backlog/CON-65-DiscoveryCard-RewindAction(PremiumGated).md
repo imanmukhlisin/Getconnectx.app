@@ -117,3 +117,15 @@ Recommended `reason` values:
 - Related issues: CON-60
 - Created: 2026-04-14T07:44:07.626Z
 - Updated: 2026-04-14T07:46:01.899Z
+
+---
+
+## Backend Implementation Status
+**Status: ⚠️ Partial**
+
+| Sub-feature | Status | Catatan |
+|---|---|---|
+| `POST /api/v1/discovery/swipes/rewind` | ⚠️ Partial | Route ada, controller method ada (`rewind`), perlu verifikasi logic rewind & premium gate |
+| Return restored card payload | ❌ Not Yet | Response rewind belum include full card data |
+| `DISCOVERY_REWIND_PREMIUM_REQUIRED` (403) | ❌ Not Yet | Premium gate belum diimplementasi |
+| `DISCOVERY_REWIND_NOT_AVAILABLE` (409) | ❌ Not Yet | Reason codes belum diimplementasi |

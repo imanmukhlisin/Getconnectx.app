@@ -783,3 +783,15 @@ See `CON-65` for the dedicated rewind contract.
   ```
 
   Backend should validate `filters.locationAvailability.city` against the supported city option values for the selected mode.
+
+---
+
+## Backend Implementation Status
+**Status: ❌ Not Yet**
+
+| Sub-feature | Status | Catatan |
+|---|---|---|
+| RevenueCat webhook integration | ❌ Not Yet | Belum ada endpoint webhook RevenueCat |
+| `is_pro` flag update via RevenueCat | ❌ Not Yet | |
+| `super_like` premium enforcement | ⚠️ Partial | Action `super_like` diterima di route, tapi belum ada premium gate khusus |
+| Boost/spotlight credit system | ❌ Not Yet | Field ada di session contract tapi belum di-track di DB |

@@ -480,3 +480,21 @@ Implemented in the Expo app:
 * profile screen renders a startup card from mock data while API fetching is temporarily disabled for this screen
 * `npm run lint` passes with two unrelated pre-existing warnings in `src/features/matches/components/match-analysis-screen.tsx` and `src/features/onboarding_test/components/onboarding-screen.tsx`
 
+---
+
+## Backend Implementation Status
+**Status: ✅ Done**
+
+| Sub-feature | Status | Catatan |
+|---|---|---|
+| `GET /api/v1/me/profile` | ✅ Done | Bearer token auth, resolve user dari token |
+| `PATCH /api/v1/me/profile` | ✅ Done | Update profile data |
+| `GET /api/v1/profiles/{id}` | ✅ Done | Lihat profil user lain (public) |
+| `GET /api/v1/profile-options` | ✅ Done | Daftar opsi untuk edit profile |
+| `PUT /api/v1/profile/fcm-token` | ✅ Done | Register/update FCM token dari device |
+| `startupIdea` vs `personalDescription` | ✅ Done | Backend menentukan variant berdasarkan onboarding state |
+| LinkedIn scraping → profile sync | ✅ Done | Apify HarvestAPI scraper, webhook callback, semua field dimapping termasuk `avatar_url`, `position`, `location`, `experience`, `education` |
+
+**Catatan penting untuk FE:**
+- `profileId` di response adalah UUID user, bukan prefixed string
+- Field `credential` di response memuat data LinkedIn (photo, headline, experience, education)
