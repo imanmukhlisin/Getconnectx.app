@@ -153,6 +153,21 @@ class User extends Authenticatable
                     ->withTimestamps();
     }
 
+    public function startupMemberships()
+    {
+        return $this->hasMany(StartupMember::class);
+    }
+
+    public function startupInvitationsSent()
+    {
+        return $this->hasMany(StartupInvitation::class, 'sender_id');
+    }
+
+    public function startupApplications()
+    {
+        return $this->hasMany(StartupApplication::class);
+    }
+
     // ─── Location Scopes (Haversine Formula) ─────────────────────────────────
 
     /**

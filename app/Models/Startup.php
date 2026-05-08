@@ -43,6 +43,21 @@ class Startup extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
+    public function members()
+    {
+        return $this->hasMany(StartupMember::class);
+    }
+
+    public function invitations()
+    {
+        return $this->hasMany(StartupInvitation::class);
+    }
+
+    public function applications()
+    {
+        return $this->hasMany(StartupApplication::class);
+    }
+
     // ─── Scopes ───────────────────────────────────────────────────────────────
 
     /**

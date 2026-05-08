@@ -202,6 +202,31 @@ Route::prefix('v1')->group(function () {
             ->name('conversations.media');
     });
 
+    // ─── Authenticated: Team & Startup Management ─────────────────────────────
+    Route::middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
+        // Active Startup Context
+        Route::prefix('me/startup')->group(function () {
+            Route::get('team-overview', [\App\Http\Controllers\Api\V1\TeamOverviewController::class, 'index']);
+            Route::get('invitation-options', [\App\Http\Controllers\Api\V1\StartupInvitationController::class, 'options']);
+            Route::post('invitations', [\App\Http\Controllers\Api\V1\StartupInvitationController::class, 'store']);
+            Route::delete('invitations/{invitationId}', [\App\Http\Controllers\Api\V1\StartupInvitationController::class, 'destroy']);
+        });
+
+        // Incoming Invitations (Talent Context)
+        Route::prefix('me/startup-invitations')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\V1\IncomingInvitationController::class, 'index']);
+            Route::post('{invitationId}/respond', [\App\Http\Controllers\Api\V1\IncomingInvitationController::class, 'respond']);
+        });
+
+        // Member Management
+        Route::prefix('startups/{startupId}/team-members')->group(function () {
+            Route::patch('{memberId}', [\App\Http\Controllers\Api\V1\TeamMemberController::class, 'update']);
+            Route::delete('{memberId}', [\App\Http\Controllers\Api\V1\TeamMemberController::class, 'destroy']);
+        });
+
+        // Applications
+        Route::get('applications', [\App\Http\Controllers\Api\V1\ApplicationController::class, 'index']);
+    });
 
     // ─── Admin API ────────────────────────────────────────────────────────────
     Route::prefix('admin')->middleware('auth:sanctum')->group(function () {

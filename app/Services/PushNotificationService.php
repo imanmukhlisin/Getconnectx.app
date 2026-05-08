@@ -79,4 +79,33 @@ class PushNotificationService
             return false;
         }
     }
+
+    /**
+     * Sends a direct push notification to a user without a template
+     */
+    public function sendDirect(User $user, string $title, string $body, array $data = []): bool
+    {
+        if (!$user->fcm_token) {
+            Log::warning("Cannot send direct push notification. User {$user->id} has no FCM token.");
+            return false;
+        }
+
+        try {
+            $notification = Notification::create($title, $body);
+            
+            $message = CloudMessage::withTarget('token', $user->fcm_token)
+                ->withNotification($notification)
+                ->withData(array_merge([
+                    'timestamp' => now()->toDateTimeString()
+                ], $data));
+
+            $this->messaging->send($message);
+            Log::info("Direct push notification '{$title}' sent successfully to User {$user->id}");
+            return true;
+
+        } catch (\Exception $e) {
+            Log::error("Failed to send direct push notification to User {$user->id}: " . $e->getMessage());
+            return false;
+        }
+    }
 }
