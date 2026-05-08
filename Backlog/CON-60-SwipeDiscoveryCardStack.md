@@ -783,3 +783,36 @@ See `CON-65` for the dedicated rewind contract.
   ```
 
   Backend should validate `filters.locationAvailability.city` against the supported city option values for the selected mode.
+
+---
+
+## Backend Implementation Status
+**Status: ✅ Done**
+
+| Sub-feature | Status | Catatan |
+|---|---|---|
+| `GET /api/v1/discovery/filter-options?mode=<mode>` | ✅ Done | Return `city`, `industries`, `skills`, `roles`, `availability`, `equity`, `languages` per mode |
+| `POST /api/v1/discovery/cards` | ✅ Done | Paginated, cursor-based, mode-aware |
+| `POST /api/v1/discovery/cards/:targetId/action` | ✅ Done | `like`, `pass`, `super_like` |
+| City filter di `filter-options` | ✅ Done | 200+ kota Indonesia + Asia + global, grouped per region |
+| City filter di `POST /cards` | ✅ Done | `filters.city` atau `filters.locationAvailability.city` |
+| Exclude swiped users | ✅ Done | Exclude via `likes` + `user_matches` table |
+| Exclude self dari feed | ✅ Done | |
+| Premium filter validation | ✅ Done | Return `PREMIUM_REQUIRED` untuk non-pro users |
+| Match score calculation | ✅ Done | Algoritma berbasis tag compatibility |
+| `entityType: "profile"` | ✅ Done | Mode `finding_cofounder`, `building_team` |
+| `entityType: "startup"` | ⚠️ Partial | Mode `explore_startups`, `joining_startups` — startup query ada, perlu validasi data startup di DB |
+| `conversationId` di swipe response saat match | ✅ Done | Fix: sebelumnya tidak di-return ke FE |
+| UUID validation pada `targetId` | ✅ Done | Guard: return 422 jika `targetId` bukan UUID (misal `card_xxxx`) |
+
+**Penting untuk FE:**
+- `:targetId` di URL harus pakai `profileId` (UUID) dari response cards, **bukan** field `id` (`card_xxxx`)
+- Saat mutual match: response include `isMatch: true`, `matchId`, `conversationId` → FE langsung navigate ke chat room
+
+**Matchmaking & Chat Implementation Status:**
+**Status: ✅ Done**
+- Mutual match detection via `likes` table.
+- Auto-create conversation saat mutual match.
+- `GenerateMatchAnalysisJob` (Async).
+- Full Chat System (5 endpoints: list, message history, send, mark read, media gallery).
+- FCM push notification enabled.

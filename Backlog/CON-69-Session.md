@@ -80,3 +80,15 @@ premium:
 - Assignee: Unassigned
 - Created: 2026-05-02T09:39:25.929Z
 - Updated: 2026-05-02T09:39:26.569Z
+
+---
+
+## Backend Implementation Status
+**Status: ✅ Done**
+
+| Sub-feature | Status | Catatan |
+|---|---|---|
+| `GET /api/v1/auth/session` | ✅ Done | Return user state, onboarding progress |
+| `discovery_preferences.default_discovery_mode` | ✅ Done | Dari onboarding answer |
+| `premium.isPremium` | ✅ Done | Dari field `is_pro` |
+| `premium.boost` & `premium.spotlight` | ⚠️ Partial | Field ada tapi credit system belum diimplementasi (selalu return 0) |
