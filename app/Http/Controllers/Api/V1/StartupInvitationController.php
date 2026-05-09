@@ -10,6 +10,7 @@ use App\Models\StartupInvitation;
 use App\Models\User;
 use App\Jobs\SendTeamInviteReceivedPush;
 use App\Mail\TeamInvitationMail;
+use App\Services\BrevoService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
@@ -94,11 +95,16 @@ class StartupInvitationController extends Controller
             SendTeamInviteReceivedPush::dispatch($invitation, $recipientUser);
         }
 
-        // Send an actual email to the recipient asynchronously
+        // Send an actual email to the recipient asynchronously using Brevo HTTP API (bypassing SMTP IP blocks)
         try {
-            Mail::to(strtolower($email))->queue(new TeamInvitationMail($invitation, $startup));
+            $mailable = new TeamInvitationMail($invitation, $startup);
+            $htmlContent = $mailable->render();
+            $subject = "You have been invited to join {$startup->name} on ConnectX";
+            
+            $brevoService = app(BrevoService::class);
+            $brevoService->sendHtmlEmail($subject, $htmlContent, strtolower($email), $recipientUser->name ?? $email);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Failed to queue invitation email: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Failed to send invitation email via Brevo API: ' . $e->getMessage());
             // We don't want to break the API response just because the email failed
         }
 

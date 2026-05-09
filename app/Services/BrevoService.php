@@ -63,4 +63,49 @@ class BrevoService
             'Failed to send Brevo template email: ' . ($response->json('message') ?? 'Unknown error')
         );
     }
+
+    /**
+     * Kirim email dengan konten HTML custom (tanpa template ID).
+     */
+    public function sendHtmlEmail(string $subject, string $htmlContent, string $toEmail, string $toName): bool
+    {
+        $response = Http::withHeaders([
+            'api-key' => $this->apiKey,
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+        ])->post("{$this->baseUrl}/smtp/email", [
+            'sender' => [
+                'name' => config('mail.from.name', 'ConnectX Official'),
+                'email' => config('mail.from.address', 'info@getconnectx.app')
+            ],
+            'to' => [
+                [
+                    'email' => $toEmail,
+                    'name'  => $toName,
+                ],
+            ],
+            'subject' => $subject,
+            'htmlContent' => $htmlContent,
+        ]);
+
+        if ($response->successful()) {
+            Log::info('Brevo HTML email sent', [
+                'subject'    => $subject,
+                'to'         => $toEmail,
+                'message_id' => $response->json('messageId'),
+            ]);
+            return true;
+        }
+
+        Log::error('Brevo HTML email failed', [
+            'subject' => $subject,
+            'to'      => $toEmail,
+            'status'  => $response->status(),
+            'error'   => $response->json(),
+        ]);
+
+        throw new \RuntimeException(
+            'Failed to send Brevo HTML email: ' . ($response->json('message') ?? 'Unknown error')
+        );
+    }
 }
