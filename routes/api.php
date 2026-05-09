@@ -136,6 +136,12 @@ Route::prefix('v1')->group(function () {
         Route::post('sessions/{session}/answer',[OnboardingController::class, 'answer'])->name('onboarding.sessions.answer');
         Route::post('sessions/{session}/back',  [OnboardingController::class, 'back'])->name('onboarding.sessions.back');
         Route::get('sessions/{session}',        [OnboardingController::class, 'show'])->name('onboarding.sessions.show');
+
+        // Simplified Onboarding Endpoints
+        Route::get('status',                    [OnboardingController::class, 'status'])->name('onboarding.status');
+        Route::post('role',                     [OnboardingController::class, 'saveRole'])->name('onboarding.role');
+        Route::post('builder-type',              [OnboardingController::class, 'saveBuilderType'])->name('onboarding.builder-type');
+        Route::post('preferences',              [OnboardingController::class, 'savePreferences'])->name('onboarding.preferences');
     });
 
     // ─── Authenticated: Media Upload ──────────────────────────────────────────

@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Onboarding\OnboardingSession;
+use App\Models\Tag;
+use App\Models\Startup;
+use App\Models\Builder;
 use App\Services\OnboardingEngineService;
 use Illuminate\Http\Request;
 
@@ -196,6 +199,160 @@ class OnboardingController extends Controller
                     'answered_at' => $r->answered_at?->toISOString(),
                 ];
             }),
+        ]);
+    }
+
+    /**
+     * GET /api/v1/onboarding/status
+     * Check onboarding completion status.
+     */
+    public function status(Request $request)
+    {
+        $user = $request->user();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'is_onboarded' => (bool) $user->is_onboarded,
+                'role_category' => $user->role_category,
+                'registration_step' => $user->registration_step,
+                'has_active_session' => OnboardingSession::where('user_id', $user->id)
+                    ->where('status', 'in_progress')
+                    ->exists(),
+            ]
+        ]);
+    }
+
+    /**
+     * POST /api/v1/onboarding/role
+     * Save user type: builder/startup
+     */
+    public function saveRole(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|in:builder,startup',
+        ]);
+
+        $user = $request->user();
+        $type = $request->type;
+
+        // If startup, we can set role_category immediately
+        if ($type === 'startup') {
+            $user->update(['role_category' => 'Startup']);
+        } else {
+            // For builder, we wait for builder-type to set the specific role
+            // but we can store a temporary hint if needed
+            $user->update(['role_category' => 'Builder']);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Role saved successfully',
+            'next_step' => $type === 'builder' ? 'builder-type' : 'preferences'
+        ]);
+    }
+
+    /**
+     * POST /api/v1/onboarding/builder-type
+     * Save builder sub-type: founder/co-founder/team member
+     */
+    public function saveBuilderType(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|in:founder,co-founder,team member,cofounder,team_member',
+        ]);
+
+        $user = $request->user();
+        $type = strtolower($request->type);
+
+        $roleMap = [
+            'founder' => 'Founder',
+            'co-founder' => 'Co-Founder',
+            'cofounder' => 'Co-Founder',
+            'team member' => 'Team Member',
+            'team_member' => 'Team Member',
+        ];
+
+        $user->update([
+            'role_category' => $roleMap[$type] ?? 'Builder'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Builder type saved successfully',
+            'next_step' => 'preferences'
+        ]);
+    }
+
+    /**
+     * POST /api/v1/onboarding/preferences
+     * Save industries, skills, co-founder type, availability, location
+     */
+    public function savePreferences(Request $request)
+    {
+        $request->validate([
+            'industries' => 'nullable|array',
+            'skills' => 'nullable|array',
+            'co_founder_type' => 'nullable|string',
+            'availability' => 'nullable|string',
+            'location' => 'nullable|string',
+        ]);
+
+        $user = $request->user();
+
+        $updateData = [
+            'is_onboarded' => true,
+        ];
+
+        if ($request->has('co_founder_type')) {
+            $updateData['cofounder_type'] = $request->co_founder_type;
+        }
+
+        if ($request->has('availability')) {
+            $updateData['commitment_level'] = $request->availability;
+        }
+
+        if ($request->has('location')) {
+            $locParts = explode(',', $request->location);
+            $updateData['city'] = trim($locParts[0] ?? '');
+            $updateData['country'] = trim($locParts[1] ?? '');
+        }
+
+        $user->update($updateData);
+
+        // Sync Tags (Industries & Skills)
+        $tagNames = array_merge(
+            $request->input('industries', []),
+            $request->input('skills', [])
+        );
+
+        if (!empty($tagNames)) {
+            $tagIds = Tag::whereIn('name', $tagNames)->pluck('id')->toArray();
+            if (!empty($tagIds)) {
+                $user->tags()->sync($tagIds);
+            }
+        }
+
+        // Create/Update Builder or Startup record
+        if ($user->role_category === 'Startup') {
+            Startup::updateOrCreate(
+                ['owner_id' => $user->id],
+                ['name' => $user->startup_name ?? ($user->name . "'s Startup")]
+            );
+        } else {
+            Builder::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'role_category' => $user->role_category,
+                    'commitment_level' => $user->commitment_level,
+                ]
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Preferences saved successfully. Onboarding complete.',
+            'redirect_to' => '/home'
         ]);
     }
 }
