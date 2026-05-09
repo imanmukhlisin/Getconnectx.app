@@ -350,6 +350,7 @@ Remove a member from the resolved startup team.
 - **Invitations:** Implemented `StartupInvitationController` to fetch options, send invites, and revoke pending invites.
 - **Models & Relationships:** Set up UUID-based traits and attached `hasMany` relationships to the `User` and `Startup` models.
 - **Push Notifications:** Setup Firebase push notifications (`SendTeamInviteReceivedPush`, `SendTeamInviteAcceptedPush`, `SendTeamMemberAddedPush`, `SendApplicationStatusUpdatedPush`) triggered via Laravel Jobs (`ShouldQueue`) using the existing `PushNotificationService`.
+- **Auto-Create Startup (Seamless UX):** Added background logic in `TeamOverviewController` and `StartupInvitationController` to automatically provision a placeholder startup entity for users with the `Founder` role in the `builders` table, allowing them to instantly access team features without altering the initial onboarding flow.
 
 ## Metadata
 - URL: [https://linear.app/summondev/issue/CON-61/api-contract-create-team-screen-api-contract-for-startup-overview](https://linear.app/summondev/issue/CON-61/api-contract-create-team-screen-api-contract-for-startup-overview)

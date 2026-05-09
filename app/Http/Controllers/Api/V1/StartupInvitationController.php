@@ -47,6 +47,19 @@ class StartupInvitationController extends Controller
         $user = Auth::user();
         $startup = Startup::where('owner_id', $user->id)->first();
 
+        // Auto-create startup on the fly if user is a Founder but doesn't have a startup yet
+        if (!$startup) {
+            $builder = \Illuminate\Support\Facades\DB::table('builders')->where('user_id', $user->id)->first();
+            if ($builder && strtolower(trim($builder->role_category)) === 'founder') {
+                $startup = Startup::create([
+                    'owner_id' => $user->id,
+                    'name' => ($user->name ?? 'Founder') . "'s Startup",
+                    'industry' => 'technology',
+                    'stage' => 'idea',
+                ]);
+            }
+        }
+
         if (!$startup) {
             return response()->json(['success' => false, 'message' => 'No active startup'], 403);
         }

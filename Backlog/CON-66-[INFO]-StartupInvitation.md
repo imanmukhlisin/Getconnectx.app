@@ -130,6 +130,8 @@ See:
 - **Controllers:** Implemented `IncomingInvitationController` covering `GET /api/v1/me/startup-invitations` and `POST /api/v1/me/startup-invitations/{id}/respond`.
 - **State Logic:** Implemented transactional logic. If decision is `accept`, automatically provisions the user into `startup_members` with the role and equity specified in the invitation, then notifies the founder.
 - **Push Notifications:** Set up `SendTeamInviteAcceptedPush` job.
+- **Payload Enhancement:** Updated `SendStartupInvitationRequest` to accept `user_id` in addition to `email`. The backend automatically resolves the user's email if only `user_id` is provided from the frontend matchmaking/chat screens.
+- **Auto-Create Startup:** Integrated logic in `StartupInvitationController` to provision a placeholder startup entity if the sender is a `Founder` but hasn't created a startup profile yet.
 
 ## Metadata
 - URL: [https://linear.app/summondev/issue/CON-66/be-api-contract-startup-invitation](https://linear.app/summondev/issue/CON-66/be-api-contract-startup-invitation)

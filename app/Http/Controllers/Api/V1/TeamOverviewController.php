@@ -18,7 +18,21 @@ class TeamOverviewController extends Controller
         $startup = Startup::where('owner_id', $user->id)->first();
         $membership = StartupMember::where('user_id', $user->id)->first();
 
-        // Person / co-founder view if no active startup
+        // Auto-create startup on the fly if user is a Founder but doesn't have a startup yet
+        if (!$startup && !$membership) {
+            $builder = \Illuminate\Support\Facades\DB::table('builders')->where('user_id', $user->id)->first();
+            // In GetConnect-X, role_category usually stores 'Founder'
+            if ($builder && strtolower(trim($builder->role_category)) === 'founder') {
+                $startup = Startup::create([
+                    'owner_id' => $user->id,
+                    'name' => ($user->name ?? 'Founder') . "'s Startup",
+                    'industry' => 'technology',
+                    'stage' => 'idea',
+                ]);
+            }
+        }
+
+        // Person / co-founder view if no active startup (and not a founder)
         if (!$startup && !$membership) {
             $invites = StartupInvitation::with('startup', 'sender')
                 ->where('recipient_email', $user->email)
