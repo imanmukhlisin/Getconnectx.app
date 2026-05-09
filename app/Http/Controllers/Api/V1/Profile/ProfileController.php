@@ -22,6 +22,16 @@ class ProfileController extends Controller
     {
         $user = $request->user()->load(['tags', 'startup', 'credentials']);
 
+        // Calculate dynamic stats
+        $user->matches_count = \App\Models\UserMatch::where(function($q) use ($user) {
+            $q->where('user_id', $user->id)->orWhere('matched_user_id', $user->id);
+        })->count();
+
+        $user->teams_joined_count = \App\Models\StartupMember::where('user_id', $user->id)->count();
+
+        // For now, connections can be treated as active matches or conversations
+        $user->connections_count = $user->matches_count;
+
         return response()->json([
             'success' => true,
             'message' => 'Profile fetched successfully',
