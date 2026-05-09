@@ -1,0 +1,67 @@
+name: Onboarding API Tests
+api: http://localhost:8000/api/v1
+items:
+- name: Check Onboarding Status
+  request:
+    url: /onboarding/status
+    method: GET
+    header:
+      Authorization: Bearer {{.token}}
+  expect:
+    statusCode: 200
+    body:
+      success: true
+
+- name: Save Role (Builder)
+  request:
+    url: /onboarding/role
+    method: POST
+    header:
+      Authorization: Bearer {{.token}}
+      Content-Type: application/json
+    body: |
+      {
+        "type": "builder"
+      }
+  expect:
+    statusCode: 200
+    body:
+      success: true
+      next_step: builder-type
+
+- name: Save Builder Type (Founder)
+  request:
+    url: /onboarding/builder-type
+    method: POST
+    header:
+      Authorization: Bearer {{.token}}
+      Content-Type: application/json
+    body: |
+      {
+        "type": "founder"
+      }
+  expect:
+    statusCode: 200
+    body:
+      success: true
+      next_step: preferences
+
+- name: Save Preferences
+  request:
+    url: /onboarding/preferences
+    method: POST
+    header:
+      Authorization: Bearer {{.token}}
+      Content-Type: application/json
+    body: |
+      {
+        "industries": ["Tech", "Education"],
+        "skills": ["PHP", "Laravel"],
+        "availability": "full-time",
+        "location": "Jakarta, Indonesia"
+      }
+  expect:
+    statusCode: 200
+    body:
+      success: true
+      redirect_to: /home
