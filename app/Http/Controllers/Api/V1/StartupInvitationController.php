@@ -95,7 +95,12 @@ class StartupInvitationController extends Controller
         }
 
         // Send an actual email to the recipient asynchronously
-        Mail::to(strtolower($email))->queue(new TeamInvitationMail($invitation, $startup));
+        try {
+            Mail::to(strtolower($email))->queue(new TeamInvitationMail($invitation, $startup));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to queue invitation email: ' . $e->getMessage());
+            // We don't want to break the API response just because the email failed
+        }
 
         return response()->json([
             'success' => true,
