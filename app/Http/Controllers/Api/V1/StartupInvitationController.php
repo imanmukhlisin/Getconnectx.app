@@ -9,7 +9,9 @@ use App\Models\Startup;
 use App\Models\StartupInvitation;
 use App\Models\User;
 use App\Jobs\SendTeamInviteReceivedPush;
+use App\Mail\TeamInvitationMail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class StartupInvitationController extends Controller
 {
@@ -91,6 +93,9 @@ class StartupInvitationController extends Controller
         if ($recipientUser) {
             SendTeamInviteReceivedPush::dispatch($invitation, $recipientUser);
         }
+
+        // Send an actual email to the recipient asynchronously
+        Mail::to(strtolower($email))->queue(new TeamInvitationMail($invitation, $startup));
 
         return response()->json([
             'success' => true,
