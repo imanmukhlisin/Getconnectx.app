@@ -42,11 +42,30 @@ class MediaUploadController extends Controller
         try {
             // Store via the configured filesystem (gcs or local)
             $disk = config('filesystems.default', 'local');
+
+            Log::info('MediaUploadController: Starting upload.', [
+                'disk'      => $disk,
+                'mediaId'   => $mediaId,
+                'mimeType'  => $mimeType,
+                'size'      => $size,
+                'gcs_bucket'=> config('filesystems.disks.gcs.bucket'),
+                'has_key_file' => !empty(config('filesystems.disks.gcs.key_file')),
+            ]);
+
             $path = $file->storeAs('chat-media', "{$mediaId}.{$extension}", $disk);
+
+            Log::info('MediaUploadController: storeAs result.', [
+                'path' => $path,
+                'disk' => $disk,
+            ]);
 
             if (!$path) {
                 throw new \Exception("Failed to store file on disk: {$disk}. Check your cloud storage credentials.");
             }
+
+            // Verify file actually exists in the storage
+            $exists = \Illuminate\Support\Facades\Storage::disk($disk)->exists("chat-media/{$mediaId}.{$extension}");
+            Log::info('MediaUploadController: File existence check.', ['exists' => $exists]);
 
             $url = $this->resolvePublicUrl($path, $disk);
 
