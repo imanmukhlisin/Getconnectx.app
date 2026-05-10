@@ -72,7 +72,7 @@ return [
             'path_prefix' => env('GOOGLE_CLOUD_STORAGE_PATH_PREFIX', ''),
             'storage_api_uri' => null,
             'apiEndpoint' => null,
-            'visibility' => 'public',
+            'visibility' => 'private', // Bucket pakai "Uniform bucket-level access" → jangan pakai legacy ACL per-file
             'visibility_handler' => null,
             'throw' => true, // throw=true agar error GCS terlihat jelas di log
         ],
