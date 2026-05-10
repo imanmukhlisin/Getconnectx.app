@@ -93,7 +93,9 @@ class MediaUploadController extends Controller
     {
         if ($disk === 'gcs') {
             $bucketName = config('filesystems.disks.gcs.bucket');
-            return "https://storage.googleapis.com/{$bucketName}/{$path}";
+            $pathPrefix = trim(config('filesystems.disks.gcs.path_prefix', ''), '/');
+            $fullPath   = $pathPrefix ? "{$pathPrefix}/{$path}" : $path;
+            return "https://storage.googleapis.com/{$bucketName}/{$fullPath}";
         }
 
         return asset("storage/{$path}");
