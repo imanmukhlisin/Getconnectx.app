@@ -103,7 +103,7 @@ class MessageController extends Controller
         $query = $conversation->messages()
             ->orderBy('created_at', 'desc');
 
-        if ($before) {
+        if ($before && \Illuminate\Support\Str::isUuid($before)) {
             $cursorMsg = Message::find($before);
             if ($cursorMsg) {
                 $query->where('created_at', '<', $cursorMsg->created_at);
