@@ -44,6 +44,10 @@ class MediaUploadController extends Controller
             $disk = config('filesystems.default', 'local');
             $path = $file->storeAs('chat-media', "{$mediaId}.{$extension}", $disk);
 
+            if (!$path) {
+                throw new \Exception("Failed to store file on disk: {$disk}. Check your cloud storage credentials.");
+            }
+
             $url = $this->resolvePublicUrl($path, $disk);
 
             // Thumbnail URL: same as main for now — in production, trigger a resize job
