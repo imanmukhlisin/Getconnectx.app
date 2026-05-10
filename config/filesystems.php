@@ -60,16 +60,21 @@ return [
 
         'gcs' => [
             'driver' => 'gcs',
-            'key_file_path' => env('GOOGLE_CLOUD_KEY_FILE', null), // path ke JSON key file
-            'key_file' => env('GOOGLE_CLOUD_KEY_JSON') ? json_decode(env('GOOGLE_CLOUD_KEY_JSON'), true) : [], // array kredensial dari JSON string (Vercel-friendly)
+            // key_file_path hanya dipakai jika file fisiknya beneran ada (local dev).
+            // Di Vercel (serverless), file ini tidak ada → gunakan key_file (JSON string).
+            'key_file_path' => (env('GOOGLE_CLOUD_KEY_FILE') && file_exists(base_path(env('GOOGLE_CLOUD_KEY_FILE'))))
+                ? base_path(env('GOOGLE_CLOUD_KEY_FILE'))
+                : null,
+            // Vercel-friendly: credentials dari ENV variable sebagai JSON string.
+            'key_file' => env('GOOGLE_CLOUD_KEY_JSON') ? json_decode(env('GOOGLE_CLOUD_KEY_JSON'), true) : null,
             'project_id' => env('GOOGLE_CLOUD_PROJECT_ID', 'your-project-id'),
             'bucket' => env('GOOGLE_CLOUD_STORAGE_BUCKET', 'your-bucket'),
-            'path_prefix' => env('GOOGLE_CLOUD_STORAGE_PATH_PREFIX', ''), 
-            'storage_api_uri' => null, // opsional: uri endpoint 
-            'apiEndpoint' => null, // opsional: endpoint string
-            'visibility' => 'public', // atau 'private'
-            'visibility_handler' => null, // class yang mengatur url visibility private/public
-            'throw' => false,
+            'path_prefix' => env('GOOGLE_CLOUD_STORAGE_PATH_PREFIX', ''),
+            'storage_api_uri' => null,
+            'apiEndpoint' => null,
+            'visibility' => 'public',
+            'visibility_handler' => null,
+            'throw' => true, // throw=true agar error GCS terlihat jelas di log
         ],
 
     ],
