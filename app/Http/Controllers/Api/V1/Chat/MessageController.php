@@ -145,21 +145,44 @@ class MessageController extends Controller
         $type    = $request->input('type');
         $content = $type === 'text' ? $request->input('text') : null;
 
-        // Resolve media: prefer media_url (from upload response), fallback to phantom message lookup
+        // Resolve media: prefer media_url (from upload response), fallback to GCS URL construction
         $media = null;
         if ($type === 'image') {
+            $mediaId = $request->input('media_id');
+
             if ($request->filled('media_url')) {
-                // Direct URL from upload response (recommended flow)
+                // Option A: client sends full URL from upload response
                 $media = [
                     'url'           => $request->input('media_url'),
                     'thumbnail_url' => $request->input('media_url'),
                     'mime_type'     => $request->input('mime_type', 'image/jpeg'),
                     'size_bytes'    => $request->input('size_bytes', 0),
                 ];
-            } elseif ($request->filled('media_id')) {
-                // Fallback: lookup phantom message record (legacy flow)
-                $uploadedMsg = Message::find($request->input('media_id'));
-                $media       = $uploadedMsg?->media;
+            } elseif ($mediaId) {
+                // Option B: client sends only media_id → construct URL from GCS config
+                $bucket     = config('filesystems.disks.gcs.bucket');
+                $prefix     = trim(config('filesystems.disks.gcs.path_prefix', ''), '/');
+                $basePath   = $prefix ? "{$prefix}/chat-media/{$mediaId}" : "chat-media/{$mediaId}";
+
+                // Try to find the actual file on GCS to get extension
+                $disk = config('filesystems.default', 'local');
+                $extensions = ['jpg', 'JPG', 'jpeg', 'JPEG', 'png', 'PNG', 'webp', 'WEBP'];
+                $foundUrl = null;
+                foreach ($extensions as $ext) {
+                    if (\Illuminate\Support\Facades\Storage::disk($disk)->exists("chat-media/{$mediaId}.{$ext}")) {
+                        $foundUrl = "https://storage.googleapis.com/{$bucket}/{$basePath}.{$ext}";
+                        break;
+                    }
+                }
+
+                if ($foundUrl) {
+                    $media = [
+                        'url'           => $foundUrl,
+                        'thumbnail_url' => $foundUrl,
+                        'mime_type'     => 'image/jpeg',
+                        'size_bytes'    => 0,
+                    ];
+                }
             }
         }
 
