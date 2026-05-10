@@ -136,19 +136,31 @@ class MessageController extends Controller
         $this->authorizeParticipant($conversation, $authUser);
 
         $request->validate([
-            'type'     => 'required|in:text,image',
-            'text'     => 'required_if:type,text|string|max:5000',
-            'media_id' => 'required_if:type,image|uuid|exists:messages,id',
+            'type'      => 'required|in:text,image',
+            'text'      => 'required_if:type,text|string|max:5000',
+            'media_id'  => 'required_if:type,image|uuid',
+            'media_url' => 'nullable|url',
         ]);
 
         $type    = $request->input('type');
         $content = $type === 'text' ? $request->input('text') : null;
 
-        // Resolve media from the upload record (stored as a temp message placeholder)
+        // Resolve media: prefer media_url (from upload response), fallback to phantom message lookup
         $media = null;
-        if ($type === 'image' && $request->filled('media_id')) {
-            $uploadedMsg = Message::find($request->input('media_id'));
-            $media       = $uploadedMsg?->media;
+        if ($type === 'image') {
+            if ($request->filled('media_url')) {
+                // Direct URL from upload response (recommended flow)
+                $media = [
+                    'url'           => $request->input('media_url'),
+                    'thumbnail_url' => $request->input('media_url'),
+                    'mime_type'     => $request->input('mime_type', 'image/jpeg'),
+                    'size_bytes'    => $request->input('size_bytes', 0),
+                ];
+            } elseif ($request->filled('media_id')) {
+                // Fallback: lookup phantom message record (legacy flow)
+                $uploadedMsg = Message::find($request->input('media_id'));
+                $media       = $uploadedMsg?->media;
+            }
         }
 
         $message = DB::transaction(function () use ($authUser, $conversation, $type, $content, $media) {
