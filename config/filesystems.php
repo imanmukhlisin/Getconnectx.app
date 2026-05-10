@@ -73,7 +73,7 @@ return [
             'storage_api_uri' => null,
             'apiEndpoint' => null,
             'visibility' => 'private', // Bucket pakai "Uniform bucket-level access" → jangan pakai legacy ACL per-file
-            'visibility_handler' => null,
+            'visibility_handler' => \League\Flysystem\GoogleCloudStorage\UniformBucketLevelAccessVisibility::class, // Handler resmi utk uniform access bucket
             'throw' => true, // throw=true agar error GCS terlihat jelas di log
         ],
 
