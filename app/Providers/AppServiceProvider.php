@@ -100,6 +100,43 @@ class AppServiceProvider extends ServiceProvider
                 'app.filament.resources.tag-resource.pages.list-tags',
                 \App\Filament\Resources\TagResource\Pages\ListTags::class
             );
+            // ── WhatsApp Module ───────────────────────────────────────────────────
+            \Livewire\Livewire::component(
+                'app.filament.pages.whatsapp-management',
+                \App\Filament\Pages\WhatsappManagement::class
+            );
+            \Livewire\Livewire::component(
+                'app.filament.widgets.whatsapp-stats-widget',
+                \App\Filament\Widgets\WhatsappStatsWidget::class
+            );
+
+            // WhatsApp Log Resource
+            \Livewire\Livewire::component(
+                'app.filament.resources.whatsapp-log-resource.pages.list-whatsapp-logs',
+                \App\Filament\Resources\WhatsappLogResource\Pages\ListWhatsappLogs::class
+            );
+            \Livewire\Livewire::component(
+                'app.filament.resources.whatsapp-log-resource.pages.view-whatsapp-log',
+                \App\Filament\Resources\WhatsappLogResource\Pages\ViewWhatsappLog::class
+            );
+
+            // WhatsApp Blast Resource
+            \Livewire\Livewire::component(
+                'app.filament.resources.whatsapp-blast-resource.pages.list-whatsapp-blasts',
+                \App\Filament\Resources\WhatsappBlastResource\Pages\ListWhatsappBlasts::class
+            );
+            \Livewire\Livewire::component(
+                'app.filament.resources.whatsapp-blast-resource.pages.create-whatsapp-blast',
+                \App\Filament\Resources\WhatsappBlastResource\Pages\CreateWhatsappBlast::class
+            );
+            \Livewire\Livewire::component(
+                'app.filament.resources.whatsapp-blast-resource.pages.edit-whatsapp-blast',
+                \App\Filament\Resources\WhatsappBlastResource\Pages\EditWhatsappBlast::class
+            );
+            \Livewire\Livewire::component(
+                'app.filament.resources.whatsapp-blast-resource.pages.view-whatsapp-blast',
+                \App\Filament\Resources\WhatsappBlastResource\Pages\ViewWhatsappBlast::class
+            );
         }
     }
 }

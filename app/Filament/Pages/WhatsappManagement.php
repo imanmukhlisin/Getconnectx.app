@@ -15,7 +15,7 @@ use Illuminate\Support\HtmlString;
 class WhatsappManagement extends Page
 {
     protected static ?string $navigationIcon  = 'heroicon-o-device-phone-mobile';
-    protected static ?string $navigationGroup = '📱 WhatsApp';
+    protected static ?string $navigationGroup = 'WhatsApp Webhook';
     protected static ?string $navigationLabel = 'Pengaturan & Webhook';
     protected static ?string $title           = 'WhatsApp API Management';
     protected static ?int    $navigationSort  = 1;
