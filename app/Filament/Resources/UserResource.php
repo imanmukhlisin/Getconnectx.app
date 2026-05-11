@@ -30,71 +30,71 @@ class UserResource extends Resource
         return $infolist
             ->schema([
                 Infolists\Components\Section::make()
+                    ->extraAttributes(['style' => 'padding: 20px 24px;'])
                     ->schema([
-                        Infolists\Components\Split::make([
-                            Infolists\Components\ImageEntry::make('avatar_url')
-                                ->hiddenLabel()
-                                ->circular()
-                                ->defaultImageUrl(fn($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name).'&color=FFFFFF&background=09090b')
-                                ->size(160)
-                                ->extraImgAttributes(['class' => 'shadow-2xl ring-4 ring-primary-500/30 object-cover hover:scale-105 transition-transform duration-300']),
-                            
-                            Infolists\Components\TextEntry::make('profile_header_html')
-                                ->hiddenLabel()
-                                ->html()
-                                ->getStateUsing(function ($record) {
-                                    $linkedinCred = $record->credentials()->where('provider', 'linkedin')->first();
-                                    
-                                    // Parse name
-                                    $name = $record->name;
-                                    if ($linkedinCred && isset($linkedinCred->raw_data['firstName']) && isset($linkedinCred->raw_data['lastName'])) {
-                                        $name = $linkedinCred->raw_data['firstName'] . ' ' . $linkedinCred->raw_data['lastName'];
-                                    }
-                                    
-                                    // Parse headline
-                                    $headline = $record->position ?? 'Belum ada headline profesional';
-                                    if ($linkedinCred && isset($linkedinCred->raw_data['headline'])) {
-                                        $headline = $linkedinCred->raw_data['headline'];
-                                    }
-                                    
-                                    // Location
-                                    $location = trim(($record->city ?? '') . ', ' . ($record->country ?? ''), ', ') ?: 'Lokasi Tidak Diketahui';
-                                    if ($linkedinCred && isset($linkedinCred->raw_data['location']['linkedinText'])) {
-                                        $location = $linkedinCred->raw_data['location']['linkedinText'];
-                                    }
-                                    
-                                    // Followers
-                                    $followers = '';
-                                    if ($linkedinCred && isset($linkedinCred->raw_data['followerCount'])) {
-                                        $followers = number_format($linkedinCred->raw_data['followerCount']) . ' Followers';
-                                    }
-                                    
-                                    // Role category
-                                    $role = strtoupper($record->role_category ?? 'BELUM ONBOARDING');
-                                    
-                                    return "
-                                        <div class='flex flex-col justify-center h-full gap-1.5'>
-                                            <h1 class='text-4xl font-extrabold text-primary-500 tracking-tight'>{$name}</h1>
-                                            <p class='text-lg text-gray-300 border-l-[3px] border-primary-500 pl-3 leading-snug max-w-3xl'>{$headline}</p>
-                                            <div class='flex flex-wrap items-center gap-4 mt-3'>
-                                                <div class='flex items-center gap-1.5 px-3 py-1 bg-primary-500/10 text-primary-400 rounded-lg text-sm font-bold border border-primary-500/20 shadow-sm'>
-                                                    <svg class='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'></path></svg>
-                                                    {$role}
-                                                </div>
-                                                <div class='flex items-center gap-1.5 text-gray-400 text-sm font-medium'>
-                                                    <svg class='w-4 h-4 text-gray-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'></path><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M15 11a3 3 0 11-6 0 3 3 0 016 0z'></path></svg>
-                                                    {$location}
-                                                </div>
-                                                ".($followers ? "
-                                                <div class='flex items-center gap-1.5 text-warning-500 text-sm font-medium'>
-                                                    <svg class='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'></path></svg>
-                                                    {$followers}
-                                                </div>" : "")."
-                                            </div>
+                        Infolists\Components\TextEntry::make('profile_header_full')
+                            ->hiddenLabel()
+                            ->html()
+                            ->columnSpanFull()
+                            ->getStateUsing(function ($record) {
+                                $linkedinCred = $record->credentials()->where('provider', 'linkedin')->first();
+
+                                $name = $record->name;
+                                if ($linkedinCred && isset($linkedinCred->raw_data['firstName'])) {
+                                    $name = trim(($linkedinCred->raw_data['firstName'] ?? '') . ' ' . ($linkedinCred->raw_data['lastName'] ?? ''));
+                                }
+                                $headline = $record->position ?? '';
+                                if ($linkedinCred && !empty($linkedinCred->raw_data['headline'])) {
+                                    $headline = $linkedinCred->raw_data['headline'];
+                                }
+                                $location = trim(($record->city ?? '') . ', ' . ($record->country ?? ''), ', ');
+                                if ($linkedinCred && !empty($linkedinCred->raw_data['location']['linkedinText'])) {
+                                    $location = $linkedinCred->raw_data['location']['linkedinText'];
+                                }
+                                $followers = '';
+                                if ($linkedinCred && !empty($linkedinCred->raw_data['followerCount'])) {
+                                    $followers = number_format($linkedinCred->raw_data['followerCount']);
+                                }
+                                $role = strtoupper($record->role_category ?? 'BELUM ONBOARDING');
+                                $avatarUrl = $record->avatar_url ?: 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=FFFFFF&background=09090b&size=160';
+
+                                $n = htmlspecialchars($name);
+                                $h = htmlspecialchars($headline);
+                                $l = htmlspecialchars($location);
+                                $r = htmlspecialchars($role);
+
+                                $followersBadge = $followers ? "
+                                    <span style='display:inline-flex;align-items:center;gap:4px;font-size:0.8rem;color:#f59e0b;font-weight:600;'>
+                                        <svg style='width:12px;height:12px;flex-shrink:0;' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'></path></svg>
+                                        {$followers} Followers
+                                    </span>" : '';
+
+                                $locationBadge = $location ? "
+                                    <span style='display:inline-flex;align-items:center;gap:4px;font-size:0.8rem;color:#9ca3af;'>
+                                        <svg style='width:12px;height:12px;flex-shrink:0;' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'></path><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M15 11a3 3 0 11-6 0 3 3 0 016 0z'></path></svg>
+                                        {$l}
+                                    </span>" : '';
+
+                                return "
+                                <div style='display:flex;align-items:center;gap:16px;'>
+                                    <img src='{$avatarUrl}' alt='avatar'
+                                         style='width:120px;height:120px;border-radius:50%;object-fit:cover;flex-shrink:0;
+                                                box-shadow:0 4px 24px rgba(0,0,0,0.18);
+                                                border:3px solid rgba(249,115,22,0.35);'>
+                                    <div style='flex:1;min-width:0;'>
+                                        <div style='font-size:1.75rem;font-weight:800;line-height:1.15;color:#f97316;letter-spacing:-0.02em;margin-bottom:4px;'>{$n}</div>
+                                        " . ($h ? "<div style='font-size:0.82rem;color:#6b7280;line-height:1.55;max-width:560px;margin-bottom:10px;'>{$h}</div>" : "") . "
+                                        <div style='display:flex;flex-wrap:wrap;align-items:center;gap:8px;'>
+                                            <span style='display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:rgba(249,115,22,0.1);color:#f97316;border:1px solid rgba(249,115,22,0.25);border-radius:6px;font-size:0.7rem;font-weight:700;letter-spacing:0.06em;'>
+                                                <svg style='width:11px;height:11px;flex-shrink:0;' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'></path></svg>
+                                                {$r}
+                                            </span>
+                                            {$locationBadge}
+                                            {$followersBadge}
                                         </div>
-                                    ";
-                                }),
-                        ])->from('md'),
+                                    </div>
+                                </div>";
+                            }),
                     ]),
 
                 // SECTION 1: PROFIL & KONTAK
@@ -428,7 +428,7 @@ class UserResource extends Resource
                     ->icon('heroicon-o-shield-check')
                     ->collapsible()
                     ->schema([
-                        Infolists\Components\Grid::make(3)
+                        Infolists\Components\Grid::make(2)
                             ->schema([
                                 Infolists\Components\IconEntry::make('is_active')
                                     ->label('Akun Aktif')
@@ -436,10 +436,6 @@ class UserResource extends Resource
                                 Infolists\Components\IconEntry::make('is_onboarded')
                                     ->label('Selesai Onboarding')
                                     ->boolean(),
-                                Infolists\Components\TextEntry::make('registration_step')
-                                    ->label('Langkah Registrasi Terakhir')
-                                    ->badge()
-                                    ->color('warning'),
                             ]),
 
                         Infolists\Components\Grid::make(2)
