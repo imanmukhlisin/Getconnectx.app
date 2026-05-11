@@ -29,117 +29,280 @@ class UserResource extends Resource
     {
         return $infolist
             ->schema([
-                Infolists\Components\Section::make('Informasi Profil Utama')
+                Infolists\Components\Section::make()
                     ->schema([
-                        Infolists\Components\Grid::make(3)->schema([
+                        Infolists\Components\Split::make([
                             Infolists\Components\ImageEntry::make('avatar_url')
-                                ->label('Foto Profil')
+                                ->hiddenLabel()
                                 ->circular()
-                                ->defaultImageUrl(fn($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name))
-                                ->hidden(fn ($state) => blank($state)),
-                            Infolists\Components\TextEntry::make('name')
-                                ->label('Nama Lengkap')
-                                ->weight('bold')
-                                ->size(Infolists\Components\TextEntry\TextEntrySize::Large),
-                            Infolists\Components\TextEntry::make('email')
-                                ->label('Email')
-                                ->icon('heroicon-m-envelope'),
-                            Infolists\Components\TextEntry::make('whatsapp_number')
-                                ->label('Nomor WhatsApp')
-                                ->icon('heroicon-m-phone'),
-                            Infolists\Components\TextEntry::make('city')
-                                ->label('Domisili')
-                                ->icon('heroicon-m-map-pin')
-                                ->hidden(fn ($state) => blank($state)),
-                            Infolists\Components\TextEntry::make('linkedin_url')
-                                ->label('LinkedIn')
-                                ->icon('heroicon-m-link')
-                                ->url(fn ($state) => $state)
-                                ->openUrlInNewTab()
-                                ->hidden(fn ($state) => blank($state)),
-                            Infolists\Components\TextEntry::make('date_of_birth')
-                                ->label('Tanggal Lahir')
-                                ->date('d M Y')
-                                ->hidden(fn ($state) => blank($state)),
-                            Infolists\Components\TextEntry::make('gender')
-                                ->label('Jenis Kelamin')
-                                ->hidden(fn ($state) => blank($state)),
-                        ]),
+                                ->defaultImageUrl(fn($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name).'&color=FFFFFF&background=09090b')
+                                ->size(120)
+                                ->extraImgAttributes(['class' => 'shadow-2xl ring-4 ring-primary-500/50']),
+                            
+                            Infolists\Components\Grid::make(1)
+                                ->schema([
+                                    Infolists\Components\TextEntry::make('name')
+                                        ->hiddenLabel()
+                                        ->size(Infolists\Components\TextEntry\TextEntrySize::Large)
+                                        ->weight('bold')
+                                        ->color('primary')
+                                        ->extraAttributes(['class' => 'text-3xl']),
+                                    Infolists\Components\TextEntry::make('username')
+                                        ->hiddenLabel()
+                                        ->icon('heroicon-m-at-symbol')
+                                        ->color('gray')
+                                        ->formatStateUsing(fn ($state) => $state ?? 'Belum ada username'),
+                                    Infolists\Components\TextEntry::make('role_category')
+                                        ->hiddenLabel()
+                                        ->badge()
+                                        ->color('info')
+                                        ->formatStateUsing(fn ($state) => strtoupper($state ?? 'Belum Onboarding')),
+                                ]),
+                        ])->from('md'),
                     ]),
 
-                Infolists\Components\Section::make('Detail Startup / Peran')
-                    ->schema([
-                        Infolists\Components\Grid::make(2)->schema([
-                            Infolists\Components\TextEntry::make('role_category')
-                                ->label('Kategori Role')
-                                ->badge()
-                                ->color('info'),
-                            Infolists\Components\TextEntry::make('primary_role')
-                                ->label('Peran Utama (Skill)')
-                                ->hidden(fn ($state) => blank($state)),
-                            Infolists\Components\TextEntry::make('startup_name')
-                                ->label('Nama Startup')
-                                ->hidden(fn ($state) => blank($state)),
-                            Infolists\Components\TextEntry::make('startup_tagline')
-                                ->label('Tagline Startup')
-                                ->hidden(fn ($state) => blank($state)),
-                            Infolists\Components\TextEntry::make('startup_stage')
-                                ->label('Tahap Startup')
-                                ->badge()
-                                ->hidden(fn ($state) => blank($state)),
-                            Infolists\Components\TextEntry::make('commitment_level')
-                                ->label('Tingkat Komitmen')
-                                ->hidden(fn ($state) => blank($state)),
-                            Infolists\Components\TextEntry::make('years_experience')
-                                ->label('Pengalaman Kerja')
-                                ->hidden(fn ($state) => blank($state)),
-                            Infolists\Components\TextEntry::make('startup_experience')
-                                ->label('Pengalaman Startup')
-                                ->hidden(fn ($state) => blank($state)),
-                            Infolists\Components\TextEntry::make('cofounder_type')
-                                ->label('Tipe Co-Founder Dicari')
-                                ->hidden(fn ($state) => blank($state)),
-                            Infolists\Components\TextEntry::make('open_to_remote')
-                                ->label('Remote Preference')
-                                ->hidden(fn ($state) => blank($state)),
-                            Infolists\Components\TextEntry::make('willing_to_relocate')
-                                ->label('Relokasi')
-                                ->hidden(fn ($state) => blank($state)),
-                        ]),
-                        Infolists\Components\TextEntry::make('bio')
-                            ->label('Bio Singkat')
-                            ->columnSpanFull()
-                            ->hidden(fn ($state) => blank($state)),
-                        Infolists\Components\TextEntry::make('startup_idea')
-                            ->label('Ide / Pitch Startup')
-                            ->columnSpanFull()
-                            ->hidden(fn ($state) => blank($state)),
-                    ])
-                    ->hidden(fn ($record) => blank($record->role_category)),
+                Infolists\Components\Tabs::make('Tabs')
+                    ->tabs([
+                        // ── TAB 1: PROFIL & KONTAK ────────────────────────────────────────────────────────────
+                        Infolists\Components\Tabs\Tab::make('👤 Profil & Kontak')
+                            ->schema([
+                                Infolists\Components\Section::make('Kontak Pribadi')
+                                    ->columns(3)
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('email')
+                                            ->label('Email')
+                                            ->icon('heroicon-m-envelope')
+                                            ->copyable(),
+                                        Infolists\Components\TextEntry::make('whatsapp_number')
+                                            ->label('WhatsApp')
+                                            ->icon('heroicon-m-device-phone-mobile')
+                                            ->copyable(),
+                                        Infolists\Components\TextEntry::make('linkedin_url')
+                                            ->label('LinkedIn URL')
+                                            ->icon('heroicon-m-link')
+                                            ->url(fn ($state) => $state)
+                                            ->openUrlInNewTab()
+                                            ->copyable(),
+                                    ]),
 
-                Infolists\Components\Section::make('Status Sistem')
-                    ->schema([
-                        Infolists\Components\Grid::make(3)->schema([
-                            Infolists\Components\IconEntry::make('is_onboarded')
-                                ->label('Selesai Onboarding')
-                                ->boolean(),
-                            Infolists\Components\IconEntry::make('is_active')
-                                ->label('Akun Aktif')
-                                ->boolean(),
-                            Infolists\Components\IconEntry::make('is_blocked')
-                                ->label('Status Blokir')
-                                ->boolean()
-                                ->trueIcon('heroicon-o-no-symbol')
-                                ->falseIcon('heroicon-o-check-circle')
-                                ->trueColor('danger')
-                                ->falseColor('success'),
-                            Infolists\Components\TextEntry::make('blocked_reason')
-                                ->label('Alasan Blokir')
-                                ->color('danger')
-                                ->columnSpanFull()
-                                ->hidden(fn ($state) => blank($state)),
-                        ])
-                    ])->collapsed(),
+                                Infolists\Components\Section::make('Demografi & Lokasi')
+                                    ->columns(3)
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('gender')
+                                            ->label('Jenis Kelamin')
+                                            ->icon('heroicon-m-users')
+                                            ->formatStateUsing(fn ($state) => ucfirst($state ?? '-')),
+                                        Infolists\Components\TextEntry::make('date_of_birth')
+                                            ->label('Tanggal Lahir')
+                                            ->icon('heroicon-m-calendar')
+                                            ->date('d F Y'),
+                                        Infolists\Components\TextEntry::make('location')
+                                            ->label('Domisili / Lokasi')
+                                            ->icon('heroicon-m-map-pin')
+                                            ->getStateUsing(fn ($record) => trim(($record->city ?? '') . ', ' . ($record->country ?? ''), ', ')),
+                                        Infolists\Components\TextEntry::make('latitude')
+                                            ->label('Latitude')
+                                            ->color('gray')
+                                            ->size(Infolists\Components\TextEntry\TextEntrySize::Small),
+                                        Infolists\Components\TextEntry::make('longitude')
+                                            ->label('Longitude')
+                                            ->color('gray')
+                                            ->size(Infolists\Components\TextEntry\TextEntrySize::Small),
+                                    ]),
+
+                                Infolists\Components\Section::make('Bio Singkat')
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('bio')
+                                            ->hiddenLabel()
+                                            ->prose()
+                                            ->placeholder('Belum ada bio.'),
+                                    ]),
+                            ]),
+
+                        // ── TAB 2: KARIR, SKILL & TAGS ─────────────────────────────────────────────────────────
+                        Infolists\Components\Tabs\Tab::make('💼 Karir & Skill')
+                            ->schema([
+                                Infolists\Components\Section::make('Posisi & Pengalaman')
+                                    ->columns(3)
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('primary_role')
+                                            ->label('Peran Utama (Skill)')
+                                            ->badge()
+                                            ->color('primary'),
+                                        Infolists\Components\TextEntry::make('position')
+                                            ->label('Jabatan Terakhir / Saat Ini'),
+                                        Infolists\Components\TextEntry::make('years_experience')
+                                            ->label('Pengalaman Kerja')
+                                            ->badge()
+                                            ->color('warning'),
+                                        Infolists\Components\TextEntry::make('startup_experience')
+                                            ->label('Pengalaman Startup')
+                                            ->badge()
+                                            ->color('success'),
+                                        Infolists\Components\TextEntry::make('leadership_style')
+                                            ->label('Gaya Kepemimpinan'),
+                                        Infolists\Components\TextEntry::make('commitment_level')
+                                            ->label('Tingkat Komitmen')
+                                            ->badge(),
+                                    ]),
+
+                                Infolists\Components\Section::make('Master Tags (Skill & Industri)')
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('tags.name')
+                                            ->hiddenLabel()
+                                            ->badge()
+                                            ->color('info')
+                                            ->icon('heroicon-m-tag'),
+                                    ]),
+
+                                Infolists\Components\Section::make('Preferensi Kerja')
+                                    ->columns(3)
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('work_arrangement')
+                                            ->label('Pengaturan Kerja')
+                                            ->badge(),
+                                        Infolists\Components\IconEntry::make('open_to_remote')
+                                            ->label('Terbuka untuk Remote')
+                                            ->boolean(),
+                                        Infolists\Components\IconEntry::make('willing_to_relocate')
+                                            ->label('Bersedia Relokasi')
+                                            ->boolean(),
+                                        Infolists\Components\IconEntry::make('remote_ready')
+                                            ->label('Remote Ready (Peralatan lengkap)')
+                                            ->boolean(),
+                                    ]),
+                            ]),
+
+                        // ── TAB 3: STARTUP & CO-FOUNDER ───────────────────────────────────────────────────────
+                        Infolists\Components\Tabs\Tab::make('🚀 Startup & Target')
+                            ->schema([
+                                Infolists\Components\Section::make('Target Pencarian')
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('cofounder_type')
+                                            ->label('Tipe Co-Founder yang dicari')
+                                            ->badge()
+                                            ->color('primary'),
+                                    ]),
+
+                                Infolists\Components\Section::make('Detail Startup (Jika ada)')
+                                    ->columns(2)
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('startup_name')
+                                            ->label('Nama Startup')
+                                            ->weight('bold')
+                                            ->size(Infolists\Components\TextEntry\TextEntrySize::Large),
+                                        Infolists\Components\TextEntry::make('startup_stage')
+                                            ->label('Tahap Startup (Stage)')
+                                            ->badge()
+                                            ->color('success'),
+                                        Infolists\Components\TextEntry::make('startup_tagline')
+                                            ->label('Tagline')
+                                            ->columnSpanFull()
+                                            ->color('gray'),
+                                        Infolists\Components\TextEntry::make('startup_idea')
+                                            ->label('Ide / Pitch Startup')
+                                            ->columnSpanFull()
+                                            ->prose(),
+                                    ]),
+                            ]),
+
+                        // ── TAB 4: EDUKASI & BAHASA ───────────────────────────────────────────────────────────
+                        Infolists\Components\Tabs\Tab::make('🎓 Edukasi & Bahasa')
+                            ->schema([
+                                Infolists\Components\Section::make('Riwayat Pendidikan (Data JSON/Array)')
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('education')
+                                            ->hiddenLabel()
+                                            ->formatStateUsing(fn ($state) => $state ? json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : 'Belum ada data')
+                                            ->extraAttributes(['class' => 'font-mono text-xs bg-gray-900 text-gray-300 p-4 rounded-lg overflow-x-auto'])
+                                            ->html(),
+                                    ]),
+                                Infolists\Components\Section::make('Bahasa yang dikuasai')
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('languages')
+                                            ->hiddenLabel()
+                                            ->badge()
+                                            ->color('success'),
+                                    ]),
+                            ]),
+
+                        // ── TAB 5: DATA LINKEDIN LENGKAP ──────────────────────────────────────────────────────
+                        Infolists\Components\Tabs\Tab::make('🔗 Data LinkedIn')
+                            ->schema([
+                                Infolists\Components\Section::make('Payload / Scraping Data LinkedIn (Mentah)')
+                                    ->description('Semua data yang berhasil ditarik dari LinkedIn tersimpan di sini.')
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('linkedin_data')
+                                            ->hiddenLabel()
+                                            ->formatStateUsing(fn ($state) => $state ? '<pre>'.json_encode(is_string($state) ? json_decode($state, true) : $state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES).'</pre>' : 'Belum ada data LinkedIn')
+                                            ->extraAttributes(['class' => 'font-mono text-xs bg-gray-900 text-gray-300 p-4 rounded-lg overflow-x-auto max-h-[600px] overflow-y-auto'])
+                                            ->html(),
+                                    ]),
+                            ]),
+
+                        // ── TAB 6: STATUS & SISTEM ────────────────────────────────────────────────────────────
+                        Infolists\Components\Tabs\Tab::make('⚙️ Sistem & Keamanan')
+                            ->schema([
+                                Infolists\Components\Section::make('Status Akun')
+                                    ->columns(3)
+                                    ->schema([
+                                        Infolists\Components\IconEntry::make('is_active')
+                                            ->label('Akun Aktif')
+                                            ->boolean(),
+                                        Infolists\Components\IconEntry::make('is_onboarded')
+                                            ->label('Selesai Onboarding')
+                                            ->boolean(),
+                                        Infolists\Components\TextEntry::make('registration_step')
+                                            ->label('Langkah Registrasi Terakhir')
+                                            ->badge()
+                                            ->color('warning'),
+                                    ]),
+
+                                Infolists\Components\Section::make('Blokir & Kemanan')
+                                    ->columns(2)
+                                    ->schema([
+                                        Infolists\Components\IconEntry::make('is_blocked')
+                                            ->label('Status Blokir')
+                                            ->boolean()
+                                            ->trueIcon('heroicon-o-no-symbol')
+                                            ->falseIcon('heroicon-o-check-circle')
+                                            ->trueColor('danger')
+                                            ->falseColor('success'),
+                                        Infolists\Components\TextEntry::make('blocked_reason')
+                                            ->label('Alasan Diblokir')
+                                            ->color('danger')
+                                            ->placeholder('-'),
+                                        Infolists\Components\TextEntry::make('blocked_at')
+                                            ->label('Waktu Diblokir')
+                                            ->dateTime()
+                                            ->placeholder('-'),
+                                    ]),
+
+                                Infolists\Components\Section::make('Log Waktu & Device')
+                                    ->columns(2)
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('created_at')
+                                            ->label('Mendaftar Pada')
+                                            ->dateTime('d F Y, H:i:s'),
+                                        Infolists\Components\TextEntry::make('updated_at')
+                                            ->label('Pembaruan Terakhir')
+                                            ->dateTime('d F Y, H:i:s'),
+                                        Infolists\Components\TextEntry::make('email_verified_at')
+                                            ->label('Waktu Verifikasi Email')
+                                            ->dateTime()
+                                            ->placeholder('Belum verifikasi'),
+                                        Infolists\Components\TextEntry::make('whatsapp_verified_at')
+                                            ->label('Waktu Verifikasi WA')
+                                            ->dateTime()
+                                            ->placeholder('Belum verifikasi'),
+                                        Infolists\Components\TextEntry::make('last_device_id')
+                                            ->label('Device ID Terakhir')
+                                            ->color('gray')
+                                            ->columnSpanFull(),
+                                    ]),
+                            ]),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 

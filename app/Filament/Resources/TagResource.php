@@ -16,6 +16,7 @@ class TagResource extends Resource
 
     protected static ?string $navigationIcon  = 'heroicon-o-tag';
     protected static ?string $navigationGroup = 'Master Data';
+    protected static bool $shouldRegisterNavigation = false;
     public static function getNavigationLabel(): string
     {
         return __('admin.nav.tags');
