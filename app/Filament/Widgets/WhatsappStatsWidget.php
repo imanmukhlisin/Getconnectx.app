@@ -15,7 +15,7 @@ class WhatsappStatsWidget extends BaseWidget
     protected static ?string $pollingInterval = '30s';
 
     // Show only on WhatsApp-related pages
-    protected static ?string $navigationGroup = '📱 WhatsApp';
+    protected static ?string $navigationGroup = 'WhatsApp Webhook';
 
     protected function getStats(): array
     {

@@ -16,7 +16,7 @@ class WhatsappLogResource extends Resource
     protected static ?string $model = WhatsappLog::class;
 
     protected static ?string $navigationIcon        = 'heroicon-o-chat-bubble-left-right';
-    protected static ?string $navigationGroup       = '📱 WhatsApp';
+    protected static ?string $navigationGroup       = 'WhatsApp Webhook';
     protected static ?string $navigationLabel       = 'Log Pesan WA';
     protected static ?string $modelLabel            = 'Log Pesan';
     protected static ?string $pluralModelLabel      = 'Log Pesan WhatsApp';

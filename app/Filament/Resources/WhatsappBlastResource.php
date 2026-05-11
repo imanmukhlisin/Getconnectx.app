@@ -16,7 +16,7 @@ class WhatsappBlastResource extends Resource
     protected static ?string $model = WhatsappBlast::class;
 
     protected static ?string $navigationIcon   = 'heroicon-o-megaphone';
-    protected static ?string $navigationGroup  = '📱 WhatsApp';
+    protected static ?string $navigationGroup  = 'WhatsApp Webhook';
     protected static ?string $navigationLabel  = 'Blasting WA';
     protected static ?string $modelLabel       = 'Blast Campaign';
     protected static ?string $pluralModelLabel = 'Blasting WhatsApp';
