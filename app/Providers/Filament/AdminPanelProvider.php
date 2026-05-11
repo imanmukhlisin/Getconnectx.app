@@ -41,6 +41,51 @@ class AdminPanelProvider extends PanelProvider
                 'panels::head.done',
                 fn () => new \Illuminate\Support\HtmlString('
                     <style>
+                        /* ─── Page Loading Overlay ─── */
+                        #ag-page-loader {
+                            position: fixed;
+                            inset: 0;
+                            z-index: 99999;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 16px;
+                            background: rgba(10, 10, 12, 0.55);
+                            backdrop-filter: blur(12px);
+                            -webkit-backdrop-filter: blur(12px);
+                            transition: opacity 0.4s ease, visibility 0.4s ease;
+                        }
+                        #ag-page-loader.ag-loader-hidden {
+                            opacity: 0;
+                            visibility: hidden;
+                        }
+                        .ag-loader-dots {
+                            width: 60px;
+                            aspect-ratio: 2;
+                            --_g: no-repeat radial-gradient(circle closest-side, #f97316 90%, #0000);
+                            background:
+                                var(--_g) 0%   50%,
+                                var(--_g) 50%  50%,
+                                var(--_g) 100% 50%;
+                            background-size: calc(100%/3) 50%;
+                            animation: ag-l3 1s infinite linear;
+                        }
+                        @keyframes ag-l3 {
+                            20% { background-position: 0%   0%, 50%  50%, 100%  50% }
+                            40% { background-position: 0% 100%, 50%   0%, 100%  50% }
+                            60% { background-position: 0%  50%, 50% 100%, 100%   0% }
+                            80% { background-position: 0%  50%, 50%  50%, 100% 100% }
+                        }
+                        .ag-loader-text {
+                            font-size: 0.75rem;
+                            color: rgba(249,115,22,0.7);
+                            font-family: system-ui, sans-serif;
+                            letter-spacing: 0.1em;
+                            text-transform: uppercase;
+                            font-weight: 600;
+                        }
+                    </style>
                         /* ── Sidebar Vercel-like ── */
                         .fi-sidebar-item-button {
                             padding-top: 0.4rem !important;
@@ -273,6 +318,36 @@ class AdminPanelProvider extends PanelProvider
                         }
                     </style>
                     <script>
+                    /* ── Inject loader immediately on script parse ── */
+                    (function() {
+                        var loader = document.createElement("div");
+                        loader.id = "ag-page-loader";
+                        loader.innerHTML = "<div class=\"ag-loader-dots\"></div><div class=\"ag-loader-text\">Memuat...</div>";
+                        document.documentElement.appendChild(loader);
+
+                        function hideLoader() {
+                            var l = document.getElementById("ag-page-loader");
+                            if (l) {
+                                l.classList.add("ag-loader-hidden");
+                                setTimeout(function() { if (l.parentNode) l.parentNode.removeChild(l); }, 450);
+                            }
+                        }
+
+                        window.addEventListener("load", function() { setTimeout(hideLoader, 200); });
+
+                        /* Also hide on Livewire navigate */
+                        document.addEventListener("livewire:navigated", hideLoader);
+                        document.addEventListener("livewire:navigate", function() {
+                            var l = document.getElementById("ag-page-loader");
+                            if (!l) {
+                                var newLoader = document.createElement("div");
+                                newLoader.id = "ag-page-loader";
+                                newLoader.innerHTML = "<div class=\"ag-loader-dots\"></div><div class=\"ag-loader-text\">Memuat...</div>";
+                                document.documentElement.appendChild(newLoader);
+                            }
+                        });
+                    })();
+
                     document.addEventListener("DOMContentLoaded", function() {
                         var layout = document.querySelector(".fi-simple-layout");
                         if (!layout) return;
