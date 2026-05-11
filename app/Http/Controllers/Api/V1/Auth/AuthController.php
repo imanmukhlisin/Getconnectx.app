@@ -418,7 +418,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         // Dynamic discovery mode mapping from onboarding
-        $discoveryMode = 'explore_startups';
+        $discoveryMode = null;
         if ($user->is_onboarded) {
             $session = \App\Models\Onboarding\OnboardingSession::where('user_id', $user->id)
                 ->where('status', 'completed')
