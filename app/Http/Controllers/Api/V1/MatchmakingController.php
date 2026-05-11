@@ -101,10 +101,61 @@ class MatchmakingController extends Controller
             'message' => 'Matches fetched successfully',
             'data'    => [
                 'likesYou' => [
-                    'locked'   => true,
+                    'locked'   => !$request->user()->is_pro,
                     'items'    => $topLikes,
                     'totalNew' => $totalNewLikes,
                 ],
+                'items'   => $items,
+                'total'   => $paginator->total(),
+                'page'    => $paginator->currentPage(),
+                'limit'   => $paginator->perPage(),
+                'hasMore' => $paginator->hasMorePages()
+            ]
+        ]);
+    }
+
+    /**
+     * Get paginated list of users who liked the authenticated user (See Who Likes You)
+     */
+    public function likesYouList(Request $request)
+    {
+        $userId = $request->user()->id;
+        $limit  = (int) $request->query('limit', 10);
+        $page   = (int) $request->query('page', 1);
+
+        $isLocked = !$request->user()->is_pro;
+
+        $paginator = Like::with('fromUser')
+            ->connects()
+            ->where('to_user_id', $userId)
+            ->where('is_mutual', false)
+            ->latest()
+            ->paginate($limit, ['*'], 'page', $page);
+
+        $items = $paginator->getCollection()->map(function ($like) {
+            $location = 'Location not set';
+            if ($like->fromUser->city) {
+                $location = trim($like->fromUser->city . ', ' . $like->fromUser->country, ', ');
+            }
+
+            return [
+                'likeId'  => $like->id,
+                'likedAt' => $like->created_at,
+                'user'    => [
+                    'userId'   => $like->fromUser->id,
+                    'name'     => $like->fromUser->name,
+                    'photoUrl' => $like->fromUser->avatar_url,
+                    'headline' => $like->fromUser->position,
+                    'location' => $location,
+                ]
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Likes fetched successfully',
+            'data'    => [
+                'locked'  => $isLocked,
                 'items'   => $items,
                 'total'   => $paginator->total(),
                 'page'    => $paginator->currentPage(),

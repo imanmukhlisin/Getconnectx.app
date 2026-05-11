@@ -49,6 +49,7 @@ class ProfileResource extends JsonResource
         // ── Highlights: Computed dari user_credentials + user data ──
         $highlights = [];
 
+        $hasLinkedinEdu = false;
         if ($this->relationLoaded('credentials')) {
             $cred = $this->credentials->where('provider', 'linkedin')->first();
 
@@ -70,6 +71,7 @@ class ProfileResource extends JsonResource
                 // Tampilkan Pendidikan Terakhir — support both normalized keys and raw Apify keys
                 $edu = collect($cred->education ?? [])->first();
                 if ($edu) {
+                    $hasLinkedinEdu = true;
                     $degree = $edu['degree']     ?? '';
                     $school = $edu['school']     ?? $edu['schoolName'] ?? '';
                     if (!empty($degree) && !empty($school)) {
@@ -83,9 +85,25 @@ class ProfileResource extends JsonResource
             }
         }
 
+        if (!$hasLinkedinEdu && !empty($this->education)) {
+            $eduData = is_array($this->education) ? $this->education : json_decode($this->education, true);
+            $edu = collect($eduData)->first();
+            if ($edu) {
+                $degree = $edu['degree'] ?? '';
+                $school = $edu['school'] ?? $edu['institution'] ?? '';
+                if (!empty($degree) && !empty($school)) {
+                    $highlights[] = $degree . ', ' . $school;
+                } elseif (!empty($degree)) {
+                    $highlights[] = $degree;
+                } elseif (!empty($school)) {
+                    $highlights[] = 'Studied at ' . $school;
+                }
+            }
+        }
 
         if (!empty($this->languages)) {
-            $highlights[] = $this->languages;
+            $langs = is_array($this->languages) ? implode(', ', $this->languages) : $this->languages;
+            $highlights[] = 'Speaks ' . $langs;
         }
 
         // ── Lokasi ──
@@ -238,6 +256,14 @@ class ProfileResource extends JsonResource
             ];
         }
 
+        $badges = [];
+        if ($this->is_pro) {
+            $badges[] = ['id' => 'premium', 'label' => 'Premium'];
+        }
+        if ($hasStartup || $this->role_category === 'Startup') {
+            $badges[] = ['id' => 'startup-founder', 'label' => 'Startup Founder'];
+        }
+
         $response = [
             'id'          => $this->id,
             'teamId'      => $this->startup->id ?? 'no_team',
@@ -255,12 +281,11 @@ class ProfileResource extends JsonResource
                 'teamsJoined' => $this->teams_joined_count ?? 0,
                 'matches'     => $this->matches_count ?? 0,
             ],
-            'badges' => []
+            'badges' => $badges
         ];
 
         if ($hasStartup) {
             $response['startup'] = $startupData;
-            $response['badges'][] = ['id' => 'startup-founder', 'label' => 'Startup Founder'];
         }
 
         $response['sections'] = [

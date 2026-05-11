@@ -160,6 +160,7 @@ class FeedService
                 (({$interestScore}) * 0.5)
                 + (({$roleScore}) * 0.3)
                 + (({$locationScore}) * 0.2)
+                + (CASE WHEN users.is_pro THEN 25 ELSE 0 END)
             , 2)
         ";
 

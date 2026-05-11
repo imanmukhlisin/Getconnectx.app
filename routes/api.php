@@ -151,6 +151,11 @@ Route::prefix('v1')->group(function () {
     });
 
     // ─── Authenticated: Matchmaking System ────────────────────────────────────
+    Route::middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
+        Route::get('likes-you', [\App\Http\Controllers\Api\V1\MatchmakingController::class, 'likesYouList'])
+            ->name('likes-you.index');
+    });
+
     Route::prefix('matches')->middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\V1\MatchmakingController::class, 'index'])
             ->name('matches.index');
