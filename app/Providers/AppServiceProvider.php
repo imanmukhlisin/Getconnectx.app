@@ -137,6 +137,20 @@ class AppServiceProvider extends ServiceProvider
                 'app.filament.resources.whatsapp-blast-resource.pages.view-whatsapp-blast',
                 \App\Filament\Resources\WhatsappBlastResource\Pages\ViewWhatsappBlast::class
             );
+
+            // ── Startup Resource ──────────────────────────────────────────────────
+            \Livewire\Livewire::component(
+                'app.filament.resources.startup-resource.pages.list-startups',
+                \App\Filament\Resources\StartupResource\Pages\ListStartups::class
+            );
+            \Livewire\Livewire::component(
+                'app.filament.resources.startup-resource.pages.edit-startup',
+                \App\Filament\Resources\StartupResource\Pages\EditStartup::class
+            );
+            \Livewire\Livewire::component(
+                'app.filament.resources.startup-resource.pages.view-startup',
+                \App\Filament\Resources\StartupResource\Pages\ViewStartup::class
+            );
         }
     }
 }
