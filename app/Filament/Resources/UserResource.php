@@ -76,12 +76,12 @@ class UserResource extends Resource
                                     </span>" : '';
 
                                 return "
-                                <div style='display:flex;align-items:center;gap:16px;'>
+                                <div style='display:flex;align-items:center;gap:32px;'>
                                     <img src='{$avatarUrl}' alt='avatar'
                                          style='width:120px;height:120px;border-radius:50%;object-fit:cover;flex-shrink:0;
                                                 box-shadow:0 4px 24px rgba(0,0,0,0.18);
                                                 border:3px solid rgba(249,115,22,0.35);'>
-                                    <div style='flex:1;min-width:0;'>
+                                    <div style='flex:1;min-width:0;padding-left:20px;border-left:2px solid rgba(249,115,22,0.15);'>
                                         <div style='font-size:1.75rem;font-weight:800;line-height:1.15;color:#f97316;letter-spacing:-0.02em;margin-bottom:4px;'>{$n}</div>
                                         " . ($h ? "<div style='font-size:0.82rem;color:#6b7280;line-height:1.55;max-width:560px;margin-bottom:10px;'>{$h}</div>" : "") . "
                                         <div style='display:flex;flex-wrap:wrap;align-items:center;gap:8px;'>
