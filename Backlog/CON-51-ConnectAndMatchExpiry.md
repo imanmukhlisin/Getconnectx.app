@@ -1,5 +1,6 @@
-# [API Contract] Connects + Match Expiry
+> ✅ **STATUS: IMPLEMENTED**
 
+# [API Contract] Connects + Match Expiry
 **Contract Extension: Connect Matches + Team Fit Analysis**
 
 **Summary**

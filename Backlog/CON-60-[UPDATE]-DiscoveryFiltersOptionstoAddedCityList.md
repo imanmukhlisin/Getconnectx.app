@@ -1,5 +1,6 @@
-Backend update needed for CON-60: add city to discovery filter options and candidate generation filters.
+> ✅ **STATUS: IMPLEMENTED**
 
+Backend update needed for CON-60: add city to discovery filter options and candidate generation filters.
 This is the only new contract change from this note.
 
 1. Filter Options Response

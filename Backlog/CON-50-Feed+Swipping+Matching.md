@@ -1,6 +1,6 @@
-# [API Contract] Feed + Swiping + Matching
+> ✅ **STATUS: IMPLEMENTED**
 
-# Feed + Swiping + Matching API Contract
+# [API Contract] Feed + Swiping + Matching# Feed + Swiping + Matching API Contract
 
 ## Base URL: `/api/v1`
 

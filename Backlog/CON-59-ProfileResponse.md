@@ -1,5 +1,6 @@
-# [API CONTRACT] - profile response
+> ✅ **STATUS: IMPLEMENTED**
 
+# [API CONTRACT] - profile response
 ## Summary
 
 Create the backend API contract for the ConnectX profile response based on the profile UI and align the update contract with the actual Edit Profile modal.

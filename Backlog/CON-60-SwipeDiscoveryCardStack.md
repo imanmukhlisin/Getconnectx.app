@@ -1,5 +1,6 @@
-# Define API contract for swipe discovery card stack
+> ✅ **STATUS: IMPLEMENTED**
 
+# Define API contract for swipe discovery card stack
 # Discovery Home API Contract (`CON-60`)
 
 References:

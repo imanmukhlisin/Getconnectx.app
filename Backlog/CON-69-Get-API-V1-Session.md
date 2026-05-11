@@ -1,5 +1,6 @@
-# API Contract: GET /api/v1/auth/session
+> ✅ **STATUS: IMPLEMENTED**
 
+# API Contract: GET /api/v1/auth/session
 ## API Contract: GET /api/v1/auth/session
 
 ### Purpose
