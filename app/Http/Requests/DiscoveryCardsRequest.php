@@ -37,6 +37,7 @@ class DiscoveryCardsRequest extends FormRequest
             'filters.locationAvailability.longitude'           => 'sometimes|numeric',
             'filters.locationAvailability.distanceKm'          => 'sometimes|numeric|min:1|max:500',
             'filters.locationAvailability.remoteReady'         => 'sometimes|boolean',
+            'filters.locationAvailability.city'                => 'sometimes|string',
             'filters.locationAvailability.workArrangementIds'  => 'sometimes|array',
             'filters.locationAvailability.workArrangementIds.*' => 'string',
             'pagination'          => 'sometimes|array',
