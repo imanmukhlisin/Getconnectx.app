@@ -12,13 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('messages', function (Blueprint $table) {
-            $table->jsonb('media')->nullable()->after('content');
-            $table->timestamp('read_at')->nullable()->after('is_read');
+            if (!Schema::hasColumn('messages', 'media')) {
+                $table->jsonb('media')->nullable()->after('content');
+            }
+            if (!Schema::hasColumn('messages', 'read_at')) {
+                $table->timestamp('read_at')->nullable()->after('is_read');
+            }
         });
 
         Schema::table('conversation_participants', function (Blueprint $table) {
-            // Nullable uuid for tracking the last read message by this participant
-            $table->uuid('last_read_message_id')->nullable()->after('user_id');
+            if (!Schema::hasColumn('conversation_participants', 'last_read_message_id')) {
+                $table->uuid('last_read_message_id')->nullable()->after('user_id');
+            }
         });
     }
 
