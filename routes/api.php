@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\Discovery\FeedController;
 use App\Http\Controllers\Api\V1\Discovery\SwipeController;
 use App\Http\Controllers\Api\V1\Discovery\DiscoveryController;
+use App\Http\Controllers\Api\V1\WhatsappWebhookController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -255,4 +256,14 @@ Route::prefix('v1')->group(function () {
         Route::post('apify/linkedin', [\App\Http\Controllers\Api\V1\WebhookController::class, 'apifyLinkedIn'])
             ->name('webhooks.apify.linkedin');
     });
+
+    // ─── WhatsApp Meta WABA Webhook ───────────────────────────────────────────
+    // GET  — Challenge verification (Meta calls this once when you register webhook)
+    // POST — Receive events: messages, delivery receipts, read receipts
+    // NOTE: No auth middleware — Meta hits these directly without Bearer token
+    Route::prefix('webhook/whatsapp')->group(function () {
+        Route::get('/',  [WhatsappWebhookController::class, 'verify'])->name('webhook.whatsapp.verify');
+        Route::post('/', [WhatsappWebhookController::class, 'handle'])->name('webhook.whatsapp.handle');
+    });
 });
+

@@ -79,4 +79,16 @@ return [
         'token' => env('APIFY_TOKEN'),
     ],
 
+    // ─── WhatsApp Meta WABA ───────────────────────────────────────────────────
+    'whatsapp' => [
+        'meta' => [
+            'phone_number_id' => env('WHATSAPP_META_PHONE_NUMBER_ID'),
+            'waba_id'         => env('WHATSAPP_META_WABA_ID'),
+            'access_token'    => env('WHATSAPP_META_ACCESS_TOKEN'),
+            'app_secret'      => env('WHATSAPP_META_APP_SECRET'),
+            'verify_token'    => env('WHATSAPP_META_VERIFY_TOKEN', 'connectx_wa_verify_2026'),
+            'api_version'     => env('WHATSAPP_META_API_VERSION', 'v19.0'),
+        ],
+    ],
+
 ];
