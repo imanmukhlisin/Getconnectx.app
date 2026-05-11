@@ -127,6 +127,10 @@ Route::prefix('v1')->group(function () {
         // endpoint tambahan untuk fitur FCM flutter
         Route::put('profile/fcm-token', [ProfileController::class, 'updateFcmToken'])
             ->name('profile.update.fcm-token');
+
+        // endpoint untuk update koordinat lokasi user
+        Route::put('profile/location', [ProfileController::class, 'updateLocation'])
+            ->name('profile.update.location');
     });
 
     // ─── Authenticated: Dynamic Onboarding Engine ─────────────────────────────

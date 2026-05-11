@@ -187,4 +187,30 @@ class ProfileController extends Controller
             'message' => 'FCM Token berhasil diperbarui.',
         ]);
     }
+    /**
+     * PUT /api/v1/profile/location
+     *
+     * Endpoint khusus untuk update titik koordinat (latitude, longitude) user.
+     */
+    public function updateLocation(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'latitude'  => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
+
+        $request->user()->update([
+            'latitude'  => $validated['latitude'],
+            'longitude' => $validated['longitude'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Location coordinates updated successfully.',
+            'data'    => [
+                'latitude'  => $validated['latitude'],
+                'longitude' => $validated['longitude'],
+            ]
+        ]);
+    }
 }
