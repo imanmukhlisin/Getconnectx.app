@@ -283,57 +283,54 @@ class UserResource extends Resource
                                             $grouped[$cName][] = $e;
                                         }
 
-                                        $html = '<div class="space-y-6 mt-2">';
+                                        $html = '<div class="space-y-8 mt-2">';
                                         foreach ($grouped as $companyName => $roles) {
                                             $firstRole = $roles[0];
-                                            $logoUrl = $firstRole['companyLogo']['url'] ?? null;
-                                            if (!$logoUrl && isset($firstRole['companyLogo']['sizes'][0]['url'])) {
-                                                $logoUrl = $firstRole['companyLogo']['sizes'][0]['url'];
-                                            }
-                                            $logoTag = $logoUrl ? "<img src='{$logoUrl}' class='w-12 h-12 rounded object-contain bg-white shrink-0 shadow-sm border border-gray-700' alt='logo'>" : "<div class='w-12 h-12 rounded bg-gray-800 border border-gray-700 flex items-center justify-center text-xl shrink-0 shadow-sm'>🏢</div>";
+                                            $logoUrl = $firstRole['companyLogo']['sizes'][2]['url'] ?? $firstRole['companyLogo']['sizes'][0]['url'] ?? $firstRole['companyLogo']['url'] ?? null;
+                                            $logoTag = $logoUrl
+                                                ? "<img src='{$logoUrl}' class='w-11 h-11 rounded-lg object-contain bg-white p-1 shrink-0 border border-gray-200' style='min-width:44px;max-width:44px;min-height:44px;max-height:44px;' alt=''>"
+                                                : "<div class='shrink-0 w-11 h-11 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400' style='min-width:44px;'><svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'></path></svg></div>";
                                             
-                                            $html .= "<div class='flex gap-4'>";
-                                            // Left col: Logo and vertical line if multiple roles
-                                            $html .= "<div class='flex flex-col items-center'>";
+                                            $isGroup = count($roles) > 1;
+                                            $lineHeight = $isGroup ? 'calc(100% - 44px)' : '0';
+                                            
+                                            $html .= "<div class='flex gap-3 items-start'>";
+                                            $html .= "<div class='flex flex-col items-center shrink-0'>";
                                             $html .= $logoTag;
-                                            if (count($roles) > 1) {
-                                                $html .= "<div class='w-0.5 bg-gray-700 h-full mt-2 rounded-full'></div>";
-                                            }
+                                            if ($isGroup) $html .= "<div class='w-px bg-gray-300 flex-1 mt-2 mb-1'></div>";
                                             $html .= "</div>";
                                             
-                                            // Right col: Company Name and Roles
-                                            $html .= "<div class='flex-1 pb-2'>";
-                                            if (count($roles) > 1) {
-                                                // It's a group, show company name at top
-                                                $html .= "<h3 class='text-lg font-bold text-white leading-tight mb-3'>{$companyName}</h3>";
-                                                $html .= "<div class='space-y-5'>";
-                                                foreach ($roles as $idx => $role) {
-                                                    $title = $role['position'] ?? 'Posisi Tidak Diketahui';
+                                            $html .= "<div class='flex-1 min-w-0 pb-2'>";
+                                            if ($isGroup) {
+                                                $html .= "<p class='text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5'>" . htmlspecialchars($companyName) . "</p>";
+                                                $html .= "<div class='space-y-4 mt-1'>";
+                                                foreach ($roles as $role) {
+                                                    $title = htmlspecialchars($role['position'] ?? 'Posisi Tidak Diketahui');
                                                     $duration = $role['duration'] ?? '';
-                                                    $dates = ($role['startDate']['text'] ?? '') . ' - ' . ($role['endDate']['text'] ?? 'Present');
-                                                    $html .= "
-                                                        <div class='relative pl-4'>
-                                                            <span class='absolute -left-[29px] top-1.5 w-2 h-2 rounded-full bg-primary-500 ring-4 ring-gray-900'></span>
-                                                            <h4 class='font-bold text-primary-400 text-base leading-tight mb-1'>{$title}</h4>
-                                                            <p class='text-sm text-gray-400 font-medium'>{$dates} · {$duration}</p>
-                                                        </div>
-                                                    ";
+                                                    $empType = $role['employmentType'] ?? '';
+                                                    $dates = ($role['startDate']['text'] ?? '') . ' – ' . ($role['endDate']['text'] ?? 'Present');
+                                                    $meta = array_filter([$empType, $dates, $duration]);
+                                                    $html .= "<div><p class='font-semibold text-gray-900 dark:text-white text-sm leading-tight'>{$title}</p><p class='text-xs text-gray-500 mt-0.5'>" . implode(' · ', $meta) . "</p></div>";
                                                 }
                                                 $html .= "</div>";
                                             } else {
-                                                // Single role for company
                                                 $role = $roles[0];
-                                                $title = $role['position'] ?? 'Posisi Tidak Diketahui';
+                                                $title = htmlspecialchars($role['position'] ?? 'Posisi Tidak Diketahui');
+                                                $empType = $role['employmentType'] ?? '';
+                                                $workplace = $role['workplaceType'] ?? '';
+                                                $dates = ($role['startDate']['text'] ?? '') . ' – ' . ($role['endDate']['text'] ?? 'Present');
                                                 $duration = $role['duration'] ?? '';
-                                                $dates = ($role['startDate']['text'] ?? '') . ' - ' . ($role['endDate']['text'] ?? 'Present');
-                                                $html .= "
-                                                    <h3 class='text-lg font-bold text-white leading-tight mb-1'>{$title}</h3>
-                                                    <h4 class='text-primary-400 font-semibold mb-1'>{$companyName}</h4>
-                                                    <p class='text-sm text-gray-400 font-medium'>{$dates} · {$duration}</p>
-                                                ";
+                                                $loc = $role['location'] ?? '';
+                                                $html .= "<p class='font-semibold text-gray-900 dark:text-white text-sm leading-tight'>{$title}</p>";
+                                                $html .= "<p class='text-xs text-gray-600 dark:text-gray-400 mt-0.5'>" . htmlspecialchars($companyName);
+                                                if ($empType) $html .= " · {$empType}";
+                                                $html .= "</p>";
+                                                $html .= "<p class='text-xs text-gray-500 mt-0.5'>{$dates} · {$duration}";
+                                                if ($loc) $html .= " · {$loc}";
+                                                if ($workplace) $html .= " · {$workplace}";
+                                                $html .= "</p>";
                                             }
-                                            $html .= "</div>";
-                                            $html .= "</div>";
+                                            $html .= "</div></div>";
                                         }
                                         $html .= '</div>';
                                         return $html;
@@ -353,25 +350,16 @@ class UserResource extends Resource
                                         
                                         $html = '<div class="space-y-5 mt-2">';
                                         foreach ($edu as $e) {
-                                            $school = $e['schoolName'] ?? 'Sekolah Tidak Diketahui';
-                                            $degree = $e['degree'] ?? '';
-                                            $field = $e['fieldOfStudy'] ?? '';
+                                            $school = htmlspecialchars($e['schoolName'] ?? 'Sekolah Tidak Diketahui');
+                                            $degree = htmlspecialchars($e['degree'] ?? '');
+                                            $field = htmlspecialchars($e['fieldOfStudy'] ?? '');
                                             $period = $e['period'] ?? '';
-                                            
-                                            $logoUrl = $e['schoolLogo']['url'] ?? null;
-                                            if (!$logoUrl && isset($e['schoolLogo']['sizes'][0]['url'])) {
-                                                $logoUrl = $e['schoolLogo']['sizes'][0]['url'];
-                                            }
-                                            $logoTag = $logoUrl ? "<img src='{$logoUrl}' class='w-12 h-12 rounded object-contain bg-white shrink-0 shadow-sm border border-gray-700' alt='logo'>" : "<div class='w-12 h-12 rounded bg-gray-800 border border-gray-700 flex items-center justify-center text-xl shrink-0 shadow-sm'>🎓</div>";
-                                            
-                                            $html .= "<div class='flex gap-4 items-start'>";
-                                            $html .= $logoTag;
-                                            $html .= "<div>
-                                                        <h3 class='text-lg font-bold text-white leading-tight mb-1'>{$school}</h3>
-                                                        <p class='text-primary-400 font-semibold text-sm mb-1'>{$degree}" . ($field ? " - {$field}" : "") . "</p>
-                                                        <p class='text-sm text-gray-400 font-medium'>{$period}</p>
-                                                      </div>";
-                                            $html .= "</div>";
+                                            $insights = $e['insights'] ?? '';
+                                            $logoUrl = $e['schoolLogo']['sizes'][2]['url'] ?? $e['schoolLogo']['sizes'][0]['url'] ?? $e['schoolLogo']['url'] ?? null;
+                                            $logoTag = $logoUrl
+                                                ? "<img src='{$logoUrl}' class='w-11 h-11 rounded-lg object-contain bg-white p-1 shrink-0 border border-gray-200' style='min-width:44px;max-width:44px;min-height:44px;max-height:44px;' alt=''>"
+                                                : "<div class='shrink-0 w-11 h-11 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400' style='min-width:44px;'><svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path d='M12 14l9-5-9-5-9 5 9 5z'/><path d='M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z'/></svg></div>";
+                                            $html .= "<div class='flex gap-3 items-start'>" . $logoTag . "<div class='flex-1 min-w-0'><p class='font-semibold text-gray-900 dark:text-white text-sm leading-tight'>{$school}</p><p class='text-xs text-gray-600 dark:text-gray-400 mt-0.5'>{$degree}" . ($field ? " · {$field}" : "") . "</p><p class='text-xs text-gray-500 mt-0.5'>{$period}</p>" . ($insights ? "<p class='text-xs text-gray-500 mt-0.5 italic'>{$insights}</p>" : "") . "</div></div>";
                                         }
                                         $html .= '</div>';
                                         return $html;
@@ -391,24 +379,16 @@ class UserResource extends Resource
                                         
                                         $html = '<div class="space-y-5 mt-2">';
                                         foreach ($certs as $c) {
-                                            $title = $c['title'] ?? 'Sertifikasi';
-                                            $issuer = $c['issuedBy'] ?? '';
+                                            $title = htmlspecialchars($c['title'] ?? 'Sertifikasi');
+                                            $issuer = htmlspecialchars($c['issuedBy'] ?? '');
                                             $issuedAt = $c['issuedAt'] ?? '';
-                                            
-                                            $logoUrl = $c['issuedByLogo']['url'] ?? null;
-                                            if (!$logoUrl && isset($c['issuedByLogo']['sizes'][0]['url'])) {
-                                                $logoUrl = $c['issuedByLogo']['sizes'][0]['url'];
-                                            }
-                                            $logoTag = $logoUrl ? "<img src='{$logoUrl}' class='w-12 h-12 rounded object-contain bg-white shrink-0 shadow-sm border border-gray-700' alt='logo'>" : "<div class='w-12 h-12 rounded bg-gray-800 border border-gray-700 flex items-center justify-center text-xl shrink-0 shadow-sm'>🏆</div>";
-                                            
-                                            $html .= "<div class='flex gap-4 items-start'>";
-                                            $html .= $logoTag;
-                                            $html .= "<div>
-                                                        <h3 class='text-base font-bold text-white leading-tight mb-1'>{$title}</h3>
-                                                        <p class='text-primary-400 font-semibold text-sm mb-1'>{$issuer}</p>
-                                                        <p class='text-sm text-gray-400 font-medium'>{$issuedAt}</p>
-                                                      </div>";
-                                            $html .= "</div>";
+                                            $link = $c['link'] ?? null;
+                                            $logoUrl = $c['issuedByLogo']['sizes'][2]['url'] ?? $c['issuedByLogo']['sizes'][0]['url'] ?? $c['issuedByLogo']['url'] ?? null;
+                                            $logoTag = $logoUrl
+                                                ? "<img src='{$logoUrl}' class='w-11 h-11 rounded-lg object-contain bg-white p-1 shrink-0 border border-gray-200' style='min-width:44px;max-width:44px;min-height:44px;max-height:44px;' alt=''>"
+                                                : "<div class='shrink-0 w-11 h-11 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center' style='min-width:44px;'><svg class='w-5 h-5 text-amber-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z'></path></svg></div>";
+                                            $credBtn = $link ? "<a href='{$link}' target='_blank' class='inline-flex items-center gap-1 mt-1.5 text-xs font-medium text-blue-500 hover:text-blue-400'><svg class='w-3 h-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14'></path></svg>Lihat Kredensial</a>" : '';
+                                            $html .= "<div class='flex gap-3 items-start'>" . $logoTag . "<div class='flex-1 min-w-0'><p class='font-semibold text-gray-900 dark:text-white text-sm leading-tight'>{$title}</p><p class='text-xs text-gray-600 dark:text-gray-400 mt-0.5'>{$issuer}</p><p class='text-xs text-gray-500 mt-0.5'>{$issuedAt}</p>{$credBtn}</div></div>";
                                         }
                                         $html .= '</div>';
                                         return $html;
