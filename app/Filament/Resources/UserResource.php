@@ -36,35 +36,86 @@ class UserResource extends Resource
                                 ->hiddenLabel()
                                 ->circular()
                                 ->defaultImageUrl(fn($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name).'&color=FFFFFF&background=09090b')
-                                ->size(120)
-                                ->extraImgAttributes(['class' => 'shadow-2xl ring-4 ring-primary-500/50']),
+                                ->size(160)
+                                ->extraImgAttributes(['class' => 'shadow-2xl ring-4 ring-primary-500/30 object-cover hover:scale-105 transition-transform duration-300']),
                             
-                            Infolists\Components\Grid::make(1)
+                            Infolists\Components\Group::make()
                                 ->schema([
                                     Infolists\Components\TextEntry::make('name')
                                         ->hiddenLabel()
                                         ->size(Infolists\Components\TextEntry\TextEntrySize::Large)
                                         ->weight('bold')
                                         ->color('primary')
-                                        ->extraAttributes(['class' => 'text-3xl']),
-                                    Infolists\Components\TextEntry::make('username')
+                                        ->formatStateUsing(function ($state, $record) {
+                                            $linkedinCred = $record->credentials()->where('provider', 'linkedin')->first();
+                                            if ($linkedinCred && isset($linkedinCred->raw_data['firstName']) && isset($linkedinCred->raw_data['lastName'])) {
+                                                return $linkedinCred->raw_data['firstName'] . ' ' . $linkedinCred->raw_data['lastName'];
+                                            }
+                                            return $state;
+                                        })
+                                        ->extraAttributes(['class' => 'text-4xl tracking-tight']),
+
+                                    Infolists\Components\TextEntry::make('headline')
                                         ->hiddenLabel()
-                                        ->icon('heroicon-m-at-symbol')
+                                        ->getStateUsing(function ($record) {
+                                            $linkedinCred = $record->credentials()->where('provider', 'linkedin')->first();
+                                            if ($linkedinCred && isset($linkedinCred->raw_data['headline'])) {
+                                                return $linkedinCred->raw_data['headline'];
+                                            }
+                                            return $record->position ?? 'Belum ada headline profesional';
+                                        })
                                         ->color('gray')
-                                        ->formatStateUsing(fn ($state) => $state ?? 'Belum ada username'),
-                                    Infolists\Components\TextEntry::make('role_category')
-                                        ->hiddenLabel()
-                                        ->badge()
-                                        ->color('info')
-                                        ->formatStateUsing(fn ($state) => strtoupper($state ?? 'Belum Onboarding')),
-                                ]),
+                                        ->extraAttributes(['class' => 'text-lg italic mt-2 border-l-2 border-primary-500 pl-3']),
+
+                                    Infolists\Components\Grid::make(4)
+                                        ->schema([
+                                            Infolists\Components\TextEntry::make('username')
+                                                ->hiddenLabel()
+                                                ->icon('heroicon-m-at-symbol')
+                                                ->badge()
+                                                ->color('gray')
+                                                ->formatStateUsing(fn ($state) => $state ?? 'Belum ada username'),
+                                                
+                                            Infolists\Components\TextEntry::make('role_category')
+                                                ->hiddenLabel()
+                                                ->badge()
+                                                ->icon('heroicon-m-briefcase')
+                                                ->color('info')
+                                                ->formatStateUsing(fn ($state) => strtoupper($state ?? 'Belum Onboarding')),
+                                                
+                                            Infolists\Components\TextEntry::make('location_details')
+                                                ->hiddenLabel()
+                                                ->icon('heroicon-m-map-pin')
+                                                ->color('gray')
+                                                ->getStateUsing(function ($record) {
+                                                    $linkedinCred = $record->credentials()->where('provider', 'linkedin')->first();
+                                                    if ($linkedinCred && isset($linkedinCred->raw_data['location']['linkedinText'])) {
+                                                        return $linkedinCred->raw_data['location']['linkedinText'];
+                                                    }
+                                                    return trim(($record->city ?? '') . ', ' . ($record->country ?? ''), ', ') ?: 'Lokasi Tidak Diketahui';
+                                                }),
+                                                
+                                            Infolists\Components\TextEntry::make('followers')
+                                                ->hiddenLabel()
+                                                ->icon('heroicon-m-users')
+                                                ->color('warning')
+                                                ->getStateUsing(function ($record) {
+                                                    $linkedinCred = $record->credentials()->where('provider', 'linkedin')->first();
+                                                    if ($linkedinCred && isset($linkedinCred->raw_data['followerCount'])) {
+                                                        return number_format($linkedinCred->raw_data['followerCount']) . ' Followers';
+                                                    }
+                                                    return '-';
+                                                }),
+                                        ])->extraAttributes(['class' => 'mt-4']),
+                                ])->grow(true),
                         ])->from('md'),
                     ]),
 
                 Infolists\Components\Tabs::make('Tabs')
                     ->tabs([
                         // ── TAB 1: PROFIL & KONTAK ────────────────────────────────────────────────────────────
-                        Infolists\Components\Tabs\Tab::make('👤 Profil & Kontak')
+                        Infolists\Components\Tabs\Tab::make('Profil & Kontak')
+                            ->icon('heroicon-o-user')
                             ->schema([
                                 Infolists\Components\Section::make('Kontak Pribadi')
                                     ->columns(3)
@@ -79,7 +130,10 @@ class UserResource extends Resource
                                             ->copyable(),
                                         Infolists\Components\TextEntry::make('linkedin_url')
                                             ->label('LinkedIn URL')
-                                            ->icon('heroicon-m-link')
+                                            ->icon('heroicon-m-globe-alt')
+                                            ->badge()
+                                            ->color('info')
+                                            ->formatStateUsing(fn ($state) => $state ? 'Kunjungi Profil LinkedIn' : '-')
                                             ->url(fn ($state) => $state)
                                             ->openUrlInNewTab()
                                             ->copyable(),
@@ -120,7 +174,8 @@ class UserResource extends Resource
                             ]),
 
                         // ── TAB 2: KARIR, SKILL & TAGS ─────────────────────────────────────────────────────────
-                        Infolists\Components\Tabs\Tab::make('💼 Karir & Skill')
+                        Infolists\Components\Tabs\Tab::make('Karir & Skill')
+                            ->icon('heroicon-o-briefcase')
                             ->schema([
                                 Infolists\Components\Section::make('Posisi & Pengalaman')
                                     ->columns(3)
@@ -174,7 +229,8 @@ class UserResource extends Resource
                             ]),
 
                         // ── TAB 3: STARTUP & CO-FOUNDER ───────────────────────────────────────────────────────
-                        Infolists\Components\Tabs\Tab::make('🚀 Startup & Target')
+                        Infolists\Components\Tabs\Tab::make('Startup & Target')
+                            ->icon('heroicon-o-rocket-launch')
                             ->schema([
                                 Infolists\Components\Section::make('Target Pencarian')
                                     ->schema([
@@ -207,7 +263,8 @@ class UserResource extends Resource
                             ]),
 
                         // ── TAB 4: EDUKASI & BAHASA ───────────────────────────────────────────────────────────
-                        Infolists\Components\Tabs\Tab::make('🎓 Edukasi & Bahasa')
+                        Infolists\Components\Tabs\Tab::make('Edukasi & Bahasa')
+                            ->icon('heroicon-o-academic-cap')
                             ->schema([
                                 Infolists\Components\Section::make('Riwayat Pendidikan (Data JSON/Array)')
                                     ->schema([
@@ -227,21 +284,142 @@ class UserResource extends Resource
                             ]),
 
                         // ── TAB 5: DATA LINKEDIN LENGKAP ──────────────────────────────────────────────────────
-                        Infolists\Components\Tabs\Tab::make('🔗 Data LinkedIn')
+                        Infolists\Components\Tabs\Tab::make('Data LinkedIn')
+                            ->icon('heroicon-o-link')
                             ->schema([
-                                Infolists\Components\Section::make('Payload / Scraping Data LinkedIn (Mentah)')
-                                    ->description('Semua data yang berhasil ditarik dari LinkedIn tersimpan di sini.')
+                                Infolists\Components\Section::make('Informasi Profesional LinkedIn')
+                                    ->description('Data terverifikasi yang ditarik secara otomatis dari profil LinkedIn pengguna. Ditampilkan dengan tampilan premium.')
                                     ->schema([
-                                        Infolists\Components\TextEntry::make('linkedin_data')
+                                        Infolists\Components\TextEntry::make('linkedin_summary')
                                             ->hiddenLabel()
-                                            ->formatStateUsing(fn ($state) => $state ? '<pre>'.json_encode(is_string($state) ? json_decode($state, true) : $state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES).'</pre>' : 'Belum ada data LinkedIn')
-                                            ->extraAttributes(['class' => 'font-mono text-xs bg-gray-900 text-gray-300 p-4 rounded-lg overflow-x-auto max-h-[600px] overflow-y-auto'])
-                                            ->html(),
+                                            ->prose()
+                                            ->getStateUsing(function ($record) {
+                                                $linkedinCred = $record->credentials()->where('provider', 'linkedin')->first();
+                                                return $linkedinCred->raw_data['about'] ?? 'Belum ada ringkasan profesional.';
+                                            }),
+                                        
+                                        Infolists\Components\Grid::make(2)
+                                            ->schema([
+                                                Infolists\Components\Section::make('Pengalaman Kerja')
+                                                    ->schema([
+                                                        Infolists\Components\TextEntry::make('linkedin_experience')
+                                                            ->hiddenLabel()
+                                                            ->html()
+                                                            ->getStateUsing(function ($record) {
+                                                                $linkedinCred = $record->credentials()->where('provider', 'linkedin')->first();
+                                                                $exp = $linkedinCred->raw_data['experience'] ?? [];
+                                                                if (empty($exp)) return '<span class="text-gray-500 italic">Belum ada pengalaman kerja.</span>';
+                                                                
+                                                                $html = '<div class="space-y-5">';
+                                                                foreach ($exp as $e) {
+                                                                    $title = $e['position'] ?? 'Posisi Tidak Diketahui';
+                                                                    $company = $e['companyName'] ?? '';
+                                                                    $duration = $e['duration'] ?? '';
+                                                                    $html .= "<div class='border-l-4 border-primary-500 pl-4 py-1 hover:bg-gray-800/50 rounded-r-lg transition-colors duration-200'>
+                                                                                <h4 class='font-bold text-lg text-white'>{$title}</h4>
+                                                                                <p class='text-primary-400 font-medium'>{$company}</p>
+                                                                                <p class='text-sm text-gray-400'>{$duration}</p>
+                                                                              </div>";
+                                                                }
+                                                                $html .= '</div>';
+                                                                return $html;
+                                                            })
+                                                    ]),
+                                                
+                                                Infolists\Components\Section::make('Pendidikan & Sertifikasi')
+                                                    ->schema([
+                                                        Infolists\Components\TextEntry::make('linkedin_education')
+                                                            ->hiddenLabel()
+                                                            ->html()
+                                                            ->getStateUsing(function ($record) {
+                                                                $linkedinCred = $record->credentials()->where('provider', 'linkedin')->first();
+                                                                if (!$linkedinCred || empty($linkedinCred->raw_data)) return '<span class="text-gray-500 italic">Belum ada data.</span>';
+                                                                
+                                                                $edu = $linkedinCred->raw_data['education'] ?? [];
+                                                                $certs = $linkedinCred->raw_data['certifications'] ?? [];
+                                                                
+                                                                $html = '<div class="space-y-4">';
+                                                                if (!empty($edu)) {
+                                                                    $html .= '<h3 class="font-bold text-white mb-2 border-b border-gray-700 pb-1">Pendidikan</h3>';
+                                                                    foreach ($edu as $e) {
+                                                                        $school = $e['schoolName'] ?? 'Sekolah Tidak Diketahui';
+                                                                        $degree = $e['degree'] ?? '';
+                                                                        $field = $e['fieldOfStudy'] ?? '';
+                                                                        $period = $e['period'] ?? '';
+                                                                        $html .= "<div class='mb-3 hover:bg-gray-800/50 p-2 rounded-lg transition-colors duration-200'>
+                                                                                    <h4 class='font-semibold text-primary-300'>{$school}</h4>
+                                                                                    <p class='text-sm text-gray-300'>{$degree} - {$field}</p>
+                                                                                    <p class='text-xs text-gray-500'>{$period}</p>
+                                                                                  </div>";
+                                                                    }
+                                                                }
+                                                                
+                                                                if (!empty($certs)) {
+                                                                    $html .= '<h3 class="font-bold text-white mb-2 mt-4 border-b border-gray-700 pb-1">Sertifikasi</h3>';
+                                                                    foreach ($certs as $c) {
+                                                                        $title = $c['title'] ?? 'Sertifikasi';
+                                                                        $issuer = $c['issuedBy'] ?? '';
+                                                                        $html .= "<div class='mb-2 flex items-start gap-2 hover:bg-gray-800/50 p-2 rounded-lg transition-colors duration-200'>
+                                                                                    <span class='text-yellow-500'>🏆</span>
+                                                                                    <div>
+                                                                                        <p class='text-sm font-medium text-gray-200'>{$title}</p>
+                                                                                        <p class='text-xs text-gray-400'>{$issuer}</p>
+                                                                                    </div>
+                                                                                  </div>";
+                                                                    }
+                                                                }
+                                                                
+                                                                if (empty($edu) && empty($certs)) {
+                                                                    return '<span class="text-gray-500 italic">Belum ada riwayat pendidikan atau sertifikasi.</span>';
+                                                                }
+                                                                
+                                                                $html .= '</div>';
+                                                                return $html;
+                                                            })
+                                                    ]),
+                                            ]),
+                                            
+                                        Infolists\Components\Section::make('Keahlian (Skills)')
+                                            ->schema([
+                                                Infolists\Components\TextEntry::make('linkedin_skills')
+                                                    ->hiddenLabel()
+                                                    ->html()
+                                                    ->getStateUsing(function ($record) {
+                                                        $linkedinCred = $record->credentials()->where('provider', 'linkedin')->first();
+                                                        $skills = $linkedinCred->raw_data['skills'] ?? [];
+                                                        if (empty($skills)) return '<span class="text-gray-500 italic">Belum ada keahlian.</span>';
+                                                        
+                                                        $html = '<div class="flex flex-wrap gap-2">';
+                                                        foreach ($skills as $s) {
+                                                            $name = $s['name'] ?? '';
+                                                            if ($name) {
+                                                                $html .= "<span class='px-3 py-1.5 bg-gray-800 border border-gray-700 text-primary-400 rounded-full text-xs font-semibold hover:bg-primary-900/30 hover:border-primary-500 transition-colors duration-200'>{$name}</span>";
+                                                            }
+                                                        }
+                                                        $html .= '</div>';
+                                                        return $html;
+                                                    })
+                                            ]),
+
+                                        Infolists\Components\Section::make('Data Mentah (JSON Payload)')
+                                            ->collapsed()
+                                            ->description('Tampilan payload JSON dari LinkedIn scraper API untuk proses debugging.')
+                                            ->schema([
+                                                Infolists\Components\TextEntry::make('linkedin_data')
+                                                    ->hiddenLabel()
+                                                    ->formatStateUsing(function ($record) {
+                                                        $linkedinCred = $record->credentials()->where('provider', 'linkedin')->first();
+                                                        return $linkedinCred ? '<pre>'.json_encode($linkedinCred->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES).'</pre>' : 'Belum ada data LinkedIn';
+                                                    })
+                                                    ->extraAttributes(['class' => 'font-mono text-xs bg-gray-900 text-gray-300 p-4 rounded-lg overflow-x-auto max-h-[400px] overflow-y-auto'])
+                                                    ->html(),
+                                            ]),
                                     ]),
                             ]),
 
                         // ── TAB 6: STATUS & SISTEM ────────────────────────────────────────────────────────────
-                        Infolists\Components\Tabs\Tab::make('⚙️ Sistem & Keamanan')
+                        Infolists\Components\Tabs\Tab::make('Sistem & Keamanan')
+                            ->icon('heroicon-o-shield-check')
                             ->schema([
                                 Infolists\Components\Section::make('Status Akun')
                                     ->columns(3)
