@@ -24,20 +24,22 @@ class TeamMemberController extends Controller
 
         $member = StartupMember::where('id', $memberId)->where('startup_id', $startupId)->firstOrFail();
 
-        $member->update($request->only(['roleId', 'equityPercent', 'commitment', 'status']));
+        // Map camelCase FE fields → snake_case DB columns
+        $updates = [];
 
-        // If the FE sends `roleId` instead of `role_id`, map it correctly
-        if ($request->has('roleId')) {
-            $member->update(['role_id' => $request->roleId]);
-        }
-        if ($request->has('equityPercent')) {
-            $member->update(['equity_percent' => $request->equityPercent]);
+        if ($request->has('roleId'))       $updates['role_id']       = $request->input('roleId');
+        if ($request->has('equityPercent')) $updates['equity_percent'] = $request->input('equityPercent');
+        if ($request->has('commitment'))   $updates['commitment']    = $request->input('commitment');
+        if ($request->has('status'))       $updates['status']        = $request->input('status');
+
+        if (!empty($updates)) {
+            $member->update($updates);
         }
 
         return response()->json([
             'success' => true,
             'message' => 'Member updated',
-            'data' => $member
+            'data'    => $member->fresh(),
         ]);
     }
 
