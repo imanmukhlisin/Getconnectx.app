@@ -47,13 +47,59 @@ class CardTransformerService
             }
         }
 
-        // Build skills from user tags
+        // Build skills: dari user tags (onboarding) — fallback ke onboarding_responses jika kosong
         $skills = [];
         if ($user->relationLoaded('tags')) {
             $skills = $user->tags->where('type', 'skill')->map(fn($tag) => [
                 'id'   => 'sk_' . $tag->id,
                 'name' => $this->getOnboardingLabel('q_tm_skills', $tag->name),
             ])->values()->toArray();
+        }
+
+        // Fallback: ambil dari onboarding_responses (q_tm_skills / q_cf_skills)
+        if (empty($skills)) {
+            // Level 1: cari question skills spesifik
+            $skillResponse = \Illuminate\Support\Facades\DB::table('onboarding_responses')
+                ->join('onboarding_sessions', 'onboarding_sessions.id', '=', 'onboarding_responses.session_id')
+                ->where('onboarding_sessions.user_id', $user->id)
+                ->where('onboarding_sessions.status', 'completed')
+                ->whereIn('onboarding_responses.question_id', ['q_tm_skills', 'q_cf_skills', 'q_fdr_skills'])
+                ->orderBy('onboarding_sessions.completed_at', 'desc')
+                ->value('onboarding_responses.value');
+
+            if ($skillResponse) {
+                $rawSkills = is_array($skillResponse) ? $skillResponse : json_decode($skillResponse, true);
+                if (is_array($rawSkills)) {
+                    $skills = collect($rawSkills)->map(fn($s) => [
+                        'id'   => 'sk_ob_' . md5($s),
+                        'name' => $this->getOnboardingLabel('q_tm_skills', $s),
+                    ])->values()->toArray();
+                }
+            }
+        }
+
+        // Level 2: fallback dari q_cf_type (tipe co-founder) + q_bld_role
+        if (empty($skills)) {
+            $typeResponse = \Illuminate\Support\Facades\DB::table('onboarding_responses')
+                ->join('onboarding_sessions', 'onboarding_sessions.id', '=', 'onboarding_responses.session_id')
+                ->where('onboarding_sessions.user_id', $user->id)
+                ->where('onboarding_sessions.status', 'completed')
+                ->whereIn('onboarding_responses.question_id', ['q_cf_type', 'q_bld_role', 'q_fdr_type'])
+                ->orderBy('onboarding_sessions.completed_at', 'desc')
+                ->get(['onboarding_responses.question_id', 'onboarding_responses.value']);
+
+            foreach ($typeResponse as $resp) {
+                $raw = is_array($resp->value) ? $resp->value : json_decode($resp->value, true);
+                if (is_array($raw)) {
+                    foreach ($raw as $s) {
+                        $skills[] = [
+                            'id'   => 'sk_ob_' . md5($s),
+                            'name' => $this->getOnboardingLabel([$resp->question_id, 'q_cf_type', 'q_bld_role'], $s),
+                        ];
+                    }
+                }
+            }
+            $skills = array_values(array_unique($skills, SORT_REGULAR));
         }
 
         return [
@@ -70,17 +116,17 @@ class CardTransformerService
                 'display'    => $this->buildLocationDisplay($user),
                 'distanceKm' => $distanceKm,
             ],
-            'match'       => $matchResult,
-            'badges'      => $this->buildBadges($user),
-            'bio'         => $user->bio,
-            'startupIdea' => $user->startup_idea,
-            'interests'   => $interests,
-            'skills'      => $skills,
+            'match'          => $matchResult,
+            'badges'         => $this->buildBadges($user),
+            'bio'            => $user->bio,
+            'startupIdea'    => $user->startup_idea,
+            'interests'      => $interests,
+            'skills'         => $skills,
             'experience'     => $this->buildExperience($user),
             'education'      => $this->buildEducation($user),
-            'certifications' => [], // Placeholder for future use
-            'languages'      => $user->languages ?? [],
-            'linkedinUrl'    => $user->linkedin_url ?: null, // Tappable — FE opens in browser
+            'certifications' => $this->buildCertifications($user),
+            'languages'      => $this->buildLanguages($user),
+            'linkedinUrl'    => $user->linkedin_url ?: null,
         ];
     }
 
@@ -146,22 +192,25 @@ class CardTransformerService
     private function getOnboardingLabel($questionIds, ?string $value): string
     {
         if (empty($value)) return '';
-        
+
         if (is_string($questionIds)) $questionIds = [$questionIds];
 
-        return \Illuminate\Support\Facades\Cache::remember("onboarding_label_{$value}", 3600, function() use ($questionIds, $value) {
+        // Cache key pakai hash dari questionIds + value supaya tidak collision
+        $cacheKey = 'onboarding_label_' . md5(implode(',', $questionIds) . '_' . $value);
+
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function() use ($questionIds, $value) {
             $option = \Illuminate\Support\Facades\DB::table('onboarding_options')
                 ->whereIn('question_id', $questionIds)
                 ->where('value', $value)
                 ->first();
 
             if ($option) {
-                $labels = json_encode($option->label, true);
+                $labels = $option->label;
                 if (is_string($labels)) $labels = json_decode($labels, true);
                 return $labels['id'] ?? $labels['en'] ?? $value;
             }
 
-            // Final fallback: beautify the slug
+            // Final fallback: humanize slug (full_time → Full Time)
             return ucwords(str_replace(['_', '-'], ' ', $value));
         });
     }
@@ -267,5 +316,60 @@ class CardTransformerService
                 return array_merge($stage, ['state' => $state]);
             }, $stages, array_keys($stages)),
         ];
+    }
+
+    /**
+     * Build certifications from LinkedIn raw_data scraping.
+     * raw_data['certifications'] is an array of objects from Apify.
+     */
+    private function buildCertifications(User $user): array
+    {
+        if ($user->relationLoaded('credentials')) {
+            $linkedIn = $user->credentials->where('provider', 'linkedin')->first();
+            if ($linkedIn && !empty($linkedIn->raw_data['certifications'])) {
+                return collect($linkedIn->raw_data['certifications'])
+                    ->map(fn($cert) => [
+                        'name'    => $cert['title']       ?? $cert['name']      ?? '',
+                        'issuer'  => $cert['issuedBy']    ?? $cert['authority'] ?? $cert['issuer'] ?? '',
+                        'date'    => $cert['issuedAt']    ?? $cert['displayDate'] ?? $cert['date'] ?? null,
+                        'logoUrl' => $cert['issuedByLogo']['sizes'][2]['url'] // 100x100
+                                  ?? $cert['issuedByLogo']['sizes'][1]['url'] // 200x200
+                                  ?? $cert['issuedByLogo']['url']             // original
+                                  ?? $cert['logo']
+                                  ?? null,
+                    ])
+                    ->filter(fn($c) => !empty($c['name']))
+                    ->values()
+                    ->toArray();
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * Build languages from LinkedIn raw_data scraping.
+     * Falls back to users.languages column if LinkedIn data is not available.
+     */
+    private function buildLanguages(User $user): array
+    {
+        if ($user->relationLoaded('credentials')) {
+            $linkedIn = $user->credentials->where('provider', 'linkedin')->first();
+            if ($linkedIn && !empty($linkedIn->raw_data['languages'])) {
+                return collect($linkedIn->raw_data['languages'])
+                    ->map(fn($lang) => is_string($lang) ? $lang : ($lang['name'] ?? ''))
+                    ->filter()
+                    ->values()
+                    ->toArray();
+            }
+        }
+
+        // Fallback: kolom languages langsung di tabel users
+        $langs = $user->languages;
+        if (!empty($langs)) {
+            return is_array($langs) ? $langs : [$langs];
+        }
+
+        return [];
     }
 }
