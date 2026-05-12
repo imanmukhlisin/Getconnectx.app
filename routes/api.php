@@ -131,6 +131,16 @@ Route::prefix('v1')->group(function () {
         // endpoint untuk update koordinat lokasi user
         Route::put('profile/location', [ProfileController::class, 'updateLocation'])
             ->name('profile.update.location');
+
+        // ── Account Management (CON-70) ───────────────────────────────────────
+        Route::prefix('me/account')->group(function () {
+            Route::post('pause',             [ProfileController::class, 'pauseAccount'])
+                ->name('account.pause');
+            Route::post('activate',          [ProfileController::class, 'activateAccount'])
+                ->name('account.activate');
+            Route::post('deletion-requests', [ProfileController::class, 'requestDeletion'])
+                ->name('account.deletion-requests');
+        });
     });
 
     // ─── Authenticated: Dynamic Onboarding Engine ─────────────────────────────

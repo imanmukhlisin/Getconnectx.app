@@ -213,4 +213,111 @@ class ProfileController extends Controller
             ]
         ]);
     }
+
+    // =========================================================================
+    //  ACCOUNT MANAGEMENT (CON-70)
+    // =========================================================================
+
+    /**
+     * POST /api/v1/me/account/pause
+     *
+     * Pause (deactivate) akun user sementara.
+     * User tetap logged in setelah pause.
+     */
+    public function pauseAccount(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Account is already paused.',
+                'error'   => ['code' => 'ACCOUNT_ALREADY_PAUSED'],
+            ], 422);
+        }
+
+        $user->update(['is_active' => false]);
+
+        Log::info('Account paused', ['user_id' => $user->id]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Account paused successfully',
+            'data'    => [
+                'userId'   => $user->id,
+                'status'   => 'paused',
+                'pausedAt' => now()->toIso8601String(),
+            ],
+        ]);
+    }
+
+    /**
+     * POST /api/v1/me/account/activate
+     *
+     * Reaktivasi akun user yang sebelumnya di-pause.
+     * User tetap logged in setelah aktivasi.
+     */
+    public function activateAccount(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Account is already active.',
+                'error'   => ['code' => 'ACCOUNT_ALREADY_ACTIVE'],
+            ], 422);
+        }
+
+        $user->update(['is_active' => true]);
+
+        Log::info('Account activated', ['user_id' => $user->id]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Account activated successfully',
+            'data'    => [
+                'userId'      => $user->id,
+                'status'      => 'active',
+                'activatedAt' => now()->toIso8601String(),
+            ],
+        ]);
+    }
+
+    /**
+     * POST /api/v1/me/account/deletion-requests
+     *
+     * Request penghapusan akun. Setelah request ini:
+     * - Seluruh token user di-revoke (user di-logout).
+     * - Backend menandai user untuk dihapus (soft delete).
+     */
+    public function requestDeletion(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $deletionRequestId = 'del_' . \Illuminate\Support\Str::uuid();
+
+        // Soft delete the user account (can be restored if needed)
+        $user->update(['is_active' => false]);
+        $user->delete(); // Uses SoftDeletes, data masih ada di DB
+
+        // Revoke all tokens — user harus login ulang jika mau restore
+        $user->tokens()->delete();
+
+        Log::info('Account deletion requested', [
+            'user_id'            => $user->id,
+            'deletion_request_id' => $deletionRequestId,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Account deletion requested successfully',
+            'data'    => [
+                'deletionRequestId'   => $deletionRequestId,
+                'userId'              => $user->id,
+                'status'              => 'scheduled',
+                'requestedAt'         => now()->toIso8601String(),
+                'scheduledDeletionAt' => null,
+            ],
+        ]);
+    }
 }
