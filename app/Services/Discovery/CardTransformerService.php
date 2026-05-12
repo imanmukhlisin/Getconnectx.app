@@ -70,17 +70,17 @@ class CardTransformerService
                 'display'    => $this->buildLocationDisplay($user),
                 'distanceKm' => $distanceKm,
             ],
-            'match'       => $matchResult,
-            'badges'      => $this->buildBadges($user),
-            'bio'         => $user->bio,
-            'startupIdea' => $user->startup_idea,
-            'interests'   => $interests,
-            'skills'      => $skills,
+            'match'          => $matchResult,
+            'badges'         => $this->buildBadges($user),
+            'bio'            => $user->bio,
+            'startupIdea'    => $user->startup_idea,
+            'interests'      => $interests,
+            'skills'         => $skills,
             'experience'     => $this->buildExperience($user),
             'education'      => $this->buildEducation($user),
-            'certifications' => [], // Placeholder for future use
-            'languages'      => $user->languages ?? [],
-            'linkedinUrl'    => $user->linkedin_url ?: null, // Tappable — FE opens in browser
+            'certifications' => $this->buildCertifications($user),
+            'languages'      => $this->buildLanguages($user),
+            'linkedinUrl'    => $user->linkedin_url ?: null,
         ];
     }
 
@@ -267,5 +267,55 @@ class CardTransformerService
                 return array_merge($stage, ['state' => $state]);
             }, $stages, array_keys($stages)),
         ];
+    }
+
+    /**
+     * Build certifications from LinkedIn raw_data scraping.
+     * raw_data['certifications'] is an array of objects from Apify.
+     */
+    private function buildCertifications(User $user): array
+    {
+        if ($user->relationLoaded('credentials')) {
+            $linkedIn = $user->credentials->where('provider', 'linkedin')->first();
+            if ($linkedIn && !empty($linkedIn->raw_data['certifications'])) {
+                return collect($linkedIn->raw_data['certifications'])
+                    ->map(fn($cert) => [
+                        'name'   => $cert['name']         ?? $cert['title']   ?? '',
+                        'issuer' => $cert['authority']    ?? $cert['issuer']  ?? $cert['organization'] ?? '',
+                        'date'   => $cert['displayDate']  ?? $cert['date']    ?? null,
+                    ])
+                    ->filter(fn($c) => !empty($c['name']))
+                    ->values()
+                    ->toArray();
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * Build languages from LinkedIn raw_data scraping.
+     * Falls back to users.languages column if LinkedIn data is not available.
+     */
+    private function buildLanguages(User $user): array
+    {
+        if ($user->relationLoaded('credentials')) {
+            $linkedIn = $user->credentials->where('provider', 'linkedin')->first();
+            if ($linkedIn && !empty($linkedIn->raw_data['languages'])) {
+                return collect($linkedIn->raw_data['languages'])
+                    ->map(fn($lang) => is_string($lang) ? $lang : ($lang['name'] ?? ''))
+                    ->filter()
+                    ->values()
+                    ->toArray();
+            }
+        }
+
+        // Fallback: kolom languages langsung di tabel users
+        $langs = $user->languages;
+        if (!empty($langs)) {
+            return is_array($langs) ? $langs : [$langs];
+        }
+
+        return [];
     }
 }
