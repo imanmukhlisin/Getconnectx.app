@@ -329,9 +329,14 @@ class CardTransformerService
             if ($linkedIn && !empty($linkedIn->raw_data['certifications'])) {
                 return collect($linkedIn->raw_data['certifications'])
                     ->map(fn($cert) => [
-                        'name'   => $cert['name']         ?? $cert['title']   ?? '',
-                        'issuer' => $cert['authority']    ?? $cert['issuer']  ?? $cert['organization'] ?? '',
-                        'date'   => $cert['displayDate']  ?? $cert['date']    ?? null,
+                        'name'    => $cert['title']       ?? $cert['name']      ?? '',
+                        'issuer'  => $cert['issuedBy']    ?? $cert['authority'] ?? $cert['issuer'] ?? '',
+                        'date'    => $cert['issuedAt']    ?? $cert['displayDate'] ?? $cert['date'] ?? null,
+                        'logoUrl' => $cert['issuedByLogo']['sizes'][2]['url'] // 100x100
+                                  ?? $cert['issuedByLogo']['sizes'][1]['url'] // 200x200
+                                  ?? $cert['issuedByLogo']['url']             // original
+                                  ?? $cert['logo']
+                                  ?? null,
                     ])
                     ->filter(fn($c) => !empty($c['name']))
                     ->values()
