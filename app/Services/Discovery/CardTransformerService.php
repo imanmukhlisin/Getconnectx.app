@@ -58,6 +58,7 @@ class CardTransformerService
 
         // Fallback: ambil dari onboarding_responses (q_tm_skills / q_cf_skills)
         if (empty($skills)) {
+            // Level 1: cari question skills spesifik
             $skillResponse = \Illuminate\Support\Facades\DB::table('onboarding_responses')
                 ->join('onboarding_sessions', 'onboarding_sessions.id', '=', 'onboarding_responses.session_id')
                 ->where('onboarding_sessions.user_id', $user->id)
@@ -75,6 +76,30 @@ class CardTransformerService
                     ])->values()->toArray();
                 }
             }
+        }
+
+        // Level 2: fallback dari q_cf_type (tipe co-founder) + q_bld_role
+        if (empty($skills)) {
+            $typeResponse = \Illuminate\Support\Facades\DB::table('onboarding_responses')
+                ->join('onboarding_sessions', 'onboarding_sessions.id', '=', 'onboarding_responses.session_id')
+                ->where('onboarding_sessions.user_id', $user->id)
+                ->where('onboarding_sessions.status', 'completed')
+                ->whereIn('onboarding_responses.question_id', ['q_cf_type', 'q_bld_role', 'q_fdr_type'])
+                ->orderBy('onboarding_sessions.completed_at', 'desc')
+                ->get(['onboarding_responses.question_id', 'onboarding_responses.value']);
+
+            foreach ($typeResponse as $resp) {
+                $raw = is_array($resp->value) ? $resp->value : json_decode($resp->value, true);
+                if (is_array($raw)) {
+                    foreach ($raw as $s) {
+                        $skills[] = [
+                            'id'   => 'sk_ob_' . md5($s),
+                            'name' => $this->getOnboardingLabel([$resp->question_id, 'q_cf_type', 'q_bld_role'], $s),
+                        ];
+                    }
+                }
+            }
+            $skills = array_values(array_unique($skills, SORT_REGULAR));
         }
 
         return [
