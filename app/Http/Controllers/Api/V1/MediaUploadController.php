@@ -48,33 +48,19 @@ class MediaUploadController extends Controller
                 throw new \Exception("Failed to store file on disk: {$disk}. Check your cloud storage credentials.");
             }
 
-            $url = $this->resolvePublicUrl($path, $disk);
+            $url          = $this->resolvePublicUrl($path, $disk);
+            $thumbnailUrl = $url; // Same for now — production can trigger a resize job
 
-            // Thumbnail URL: same as main for now — in production, trigger a resize job
-            $thumbnailUrl = $url;
-
-            // Persist a reference row in messages so sendMessage can look it up
-            // We use a "phantom" message row as a temporary upload record
-            $uploadRecord = \App\Models\Message::create([
-                'id'              => $mediaId,
-                'conversation_id' => null, // null = not yet attached to a conversation
-                'sender_id'       => $request->user()->id,
-                'content'         => null,
-                'type'            => 'image',
-                'media'           => [
-                    'url'           => $url,
-                    'thumbnail_url' => $thumbnailUrl,
-                    'mime_type'     => $mimeType,
-                    'size_bytes'    => $size,
-                ],
-            ]);
-
-            Log::info('MediaUploadController: File uploaded.', [
+            Log::info('MediaUploadController: File uploaded to GCS.', [
                 'media_id' => $mediaId,
                 'user_id'  => $request->user()->id,
                 'size'     => $size,
+                'url'      => $url,
             ]);
 
+            // Return only the upload result.
+            // The actual messages row is created later by POST /conversations/{id}/messages
+            // when FE passes `type: "image"` + `media_url` from this response.
             return response()->json([
                 'media_id'      => $mediaId,
                 'url'           => $url,
