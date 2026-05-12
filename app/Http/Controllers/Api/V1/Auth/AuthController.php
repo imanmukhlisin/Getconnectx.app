@@ -418,7 +418,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         // Dynamic discovery mode mapping from onboarding
-        $discoveryMode = null;
+        $discoveryMode = 'explore_startups'; // Default fallback
         if ($user->is_onboarded) {
             $session = \App\Models\Onboarding\OnboardingSession::where('user_id', $user->id)
                 ->where('status', 'completed')
@@ -433,16 +433,29 @@ class AuthController extends Controller
                 $getVal = fn($key) => isset($responses[$key]) ? (is_array($responses[$key]->value) ? ($responses[$key]->value[0] ?? null) : $responses[$key]->value) : null;
 
                 $action = $getVal('q_use_connectx');
+                
                 if ($action === 'startup') {
-                    $lookingFor = $getVal('q_su_need_type') ?? $getVal('q_fdr_looking');
+                    $lookingFor = $getVal('q_su_need');
                     $discoveryMode = match ($lookingFor) {
                         'cofounder' => 'finding_cofounder',
                         'team'      => 'building_team',
-                        'both'      => 'building_team',
+                        'both'      => 'finding_cofounder',
                         default     => 'finding_cofounder'
                     };
-                } else {
-                    $discoveryMode = 'joining_startups';
+                } elseif ($action === 'builder') {
+                    $bldType = $getVal('q_bld_type');
+                    if ($bldType === 'founder') {
+                        $lookingFor = $getVal('q_fdr_looking');
+                        $discoveryMode = match ($lookingFor) {
+                            'cofounder' => 'finding_cofounder',
+                            'team'      => 'building_team',
+                            'both'      => 'finding_cofounder',
+                            default     => 'finding_cofounder'
+                        };
+                    } else {
+                        // cofounder or team
+                        $discoveryMode = 'joining_startups';
+                    }
                 }
             }
         }
