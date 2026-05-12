@@ -1262,40 +1262,35 @@ class OnboardingSeeder extends Seeder
         // ════════════════════════════════════════════════════════════════
         $opts = [];
 
-        // ── Locations (68 cities with groups) ──
-        $groupedLocations = [];
-        foreach ($locations as $loc) {
-            $groupedLocations[$loc[2]][] = $loc;
-        }
-
-        uksort($groupedLocations, function ($a, $b) {
-            if ($a === 'Indonesia') return -1;
-            if ($b === 'Indonesia') return 1;
-            if ($a === 'Remote') return 1;
-            if ($b === 'Remote') return -1;
-            return strcmp($a, $b);
-        });
-
-        $sortedLocations = [];
-        foreach ($groupedLocations as $groupName => $locs) {
-            usort($locs, function ($a, $b) {
-                return strcmp($a[0], $b[0]);
-            });
-            foreach ($locs as $loc) {
-                $sortedLocations[] = $loc;
+        // ── Locations (From JSON Dataset) ──
+        $citiesPath = database_path('data/world_cities.json');
+        if (file_exists($citiesPath)) {
+            $jsonLocations = json_decode(file_get_contents($citiesPath), true);
+            foreach ($jsonLocations as $i => $loc) {
+                $opts[] = [
+                    'id' => 'opt_loc_' . ($i + 1),
+                    'question_id' => 'q_location',
+                    'order_index' => $i + 1,
+                    'label' => json_encode(['id' => $loc['label'], 'en' => $loc['label']]),
+                    'value' => $loc['value'],
+                    'sub_label' => null,
+                    'icon' => null,
+                    'group_name' => $loc['group'],
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
             }
-        }
-
-        foreach ($sortedLocations as $i => [$label, $value, $group]) {
+        } else {
+            // Fallback (jika file JSON belum di-download)
             $opts[] = [
-                'id' => 'opt_loc_' . ($i + 1),
+                'id' => 'opt_loc_1',
                 'question_id' => 'q_location',
-                'order_index' => $i + 1,
-                'label' => json_encode(['id' => $label, 'en' => $label]),
-                'value' => $value,
+                'order_index' => 1,
+                'label' => json_encode(['id' => 'Jakarta, Indonesia', 'en' => 'Jakarta, Indonesia']),
+                'value' => 'jakarta_indonesia',
                 'sub_label' => null,
                 'icon' => null,
-                'group_name' => $group,
+                'group_name' => 'Indonesia',
                 'created_at' => $now,
                 'updated_at' => $now,
             ];
