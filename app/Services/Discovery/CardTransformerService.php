@@ -47,13 +47,34 @@ class CardTransformerService
             }
         }
 
-        // Build skills from user tags
+        // Build skills: dari user tags (onboarding) — fallback ke onboarding_responses jika kosong
         $skills = [];
         if ($user->relationLoaded('tags')) {
             $skills = $user->tags->where('type', 'skill')->map(fn($tag) => [
                 'id'   => 'sk_' . $tag->id,
                 'name' => $this->getOnboardingLabel('q_tm_skills', $tag->name),
             ])->values()->toArray();
+        }
+
+        // Fallback: ambil dari onboarding_responses (q_tm_skills / q_cf_skills)
+        if (empty($skills)) {
+            $skillResponse = \Illuminate\Support\Facades\DB::table('onboarding_responses')
+                ->join('onboarding_sessions', 'onboarding_sessions.id', '=', 'onboarding_responses.session_id')
+                ->where('onboarding_sessions.user_id', $user->id)
+                ->where('onboarding_sessions.status', 'completed')
+                ->whereIn('onboarding_responses.question_id', ['q_tm_skills', 'q_cf_skills', 'q_fdr_skills'])
+                ->orderBy('onboarding_sessions.completed_at', 'desc')
+                ->value('onboarding_responses.value');
+
+            if ($skillResponse) {
+                $rawSkills = is_array($skillResponse) ? $skillResponse : json_decode($skillResponse, true);
+                if (is_array($rawSkills)) {
+                    $skills = collect($rawSkills)->map(fn($s) => [
+                        'id'   => 'sk_ob_' . md5($s),
+                        'name' => $this->getOnboardingLabel('q_tm_skills', $s),
+                    ])->values()->toArray();
+                }
+            }
         }
 
         return [
@@ -146,22 +167,25 @@ class CardTransformerService
     private function getOnboardingLabel($questionIds, ?string $value): string
     {
         if (empty($value)) return '';
-        
+
         if (is_string($questionIds)) $questionIds = [$questionIds];
 
-        return \Illuminate\Support\Facades\Cache::remember("onboarding_label_{$value}", 3600, function() use ($questionIds, $value) {
+        // Cache key pakai hash dari questionIds + value supaya tidak collision
+        $cacheKey = 'onboarding_label_' . md5(implode(',', $questionIds) . '_' . $value);
+
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function() use ($questionIds, $value) {
             $option = \Illuminate\Support\Facades\DB::table('onboarding_options')
                 ->whereIn('question_id', $questionIds)
                 ->where('value', $value)
                 ->first();
 
             if ($option) {
-                $labels = json_encode($option->label, true);
+                $labels = $option->label;
                 if (is_string($labels)) $labels = json_decode($labels, true);
                 return $labels['id'] ?? $labels['en'] ?? $value;
             }
 
-            // Final fallback: beautify the slug
+            // Final fallback: humanize slug (full_time → Full Time)
             return ucwords(str_replace(['_', '-'], ' ', $value));
         });
     }
