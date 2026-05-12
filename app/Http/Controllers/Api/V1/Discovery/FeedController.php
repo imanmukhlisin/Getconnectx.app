@@ -77,7 +77,7 @@ class FeedController extends Controller
             'position'            => $user->position,
             'role_category'       => $user->role_category,
             'startup_stage'       => $user->startup_stage,
-            'commitment_level'    => $user->commitment_level,
+            'commitment_level'    => $user->commitment_level ? ucwords(str_replace('_', ' ', $user->commitment_level)) : null,
             'distance_km'         => $user->distance_km ? round((float) $user->distance_km, 1) : null,
             'compatibility_score' => (float) ($user->compatibility_score ?? 0),
         ])->toArray();
