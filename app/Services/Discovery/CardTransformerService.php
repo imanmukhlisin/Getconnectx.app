@@ -70,7 +70,7 @@ class CardTransformerService
                 'display'    => $this->buildLocationDisplay($user),
                 'distanceKm' => $distanceKm,
             ],
-            'match' => $matchResult,
+            'match'       => $matchResult,
             'badges'      => $this->buildBadges($user),
             'bio'         => $user->bio,
             'startupIdea' => $user->startup_idea,
@@ -80,6 +80,7 @@ class CardTransformerService
             'education'      => $this->buildEducation($user),
             'certifications' => [], // Placeholder for future use
             'languages'      => $user->languages ?? [],
+            'linkedinUrl'    => $user->linkedin_url ?: null, // Tappable — FE opens in browser
         ];
     }
 
