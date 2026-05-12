@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             TagSeeder::class,
             OnboardingSeeder::class,
             NotificationTemplateSeeder::class,
+            DiscoveryCatalogSeeder::class,
+            PersonalityHobbySeeder::class,
         ]);
 
         // User::factory()->create([
