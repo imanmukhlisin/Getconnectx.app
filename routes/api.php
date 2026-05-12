@@ -279,5 +279,11 @@ Route::prefix('v1')->group(function () {
         Route::get('/',  [WhatsappWebhookController::class, 'verify'])->name('webhook.whatsapp.verify');
         Route::post('/', [WhatsappWebhookController::class, 'handle'])->name('webhook.whatsapp.handle');
     });
+
+    // ─── Test Push Notifications ─────────────────────────────────────────────
+    Route::prefix('test')->group(function () {
+        Route::post('push', [\App\Http\Controllers\Api\V1\TestNotificationController::class, 'sendTest']);
+        Route::post('push-direct', [\App\Http\Controllers\Api\V1\TestNotificationController::class, 'sendDirectTest']);
+    });
 });
 
