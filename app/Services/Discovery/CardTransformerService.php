@@ -93,7 +93,7 @@ class CardTransformerService
             'industry'     => $user->industry ?? $this->getFirstIndustryTag($user),
             'skills'       => $this->buildSkills($user),
             'certifications' => $this->buildCertifications($user),
-            'languages'    => is_array($user->languages) ? $user->languages : [],
+            'languages'    => $this->buildLanguages($user),
             'socials'      => $this->buildSocialLinks($user),
             'experience'   => $this->buildExperience($user),
             'education'    => $this->buildEducation($user),
@@ -193,22 +193,58 @@ class CardTransformerService
 
         $allCerts = [];
         foreach ($user->credentials as $cred) {
-            $data  = is_array($cred->raw_data) ? $cred->raw_data : json_decode($cred->raw_data, true);
+            // raw_data sudah di-cast ke array oleh model
+            $data  = is_array($cred->raw_data) ? $cred->raw_data : [];
             $certs = $data['certifications'] ?? [];
 
             if (is_array($certs)) {
                 foreach ($certs as $cert) {
+                    // Key dari LinkedIn scrape: 'title' (bukan 'name'), 'issuedByLogo' berupa object {url, sizes[]}
+                    $logoUrl = null;
+                    if (isset($cert['issuedByLogo']['url'])) {
+                        $logoUrl = $cert['issuedByLogo']['url'];
+                    } elseif (isset($cert['issuedByLogo']['sizes'][0]['url'])) {
+                        $logoUrl = $cert['issuedByLogo']['sizes'][0]['url'];
+                    }
+
                     $allCerts[] = [
-                        'name'    => $cert['name'] ?? 'Certification',
+                        'name'    => $cert['title'] ?? $cert['name'] ?? 'Certification',
                         'issuer'  => $cert['issuedBy'] ?? '',
-                        'logoUrl' => $cert['issuedByLogo'] ?? null,
+                        'logoUrl' => $logoUrl,
                         'date'    => $cert['issuedAt'] ?? null,
+                        'link'    => $cert['link'] ?? null,
                     ];
                 }
             }
         }
 
         return $allCerts;
+    }
+
+    private function buildLanguages(User $user): array
+    {
+        // 1. Cek kolom users.languages dulu (disinkron dari onboarding)
+        if (!empty($user->languages) && is_array($user->languages)) {
+            return $user->languages;
+        }
+
+        // 2. Fallback: ambil dari raw_data LinkedIn scrape
+        if (!$user->relationLoaded('credentials')) return [];
+
+        foreach ($user->credentials as $cred) {
+            $data  = is_array($cred->raw_data) ? $cred->raw_data : [];
+            $langs = $data['languages'] ?? [];
+
+            if (!empty($langs) && is_array($langs)) {
+                // Format LinkedIn: [{name, proficiency}] → return array of name strings
+                return array_values(array_filter(array_map(
+                    fn($l) => $l['name'] ?? null,
+                    $langs
+                )));
+            }
+        }
+
+        return [];
     }
 
     private function buildSocialLinks(User $user): array
@@ -221,6 +257,15 @@ class CardTransformerService
 
     private function buildExperience(User $user): array
     {
+        if (!$user->relationLoaded('credentials')) return [];
+
+        foreach ($user->credentials as $cred) {
+            // UserCredential punya kolom 'experience' sendiri (bukan dari raw_data)
+            if (!empty($cred->experience) && is_array($cred->experience)) {
+                return $cred->experience;
+            }
+        }
+
         return [];
     }
 
