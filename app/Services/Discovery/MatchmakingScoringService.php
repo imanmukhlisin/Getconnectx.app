@@ -155,12 +155,23 @@ class MatchmakingScoringService
         $aTags = $this->getUserTagGroupIds($a, 'role');
         $bTags = $this->getUserTagGroupIds($b, 'role');
         
-        // 2. Fallback to onboarding columns if tags empty
+        // 2. Fallback to builder model columns if tags empty
         if (empty($aTags)) {
-            $aTags = is_array($a->cofounder_type) ? $a->cofounder_type : ($a->cofounder_type ? [$a->cofounder_type] : []);
+            $builder = $a->builder;
+            if ($builder) {
+                $aTags = [$builder->primary_role];
+            } else {
+                // Last fallback to legacy columns
+                $aTags = is_array($a->cofounder_type) ? $a->cofounder_type : ($a->cofounder_type ? [$a->cofounder_type] : []);
+            }
         }
         if (empty($bTags)) {
-            $bTags = is_array($b->cofounder_type) ? $b->cofounder_type : ($b->cofounder_type ? [$b->cofounder_type] : []);
+            $builder = $b->builder;
+            if ($builder) {
+                $bTags = [$builder->primary_role];
+            } else {
+                $bTags = is_array($b->cofounder_type) ? $b->cofounder_type : ($b->cofounder_type ? [$b->cofounder_type] : []);
+            }
         }
 
         if (empty($aTags) || empty($bTags)) return 0.5;
@@ -194,9 +205,23 @@ class MatchmakingScoringService
         $aCom = $this->getUserTagGroupIds($a, 'commitment');
         $bCom = $this->getUserTagGroupIds($b, 'commitment');
         
-        // 2. Fallback to commitment_level column
-        if (empty($aCom) && $a->commitment_level) $aCom = [$a->commitment_level];
-        if (empty($bCom) && $b->commitment_level) $bCom = [$b->commitment_level];
+        // 2. Fallback to builder model
+        if (empty($aCom)) {
+            $builder = $a->builder;
+            if ($builder && $builder->commitment_level) {
+                $aCom = [$builder->commitment_level];
+            } elseif ($a->commitment_level) {
+                $aCom = [$a->commitment_level];
+            }
+        }
+        if (empty($bCom)) {
+            $builder = $b->builder;
+            if ($builder && $builder->commitment_level) {
+                $bCom = [$builder->commitment_level];
+            } elseif ($b->commitment_level) {
+                $bCom = [$b->commitment_level];
+            }
+        }
 
         if (empty($aCom) || empty($bCom)) return 0.5;
 

@@ -129,6 +129,11 @@ class User extends Authenticatable
         return $this->hasOne(\App\Models\Startup::class, 'owner_id');
     }
 
+    public function builder()
+    {
+        return $this->hasOne(\App\Models\Builder::class, 'user_id');
+    }
+
     /**
      * Kredensial OAuth user (LinkedIn, Google, dll).
      */
