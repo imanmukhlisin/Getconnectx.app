@@ -111,7 +111,7 @@ class CardTransformerService
             'tagline'      => $startup->tagline,
             'industry'     => $startup->industry,
             'stage'        => $startup->stage,
-            'location'     => $startup->location ?? null,
+            'location'     => $startup->city ? "{$startup->city}, {$startup->country}" : $startup->country,
 
             'matchmaking'  => $matchResult ? [
                 'score'      => $matchResult['score'],

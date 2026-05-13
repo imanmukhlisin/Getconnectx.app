@@ -106,16 +106,20 @@ class DiscoveryController extends Controller
 
         if ($isP2P) {
             $query  = $this->filterBuilder->buildProfileQuery($authUser, $filters, $mode);
-            $query->with(['tags', 'credentials', 'builder']); // eager load for card transformation
-            $result = $this->filterBuilder->applyCursorPagination($query, $cursor, $limit);
+            $result = $this->filterBuilder->applyCursorPagination(
+                $query->with(['tags', 'credentials', 'builder']), // eager load
+                $cursor, $limit
+            );
 
             $items = $result['items']->map(function ($user, $idx) use ($authUser) {
                 return $this->cardTransformer->transformProfileCard($user, $idx, null, $authUser);
             })->values()->toArray();
         } else {
             $query  = $this->filterBuilder->buildStartupQuery($authUser, $filters, $mode);
-            $query->with('owner'); // eager load founder
-            $result = $this->filterBuilder->applyCursorPagination($query, $cursor, $limit);
+            $result = $this->filterBuilder->applyCursorPagination(
+                $query->with('owner'), // eager load founder
+                $cursor, $limit
+            );
 
             $items = $result['items']->map(function ($startup, $idx) use ($authUser) {
                 return $this->cardTransformer->transformStartupCard($startup, $idx, null, $authUser);
