@@ -7,7 +7,7 @@ You have been invited to join **{{ $startup->name }}** on ConnectX.
 **Commitment:** {{ ucwords(str_replace('_', ' ', $invitation->commitment)) }}
 **Equity Offered:** {{ $invitation->equity_percent }}%
 
-<x-mail::button :url="config('app.frontend_url') . '/invitations'">
+<x-mail::button url="connectx://team">
 Review Invitation
 </x-mail::button>
 
