@@ -170,7 +170,7 @@ class CardTransformerService
             'team'        => $teamBlock,                  // was teamSize number — FIXED
             // ── CON-60 content fields ────────────────────────────────────
             'summary'     => $startup->description,       // was about — FIXED
-            'website'     => $startup->website ?? null,
+            'website'     => null, // kolom website belum ada di tabel startups
             'openRoles'   => is_array($startup->open_roles) ? $startup->open_roles : [], // was missing — ADDED
             'lookingFor'  => $this->buildLookingFor($startup),
             'teamStage'   => $startup->stage,             // was stage — FIXED name
@@ -250,8 +250,8 @@ class CardTransformerService
     private function buildSocialLinks(User $user): array
     {
         return [
-            'linkedin' => $user->linkedin_url,
-            'github'   => $user->github_url ?? null,
+            'linkedin' => $user->linkedin_url ?? null,
+            'github'   => null, // github_url tidak ada di tabel users
         ];
     }
 
