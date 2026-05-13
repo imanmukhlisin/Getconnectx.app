@@ -67,6 +67,7 @@ class CardTransformerService
             if ($isPro) {
                 $matchBlock['highlights'] = $matchResult['highlights'] ?? [];
                 $matchBlock['reason']     = $matchReason;
+                $matchBlock['analysis']   = $matchResult['analysis'] ?? null;
             }
         }
 
@@ -100,14 +101,14 @@ class CardTransformerService
             'about'        => $user->bio,        // Legacy FE fallback
             'startupIdea'  => $user->startup_idea ?? null,
             'linkedinUrl'  => $user->linkedin_url ?? null,
-            'industries'   => $industries,
+            'industries'   => collect($industries)->pluck('name')->all(),
             'industry'     => $user->industry ?? ($industries[0]['name'] ?? null),
-            'interests'    => $this->buildInterests($user),
-            'skills'       => $this->buildSkills($user),
+            'interests'    => collect($this->buildInterests($user))->pluck('name')->all(),
+            'skills'       => collect($this->buildSkills($user))->pluck('name')->all(),
             'commitment'   => $user->commitment_level ? ucwords(str_replace('_', ' ', $user->commitment_level)) : null,
             'role'         => $user->position ?? 'Developer',
             'certifications' => $this->buildCertifications($user),
-            'languages'    => $this->buildLanguages($user),
+            'languages'    => collect($this->buildLanguages($user))->pluck('name')->all(),
             'experience'   => $this->buildExperience($user),
             'education'    => $this->buildEducation($user),
             'socials'      => $this->buildSocialLinks($user),
@@ -410,7 +411,7 @@ class CardTransformerService
                         return [
                             'degree'     => $e['degree'] ?? '',
                             'school'     => $e['schoolName'] ?? $e['school'] ?? '',
-                            'schoolLogo' => $e['logo']['url'] ?? $e['logo']['sizes'][0]['url'] ?? null,
+                            'schoolLogo' => $e['schoolLogo']['url'] ?? $e['schoolLogo']['sizes'][0]['url'] ?? null,
                             'period'     => $e['period'] ?? null,
                             'field'      => $e['fieldOfStudy'] ?? null,
                         ];
