@@ -45,31 +45,58 @@ class CardTransformerService
             }
         }
 
+        // Location as Object (CON-60)
+        $locationDisplay = collect([$user->city, $user->country])->filter()->implode(', ');
+        $locationBlock = [
+            'city'       => $user->city ?? null,
+            'country'    => $user->country ?? null,
+            'display'    => $locationDisplay ?: null,
+            'distanceKm' => $distanceKm,
+        ];
+
+        // Match Block (CON-60)
+        $matchBlock = null;
+        if ($matchResult) {
+            $matchBlock = [
+                'score'      => $matchResult['score'],
+                'label'      => $matchResult['label'],
+            ];
+            if ($isPro) {
+                $matchBlock['highlights'] = $matchResult['highlights'] ?? [];
+                $matchBlock['reason']     = $matchReason;
+            }
+        }
+
+        // Age Calculation
+        $age = null;
+        if ($user->date_of_birth) {
+            try {
+                $age = Carbon::parse($user->date_of_birth)->age;
+            } catch (\Throwable $e) {
+                $age = null;
+            }
+        }
+
         return [
             'entityType'   => 'profile',
             'id'           => "card_{$user->id}_{$index}",
             'profileId'    => $user->id,
+            'photoUrl'     => $user->avatar_url,
             'name'         => $user->name,
-            'avatarUrl'    => $user->avatar_url,
-            'position'     => $user->position,
-            'industry'     => $user->industry ?? $this->getFirstIndustryTag($user),
-            'location'     => $user->city ? "{$user->city}, {$user->country}" : $user->country,
-            'distanceKm'   => $distanceKm,
-
-            'matchmaking'  => $matchResult ? [
-                'score'      => $matchResult['score'],
-                'label'      => $matchResult['label'],
-                'highlights' => $isPro ? $matchResult['highlights'] : [],
-                'reason'     => $isPro ? $matchReason : null,
-            ] : null,
-
-            'skills'         => $this->buildSkills($user),
+            'age'          => $age,
+            'headline'     => $user->position,
+            'location'     => $locationBlock,
+            'match'        => $matchBlock,
+            'badges'       => [], // Placeholder for badges
+            'bio'          => $user->bio,
+            'startupIdea'  => $user->startup_idea ?? null,
+            'interests'    => [], // Placeholder
+            'skills'       => $this->buildSkills($user),
             'certifications' => $this->buildCertifications($user),
-            'languages'      => $this->buildLanguages($user),
-            'about'          => $user->bio,
-            'socials'        => $this->buildSocialLinks($user),
-            'experience'     => $this->buildExperience($user),
-            'education'      => $this->buildEducation($user),
+            'languages'    => $this->buildLanguages($user),
+            'experience'   => $this->buildExperience($user),
+            'education'    => $this->buildEducation($user),
+            'socials'      => $this->buildSocialLinks($user),
         ];
     }
 
@@ -102,33 +129,64 @@ class CardTransformerService
             }
         }
 
+        // Match Block (CON-60)
+        $matchBlock = null;
+        if ($matchResult) {
+            $matchBlock = [
+                'score'      => $matchResult['score'],
+                'label'      => $matchResult['label'],
+            ];
+            if ($isPro) {
+                $matchBlock['highlights'] = $matchResult['highlights'] ?? [];
+                $matchBlock['reason']     = $matchReason;
+            }
+        }
+
+        // Industry Object (CON-60)
+        $industryDisplay = collect([$startup->industry, $startup->secondary_industry ?? null])->filter()->implode(' · ');
+        $industryBlock = [
+            'primary'   => $startup->industry,
+            'secondary' => $startup->secondary_industry ?? null,
+            'display'   => $industryDisplay ?: null,
+        ];
+
+        // Team Object (CON-60)
+        $teamBlock = [
+            'memberCount' => $startup->team_size ?? 1,
+            'display'     => $startup->team_size ? "{$startup->team_size} members" : "1 member",
+        ];
+
+        // TeamStage Object (API-MACHMAKING)
+        $openRoles = is_array($startup->open_roles) ? $startup->open_roles : [];
+        $teamStageBlock = [
+            'teamSize'    => $startup->team_size ?? 1,
+            'stage'       => $startup->stage ? strtoupper($startup->stage) : null,
+            'industry'    => $startup->industry,
+            'hiringCount' => count($openRoles)
+        ];
+
+        // Journey Object (API-MACHMAKING)
+        $journeyBlock = $this->buildJourney($startup->stage);
+
         return [
             'entityType'   => 'startup',
             'id'           => "card_startup_{$startup->id}_{$index}",
             'startupId'    => $startup->id,
             'name'         => $startup->name,
             'logoUrl'      => $startup->logo_url,
-            'tagline'      => $startup->tagline,
-            'industry'     => $startup->industry,
-            'stage'        => $startup->stage,
-            'location'     => $startup->city ? "{$startup->city}, {$startup->country}" : $startup->country,
-
-            'matchmaking'  => $matchResult ? [
-                'score'      => $matchResult['score'],
-                'label'      => $matchResult['label'],
-                'highlights' => $isPro ? $matchResult['highlights'] : [],
-                'reason'     => $isPro ? $matchReason : null,
-            ] : null,
-
-            'about'        => $startup->description,
-            'lookingFor'   => $this->buildLookingFor($startup),
-            'teamSize'     => $startup->team_size,
-            'foundedAt'    => $startup->founded_at ? Carbon::parse($startup->founded_at)->format('Y') : null,
+            'badge'        => ['label' => $startup->stage ? strtoupper($startup->stage) : null],
             'founder'      => $owner ? [
-                'name'      => $owner->name,
-                'avatarUrl' => $owner->avatar_url,
-                'position'  => $owner->position,
+                'name'  => $owner->name,
+                'title' => $owner->position ?? 'Founder',
             ] : null,
+            'match'        => $matchBlock,
+            'industry'     => $industryBlock,
+            'team'         => $teamBlock,
+            'summary'      => $startup->description,
+            'openRoles'    => $openRoles,
+            'lookingFor'   => $this->buildLookingFor($startup),
+            'teamStage'    => $teamStageBlock,
+            'journey'      => $journeyBlock,
         ];
     }
 
@@ -234,5 +292,43 @@ class CardTransformerService
     {
         if (!$user->relationLoaded('tags')) return null;
         return $user->tags->where('type', 'industry')->first()?->name;
+    }
+
+    private function buildJourney(?string $currentStage): array
+    {
+        $allStages = ['idea', 'mvp', 'pre_seed', 'seed'];
+        // Normalize DB stage value to array values if needed, fallback to idea
+        $normalizedStage = strtolower(str_replace('-', '_', $currentStage ?? 'idea'));
+
+        $currentIndex = array_search($normalizedStage, $allStages);
+        if ($currentIndex === false) $currentIndex = 0;
+
+        $stagesList = [];
+        foreach ($allStages as $i => $stageId) {
+            $labelMap = [
+                'idea' => 'Idea',
+                'mvp' => 'MVP',
+                'pre_seed' => 'Pre-Seed',
+                'seed' => 'Seed'
+            ];
+
+            $state = 'upcoming';
+            if ($i < $currentIndex) {
+                $state = 'completed';
+            } elseif ($i === $currentIndex) {
+                $state = 'current';
+            }
+
+            $stagesList[] = [
+                'id' => $stageId,
+                'label' => $labelMap[$stageId] ?? ucfirst($stageId),
+                'state' => $state
+            ];
+        }
+
+        return [
+            'currentStage' => $normalizedStage,
+            'stages' => $stagesList
+        ];
     }
 }

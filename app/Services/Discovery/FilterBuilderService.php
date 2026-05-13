@@ -192,11 +192,13 @@ class FilterBuilderService
      */
     public function applyCursorPagination(Builder $query, ?string $cursor, int $limit): array
     {
+        $table = $query->getModel()->getTable();
+
         if ($cursor) {
-            $query->where($query->getModel()->getTable() . '.id', '>', $cursor);
+            $query->where("{$table}.id", '>', $cursor);
         }
 
-        $query->orderBy($query->getModel()->getTable() . '.id', 'asc');
+        $query->orderBy("{$table}.id", 'asc');
 
         // Fetch limit + 1 to determine hasMore
         $results = $query->limit($limit + 1)->get();
