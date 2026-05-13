@@ -90,7 +90,10 @@ class CardTransformerService
             'badges'       => [], // Placeholder for badges
             'bio'          => $user->bio,
             'startupIdea'  => $user->startup_idea ?? null,
-            'interests'    => [], // Placeholder
+            'linkedinUrl'  => $user->linkedin_url ?? null,
+            'industry'     => $user->industry ?? $this->getFirstIndustryTag($user),
+            'industries'   => $this->buildIndustries($user),
+            'interests'    => $this->buildInterests($user),
             'skills'       => $this->buildSkills($user),
             'certifications' => $this->buildCertifications($user),
             'languages'    => $this->buildLanguages($user),
@@ -195,7 +198,19 @@ class CardTransformerService
     private function buildSkills(User $user): array
     {
         if (!$user->relationLoaded('tags')) return [];
-        return $user->tags->where('type', 'skill')->pluck('name')->toArray();
+        return $user->tags->where('type', 'skill')->pluck('name')->values()->toArray();
+    }
+
+    private function buildInterests(User $user): array
+    {
+        if (!$user->relationLoaded('tags')) return [];
+        return $user->tags->where('type', 'interest')->pluck('name')->values()->toArray();
+    }
+
+    private function buildIndustries(User $user): array
+    {
+        if (!$user->relationLoaded('tags')) return [];
+        return $user->tags->where('type', 'industry')->pluck('name')->values()->toArray();
     }
 
     private function buildCertifications(User $user): array
