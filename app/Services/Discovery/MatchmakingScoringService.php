@@ -52,9 +52,46 @@ class MatchmakingScoringService
         $finalScore = min(100, max(0, $finalScore));
 
         return [
-            'score' => $finalScore,
-            'label' => $this->buildMatchLabel($finalScore),
+            'score'      => $finalScore,
+            'label'      => $this->buildMatchLabel($finalScore),
+            'highlights' => $this->buildMatchHighlights($authUser, $targetUser, $scores),
         ];
+    }
+
+    /**
+     * Build a list of highlights (reasons why they match).
+     */
+    private function buildMatchHighlights(User $a, User $b, array $scores): array
+    {
+        $highlights = [];
+
+        // 1. Shared Industries
+        $aInd = $this->getUserTagGroupIds($a, 'industry');
+        $bInd = $this->getUserTagGroupIds($b, 'industry');
+        $sharedInd = array_intersect($aInd, $bInd);
+        if (!empty($sharedInd)) {
+            $highlights[] = 'Shared interest in ' . implode(', ', $sharedInd);
+        }
+
+        // 2. Skill Complementarity
+        if (($scores['skillComp'] ?? 0) >= 4.5) {
+            $highlights[] = 'Complementary skill sets (Hacker/Hustler dynamic)';
+        }
+
+        // 3. Shared Location
+        if ($a->city && $a->city === $b->city) {
+            $highlights[] = 'Both based in ' . $a->city;
+        }
+
+        // 4. Shared Languages
+        $aLangs = is_array($a->languages) ? $a->languages : [];
+        $bLangs = is_array($b->languages) ? $b->languages : [];
+        $sharedLangs = array_intersect($aLangs, $bLangs);
+        if (!empty($sharedLangs)) {
+            $highlights[] = 'Both speak ' . implode(', ', $sharedLangs);
+        }
+
+        return $highlights;
     }
 
     /**
@@ -98,19 +135,34 @@ class MatchmakingScoringService
 
     private function computeSkillComplementarity(User $a, User $b): float
     {
+        // 1. Try from Tags first
         $aTags = $this->getUserTagGroupIds($a, 'role');
         $bTags = $this->getUserTagGroupIds($b, 'role');
         
+        // 2. Fallback to onboarding columns if tags empty
+        if (empty($aTags)) {
+            $aTags = is_array($a->cofounder_type) ? $a->cofounder_type : ($a->cofounder_type ? [$a->cofounder_type] : []);
+        }
+        if (empty($bTags)) {
+            $bTags = is_array($b->cofounder_type) ? $b->cofounder_type : ($b->cofounder_type ? [$b->cofounder_type] : []);
+        }
+
         if (empty($aTags) || empty($bTags)) return 0.5;
         
         $intersection = array_intersect($aTags, $bTags);
+        // Hacker/Hustler dynamic: if they have DIFFERENT roles, it's a better match
         return count($intersection) === 0 ? 1.0 : 0.4;
     }
 
     private function computeIndustryFit(User $a, User $b): float
     {
+        // 1. Try from Tags
         $aInd = $this->getUserTagGroupIds($a, 'industry');
         $bInd = $this->getUserTagGroupIds($b, 'industry');
+
+        // 2. Fallback to primary industry column
+        if (empty($aInd) && $a->industry) $aInd = [$a->industry];
+        if (empty($bInd) && $b->industry) $bInd = [$b->industry];
 
         if (empty($aInd) || empty($bInd)) return 0.5;
 
@@ -122,9 +174,14 @@ class MatchmakingScoringService
 
     private function computeCommitmentFit(User $a, User $b): float
     {
+        // 1. Try from Tags
         $aCom = $this->getUserTagGroupIds($a, 'commitment');
         $bCom = $this->getUserTagGroupIds($b, 'commitment');
         
+        // 2. Fallback to commitment_level column
+        if (empty($aCom) && $a->commitment_level) $aCom = [$a->commitment_level];
+        if (empty($bCom) && $b->commitment_level) $bCom = [$b->commitment_level];
+
         if (empty($aCom) || empty($bCom)) return 0.5;
 
         $intersect = count(array_intersect($aCom, $bCom));

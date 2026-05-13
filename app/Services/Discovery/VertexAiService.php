@@ -22,11 +22,11 @@ class VertexAiService
     {
         // 1. Build a unique cache key based on user ID, mode, and filter hash
         $filterHash = md5(json_encode($filters));
-        $cacheKey   = self::CACHE_PREFIX . "{$user->id}:{$mode}:{$filterHash}";
+        $cacheKey   = self::CACHE_PREFIX . "insight:{$user->id}:{$mode}:{$filterHash}";
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user, $filters, $mode) {
             try {
-                $prompt = $this->buildPrompt($user, $filters, $mode);
+                $prompt = $this->buildInsightPrompt($user, $filters, $mode);
                 return $this->callVertexAi($prompt);
             } catch (\Throwable $e) {
                 Log::error('Vertex AI Error: ' . $e->getMessage());
@@ -36,35 +36,71 @@ class VertexAiService
         });
     }
 
+    /**
+     * Generate a specific reason why two users match.
+     */
+    public function generateMatchReason(User $authUser, User $targetUser, array $highlights): string
+    {
+        if (empty($highlights)) {
+            return "Based on your preferences, this profile is a potential match for your startup journey.";
+        }
+
+        $cacheKey = self::CACHE_PREFIX . "reason:{$authUser->id}:{$targetUser->id}";
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($authUser, $targetUser, $highlights) {
+            try {
+                $prompt = $this->buildMatchReasonPrompt($authUser, $targetUser, $highlights);
+                return $this->callVertexAi($prompt);
+            } catch (\Throwable $e) {
+                Log::error('Vertex AI Reason Error: ' . $e->getMessage());
+                return implode(' and ', array_slice($highlights, 0, 2)) . '.';
+            }
+        });
+    }
+
+
 
 
 
     /**
-     * Build the contextual prompt for Gemini 1.5 Pro.
+     * Build the contextual prompt for Discovery-wide insights.
      */
-    private function buildPrompt(User $user, array $filters, string $mode): string
+    private function buildInsightPrompt(User $user, array $filters, string $mode): string
     {
         $role = $user->position ?? 'Professional';
         $industry = $user->industry ?? 'Tech';
         
         $modeLabel = $this->getModeLabel($mode);
-        $filterSummary = json_encode($filters); // Can be formatted prettier if needed
+        $filterSummary = json_encode($filters);
 
         return <<<PROMPT
-You are ConnectX AI, an expert matchmaking assistant for a platform connecting startup founders and talents.
-Your goal is to generate a short, engaging, and professional 1-2 sentence insight about a user's current discovery search.
-
+You are ConnectX AI, an expert matchmaking assistant.
+Generate a short, engaging 1-sentence insight about the user's current search.
 Context:
 - User's Role: {$role}
-- User's Industry: {$industry}
 - What they are doing: {$modeLabel}
-- Their current search filters (JSON): {$filterSummary}
+- Search filters: {$filterSummary}
 
-Generate a personalized, encouraging insight explaining why the platform is uniquely positioned to find them great matches based on these precise filters. 
-Keep it under 30 words. Do not use hashtags or emojis. 
-Be direct, professional, and slightly enthusiastic.
+Explain why the platform is uniquely positioned to find them matches. Keep it under 25 words. Professional and enthusiastic.
 PROMPT;
     }
+
+    /**
+     * Build the prompt for a specific user-to-user match reason.
+     */
+    private function buildMatchReasonPrompt(User $authUser, User $targetUser, array $highlights): string
+    {
+        $highlightsStr = implode(', ', $highlights);
+
+        return <<<PROMPT
+You are ConnectX AI. 
+Explain in one very short, friendly sentence (max 15 words) why these two people are a great match.
+Key Highlights: {$highlightsStr}
+Example: "Both of you are based in Jakarta and share a passion for AI."
+Be direct and warm.
+PROMPT;
+    }
+
 
     // ═══════════════════════════════════════════════════════════════════
     //  Shared Infrastructure
