@@ -268,6 +268,7 @@ class DiscoveryController extends Controller
     public function rewind(Request $request): JsonResponse
     {
         $authUser = $request->user();
+        $mode     = $request->query('mode'); // e.g. explore_startups
 
         // 1. Check premium entitlement
         if (!$authUser->is_pro) {
@@ -294,22 +295,31 @@ class DiscoveryController extends Controller
             $targetUserId = $rewoundData['targetUserId'];
             $action = $rewoundData['action'];
             
-            // Check if target is a startup (mock logic or actual model load)
-            $targetUser = \App\Models\User::with('tags')->find($targetUserId);
+            // Check if target exists
+            $targetUser = \App\Models\User::with(['tags', 'startup'])->find($targetUserId);
             
             if (!$targetUser) {
-                // If user doesn't exist anymore
                 return $this->rewindConflictResponse('WINDOW_EXPIRED');
             }
 
-            // Transform into card
-            $card = $this->cardTransformer->transformProfileCard($targetUser, 0, null, $authUser);
+            // Transform into card based on mode
+            // If mode is startup-related and target has a startup, return startup card
+            if (in_array($mode, ['explore_startups', 'joining_startups']) && $targetUser->startup) {
+                $card = $this->cardTransformer->transformStartupCard($targetUser->startup, 0, null, $authUser);
+                $profileId = null;
+                $startupId = $targetUser->startup->id;
+            } else {
+                $card = $this->cardTransformer->transformProfileCard($targetUser, 0, null, $authUser);
+                $profileId = $targetUserId;
+                $startupId = null;
+            }
 
             return response()->json([
                 'success' => true,
                 'message' => 'Last swipe rewound.',
                 'data'    => [
-                    'profileId'     => $targetUserId,
+                    'profileId'     => $profileId,
+                    'startupId'     => $startupId,
                     'rewoundAction' => $action,
                     'card'          => $card
                 ]

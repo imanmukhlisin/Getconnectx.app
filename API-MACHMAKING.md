@@ -134,7 +134,8 @@ Mencari Startup yang mau di-join.
 
 ### 4. Rewind Action (Premium Only)
 Mengembalikan urung Swipe terakhir (dengan asumsi belum match).
-*   **Endpoint**: `POST {{base_url}}/api/v1/discovery/swipes/rewind`
+*   **Endpoint**: `POST {{base_url}}/api/v1/discovery/swipes/rewind?mode=explore_startups`
+*   **Query**: `mode` (optional: finding_cofounder, building_team, explore_startups, joining_startups)
 *   **Body JSON**: `{}`
 *   **Expected Response (200 OK)**:
 ```json

@@ -191,13 +191,7 @@ Route::prefix('v1')->group(function () {
         Route::post('skip',    [SwipeController::class, 'skip'])->name('swipe.skip');
     });
 
-    // ─── Authenticated: Discovery V2 — Filter Engine ─────────────────────────
-    Route::prefix('discovery')->middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
-        Route::get('filter-options',         [DiscoveryController::class, 'filterOptions'])->name('discovery.filter-options');
-        Route::post('cards',                 [DiscoveryController::class, 'cards'])->name('discovery.cards');
-        Route::post('cards/{targetId}/action', [DiscoveryController::class, 'swipeAction'])->name('discovery.swipe-action');
-        Route::post('swipes/rewind',         [DiscoveryController::class, 'rewind'])->name('discovery.rewind');
-    });
+
 
     // ─── Authenticated: Media Upload (Chat) ───────────────────────────────────
     Route::middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
@@ -237,12 +231,13 @@ Route::prefix('v1')->group(function () {
         });
 
         // Active Startup Context
+        // ─── Discovery V2 — Filter Engine ─────────────────────────
         Route::prefix('discovery')->group(function () {
-            Route::get('filter-options', [\App\Http\Controllers\Api\V1\Discovery\DiscoveryController::class, 'filterOptions']);
-            Route::post('cards', [\App\Http\Controllers\Api\V1\Discovery\DiscoveryController::class, 'cards']);
-            Route::post('cards/{targetId}/action', [\App\Http\Controllers\Api\V1\Discovery\DiscoveryController::class, 'swipeAction']);
-            Route::post('swipes/rewind', [\App\Http\Controllers\Api\V1\Discovery\DiscoveryController::class, 'rewind']);
-            Route::get('who-liked-me', [\App\Http\Controllers\Api\V1\Discovery\DiscoveryController::class, 'whoLikedMe']);
+            Route::get('filter-options',         [DiscoveryController::class, 'filterOptions'])->name('discovery.filter-options');
+            Route::post('cards',                 [DiscoveryController::class, 'cards'])->name('discovery.cards');
+            Route::post('cards/{targetId}/action', [DiscoveryController::class, 'swipeAction'])->name('discovery.swipe-action');
+            Route::post('swipes/rewind',         [DiscoveryController::class, 'rewind'])->name('discovery.rewind');
+            Route::get('who-liked-me',           [DiscoveryController::class, 'whoLikedMe'])->name('discovery.who-liked-me');
         });
 
         Route::prefix('me/startup')->group(function () {
