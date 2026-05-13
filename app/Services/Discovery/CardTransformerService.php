@@ -87,13 +87,17 @@ class CardTransformerService
             'id'           => "card_{$user->id}_{$index}",
             'profileId'    => $user->id,
             'photoUrl'     => $user->avatar_url,
+            'avatarUrl'    => $user->avatar_url, // Legacy FE fallback
             'name'         => $user->name,
             'age'          => $age,
             'headline'     => $user->position,
+            'position'     => $user->position,   // Legacy FE fallback
             'location'     => $locationBlock,
             'match'        => $matchBlock,
+            'matchmaking'  => $matchBlock,       // Legacy FE fallback
             'badges'       => [], // Placeholder for badges
             'bio'          => $user->bio,
+            'about'        => $user->bio,        // Legacy FE fallback
             'startupIdea'  => $user->startup_idea ?? null,
             'linkedinUrl'  => $user->linkedin_url ?? null,
             'industries'   => $industries,
