@@ -83,6 +83,29 @@ class SwipeService
                 app(FeedService::class)->invalidateUserFeedCache($fromUserId);
                 app(FeedService::class)->invalidateUserFeedCache($targetUserId);
 
+                // 4d. Send Push Notifications for Match
+                $userA = \App\Models\User::find($fromUserId);
+                $userB = \App\Models\User::find($targetUserId);
+                
+                if ($userA && $userB) {
+                    \App\Jobs\SendPushNotificationJob::dispatch($userB, 'new_match', [
+                        '[name]' => $userA->name ?? 'Someone',
+                        '[nama]' => $userA->name ?? 'Seseorang'
+                    ], [
+                        'screen'          => 'match_success',
+                        'match_id'        => $match->id,
+                        'conversation_id' => $match->conversation_id,
+                    ]);
+                    \App\Jobs\SendPushNotificationJob::dispatch($userA, 'new_match', [
+                        '[name]' => $userB->name ?? 'Someone',
+                        '[nama]' => $userB->name ?? 'Seseorang'
+                    ], [
+                        'screen'          => 'match_success',
+                        'match_id'        => $match->id,
+                        'conversation_id' => $match->conversation_id,
+                    ]);
+                }
+
             } else {
                 // Still invalidate own feed (target disappears from feed)
                 app(FeedService::class)->invalidateUserFeedCache($fromUserId);

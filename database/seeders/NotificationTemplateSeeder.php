@@ -62,6 +62,54 @@ class NotificationTemplateSeeder extends Seeder
                     'id' => 'Kamu dan [name] sudah terhubung. Mulai obrolan sekarang!',
                 ],
             ],
+            [
+                'name' => 'premium_activated',
+                'type' => 'push',
+                'title' => [
+                    'en' => '💎 ConnectX Pro Activated!',
+                    'id' => '💎 ConnectX Pro Aktif!',
+                ],
+                'body' => [
+                    'en' => 'Thank you for upgrading! Enjoy your unlimited swipes and advanced filters.',
+                    'id' => 'Terima kasih sudah langganan! Nikmati unlimited swipes dan advanced filters sekarang.',
+                ],
+            ],
+            [
+                'name' => 'startup_application_received',
+                'type' => 'push',
+                'title' => [
+                    'en' => '📄 New Application Received',
+                    'id' => '📄 Lamaran Baru Masuk',
+                ],
+                'body' => [
+                    'en' => '[applicant_name] has applied to join [startup_name].',
+                    'id' => '[applicant_name] melamar untuk bergabung dengan [startup_name].',
+                ],
+            ],
+            [
+                'name' => 'startup_application_status',
+                'type' => 'push',
+                'title' => [
+                    'en' => '📢 Application Status Updated',
+                    'id' => '📢 Status Lamaran Diperbarui',
+                ],
+                'body' => [
+                    'en' => 'Your application to [startup_name] is now [status].',
+                    'id' => 'Lamaranmu ke [startup_name] sekarang berstatus [status].',
+                ],
+            ],
+            [
+                'name' => 'startup_invitation_received',
+                'type' => 'push',
+                'title' => [
+                    'en' => '🤝 New Team Invitation',
+                    'id' => '🤝 Undangan Tim Baru',
+                ],
+                'body' => [
+                    'en' => 'You have been invited to join [startup_name] as a [role].',
+                    'id' => 'Kamu diundang untuk bergabung dengan [startup_name] sebagai [role].',
+                ],
+            ]
         ];
 
         foreach ($templates as $template) {

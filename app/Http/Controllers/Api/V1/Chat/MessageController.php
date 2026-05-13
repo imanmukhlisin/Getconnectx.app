@@ -218,6 +218,11 @@ class MessageController extends Controller
                     '[sender_name]' => $senderName,
                     '[sender]'      => $senderName,
                     '[message]'     => $type === 'text' ? ($content ?? '') : '📷 Image',
+                ],
+                [
+                    'screen'          => 'chat_room',
+                    'conversation_id' => $conversation->id,
+                    'sender_id'       => $authUser->id,
                 ]
             );
 
