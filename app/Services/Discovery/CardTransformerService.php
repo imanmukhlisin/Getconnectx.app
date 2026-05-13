@@ -111,6 +111,20 @@ class CardTransformerService
             'experience'   => $this->buildExperience($user),
             'education'    => $this->buildEducation($user),
             'socials'      => $this->buildSocialLinks($user),
+            'sections'     => [
+                'skills' => [
+                    'title' => 'Skills',
+                    'items' => $this->buildSkills($user),
+                ],
+                'interests' => [
+                    'title' => 'Interests',
+                    'items' => $this->buildInterests($user),
+                ],
+                'personalityAndHobbies' => [
+                    'title' => 'Personality & Hobbies',
+                    'items' => [],
+                ],
+            ],
         ];
     }
 
