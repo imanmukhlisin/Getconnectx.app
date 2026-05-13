@@ -7,46 +7,74 @@ use App\Models\User;
 class MatchmakingScoringService
 {
     /**
-     * Compute the matchmaking score between two users.
+     * Compute the matchmaking score using SAW (Simple Additive Weighting) + Profile Matching.
      * Returns an array with 'score' (0-100) and 'label' (e.g. "Perfect Match").
      */
     public function computeScore(User $authUser, User $targetUser, string $mode = 'finding_cofounder'): array
     {
-        // Compute base variables (0.0 to 1.0)
-        $modeFit = $this->computeModeFit($authUser, $targetUser, $mode);
-        $skillComp = $this->computeSkillComplementarity($authUser, $targetUser);
-        $industryFit = $this->computeIndustryFit($authUser, $targetUser);
-        $commitmentFit = $this->computeCommitmentFit($authUser, $targetUser);
+        $isPro = $authUser->is_pro;
 
-        if ($authUser->is_pro) {
-            // Premium Weighting
-            $score = 
-                ($modeFit * 21.7) +
-                ($skillComp * 18.6) +
-                ($industryFit * 12.4) +
-                ($commitmentFit * 9.3) +
-                ($this->computeStageFit($authUser, $targetUser) * 10) +
-                ($this->computeLocationScore($authUser, $targetUser) * 8) +
-                ($this->computeExperienceFit($authUser, $targetUser) * 5) +
-                ($this->computeLeadershipFit($authUser, $targetUser) * 5) +
-                ($this->computeLanguageFit($authUser, $targetUser) * 5) +
-                ($this->computeEducationFit($authUser, $targetUser) * 5);
-        } else {
-            // Free Weighting
-            $score = 
-                ($modeFit * 35) +
-                ($skillComp * 30) +
-                ($industryFit * 20) +
-                ($commitmentFit * 15);
+        // 1. Gather all individual scores (converted to 1.0 - 5.0 scale)
+        $scores = [
+            'modeFit'       => $this->computeModeFit($authUser, $targetUser, $mode) * 5,
+            'skillComp'     => $this->computeSkillComplementarity($authUser, $targetUser) * 5,
+            'industryFit'   => $this->computeIndustryFit($authUser, $targetUser) * 5,
+            'commitmentFit' => $this->computeCommitmentFit($authUser, $targetUser) * 5,
+        ];
+
+        if ($isPro) {
+            $scores['experienceFit'] = $this->computeExperienceFit($authUser, $targetUser) * 5;
+            $scores['stageFit']      = $this->computeStageFit($authUser, $targetUser) * 5;
+            $scores['locationScore'] = $this->computeLocationScore($authUser, $targetUser) * 5;
+            $scores['leadershipFit'] = $this->computeLeadershipFit($authUser, $targetUser) * 5;
+            $scores['languageFit']   = $this->computeLanguageFit($authUser, $targetUser) * 5;
+            $scores['educationFit']  = $this->computeEducationFit($authUser, $targetUser) * 5;
         }
 
-        // Ensure max theoretical limit is exactly 100
-        $finalScore = min(100, max(0, (int) round($score)));
+        // 2. Define Core Factors (CF) and Secondary Factors (SF)
+        if ($isPro) {
+            $cfKeys = ['modeFit', 'skillComp', 'industryFit', 'experienceFit', 'stageFit'];
+            $sfKeys = ['commitmentFit', 'locationScore', 'leadershipFit', 'languageFit', 'educationFit'];
+        } else {
+            $cfKeys = ['modeFit', 'skillComp'];
+            $sfKeys = ['industryFit', 'commitmentFit'];
+        }
+
+        // 3. Calculate NCF (Average Core Factor) and NSF (Average Secondary Factor)
+        $ncf = collect($cfKeys)->map(fn($k) => $scores[$k] ?? 0)->avg();
+        $nsf = collect($sfKeys)->map(fn($k) => $scores[$k] ?? 0)->avg();
+
+        // 4. Calculate Final SAW Score (60% CF + 40% SF)
+        $totalScoreValue = ($ncf * 0.6) + ($nsf * 0.4);
+
+        // 5. Convert to 0-100 scale
+        $finalScore = (int) round(($totalScoreValue / 5.0) * 100);
+        $finalScore = min(100, max(0, $finalScore));
 
         return [
             'score' => $finalScore,
             'label' => $this->buildMatchLabel($finalScore),
         ];
+    }
+
+    /**
+     * Map a GAP (difference) to a weight value (1-5).
+     * Used for more granular Profile Matching.
+     */
+    private function mapGapToWeight(float $gap): float
+    {
+        return match (true) {
+            $gap == 0   => 5.0, // Ideal
+            $gap == 1   => 4.5, // Surplus 1
+            $gap == -1  => 4.0, // Deficit 1
+            $gap == 2   => 3.5, // Surplus 2
+            $gap == -2  => 3.0, // Deficit 2
+            $gap == 3   => 2.5, // Surplus 3
+            $gap == -3  => 2.0, // Deficit 3
+            $gap == 4   => 1.5, // Surplus 4
+            $gap >= -4  => 1.0, // Deficit 4 or more
+            default     => 1.0,
+        };
     }
 
     /**
@@ -61,40 +89,35 @@ class MatchmakingScoringService
         return "Potential Match";
     }
 
-    // ─── Free Core Computations ──────────────────────────────────────────────
+    // ─── Core Computations (Normalized to 0.0 - 1.0) ──────────────────────────
 
     private function computeModeFit(User $a, User $b, string $mode): float
     {
-        // Example logic: Founder seeking Co-Founder gives max points
-        // In real life this depends on mode and their self-identified intentions.
-        // For 'finding_cofounder', both being aligned gets 1.0.
         return 1.0; 
     }
 
     private function computeSkillComplementarity(User $a, User $b): float
     {
-        // Hacker x Hustler complementarity
         $aTags = $this->getUserTagGroupIds($a, 'role');
         $bTags = $this->getUserTagGroupIds($b, 'role');
         
-        // Simplified Logic: if they have different primary roles (Hacker vs Hustler), 1.0
-        // If same (Hacker x Hacker), 0.3
-        $intersection = array_intersect($aTags, $bTags);
-        if (empty($aTags) || empty($bTags)) return 0.5; // neutral if unmapped
+        if (empty($aTags) || empty($bTags)) return 0.5;
         
+        $intersection = array_intersect($aTags, $bTags);
         return count($intersection) === 0 ? 1.0 : 0.4;
     }
 
     private function computeIndustryFit(User $a, User $b): float
     {
-        // Jaccard Similarity on industry tags
         $aInd = $this->getUserTagGroupIds($a, 'industry');
         $bInd = $this->getUserTagGroupIds($b, 'industry');
+
+        if (empty($aInd) || empty($bInd)) return 0.5;
 
         $intersection = count(array_intersect($aInd, $bInd));
         $union = count(array_unique(array_merge($aInd, $bInd)));
         
-        return $union === 0 ? 0.5 : ($intersection / $union);
+        return ($intersection / $union);
     }
 
     private function computeCommitmentFit(User $a, User $b): float
@@ -102,66 +125,56 @@ class MatchmakingScoringService
         $aCom = $this->getUserTagGroupIds($a, 'commitment');
         $bCom = $this->getUserTagGroupIds($b, 'commitment');
         
-        $intersect = count(array_intersect($aCom, $bCom));
-        return $intersect > 0 ? 1.0 : 0.5; // Same level = 1.0, diff = 0.5
-    }
+        if (empty($aCom) || empty($bCom)) return 0.5;
 
-    // ─── Premium Sub-scores ──────────────────────────────────────────────────
+        $intersect = count(array_intersect($aCom, $bCom));
+        return $intersect > 0 ? 1.0 : 0.5;
+    }
 
     private function computeStageFit(User $a, User $b): float
     {
-        return 0.8; // Stubbed stage fit (Requires startup relationship to be checked)
+        return 0.8; 
     }
 
     private function computeLocationScore(User $a, User $b): float
     {
-        // L (Local Fit)
-        $lScore = 0.3; // Diff
-        if ($a->city && $a->city === $b->city) $lScore = 1.0;
-        elseif ($a->country && $a->country === $b->country) $lScore = 0.8;
-        
-        // R (Remote Fit)
+        $lScore = ($a->city && $a->city === $b->city) ? 1.0 : (($a->country && $a->country === $b->country) ? 0.8 : 0.3);
         $aRemote = $a->remote_ready ?? false;
         $bRemote = $b->remote_ready ?? false;
         $rScore = ($aRemote && $bRemote) ? 1.0 : (($aRemote || $bRemote) ? 0.5 : 0.0);
-
-        // Relocate (Rel)
-        // For simplicity, let's assume rel willingness is part of work_arrangement
         $relScore = 0.5;
 
-        // Formula: (Lx5) + (Rx3) + (Relx2) => max 10
         return (($lScore * 5) + ($rScore * 3) + ($relScore * 2)) / 10;
     }
 
     private function computeExperienceFit(User $a, User $b): float
     {
-        // Proximity of experience. (Assuming experience is saved in years or similar level tag)
         return 0.7; 
     }
 
     private function computeLeadershipFit(User $a, User $b): float
     {
-        // Complementary leadership styles
         return 0.75;
     }
 
     private function computeLanguageFit(User $a, User $b): float
     {
-        // Shared languages
         $aLangs = is_array($a->languages) ? $a->languages : [];
         $bLangs = is_array($b->languages) ? $b->languages : [];
         
-        if (empty($aLangs) && empty($bLangs)) return 1.0;
+        if (empty($aLangs) || empty($bLangs)) return 0.5;
         
         $shared = count(array_intersect($aLangs, $bLangs));
-        return $shared > 0 ? 1.0 : 0.0;
+        return $shared > 0 ? 1.0 : 0.4;
     }
 
     private function computeEducationFit(User $a, User $b): float
     {
         $aEdu = is_array($a->education) ? $a->education : [];
         $bEdu = is_array($b->education) ? $b->education : [];
-        // Same education level match
+        
+        if (empty($aEdu) || empty($bEdu)) return 0.5;
+
         return (count(array_intersect($aEdu, $bEdu)) > 0) ? 1.0 : 0.7;
     }
 
@@ -170,7 +183,6 @@ class MatchmakingScoringService
     private function getUserTagGroupIds(User $user, string $type): array
     {
         if (!$user->relationLoaded('tags')) {
-            // Safe fallback if not eager loaded
             return [];
         }
         return $user->tags->where('type', $type)->pluck('id')->toArray();
