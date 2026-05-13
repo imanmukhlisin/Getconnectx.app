@@ -128,12 +128,12 @@ class DiscoveryController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Discovery cards fetched successfully',
-            'data'    => [
+            'data'    => $items,
+            'meta'    => [
                 'aiInsight'  => $aiInsight,
-                'items'      => $items,
                 'nextCursor' => $result['nextCursor'],
                 'hasMore'    => $result['hasMore'],
-            ],
+            ]
         ]);
     }
 
