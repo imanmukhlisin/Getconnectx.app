@@ -174,7 +174,7 @@ class MatchmakingScoringService
             }
         }
 
-        if (empty($aTags) || empty($bTags)) return 0.5;
+        if (empty($aTags) || empty($bTags)) return 0.3;
         
         $intersection = array_intersect($aTags, $bTags);
         // Hacker/Hustler dynamic: if they have DIFFERENT roles, it's a better match
@@ -191,7 +191,7 @@ class MatchmakingScoringService
         if (empty($aInd) && $a->industry) $aInd = [$a->industry];
         if (empty($bInd) && $b->industry) $bInd = [$b->industry];
 
-        if (empty($aInd) || empty($bInd)) return 0.5;
+        if (empty($aInd) || empty($bInd)) return 0.3;
 
         $intersection = count(array_intersect($aInd, $bInd));
         $union = count(array_unique(array_merge($aInd, $bInd)));
@@ -223,10 +223,10 @@ class MatchmakingScoringService
             }
         }
 
-        if (empty($aCom) || empty($bCom)) return 0.5;
+        if (empty($aCom) || empty($bCom)) return 0.3;
 
         $intersect = count(array_intersect($aCom, $bCom));
-        return $intersect > 0 ? 1.0 : 0.5;
+        return $intersect > 0 ? 1.0 : 0.3;
     }
 
     private function computeStageFit(User $a, User $b): float
@@ -260,10 +260,10 @@ class MatchmakingScoringService
         $aLangs = is_array($a->languages) ? $a->languages : [];
         $bLangs = is_array($b->languages) ? $b->languages : [];
         
-        if (empty($aLangs) || empty($bLangs)) return 0.5;
+        if (empty($aLangs) || empty($bLangs)) return 0.3;
         
         $shared = count(array_intersect($aLangs, $bLangs));
-        return $shared > 0 ? 1.0 : 0.4;
+        return $shared > 0 ? 1.0 : 0.3;
     }
 
     private function computeEducationFit(User $a, User $b): float
@@ -271,7 +271,7 @@ class MatchmakingScoringService
         $aEdu = is_array($a->education) ? $a->education : [];
         $bEdu = is_array($b->education) ? $b->education : [];
         
-        if (empty($aEdu) || empty($bEdu)) return 0.5;
+        if (empty($aEdu) || empty($bEdu)) return 0.3;
 
         return (count(array_intersect($aEdu, $bEdu)) > 0) ? 1.0 : 0.7;
     }

@@ -4,7 +4,6 @@ namespace App\Services\Discovery;
 
 use App\Models\Startup;
 use App\Models\User;
-use App\Models\Tag;
 use App\Services\Discovery\MatchmakingScoringService;
 use App\Services\Discovery\VertexAiService;
 use Carbon\Carbon;
@@ -17,16 +16,13 @@ class CardTransformerService
     ) {}
 
     // ═══════════════════════════════════════════════════════════════════
-    //  Profile Card (entityType: "profile")
+    //  Profile Card (entityType: "profile") — CON-60
     // ═══════════════════════════════════════════════════════════════════
 
-    /**
-     * Transform a User model into the V2 profile card response format.
-     */
     public function transformProfileCard(User $user, int $index, ?float $distanceKm = null, ?User $authUser = null): array
     {
         $distanceKm = isset($user->distance_km) ? round((float) $user->distance_km, 1) : null;
-        $isPro = $authUser && $authUser->is_pro;
+        $isPro      = $authUser && $authUser->is_pro;
 
         // Calculate matchmaking score
         $matchResult = null;
@@ -45,45 +41,73 @@ class CardTransformerService
             }
         }
 
+        // Age from date_of_birth
+        $age = null;
+        if ($user->date_of_birth) {
+            try {
+                $age = Carbon::parse($user->date_of_birth)->age;
+            } catch (\Throwable $e) {
+                $age = null;
+            }
+        }
+
+        // Location as object per CON-60
+        $locationDisplay = collect([$user->city, $user->country])->filter()->implode(', ');
+        $location = [
+            'city'       => $user->city,
+            'country'    => $user->country,
+            'display'    => $locationDisplay ?: null,
+            'distanceKm' => $distanceKm,
+        ];
+
+        // Match block per CON-60: { score, label }
+        // Pro users also get highlights and reason
+        $matchBlock = null;
+        if ($matchResult) {
+            $matchBlock = [
+                'score'      => $matchResult['score'],
+                'label'      => $matchResult['label'],
+            ];
+            if ($isPro) {
+                $matchBlock['highlights'] = $matchResult['highlights'];
+                $matchBlock['reason']     = $matchReason;
+            }
+        }
+
         return [
             'entityType'   => 'profile',
             'id'           => "card_{$user->id}_{$index}",
             'profileId'    => $user->id,
+            // ── CON-60 field names ──────────────────────────────────────
+            'photoUrl'     => $user->avatar_url,       // was avatarUrl — FIXED
             'name'         => $user->name,
-            'avatarUrl'    => $user->avatar_url,
-            'position'     => $user->position,
+            'age'          => $age,                    // was missing — ADDED
+            'headline'     => $user->position,         // was position — FIXED
+            'location'     => $location,               // was string — FIXED to object
+            'match'        => $matchBlock,             // was matchmaking — FIXED
+            'badges'       => [],                      // was missing — ADDED
+            'bio'          => $user->bio,              // was about — FIXED
+            'startupIdea'  => $user->startup_idea,    // was missing — ADDED
+            'interests'    => [],                      // was missing — ADDED
+            // ── Extra fields (still useful for FE) ─────────────────────
             'industry'     => $user->industry ?? $this->getFirstIndustryTag($user),
-            'location'     => $user->city ? "{$user->city}, {$user->country}" : $user->country,
-            'distanceKm'   => $distanceKm,
-            
-            'matchmaking'  => $matchResult ? [
-                'score'      => $matchResult['score'],
-                'label'      => $matchResult['label'],
-                'highlights' => $isPro ? $matchResult['highlights'] : [],
-                'reason'     => $isPro ? $matchReason : null,
-            ] : null,
-
-            'skills'         => $this->buildSkills($user),
+            'skills'       => $this->buildSkills($user),
             'certifications' => $this->buildCertifications($user),
-            'languages'      => is_array($user->languages) ? $user->languages : [],
-            'about'          => $user->bio,
-            'socials'        => $this->buildSocialLinks($user),
-            'experience'     => $this->buildExperience($user),
-            'education'      => $this->buildEducation($user),
+            'languages'    => is_array($user->languages) ? $user->languages : [],
+            'socials'      => $this->buildSocialLinks($user),
+            'experience'   => $this->buildExperience($user),
+            'education'    => $this->buildEducation($user),
         ];
     }
 
     // ═══════════════════════════════════════════════════════════════════
-    //  Startup Card (entityType: "startup")
+    //  Startup Card (entityType: "startup") — CON-60
     // ═══════════════════════════════════════════════════════════════════
 
-    /**
-     * Transform a Startup model into the V2 startup card response format.
-     */
     public function transformStartupCard(Startup $startup, int $index, ?float $distanceKm = null, ?User $authUser = null): array
     {
-        $owner = $startup->relationLoaded('owner') ? $startup->owner : null;
-        $isPro = $authUser && $authUser->is_pro;
+        $owner  = $startup->relationLoaded('owner') ? $startup->owner : null;
+        $isPro  = $authUser && $authUser->is_pro;
 
         // Calculate matchmaking score with founder
         $matchResult = null;
@@ -102,38 +126,60 @@ class CardTransformerService
             }
         }
 
-        return [
-            'entityType'   => 'startup',
-            'id'           => "card_startup_{$startup->id}_{$index}",
-            'startupId'    => $startup->id,
-            'name'         => $startup->name,
-            'logoUrl'      => $startup->logo_url,
-            'tagline'      => $startup->tagline,
-            'industry'     => $startup->industry,
-            'stage'        => $startup->stage,
-            'location'     => $startup->location,
-            
-            'matchmaking'  => $matchResult ? [
-                'score'      => $matchResult['score'],
-                'label'      => $matchResult['label'],
-                'highlights' => $isPro ? $matchResult['highlights'] : [],
-                'reason'     => $isPro ? $matchReason : null,
-            ] : null,
+        // Match block per CON-60
+        $matchBlock = null;
+        if ($matchResult) {
+            $matchBlock = [
+                'score' => $matchResult['score'],
+                'label' => $matchResult['label'],
+            ];
+            if ($isPro) {
+                $matchBlock['highlights'] = $matchResult['highlights'];
+                $matchBlock['reason']     = $matchReason;
+            }
+        }
 
-            'about'        => $startup->description,
-            'website'      => $startup->website,
-            'lookingFor'   => $this->buildLookingFor($startup),
-            'teamSize'     => $startup->team_size,
-            'foundedAt'    => $startup->founded_at ? Carbon::parse($startup->founded_at)->format('Y') : null,
-            'founder'      => $owner ? [
-                'name'      => $owner->name,
-                'avatarUrl' => $owner->avatar_url,
-                'position'  => $owner->position,
+        // Industry as object per CON-60: { primary, secondary, display }
+        $industryDisplay = collect([$startup->industry, $startup->secondary_industry])->filter()->implode(' · ');
+        $industryBlock = [
+            'primary'   => $startup->industry,
+            'secondary' => $startup->secondary_industry,
+            'display'   => $industryDisplay ?: null,
+        ];
+
+        // Team as object per CON-60: { memberCount, display }
+        $teamBlock = [
+            'memberCount' => $startup->team_size,
+            'display'     => $startup->team_size ? "{$startup->team_size} members" : null,
+        ];
+
+        return [
+            'entityType'  => 'startup',
+            'id'          => "card_startup_{$startup->id}_{$index}",
+            'startupId'   => $startup->id,
+            // ── CON-60 field names ──────────────────────────────────────
+            'name'        => $startup->name,
+            'logoUrl'     => $startup->logo_url,
+            'badge'       => ['label' => $startup->stage ? strtoupper($startup->stage) : null], // was missing — ADDED
+            'founder'     => $owner ? [
+                'name'  => $owner->name,
+                'title' => $owner->position,              // was missing title — FIXED
             ] : null,
+            'match'       => $matchBlock,                 // was matchmaking — FIXED
+            'industry'    => $industryBlock,              // was string — FIXED to object
+            'team'        => $teamBlock,                  // was teamSize number — FIXED
+            // ── CON-60 content fields ────────────────────────────────────
+            'summary'     => $startup->description,       // was about — FIXED
+            'website'     => $startup->website ?? null,
+            'openRoles'   => is_array($startup->open_roles) ? $startup->open_roles : [], // was missing — ADDED
+            'lookingFor'  => $this->buildLookingFor($startup),
+            'teamStage'   => $startup->stage,             // was stage — FIXED name
+            'location'    => collect([$startup->city, $startup->country])->filter()->implode(', ') ?: null,
+            'foundedAt'   => $startup->founded_at ? Carbon::parse($startup->founded_at)->format('Y') : null,
         ];
     }
 
-    // ─── Sub-builders ─────────────────────────────────────────────────────────
+    // ─── Private Helpers ──────────────────────────────────────────────────────
 
     private function buildSkills(User $user): array
     {
@@ -144,12 +190,12 @@ class CardTransformerService
     private function buildCertifications(User $user): array
     {
         if (!$user->relationLoaded('credentials')) return [];
-        
+
         $allCerts = [];
         foreach ($user->credentials as $cred) {
-            $data = is_array($cred->raw_data) ? $cred->raw_data : json_decode($cred->raw_data, true);
+            $data  = is_array($cred->raw_data) ? $cred->raw_data : json_decode($cred->raw_data, true);
             $certs = $data['certifications'] ?? [];
-            
+
             if (is_array($certs)) {
                 foreach ($certs as $cert) {
                     $allCerts[] = [
@@ -169,13 +215,12 @@ class CardTransformerService
     {
         return [
             'linkedin' => $user->linkedin_url,
-            'github'   => $user->github_url,
+            'github'   => $user->github_url ?? null,
         ];
     }
 
     private function buildExperience(User $user): array
     {
-        // Mocked or extracted from credentials
         return [];
     }
 
