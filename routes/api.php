@@ -230,7 +230,21 @@ Route::prefix('v1')->group(function () {
 
     // ─── Authenticated: Team & Startup Management ─────────────────────────────
     Route::middleware(['auth:sanctum', 'registration.progress:5'])->group(function () {
+        // ─── Pro / Premium Endpoints ──────────────────────────────────────────────
+        Route::prefix('pro')->group(function () {
+            Route::get('plans', [\App\Http\Controllers\Api\V1\ProController::class, 'plans']);
+            Route::get('status', [\App\Http\Controllers\Api\V1\ProController::class, 'status']);
+        });
+
         // Active Startup Context
+        Route::prefix('discovery')->group(function () {
+            Route::get('filter-options', [\App\Http\Controllers\Api\V1\Discovery\DiscoveryController::class, 'filterOptions']);
+            Route::post('cards', [\App\Http\Controllers\Api\V1\Discovery\DiscoveryController::class, 'cards']);
+            Route::post('cards/{targetId}/action', [\App\Http\Controllers\Api\V1\Discovery\DiscoveryController::class, 'swipeAction']);
+            Route::post('swipes/rewind', [\App\Http\Controllers\Api\V1\Discovery\DiscoveryController::class, 'rewind']);
+            Route::get('who-liked-me', [\App\Http\Controllers\Api\V1\Discovery\DiscoveryController::class, 'whoLikedMe']);
+        });
+
         Route::prefix('me/startup')->group(function () {
             Route::get('team-overview', [\App\Http\Controllers\Api\V1\TeamOverviewController::class, 'index']);
             Route::get('invitation-options', [\App\Http\Controllers\Api\V1\StartupInvitationController::class, 'options']);

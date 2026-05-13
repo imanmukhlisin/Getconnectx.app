@@ -179,6 +179,17 @@ class DiscoveryController extends Controller
         $authUser = $request->user();
         $action   = $request->input('action');
 
+        // Premium gate for super_like
+        if ($action === 'super_like' && !$authUser->is_pro) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ConnectX Pro is required to use Super Like.',
+                'error'   => [
+                    'code'    => 'PREMIUM_REQUIRED'
+                ]
+            ], 403);
+        }
+
         // Detect if targetId is a startup UUID by looking it up in the startups table.
         // FE passes the raw startupId UUID from the card response (no prefix needed).
         $startup = \App\Models\Startup::find($targetId);
@@ -327,5 +338,74 @@ class DiscoveryController extends Controller
                 ]
             ]
         ], 409);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  5. GET /api/v1/discovery/who-liked-me
+    // ═══════════════════════════════════════════════════════════════════
+
+    #[OA\Get(
+        path: '/api/v1/discovery/who-liked-me',
+        summary: 'Get users who liked the current user',
+        description: 'Returns a list of users who have swiped right on the current user. Premium feature.',
+        security: [['sanctum' => []]],
+        tags: ['Discovery'],
+        responses: [
+            new OA\Response(response: 200, description: 'List fetched successfully'),
+            new OA\Response(response: 403, description: 'Premium required'),
+        ]
+    )]
+    public function whoLikedMe(Request $request): JsonResponse
+    {
+        $authUser = $request->user();
+
+        if (!$authUser->is_pro) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ConnectX Pro is required to see who liked you.',
+                'error'   => [
+                    'code'    => 'PREMIUM_REQUIRED'
+                ]
+            ], 403);
+        }
+
+        // 1. Get users who liked me
+        $likedMeIds = Like::where('to_user_id', $authUser->id)
+            ->where('type', 'like')
+            ->pluck('from_user_id')
+            ->toArray();
+
+        // 2. Exclude users I have already swiped or matched with
+        $alreadySwipedIds = Like::where('from_user_id', $authUser->id)
+            ->pluck('to_user_id')
+            ->toArray();
+
+        $matchedIds = \App\Models\UserMatch::where(function ($q) use ($authUser) {
+            $q->where('user_id', $authUser->id)->orWhere('matched_user_id', $authUser->id);
+        })->where('status', 'active')
+          ->get()
+          ->flatMap(fn($m) => [$m->user_id, $m->matched_user_id])
+          ->unique()
+          ->toArray();
+
+        $excludeIds = array_unique(array_merge([$authUser->id], $alreadySwipedIds, $matchedIds));
+        $filteredIds = array_diff($likedMeIds, $excludeIds);
+
+        // 3. Transform to cards
+        $users = \App\Models\User::whereIn('id', $filteredIds)
+            ->with(['tags', 'credentials'])
+            ->get();
+
+        $items = $users->map(function ($user, $idx) use ($authUser) {
+            return $this->cardTransformer->transformProfileCard($user, $idx, null, $authUser);
+        })->values()->toArray();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Who liked you fetched successfully',
+            'data'    => [
+                'items' => $items
+            ]
+        ]);
     }
 }
