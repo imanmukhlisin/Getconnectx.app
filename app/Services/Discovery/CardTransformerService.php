@@ -143,18 +143,26 @@ class CardTransformerService
 
     private function buildCertifications(User $user): array
     {
-        // Logic for LinkedIn certifications mapping (previously implemented)
-        $creds = $user->relationLoaded('credentials') ? $user->credentials : null;
-        if (!$creds || !isset($creds->raw_data['certifications'])) return [];
+        if (!$user->relationLoaded('credentials')) return [];
+        
+        $allCerts = [];
+        foreach ($user->credentials as $cred) {
+            $data = is_array($cred->raw_data) ? $cred->raw_data : json_decode($cred->raw_data, true);
+            $certs = $data['certifications'] ?? [];
+            
+            if (is_array($certs)) {
+                foreach ($certs as $cert) {
+                    $allCerts[] = [
+                        'name'    => $cert['name'] ?? 'Certification',
+                        'issuer'  => $cert['issuedBy'] ?? '',
+                        'logoUrl' => $cert['issuedByLogo'] ?? null,
+                        'date'    => $cert['issuedAt'] ?? null,
+                    ];
+                }
+            }
+        }
 
-        return collect($creds->raw_data['certifications'])->map(function($cert) {
-            return [
-                'name'    => $cert['name'] ?? 'Certification',
-                'issuer'  => $cert['issuedBy'] ?? '',
-                'logoUrl' => $cert['issuedByLogo'] ?? null,
-                'date'    => $cert['issuedAt'] ?? null,
-            ];
-        })->toArray();
+        return $allCerts;
     }
 
     private function buildSocialLinks(User $user): array
