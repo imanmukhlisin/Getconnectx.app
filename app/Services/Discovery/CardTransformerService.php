@@ -124,12 +124,8 @@ class CardTransformerService
                     'title' => 'Personality & Hobbies',
                     'items' => [],
                 ],
-                'certifications' => [
-                    'title' => 'Certifications',
-                    'items' => $this->buildCertifications($user),
-                ],
+                'certifications' => $this->buildCertifications($user),
                 'commitment' => [
-                    'title' => 'Commitment',
                     'value' => $user->commitment_level,
                     'label' => $user->commitment_level ? ucwords(str_replace('_', ' ', $user->commitment_level)) : null,
                 ],
@@ -410,7 +406,7 @@ class CardTransformerService
                         return [
                             'degree'     => $e['degree'] ?? '',
                             'school'     => $e['schoolName'] ?? $e['school'] ?? '',
-                            'schoolLogo' => $e['logo']['url'] ?? $e['logo']['sizes'][0]['url'] ?? null,
+                            'logoUrl'    => $e['schoolLogo']['url'] ?? $e['schoolLogo']['sizes'][0]['url'] ?? null,
                             'period'     => $e['period'] ?? null,
                             'field'      => $e['fieldOfStudy'] ?? null,
                         ];
