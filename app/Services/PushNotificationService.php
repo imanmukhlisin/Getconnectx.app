@@ -71,7 +71,18 @@ class PushNotificationService
                 ], $data));
 
             $this->messaging->send($message);
-            Log::info("Push notification '{$templateName}' sent successfully to User {$user->id}");
+            
+            // Save to Notification History (Database)
+            \App\Models\UserNotification::create([
+                'user_id'  => $user->id,
+                'type'     => $templateName,
+                'title'    => $title,
+                'body'     => $body,
+                'data'     => $data,
+                'actor_id' => $data['sender_id'] ?? null,
+            ]);
+
+            Log::info("Push notification '{$templateName}' sent and logged for User {$user->id}");
             return true;
 
         } catch (\Exception $e) {

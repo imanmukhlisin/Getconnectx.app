@@ -141,6 +141,14 @@ Route::prefix('v1')->group(function () {
             Route::post('deletion-requests', [ProfileController::class, 'requestDeletion'])
                 ->name('account.deletion-requests');
         });
+
+        // ── Notifications (CON-57 / CON-68) ───────────────────────────────────────
+        Route::prefix('me/notifications')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\V1\UserNotificationController::class, 'index'])
+                ->name('notifications.index');
+            Route::post('read', [\App\Http\Controllers\Api\V1\UserNotificationController::class, 'markRead'])
+                ->name('notifications.mark-read');
+        });
     });
 
     // ─── Authenticated: Dynamic Onboarding Engine ─────────────────────────────
