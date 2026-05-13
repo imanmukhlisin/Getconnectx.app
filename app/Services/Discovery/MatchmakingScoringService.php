@@ -159,7 +159,7 @@ class MatchmakingScoringService
         if (empty($aTags)) {
             $builder = $a->builder;
             if ($builder) {
-                $aTags = [$builder->primary_role];
+                $aTags = [$builder->role_category];
             } else {
                 // Last fallback to legacy columns
                 $aTags = is_array($a->cofounder_type) ? $a->cofounder_type : ($a->cofounder_type ? [$a->cofounder_type] : []);
@@ -168,7 +168,7 @@ class MatchmakingScoringService
         if (empty($bTags)) {
             $builder = $b->builder;
             if ($builder) {
-                $bTags = [$builder->primary_role];
+                $bTags = [$builder->role_category];
             } else {
                 $bTags = is_array($b->cofounder_type) ? $b->cofounder_type : ($b->cofounder_type ? [$b->cofounder_type] : []);
             }

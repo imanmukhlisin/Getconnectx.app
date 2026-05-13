@@ -112,7 +112,7 @@ class FilterBuilderService
         // ── Role filter ──────────────────────────────────────────────────
         if (!empty($filters['roleNeededIds'])) {
             $roles = $this->mapIds($filters['roleNeededIds'], $this->buildRoleMap());
-            $query->whereIn('builders.primary_role', $roles);
+            $query->whereIn('builders.role_category', $roles);
         }
 
         // ── Skill strength filter ────────────────────────────────────────
