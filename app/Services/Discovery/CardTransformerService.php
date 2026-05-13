@@ -4,7 +4,9 @@ namespace App\Services\Discovery;
 
 use App\Models\Startup;
 use App\Models\User;
+use App\Models\Tag;
 use App\Services\Discovery\MatchmakingScoringService;
+use App\Services\Discovery\VertexAiService;
 use Carbon\Carbon;
 
 class CardTransformerService
@@ -35,7 +37,12 @@ class CardTransformerService
         // Generate AI Match Reason (Only for Pro users with significant highlights)
         $matchReason = null;
         if ($isPro && $matchResult && !empty($matchResult['highlights'])) {
-            $matchReason = $this->vertexAiService->generateMatchReason($authUser, $user, $matchResult['highlights']);
+            try {
+                $matchReason = $this->vertexAiService->generateMatchReason($authUser, $user, $matchResult['highlights']);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("AI Match Reason Error: " . $e->getMessage());
+                $matchReason = null;
+            }
         }
 
         return [
@@ -87,7 +94,12 @@ class CardTransformerService
         // Generate AI Match Reason (Only for Pro)
         $matchReason = null;
         if ($isPro && $owner && $matchResult && !empty($matchResult['highlights'])) {
-            $matchReason = $this->vertexAiService->generateMatchReason($authUser, $owner, $matchResult['highlights']);
+            try {
+                $matchReason = $this->vertexAiService->generateMatchReason($authUser, $owner, $matchResult['highlights']);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("AI Startup Match Reason Error: " . $e->getMessage());
+                $matchReason = null;
+            }
         }
 
         return [
