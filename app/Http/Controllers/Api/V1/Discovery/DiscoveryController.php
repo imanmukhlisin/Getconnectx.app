@@ -107,7 +107,7 @@ class DiscoveryController extends Controller
         if ($isP2P) {
             $query  = $this->filterBuilder->buildProfileQuery($authUser, $filters, $mode);
             $result = $this->filterBuilder->applyCursorPagination(
-                $query->with(['tags', 'credentials', 'builder']), // eager load
+                $query->with(['tags', 'credentials', 'builder', 'onboardingSession.responses']), // eager load
                 $cursor, $limit
             );
 

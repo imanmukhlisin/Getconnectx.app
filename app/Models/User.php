@@ -135,6 +135,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the latest onboarding session for the user.
+     */
+    public function onboardingSession()
+    {
+        return $this->hasOne(\App\Models\Onboarding\OnboardingSession::class, 'user_id')->latestOfMany();
+    }
+
+    /**
      * Kredensial OAuth user (LinkedIn, Google, dll).
      */
     public function credentials()

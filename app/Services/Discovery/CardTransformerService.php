@@ -5,12 +5,15 @@ namespace App\Services\Discovery;
 use App\Models\Startup;
 use App\Models\User;
 use App\Models\Tag;
+use App\Models\Onboarding\OnboardingOption;
 use App\Services\Discovery\MatchmakingScoringService;
 use App\Services\Discovery\VertexAiService;
 use Carbon\Carbon;
 
 class CardTransformerService
 {
+    private array $optionLabelCache = [];
+
     public function __construct(
         private MatchmakingScoringService $scoringService,
         private VertexAiService $vertexAiService
@@ -197,20 +200,76 @@ class CardTransformerService
 
     private function buildSkills(User $user): array
     {
-        if (!$user->relationLoaded('tags')) return [];
-        return $user->tags->where('type', 'skill')->pluck('name')->values()->toArray();
+        return $this->getOnboardingValuesAsLabels($user, ['q_fdr_skills', 'q_tm_skills', 'q_cf_skills', 'q_js_skills']);
     }
 
     private function buildInterests(User $user): array
     {
-        if (!$user->relationLoaded('tags')) return [];
-        return $user->tags->where('type', 'interest')->pluck('name')->values()->toArray();
+        return $this->getOnboardingValuesAsLabels($user, ['q_personal_interests']);
     }
 
     private function buildIndustries(User $user): array
     {
-        if (!$user->relationLoaded('tags')) return [];
-        return $user->tags->where('type', 'industry')->pluck('name')->values()->toArray();
+        return $this->getOnboardingValuesAsLabels($user, ['q_fdr_industry', 'q_tm_industry', 'q_cf_industry', 'q_js_industry', 'q_industries_interest']);
+    }
+
+    /**
+     * Helper to extract values from onboarding responses and map them to their labels.
+     */
+    private function getOnboardingValuesAsLabels(User $user, array $questionIds): array
+    {
+        if (!$user->relationLoaded('onboardingSession') || !$user->onboardingSession) {
+            return [];
+        }
+
+        $session = $user->onboardingSession;
+        if (!$session->relationLoaded('responses')) {
+            return [];
+        }
+
+        // Get all response values for the matching question IDs
+        $values = [];
+        foreach ($session->responses as $response) {
+            if (in_array($response->question_id, $questionIds)) {
+                $val = $response->value;
+                if (is_array($val)) {
+                    $values = array_merge($values, $val);
+                } elseif (is_string($val)) {
+                    $values[] = $val;
+                }
+            }
+        }
+
+        $values = array_unique(array_filter($values));
+        if (empty($values)) {
+            return [];
+        }
+
+        // Map values to labels
+        $labels = [];
+        $valuesToFetch = [];
+
+        foreach ($values as $val) {
+            if (isset($this->optionLabelCache[$val])) {
+                $labels[] = $this->optionLabelCache[$val];
+            } else {
+                $valuesToFetch[] = $val;
+            }
+        }
+
+        if (!empty($valuesToFetch)) {
+            $options = OnboardingOption::whereIn('value', $valuesToFetch)->get(['value', 'label']);
+            foreach ($options as $opt) {
+                // Determine label string from JSON. Fallback to English 'en' or first available.
+                $labelArray = is_array($opt->label) ? $opt->label : json_decode($opt->label, true);
+                $labelStr = $labelArray['en'] ?? $labelArray['id'] ?? $opt->value;
+                
+                $this->optionLabelCache[$opt->value] = $labelStr;
+                $labels[] = $labelStr;
+            }
+        }
+
+        return array_values(array_unique($labels));
     }
 
     private function buildCertifications(User $user): array
