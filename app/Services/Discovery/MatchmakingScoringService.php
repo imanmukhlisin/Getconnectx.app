@@ -41,8 +41,23 @@ class MatchmakingScoringService
         }
 
         // 3. Calculate NCF (Average Core Factor) and NSF (Average Secondary Factor)
-        $ncf = collect($cfKeys)->map(fn($k) => $scores[$k] ?? 0)->avg();
-        $nsf = collect($sfKeys)->map(fn($k) => $scores[$k] ?? 0)->avg();
+        $ncf = 0;
+        if (count($cfKeys) > 0) {
+            $sum = 0;
+            foreach ($cfKeys as $k) {
+                $sum += ($scores[$k] ?? 0);
+            }
+            $ncf = $sum / count($cfKeys);
+        }
+
+        $nsf = 0;
+        if (count($sfKeys) > 0) {
+            $sum = 0;
+            foreach ($sfKeys as $k) {
+                $sum += ($scores[$k] ?? 0);
+            }
+            $nsf = $sum / count($sfKeys);
+        }
 
         // 4. Calculate Final SAW Score (60% CF + 40% SF)
         $totalScoreValue = ($ncf * 0.6) + ($nsf * 0.4);
@@ -57,6 +72,7 @@ class MatchmakingScoringService
             'highlights' => $this->buildMatchHighlights($authUser, $targetUser, $scores),
         ];
     }
+
 
     /**
      * Build a list of highlights (reasons why they match).
