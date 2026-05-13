@@ -305,28 +305,33 @@ class CardTransformerService
 
         $allCerts = [];
         foreach ($user->credentials as $cred) {
-            $data  = is_array($cred->raw_data) ? $cred->raw_data : [];
+            $raw   = $cred->raw_data;
+            $data  = is_array($raw) ? $raw : (is_string($raw) ? json_decode($raw, true) : []);
             $certs = $data['certifications'] ?? [];
 
-            if (is_array($certs)) {
-                foreach ($certs as $cert) {
-                    // LinkedIn scrape key: 'title' bukan 'name'
-                    // issuedByLogo adalah object {url, sizes[]}
-                    $logoUrl = null;
-                    if (isset($cert['issuedByLogo']['url'])) {
-                        $logoUrl = $cert['issuedByLogo']['url'];
-                    } elseif (isset($cert['issuedByLogo']['sizes'][0]['url'])) {
-                        $logoUrl = $cert['issuedByLogo']['sizes'][0]['url'];
-                    }
+            if (!is_array($certs) || empty($certs)) continue;
 
-                    $allCerts[] = [
-                        'name'    => $cert['title'] ?? $cert['name'] ?? 'Certification',
-                        'issuer'  => $cert['issuedBy'] ?? '',
-                        'logoUrl' => $logoUrl,
-                        'date'    => $cert['issuedAt'] ?? null,
-                        'link'    => $cert['link'] ?? null,
-                    ];
+            foreach ($certs as $cert) {
+                if (!is_array($cert)) continue;
+
+                // Logo: issuedByLogo can be {url, sizes[]} or just a string
+                $logoUrl = null;
+                $logo = $cert['issuedByLogo'] ?? null;
+                if (is_array($logo)) {
+                    $logoUrl = $logo['url']
+                        ?? $logo['sizes'][0]['url']
+                        ?? null;
+                } elseif (is_string($logo)) {
+                    $logoUrl = $logo;
                 }
+
+                $allCerts[] = [
+                    'name'    => $cert['title'] ?? $cert['name'] ?? 'Certification',
+                    'issuer'  => $cert['issuedBy'] ?? '',
+                    'logoUrl' => $logoUrl,
+                    'date'    => $cert['issuedAt'] ?? $cert['date'] ?? null,
+                    'link'    => $cert['link'] ?? null,
+                ];
             }
         }
 
@@ -381,7 +386,30 @@ class CardTransformerService
 
     private function buildEducation(User $user): array
     {
-        return is_array($user->education) ? $user->education : [];
+        // 1. Try credentials raw_data first (LinkedIn scrape)
+        if ($user->relationLoaded('credentials')) {
+            foreach ($user->credentials as $cred) {
+                $raw  = $cred->raw_data;
+                $data = is_array($raw) ? $raw : (is_string($raw) ? json_decode($raw, true) : []);
+                $edu  = $data['education'] ?? [];
+
+                if (!empty($edu) && is_array($edu)) {
+                    return array_values(array_map(function ($e) {
+                        return [
+                            'degree'     => $e['degree'] ?? '',
+                            'school'     => $e['schoolName'] ?? $e['school'] ?? '',
+                            'schoolLogo' => $e['logo']['url'] ?? $e['logo']['sizes'][0]['url'] ?? null,
+                            'period'     => $e['period'] ?? null,
+                            'field'      => $e['fieldOfStudy'] ?? null,
+                        ];
+                    }, $edu));
+                }
+            }
+        }
+
+        // 2. Fallback: users.education column
+        $col = $user->education;
+        return is_array($col) ? $col : [];
     }
 
     private function buildLookingFor(Startup $startup): array
