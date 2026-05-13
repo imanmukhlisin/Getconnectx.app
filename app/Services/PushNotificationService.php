@@ -21,7 +21,7 @@ class PushNotificationService
     /**
      * Sends a localized push notification to a user based on a template
      */
-    public function sendFromTemplate(User $user, string $templateName, array $placeholders = []): bool
+    public function sendFromTemplate(User $user, string $templateName, array $placeholders = [], array $data = []): bool
     {
         if (!$user->fcm_token) {
             Log::warning("Cannot send push notification. User {$user->id} has no FCM token.");
@@ -65,10 +65,10 @@ class PushNotificationService
             
             $message = CloudMessage::withTarget('token', $user->fcm_token)
                 ->withNotification($notification)
-                ->withData([
+                ->withData(array_merge([
                     'template' => $templateName,
                     'timestamp' => now()->toDateTimeString()
-                ]);
+                ], $data));
 
             $this->messaging->send($message);
             Log::info("Push notification '{$templateName}' sent successfully to User {$user->id}");

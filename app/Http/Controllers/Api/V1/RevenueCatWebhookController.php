@@ -62,6 +62,12 @@ class RevenueCatWebhookController extends Controller
                 if ($hasProEntitlement) {
                     $user->update(['is_pro' => true]);
                     Log::info('RevenueCat Webhook: User upgraded to PRO', ['user_id' => $user->id]);
+                    
+                    if ($eventType === 'INITIAL_PURCHASE') {
+                        \App\Jobs\SendPushNotificationJob::dispatch($user, 'premium_activated', [], [
+                            'screen' => 'pro_status'
+                        ]);
+                    }
                 }
                 break;
 
