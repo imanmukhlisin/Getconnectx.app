@@ -70,7 +70,6 @@ class MatchmakingScoringService
             'score'      => $finalScore,
             'label'      => $this->buildMatchLabel($finalScore),
             'highlights' => $this->buildMatchHighlights($authUser, $targetUser, $scores),
-            'analysis'   => $this->buildMatchAnalysis($authUser, $targetUser, $scores, $finalScore),
         ];
     }
 
@@ -277,71 +276,6 @@ class MatchmakingScoringService
         return (count(array_intersect($aEdu, $bEdu)) > 0) ? 1.0 : 0.7;
     }
 
-    /**
-     * Build full analysis object for Team Fit screen (CON-51)
-     */
-    private function buildMatchAnalysis(User $a, User $b, array $scores, int $finalScore): array
-    {
-        // 1. Skill Complementarity
-        $aRoles = $this->getProfileRoles($a);
-        $bRoles = $this->getProfileRoles($b);
-        
-        $skillSummary = "Your skill sets complement each other well.";
-        if ($scores['skillComp'] >= 4.5) {
-            $skillSummary = "Strong Hacker/Hustler dynamic detected. Your backgrounds cover both technical and business leadership.";
-        }
-
-        // 2. Vision/Interests
-        $aInd = $this->getUserTagGroupNames($a, 'industry');
-        if (empty($aInd) && $a->industry) $aInd = [$a->industry];
-        
-        $bInd = $this->getUserTagGroupNames($b, 'industry');
-        if (empty($bInd) && $b->industry) $bInd = [$b->industry];
-        
-        $sharedInterests = array_values(array_intersect($aInd, $bInd));
-
-        // 3. Commitment
-        $aCommit = $a->commitment_level ?? 'Not specified';
-        $bCommit = $b->commitment_level ?? 'Not specified';
-
-        return [
-            'compatibilityScore' => $finalScore,
-            'label' => $this->buildMatchLabel($finalScore),
-            'subtitle' => "You & " . $b->name,
-            'skillComplementarity' => [
-                'title' => 'Skill Complementarity',
-                'youBring' => $aRoles,
-                'theyBring' => $bRoles,
-                'summary' => $skillSummary
-            ],
-            'startupVisionAlignment' => [
-                'title' => 'Startup Vision Alignment',
-                'sharedInterests' => $sharedInterests
-            ],
-            'commitmentCompatibility' => [
-                'title' => 'Commitment Compatibility',
-                'you' => ucwords(str_replace('_', ' ', $aCommit)),
-                'them' => ucwords(str_replace('_', ' ', $bCommit))
-            ],
-            'suggestedRoles' => [
-                'title' => 'Suggested Roles',
-                'you' => $a->position ?? 'CEO/Founder',
-                'them' => $b->position ?? 'CTO/Founder'
-            ]
-        ];
-    }
-
-    private function getProfileRoles(User $user): array
-    {
-        $tags = $this->getUserTagGroupIds($user, 'role');
-        if (!empty($tags)) return $tags;
-
-        $builder = $user->builder;
-        if ($builder && $builder->role_category) return [$builder->role_category];
-
-        return is_array($user->cofounder_type) ? $user->cofounder_type : ($user->cofounder_type ? [$user->cofounder_type] : ['Builder']);
-    }
-
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
     private function getUserTagGroupIds(User $user, string $type): array
@@ -350,13 +284,5 @@ class MatchmakingScoringService
             return [];
         }
         return $user->tags->where('type', $type)->pluck('id')->toArray();
-    }
-
-    private function getUserTagGroupNames(User $user, string $type): array
-    {
-        if (!$user->relationLoaded('tags')) {
-            return [];
-        }
-        return $user->tags->where('type', $type)->pluck('name')->toArray();
     }
 }
