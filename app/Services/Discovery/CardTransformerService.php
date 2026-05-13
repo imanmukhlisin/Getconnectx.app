@@ -109,7 +109,10 @@ class CardTransformerService
             'certifications' => $this->buildCertifications($user),
             'languages'    => $this->buildLanguages($user),
             'experience'   => $this->buildExperience($user),
-            'education'    => $this->buildEducation($user),
+            'education'    => [
+                'title' => 'Education',
+                'items' => $this->buildEducation($user),
+            ],
             'socials'      => $this->buildSocialLinks($user),
             'sections'     => [
                 'skills' => [
@@ -406,7 +409,7 @@ class CardTransformerService
                         return [
                             'degree'     => $e['degree'] ?? '',
                             'school'     => $e['schoolName'] ?? $e['school'] ?? '',
-                            'logoUrl'    => $e['schoolLogo']['url'] ?? $e['schoolLogo']['sizes'][0]['url'] ?? null,
+                            'schoolLogo' => $e['schoolLogo']['url'] ?? $e['schoolLogo']['sizes'][0]['url'] ?? null,
                             'period'     => $e['period'] ?? null,
                             'field'      => $e['fieldOfStudy'] ?? null,
                         ];
