@@ -79,6 +79,10 @@ return [
         'token' => env('APIFY_TOKEN'),
     ],
 
+    'revenuecat' => [
+        'webhook_token' => env('REVENUECAT_WEBHOOK_TOKEN'),
+    ],
+
     // ─── WhatsApp Meta WABA ───────────────────────────────────────────────────
     'whatsapp' => [
         'meta' => [

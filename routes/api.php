@@ -269,6 +269,9 @@ Route::prefix('v1')->group(function () {
     Route::prefix('webhooks')->group(function () {
         Route::post('apify/linkedin', [\App\Http\Controllers\Api\V1\WebhookController::class, 'apifyLinkedIn'])
             ->name('webhooks.apify.linkedin');
+            
+        Route::post('revenuecat', [\App\Http\Controllers\Api\V1\RevenueCatWebhookController::class, 'handle'])
+            ->name('webhooks.revenuecat');
     });
 
     // ─── WhatsApp Meta WABA Webhook ───────────────────────────────────────────
