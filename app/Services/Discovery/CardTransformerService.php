@@ -80,6 +80,8 @@ class CardTransformerService
             }
         }
 
+        $industries = $this->buildIndustries($user);
+
         return [
             'entityType'   => 'profile',
             'id'           => "card_{$user->id}_{$index}",
@@ -94,8 +96,8 @@ class CardTransformerService
             'bio'          => $user->bio,
             'startupIdea'  => $user->startup_idea ?? null,
             'linkedinUrl'  => $user->linkedin_url ?? null,
-            'industry'     => $user->industry ?? $this->getFirstIndustryTag($user),
-            'industries'   => $this->buildIndustries($user),
+            'industries'   => $industries,
+            'industry'     => $user->industry ?? ($industries[0] ?? null),
             'interests'    => $this->buildInterests($user),
             'skills'       => $this->buildSkills($user),
             'certifications' => $this->buildCertifications($user),
@@ -200,7 +202,7 @@ class CardTransformerService
 
     private function buildSkills(User $user): array
     {
-        return $this->getOnboardingValuesAsLabels($user, ['q_fdr_skills', 'q_tm_skills', 'q_cf_skills', 'q_js_skills']);
+        return $this->getOnboardingValuesAsLabels($user, ['q_fdr_skills', 'q_tm_skills', 'q_cf_skills', 'q_js_skills', 'q_bld_role', 'q_fdr_bt_roles']);
     }
 
     private function buildInterests(User $user): array
