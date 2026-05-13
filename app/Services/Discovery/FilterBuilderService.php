@@ -76,13 +76,11 @@ class FilterBuilderService
         $userId = $authUser->id;
         $excludedIds = $this->getExcludedUserIds($userId);
 
-        // ── P2P: Query users that have a builders profile (JOIN) ──────────
-        // CardTransformerService still receives User models — no changes needed there.
-        $query = User::select('users.*')
-            ->join('builders', 'builders.user_id', '=', 'users.id')
-            ->whereNotIn('users.id', $excludedIds)
-            ->where('users.is_active', true)
-            ->where('users.is_onboarded', true);
+        // ── P2P: Query users ─────────────────────────────────────────────
+        $query = User::query()
+            ->whereNotIn('id', $excludedIds)
+            ->where('is_active', true)
+            ->where('is_onboarded', true);
 
         // ── Industry filter (via user_tags + tags join) ───────────────────
         if (!empty($filters['industryIds'])) {
@@ -110,39 +108,39 @@ class FilterBuilderService
             });
         }
 
-        // ── Role filter (from builders table) ────────────────────────────
+        // ── Role filter ──────────────────────────────────────────────────
         if (!empty($filters['roleNeededIds'])) {
             $roles = $this->mapIds($filters['roleNeededIds'], $this->buildRoleMap());
-            $query->whereIn('builders.role_category', $roles);
+            $query->whereIn('primary_role', $roles);
         }
 
-        // ── Skill strength filter (from builders table) ───────────────────
+        // ── Skill strength filter ────────────────────────────────────────
         if (!empty($filters['skillStrengthIds'])) {
             $strengths = $this->mapIds($filters['skillStrengthIds'], $this->buildSkillStrengthMap());
-            $query->whereIn('builders.role_category', $strengths);
+            $query->whereIn('role_category', $strengths);
         }
 
-        // ── Commitment filter (from builders table) ───────────────────────
+        // ── Commitment filter ────────────────────────────────────────────
         if (!empty($filters['commitmentIds'])) {
             $commitments = $this->mapIds($filters['commitmentIds'], self::COMMITMENT_MAP);
-            $query->whereIn('builders.commitment_level', $commitments);
+            $query->whereIn('commitment_level', $commitments);
         }
 
         // ── Location / Distance filter ────────────────────────────────────
         $this->applyLocationFilter($query, $authUser, $filters, 'users');
 
-        // ── Work arrangement filter (from builders table) ─────────────────
+        // ── Work arrangement filter ──────────────────────────────────────
         if (!empty($filters['locationAvailability']['workArrangementIds'] ?? null)) {
             $arrangements = $this->mapIds(
                 $filters['locationAvailability']['workArrangementIds'],
                 self::WORK_ARRANGEMENT_MAP
             );
-            $query->whereIn('builders.work_arrangement', $arrangements);
+            $query->whereIn('work_arrangement', $arrangements);
         }
 
-        // ── Remote ready filter (from builders table) ─────────────────────
+        // ── Remote ready filter ──────────────────────────────────────────
         if (!empty($filters['locationAvailability']['remoteReady'] ?? false)) {
-            $query->where('builders.remote_ready', true);
+            $query->where('remote_ready', true);
         }
 
         return $query;
@@ -263,7 +261,8 @@ class FilterBuilderService
                 $lat, $table, $table, $lng, $lat, $table
             );
 
-            $query->whereNotNull("{$table}.latitude")
+            $query->select($table . '.*')
+                  ->whereNotNull("{$table}.latitude")
                   ->whereNotNull("{$table}.longitude")
                   ->selectRaw("{$haversine} AS distance_km");
 
