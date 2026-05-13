@@ -113,15 +113,27 @@ class CardTransformerService
             'socials'      => $this->buildSocialLinks($user),
             'sections'     => [
                 'skills' => [
-                    'title' => 'Skills',
+                    'title' => 'Expertise',
                     'items' => $this->buildSkills($user),
                 ],
                 'interests' => [
-                    'title' => 'Interests',
-                    'items' => $this->buildInterests($user),
+                    'title' => 'Focus',
+                    'items' => array_merge($this->buildIndustries($user), $this->buildInterests($user)),
                 ],
                 'personalityAndHobbies' => [
                     'title' => 'Personality & Hobbies',
+                    'items' => [],
+                ],
+                'certifications' => [
+                    'title' => 'Certifications',
+                    'items' => $this->buildCertifications($user),
+                ],
+                'commitment' => [
+                    'title' => 'Commitment',
+                    'value' => $user->commitment_level,
+                    'label' => $user->commitment_level ? ucwords(str_replace('_', ' ', $user->commitment_level)) : null,
+                ],
+                'highlights' => [
                     'items' => [],
                 ],
             ],
@@ -227,7 +239,7 @@ class CardTransformerService
 
     private function buildInterests(User $user): array
     {
-        return $this->getOnboardingValuesAsLabels($user, ['q_personal_interests']);
+        return $this->getOnboardingValuesAsLabels($user, ['q_personal_interests', 'q_su_interests']);
     }
 
     private function buildIndustries(User $user): array
