@@ -257,7 +257,7 @@ class CardTransformerService
 
         foreach ($values as $val) {
             if (isset($this->optionLabelCache[$val])) {
-                $labels[] = $this->optionLabelCache[$val];
+                $labels[$val] = $this->optionLabelCache[$val];
             } else {
                 $valuesToFetch[] = $val;
             }
@@ -271,11 +271,16 @@ class CardTransformerService
                 $labelStr = $labelArray['en'] ?? $labelArray['id'] ?? $opt->value;
                 
                 $this->optionLabelCache[$opt->value] = $labelStr;
-                $labels[] = $labelStr;
+                $labels[$opt->value] = $labelStr;
             }
         }
 
-        return array_values(array_unique($labels));
+        $result = [];
+        foreach ($labels as $id => $name) {
+            $result[] = ['id' => $id, 'name' => $name];
+        }
+
+        return $result;
     }
 
     private function buildCertifications(User $user): array
