@@ -52,7 +52,7 @@ class CardTransformerService
             'name'         => $user->name,
             'avatarUrl'    => $user->avatar_url,
             'position'     => $user->position,
-            'industry'     => $user->industry,
+            'industry'     => $user->industry ?? $this->getFirstIndustryTag($user),
             'location'     => $user->city ? "{$user->city}, {$user->country}" : $user->country,
             'distanceKm'   => $distanceKm,
             
@@ -187,5 +187,11 @@ class CardTransformerService
     private function buildLookingFor(Startup $startup): array
     {
         return is_array($startup->looking_for) ? $startup->looking_for : [];
+    }
+
+    private function getFirstIndustryTag(User $user): ?string
+    {
+        if (!$user->relationLoaded('tags')) return null;
+        return $user->tags->where('type', 'industry')->first()?->name;
     }
 }
