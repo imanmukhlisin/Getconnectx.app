@@ -110,6 +110,11 @@ class CardTransformerService
                 'label' => $user->commitment_level ? ucwords(str_replace('_', ' ', $user->commitment_level)) : null,
             ],
             'role'         => $user->position ?? 'Developer',
+            'experience'   => $this->buildExperience($user),
+            'education'    => [
+                'title' => 'Education',
+                'items' => $this->buildEducation($user),
+            ],
             'certifications' => [
                 'title' => 'Certifications',
                 'items' => $this->buildCertifications($user),
@@ -117,11 +122,6 @@ class CardTransformerService
             'languages'    => [
                 'title' => 'Languages',
                 'items' => $this->buildLanguages($user),
-            ],
-            'experience'   => $this->buildExperience($user),
-            'education'    => [
-                'title' => 'Education',
-                'items' => $this->buildEducation($user),
             ],
             'socials'      => $this->buildSocialLinks($user),
             'sections'     => [
