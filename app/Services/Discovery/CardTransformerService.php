@@ -104,13 +104,20 @@ class CardTransformerService
             'industry'     => $user->industry ?? ($industries[0]['name'] ?? null),
             'interests'    => array_values(array_merge($industries, $this->buildInterests($user))),
             'skills'       => $this->buildSkills($user),
+            'role'         => $user->position ?? 'Developer',
+            'certifications' => [
+                'title' => 'Certifications',
+                'items' => $this->buildCertifications($user),
+            ],
+            'languages'    => [
+                'title' => 'Languages',
+                'items' => $this->buildLanguages($user),
+            ],
             'commitment'   => [
+                'title' => 'Commitment',
                 'value' => $user->commitment_level,
                 'label' => $user->commitment_level ? ucwords(str_replace('_', ' ', $user->commitment_level)) : null,
             ],
-            'role'         => $user->position ?? 'Developer',
-            'certifications' => $this->buildCertifications($user),
-            'languages'    => $this->buildLanguages($user),
             'experience'   => $this->buildExperience($user),
             'education'    => [
                 'title' => 'Education',
