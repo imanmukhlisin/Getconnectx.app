@@ -106,12 +106,22 @@ class DiscoveryCatalogService
     /**
      * Validate that submitted IDs exist in the onboarding options for the given type.
      */
-    public function validateCatalogIds(array $ids, string $type, string $mode): void
+    public function validateCatalogIds(array|string $ids, string $type, string $mode): void
     {
         if (empty($ids)) return;
+        $ids = is_string($ids) ? [$ids] : $ids;
 
         if ($type === 'language') {
             $validIds = ['id', 'en']; // Hardcoded languages for now
+            $invalid = array_diff($ids, $validIds);
+            if (!empty($invalid)) {
+                throw new \InvalidArgumentException("Unknown {$type} IDs: " . implode(', ', $invalid));
+            }
+            return;
+        }
+
+        if ($type === 'city') {
+            $validIds = collect(\App\Services\Discovery\CityCatalog::all())->pluck('value')->toArray();
             $invalid = array_diff($ids, $validIds);
             if (!empty($invalid)) {
                 throw new \InvalidArgumentException("Unknown {$type} IDs: " . implode(', ', $invalid));

@@ -115,6 +115,9 @@ class DiscoveryController extends Controller
             if (!empty($filters['languageIds'])) {
                 $this->catalogService->validateCatalogIds($filters['languageIds'], 'language', $mode);
             }
+            if (!empty($filters['locationAvailability']['city'])) {
+                $this->catalogService->validateCatalogIds($filters['locationAvailability']['city'], 'city', $mode);
+            }
         } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'success' => false,
