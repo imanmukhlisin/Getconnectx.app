@@ -310,6 +310,14 @@ class ProfileResource extends JsonResource
                 'title' => 'Focus',
                 'items' => $interests,
             ];
+            $response['sections']['experience'] = [
+                'title' => 'Experience',
+                'items' => $this->buildExperience(),
+            ];
+            $response['sections']['education'] = [
+                'title' => 'Education',
+                'items' => $this->buildEducation(),
+            ];
         }
 
         $response['sections']['highlights'] = [
@@ -320,5 +328,60 @@ class ProfileResource extends JsonResource
         $response['updatedAt'] = $this->updated_at ? $this->updated_at->toIso8601String() : null;
 
         return $response;
+    }
+
+    private function buildExperience(): array
+    {
+        if (!empty($this->experience)) {
+            return $this->experience;
+        }
+
+        if ($this->relationLoaded('credentials')) {
+            foreach ($this->credentials as $cred) {
+                if (!empty($cred->experience) && is_array($cred->experience)) {
+                    return array_values(array_map(function ($e) {
+                        return [
+                            'title'        => $e['title'] ?? $e['position'] ?? '',
+                            'organization' => $e['organization'] ?? $e['companyName'] ?? '',
+                            'companyLogo'  => $e['companyLogo']['url'] ?? $e['companyLogo']['sizes'][0]['url'] ?? $e['companyLogo'] ?? null,
+                            'period'       => $e['period'] ?? null,
+                            'location'     => $e['location'] ?? null,
+                            'isCurrent'    => $e['isCurrent'] ?? false,
+                            'description'  => $e['description'] ?? null,
+                        ];
+                    }, $cred->experience));
+                }
+            }
+        }
+        return [];
+    }
+
+    private function buildEducation(): array
+    {
+        if (!empty($this->education)) {
+            return $this->education;
+        }
+
+        if ($this->relationLoaded('credentials')) {
+            foreach ($this->credentials as $cred) {
+                $raw = $cred->raw_data;
+                $data = is_array($raw) ? $raw : (is_string($raw) ? json_decode($raw, true) : []);
+                $edu = $data['education'] ?? [];
+
+                if (!empty($edu) && is_array($edu)) {
+                    return array_values(array_map(function ($e) {
+                        return [
+                            'degree'     => $e['degree'] ?? '',
+                            'school'     => $e['schoolName'] ?? $e['school'] ?? '',
+                            'schoolLogo' => $e['schoolLogo']['url'] ?? $e['schoolLogo']['sizes'][0]['url'] ?? $e['schoolLogo'] ?? null,
+                            'period'     => $e['period'] ?? null,
+                            'field'      => $e['fieldOfStudy'] ?? $e['field'] ?? null,
+                            'description'=> $e['description'] ?? null,
+                        ];
+                    }, $edu));
+                }
+            }
+        }
+        return [];
     }
 }

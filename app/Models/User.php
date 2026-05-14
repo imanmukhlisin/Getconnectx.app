@@ -72,6 +72,7 @@ class User extends Authenticatable
         'bio',
         'startup_idea',
         'education',
+        'experience',
         'languages',
         'leadership_style',
         'work_arrangement',
@@ -103,6 +104,7 @@ class User extends Authenticatable
             'is_pro'               => 'boolean',
             'remote_ready'         => 'boolean',
             'education'            => 'array',
+            'experience'           => 'array',
             'languages'            => 'array',
         ];
     }

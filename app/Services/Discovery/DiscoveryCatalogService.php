@@ -110,6 +110,15 @@ class DiscoveryCatalogService
     {
         if (empty($ids)) return;
 
+        if ($type === 'language') {
+            $validIds = ['id', 'en']; // Hardcoded languages for now
+            $invalid = array_diff($ids, $validIds);
+            if (!empty($invalid)) {
+                throw new \InvalidArgumentException("Unknown {$type} IDs: " . implode(', ', $invalid));
+            }
+            return;
+        }
+
         $questionIds = match ($type) {
             'industry'     => ['q_su_industry', 'q_fdr_industry', 'q_cf_industry', 'q_tm_industry'],
             'skill'        => ['q_tm_skills', 'q_su_need_tm_skills', 'q_su_need_bt_tm'],

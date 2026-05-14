@@ -102,9 +102,12 @@ class CardTransformerService
             'linkedinUrl'  => $user->linkedin_url ?? null,
             'industries'   => $industries,
             'industry'     => $user->industry ?? ($industries[0]['name'] ?? null),
-            'interests'    => $this->buildInterests($user),
+            'interests'    => array_values(array_merge($industries, $this->buildInterests($user))),
             'skills'       => $this->buildSkills($user),
-            'commitment'   => $user->commitment_level ? ucwords(str_replace('_', ' ', $user->commitment_level)) : null,
+            'commitment'   => [
+                'value' => $user->commitment_level,
+                'label' => $user->commitment_level ? ucwords(str_replace('_', ' ', $user->commitment_level)) : null,
+            ],
             'role'         => $user->position ?? 'Developer',
             'certifications' => $this->buildCertifications($user),
             'languages'    => $this->buildLanguages($user),
@@ -126,11 +129,6 @@ class CardTransformerService
                 'personalityAndHobbies' => [
                     'title' => 'Personality & Hobbies',
                     'items' => [],
-                ],
-                'certifications' => $this->buildCertifications($user),
-                'commitment' => [
-                    'value' => $user->commitment_level,
-                    'label' => $user->commitment_level ? ucwords(str_replace('_', ' ', $user->commitment_level)) : null,
                 ],
                 'highlights' => [
                     'items' => [],

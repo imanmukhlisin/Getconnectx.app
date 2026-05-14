@@ -10,7 +10,8 @@ References:
 
 ## Summary
 
-* Discovery filter section layout, order, premium presentation, and UI behavior are frontend-owned.
+* Discovery filter section structure and UI behavior remain frontend-owned.
+* Shared grouped catalogs for `industryIds`, `skillIds`, `roleNeededIds`, and `languageIds` are backend-provided.
 * Backend owns the protected discovery API contracts:
   * `GET /api/v1/discovery/filter-options?mode=<mode>`
   * `POST /api/v1/discovery/cards`
@@ -46,8 +47,9 @@ The backend resolves the current user from the token.
 
 * Accepted request schema
 * Canonical ids used in filter payloads
-* Dynamic catalog ids/labels returned by filter-options
 * Validation of mode-specific filter payloads
+* Grouped catalogs for `industryIds`, `skillIds`, `roleNeededIds`, and `languageIds`
+* Group labels and option labels for those fetched catalogs
 * Premium enforcement
 * Ranked discovery results
 * Match score calculation

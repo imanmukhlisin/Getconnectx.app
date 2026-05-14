@@ -101,6 +101,28 @@ class DiscoveryController extends Controller
             return $e->render();
         }
 
+        // ── Catalog ID validation ─────────────────────────────────────
+        try {
+            if (!empty($filters['industryIds'])) {
+                $this->catalogService->validateCatalogIds($filters['industryIds'], 'industry', $mode);
+            }
+            if (!empty($filters['skillIds'])) {
+                $this->catalogService->validateCatalogIds($filters['skillIds'], 'skill', $mode);
+            }
+            if (!empty($filters['roleNeededIds'])) {
+                $this->catalogService->validateCatalogIds($filters['roleNeededIds'], 'role', $mode);
+            }
+            if (!empty($filters['languageIds'])) {
+                $this->catalogService->validateCatalogIds($filters['languageIds'], 'language', $mode);
+            }
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors'  => ['filters' => [$e->getMessage()]]
+            ], 422);
+        }
+
         // ── Branch: P2P (user cards) or P2B (startup cards) ──────────
         $isP2P = in_array($mode, self::P2P_MODES);
 

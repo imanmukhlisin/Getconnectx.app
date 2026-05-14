@@ -50,9 +50,11 @@ class ProfileController extends Controller
         $validated = $request->validate([
             'name'                   => 'nullable|string|max:255',
             'headline'               => 'nullable|string|max:255',
-            'location'               => 'nullable|string|max:255',
+            'locationId'             => 'nullable|string|max:255',
             'about'                  => 'nullable|string|max:1000',
             'personalityAndHobbyIds' => 'nullable|array',
+            'experience'             => 'nullable|array',
+            'education'              => 'nullable|array',
         ]);
 
         $user = $request->user();
@@ -64,10 +66,21 @@ class ProfileController extends Controller
         if (isset($validated['headline'])) {
             $updateData['position'] = $validated['headline'];
         }
-        if (isset($validated['location'])) {
-            $locParts = explode(',', $validated['location']);
-            $updateData['city'] = trim($locParts[0] ?? '');
-            $updateData['country'] = trim($locParts[1] ?? '');
+        if (isset($validated['locationId'])) {
+            $cityOption = collect(\App\Services\Discovery\CityCatalog::all())->firstWhere('id', $validated['locationId']) 
+                          ?? collect(\App\Services\Discovery\CityCatalog::all())->firstWhere('value', $validated['locationId']);
+            if ($cityOption) {
+                $updateData['city'] = $cityOption['label'] ?? '';
+                $updateData['country'] = $cityOption['group'] ?? 'Indonesia';
+            }
+        }
+
+        if (array_key_exists('experience', $validated)) {
+            $updateData['experience'] = $validated['experience'];
+        }
+
+        if (array_key_exists('education', $validated)) {
+            $updateData['education'] = $validated['education'];
         }
 
         if (isset($validated['about'])) {
@@ -83,7 +96,8 @@ class ProfileController extends Controller
             $user->update($updateData);
         }
 
-        if ($request->has('personalityAndHobbyIds') || $request->has('personalityAndHobbies')) {
+        $hasStartup = $user->startup !== null;
+        if (!$hasStartup && ($request->has('personalityAndHobbyIds') || $request->has('personalityAndHobbies'))) {
             $phIds = $request->input('personalityAndHobbyIds', []);
             if (empty($phIds) && $request->has('personalityAndHobbies.items')) {
                 $phIds = collect($request->input('personalityAndHobbies.items'))->pluck('id')->all();
@@ -148,6 +162,7 @@ class ProfileController extends Controller
             'success' => true,
             'message' => 'Profile options fetched successfully',
             'data'    => [
+                'locations'             => \App\Services\Discovery\CityCatalog::all(),
                 'personalityAndHobbies' => $tags
             ]
         ]);
