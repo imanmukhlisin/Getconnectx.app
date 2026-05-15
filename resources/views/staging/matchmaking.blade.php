@@ -3,98 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ConnectX | SAW + Profile Matching Simulator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <title>ConnectX | Intelligence Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-glow: rgba(99, 102, 241, 0.4);
-            --secondary: #ec4899;
-            --bg: #0b0f1a;
-            --card-bg: rgba(23, 29, 45, 0.7);
-            --text: #ffffff;
-            --text-dim: #8ba1c1;
-            --accent: #22d3ee;
-            --success: #10b981;
+            --apple-bg: #f5f5f7;
+            --apple-card: #ffffff;
+            --apple-blue: #0071e3;
+            --apple-text: #1d1d1f;
+            --apple-text-dim: #86868b;
+            --apple-border: #d2d2d7;
+            --radius: 20px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
+        
         body {
-            background: var(--bg);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
-            color: var(--text);
-            padding: 50px 20px;
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
+            padding: 80px 20px;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 60px; }
-        h1 { font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #fff 30%, #6366f1, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        p.subtitle { color: var(--text-dim); margin-top: 10px; font-weight: 300; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        header { text-align: center; margin-bottom: 80px; }
+        h1 { font-size: 3.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 10px; }
+        p.subtitle { color: var(--apple-text-dim); font-size: 1.2rem; font-weight: 400; }
 
-        .badge { display: inline-block; padding: 6px 18px; border-radius: 99px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; background: rgba(34, 211, 238, 0.1); color: var(--accent); border: 1px solid rgba(34, 211, 238, 0.3); margin-bottom: 20px; }
+        .badge { display: inline-block; padding: 6px 14px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; background: #e8e8ed; color: #515154; margin-bottom: 20px; }
 
         .sim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
-        @media (max-width: 900px) { .sim-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 850px) { .sim-grid { grid-template-columns: 1fr; } }
 
-        .card { background: var(--card-bg); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 40px; padding: 35px; box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8); }
-        .card h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 25px; color: var(--accent); display: flex; align-items: center; gap: 12px; }
+        .card { 
+            background: var(--apple-card); 
+            border-radius: var(--radius); 
+            padding: 40px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03); 
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); }
+        .card h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 30px; border-bottom: 1px solid var(--apple-border); padding-bottom: 15px; }
 
-        .field { margin-bottom: 20px; }
-        label { display: block; font-size: 0.7rem; font-weight: 800; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .field { margin-bottom: 25px; }
+        label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--apple-text-dim); margin-bottom: 10px; }
         
-        select, input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px; color: white; font-size: 0.9rem; }
-        
-        .tag-wall { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 16px; max-height: 150px; overflow-y: auto; }
-        .tag-pill { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; cursor: pointer; padding: 6px; }
-        .tag-pill input { width: auto; }
+        select, input { 
+            width: 100%; 
+            background: #ffffff; 
+            border: 1px solid var(--apple-border); 
+            border-radius: 12px; 
+            padding: 14px; 
+            color: var(--apple-text); 
+            font-size: 1rem; 
+            transition: all 0.3s;
+        }
+        select:focus, input:focus { outline: none; border-color: var(--apple-blue); box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1); }
 
-        .btn-calculate { width: 100%; padding: 22px; border-radius: 22px; border: none; background: linear-gradient(90deg, #6366f1, #22d3ee); color: white; font-weight: 900; font-size: 1.3rem; cursor: pointer; transition: 0.3s; box-shadow: 0 15px 30px -10px rgba(99, 102, 241, 0.5); }
-        .btn-calculate:hover { transform: translateY(-4px); box-shadow: 0 25px 40px -10px rgba(34, 211, 238, 0.5); }
+        .tag-wall { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #fbfbfd; padding: 20px; border-radius: 16px; max-height: 180px; overflow-y: auto; border: 1px solid var(--apple-border); }
+        .tag-pill { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; padding: 5px; color: var(--apple-text); }
+        .tag-pill input { width: auto; height: 18px; width: 18px; accent-color: var(--apple-blue); }
 
-        #results { display: none; margin-top: 50px; animation: fadeInUp 0.6s ease-out; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .btn-run { 
+            width: 100%; 
+            padding: 20px; 
+            border-radius: 99px; 
+            border: none; 
+            background: var(--apple-blue); 
+            color: white; 
+            font-weight: 600; 
+            font-size: 1.1rem; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            margin-top: 20px;
+        }
+        .btn-run:hover { opacity: 0.9; transform: scale(0.98); }
 
-        .score-row { display: flex; justify-content: space-around; align-items: center; margin-bottom: 40px; flex-wrap: wrap; gap: 20px; }
-        .score-circle { width: 180px; height: 180px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); border: 2px solid var(--accent); box-shadow: 0 0 30px rgba(34, 211, 238, 0.2); }
-        .score-val { font-size: 3rem; font-weight: 900; }
-        .score-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; }
+        #results { display: none; margin-top: 60px; animation: slideUp 0.8s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 
-        .avg-card { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 20px; text-align: center; min-width: 140px; border: 1px solid rgba(255,255,255,0.05); }
-        .avg-val { font-size: 1.8rem; font-weight: 700; color: var(--primary); }
-        .avg-label { font-size: 0.65rem; color: var(--text-dim); margin-top: 5px; }
+        .score-section { display: flex; flex-direction: column; align-items: center; margin-bottom: 50px; }
+        .score-circle { 
+            width: 200px; 
+            height: 200px; 
+            border-radius: 50%; 
+            background: white; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            border: 10px solid #f2f2f7;
+            position: relative;
+        }
+        .score-val { font-size: 3.5rem; font-weight: 700; color: var(--apple-blue); }
+        .score-label { font-size: 0.8rem; font-weight: 600; color: var(--apple-text-dim); text-transform: uppercase; }
 
-        .breakdown { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
-        .b-item { background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        .b-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 5px; }
-        .b-val { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
+        .averages { display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; }
+        .avg-box { background: #fbfbfd; padding: 20px 30px; border-radius: 20px; text-align: center; border: 1px solid var(--apple-border); }
+        .avg-num { font-size: 1.8rem; font-weight: 700; }
+        .avg-txt { font-size: 0.75rem; color: var(--apple-text-dim); }
+
+        .breakdown { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .b-card { background: #ffffff; padding: 25px; border-radius: 20px; border: 1px solid var(--apple-border); }
+        .b-lbl { font-size: 0.75rem; font-weight: 700; color: var(--apple-text-dim); text-transform: uppercase; margin-bottom: 10px; }
+        .b-val { font-size: 1.3rem; font-weight: 600; color: var(--apple-text); }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="badge">Engine: SAW + Profile Matching</div>
-            <h1>Matchmaking Intelligence</h1>
-            <p class="subtitle">Decision Support System based on GAP Analysis & Simple Additive Weighting</p>
+            <div class="badge">{{ strtoupper($mode) }} Match Engine</div>
+            <h1>Match Intelligence.</h1>
+            <p class="subtitle">Designed for simplicity. Engineered for precision.</p>
         </header>
 
         <div class="sim-grid">
-            <!-- User A (Initiator) -->
+            <!-- User A -->
             <div class="card">
-                <h2>👤 Initiator (Ideal)</h2>
+                <h2>Initiator.</h2>
                 <div class="field">
-                    <label>Role</label>
+                    <label>Professional Role</label>
                     <select id="a-role">
-                        @foreach($roles as $cat => $list)
-                            <optgroup label="{{ $cat }}">
-                                @foreach($list as $r) <option value="{{ $r }}">{{ $r }}</option> @endforeach
-                            </optgroup>
+                        @foreach($roles as $main => $subCategories)
+                            @foreach($subCategories as $sub => $list)
+                                <optgroup label="{{ $main }} › {{ $sub }}">
+                                    @foreach($list as $r) <option value="{{ $r }}">{{ $r }}</option> @endforeach
+                                </optgroup>
+                            @endforeach
                         @endforeach
                     </select>
                 </div>
                 <div class="field">
-                    <label>Industry Tags</label>
+                    <label>Industry Domains</label>
                     <div class="tag-wall" id="a-tags">
                         @foreach($industries as $t)
                             <label class="tag-pill"><input type="checkbox" value="{{ $t }}"> <span>{{ $t }}</span></label>
@@ -109,7 +151,7 @@
                 </div>
                 @if($mode === 'pro')
                 <div class="field">
-                    <label>Experience Level</label>
+                    <label>Experience</label>
                     <select id="a-experience">
                         @foreach($experience as $e) <option value="{{ $e }}">{{ $e }}</option> @endforeach
                     </select>
@@ -123,16 +165,18 @@
                 @endif
             </div>
 
-            <!-- User B (Target) -->
+            <!-- User B -->
             <div class="card">
-                <h2>🎯 Target Candidate</h2>
+                <h2>Candidate.</h2>
                 <div class="field">
-                    <label>Role</label>
+                    <label>Professional Role</label>
                     <select id="b-role">
-                        @foreach($roles as $cat => $list)
-                            <optgroup label="{{ $cat }}">
-                                @foreach($list as $r) <option value="{{ $r }}">{{ $r }}</option> @endforeach
-                            </optgroup>
+                        @foreach($roles as $main => $subCategories)
+                            @foreach($subCategories as $sub => $list)
+                                <optgroup label="{{ $main }} › {{ $sub }}">
+                                    @foreach($list as $r) <option value="{{ $r }}">{{ $r }}</option> @endforeach
+                                </optgroup>
+                            @endforeach
                         @endforeach
                     </select>
                 </div>
@@ -158,7 +202,7 @@
                     </select>
                 </div>
                 <div class="field">
-                    <label>Primary Language</label>
+                    <label>Communication</label>
                     <select id="b-language">
                         @foreach($languages as $lan) <option value="{{ $lan }}">{{ $lan }}</option> @endforeach
                     </select>
@@ -167,21 +211,24 @@
             </div>
         </div>
 
-        <button class="btn-calculate" onclick="calculate()">RUN INTELLIGENCE ANALYSIS</button>
+        <button class="btn-run" onclick="runAnalysis()">Run Intelligence Analysis</button>
 
         <div id="results" class="card">
-            <div class="score-row">
-                <div class="avg-card">
-                    <div class="avg-val" id="ncf-val">0.0</div>
-                    <div class="avg-label">Core Factor (NCF)</div>
-                </div>
+            <div class="score-section">
                 <div class="score-circle">
-                    <div class="score-label">Final Score</div>
+                    <div class="score-label">Match.</div>
                     <div class="score-val" id="score-text">0%</div>
                 </div>
-                <div class="avg-card">
-                    <div class="avg-val" id="nsf-val">0.0</div>
-                    <div class="avg-label">Secondary (NSF)</div>
+            </div>
+
+            <div class="averages">
+                <div class="avg-box">
+                    <div class="avg-num" id="ncf-val">0.0</div>
+                    <div class="avg-txt">Core Factor (NCF)</div>
+                </div>
+                <div class="avg-box">
+                    <div class="avg-num" id="nsf-val">0.0</div>
+                    <div class="avg-txt">Secondary Factor (NSF)</div>
                 </div>
             </div>
             
@@ -192,7 +239,7 @@
     </div>
 
     <script>
-        async function calculate() {
+        async function runAnalysis() {
             const getTags = (id) => Array.from(document.querySelectorAll(`#${id} input:checked`)).map(el => el.value);
 
             const payload = {
@@ -209,8 +256,7 @@
                     tags: getTags('b-tags'),
                     commitment: document.getElementById('b-commitment').value,
                     leadership: document.getElementById('b-leadership')?.value,
-                    language: document.getElementById('b-language')?.value,
-                    education: 'Bachelor' // Hardcoded for simulation
+                    language: document.getElementById('b-language')?.value
                 }
             };
 
@@ -229,10 +275,9 @@
 
             const list = document.getElementById('breakdown-list');
             list.innerHTML = res.breakdown.map(b => `
-                <div class="b-item">
-                    <div class="b-label">${b.label}</div>
+                <div class="b-card">
+                    <div class="b-lbl">${b.label}</div>
                     <div class="b-val">${b.value}</div>
-                    <div style="font-size: 0.6rem; color: var(--primary); margin-top: 5px;">Group Weight: ${b.weight}</div>
                 </div>
             `).join('');
 

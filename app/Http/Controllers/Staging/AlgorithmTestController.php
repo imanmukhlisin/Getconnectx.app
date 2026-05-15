@@ -33,11 +33,22 @@ class AlgorithmTestController extends Controller
     {
         return [
             'roles' => [
-                'Founders' => ['Founder', 'Co-Founder', 'CEO', 'CTO'],
-                'Builders' => ['Frontend Engineer', 'Backend Engineer', 'Product Manager', 'Designer'],
-                'Team' => ['Team Member', 'Associate', 'Lead']
+                'BUILDERS' => [
+                    'Founder' => ['Founder'],
+                    'Co-Founder' => ['Co-Founder'],
+                    'Team' => [
+                        'CEO', 'CTO', 'CPO', 'CMO', 
+                        'Frontend Engineer', 'Backend Engineer', 'Full Stack Engineer', 'Mobile Engineer', 
+                        'AI/ML Engineer', 'Data Engineer', 'DevOps',
+                        'Product Manager', 'UI/UX Designer', 'Product Designer', 'UX Researcher',
+                        'Growth Marketer', 'Digital Marketer', 'Sales Executive', 'Operations Manager'
+                    ]
+                ],
+                'STARTUPS' => [
+                    'Entity' => ['Stealth Startup', 'Idea Stage', 'MVP Stage', 'Pre-Seed Startup', 'Seed Stage', 'Series A+']
+                ]
             ],
-            'industries' => ['AI', 'SaaS', 'Fintech', 'Ecommerce', 'DeepTech', 'Web3'],
+            'industries' => ['AI', 'SaaS', 'Fintech', 'Ecommerce', 'DeepTech', 'Web3', 'Healthcare', 'EdTech'],
             'experience' => ['Junior (0-2y)', 'Mid (3-5y)', 'Senior (5-8y)', 'Expert (8y+)'],
             'stages' => ['Idea', 'MVP', 'Seed', 'Series A+'],
             'commitments' => ['Full-time', 'Part-time', 'Weekends'],
