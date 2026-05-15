@@ -113,15 +113,15 @@ class CardTransformerService
             'experience'   => $this->buildExperience($user),
             'education'    => [
                 'title' => 'Education',
-                'items' => $this->buildEducation($user),
+                'items' => $isPro ? $this->buildEducation($user) : [],
             ],
             'certifications' => [
                 'title' => 'Certifications',
-                'items' => $this->buildCertifications($user),
+                'items' => $isPro ? $this->buildCertifications($user) : [],
             ],
             'languages'    => [
                 'title' => 'Languages',
-                'items' => $this->buildLanguages($user),
+                'items' => $isPro ? $this->buildLanguages($user) : [],
             ],
             'socials'      => $this->buildSocialLinks($user),
             'sections'     => [
