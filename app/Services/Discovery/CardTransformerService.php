@@ -106,8 +106,10 @@ class CardTransformerService
             'skills'       => $this->buildSkills($user),
             'commitment'   => [
                 'title' => 'Commitment',
-                'value' => $user->commitment_level,
-                'label' => $user->commitment_level ? ucwords(str_replace('_', ' ', $user->commitment_level)) : null,
+                'value' => $user->commitment_level ?? ($user->builder->commitment_level ?? null),
+                'label' => ($user->commitment_level ?? ($user->builder->commitment_level ?? null)) 
+                    ? ucwords(str_replace('_', ' ', $user->commitment_level ?? ($user->builder->commitment_level ?? null))) 
+                    : null,
             ],
             'role'         => $user->position ?? 'Developer',
             'experience'   => $this->buildExperience($user),
