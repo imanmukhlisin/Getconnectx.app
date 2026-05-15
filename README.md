@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>The official backend service for ConnectX, powering matchmaking, real-time discovery, and seamless networking.</strong>
+  <strong>The official backend REST API for the ConnectX mobile application, powering matchmaking, real-time discovery, and seamless networking.</strong>
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
 * **Matchmaking & Discovery:** A highly optimized swipe-based feed algorithm utilizing Geo-location (Haversine formula), deep Tag/Skill matching, and Role compatibility scoring. Supports transactional *Swipe Right (Connect)* and *Swipe Left (Skip)* actions.
 * **AI-Powered Match Analysis:** Automated background queues that generate JSON-based AI compatibility insights whenever a mutual match occurs.
 * **Real-time Chat Integration:** 1-on-1 direct messaging capabilities synchronized directly with **Supabase Realtime Broadcast** for instantaneous mutual-match communication.
-* **Fully Serverless Ready:** Architected specifically to achieve 100% compatibility with the Vercel Serverless ecosystem.
+* **Scalable Architecture:** Architected to handle high-concurrency requests typical of mobile application usage.
 
 ## 🛠 Tech Stack
 
@@ -31,7 +31,7 @@
 * **Database:** PostgreSQL (hosted on [Supabase Cloud](https://supabase.com/))
 * **Real-time Engine:** Supabase Realtime
 * **API Documentation:** OpenAPI 3.0 via [L5-Swagger](https://github.com/DarkaOnLine/L5-Swagger)
-* **Deployment:** Vercel (Serverless Functions)
+* **Deployment:** Linux VPS / Docker (Nginx + PHP-FPM)
 
 ## 💻 Getting Started
 
@@ -74,18 +74,31 @@ Ensure you have the following installed on your local development machine:
    php artisan serve
    ```
 
-## ☁️ Deployment (Vercel)
+## ☁️ Deployment (VPS)
 
-This application has been meticulously modified to bypass traditional VPS limitations and run seamlessly on **Vercel Serverless Functions**. It handles Read-Only File System (EROFS) restrictions, temporary session storage, and routing conflict mitigation.
+This application is designed to be deployed on a standard Linux Virtual Private Server (VPS). 
 
-👉 **IMPORTANT:** Before deploying, please read the [Vercel Architecture & Setup Guide](./VERCEL_DEPLOYMENT_GUIDE.md).
+### Recommended Stack
+* **Web Server:** Nginx or Apache
+* **PHP:** PHP 8.2+ with PHP-FPM
+* **Process Monitor:** Supervisor (for Laravel Queues)
+* **SSL:** Let's Encrypt
+
+Ensure you run the standard Laravel deployment commands during your CI/CD pipeline or manual setup:
+```bash
+composer install --optimize-autoloader --no-dev
+php artisan config:cache
+php artisan event:cache
+php artisan route:cache
+php artisan view:cache
+```
 
 ## 📚 Documentation
 
-The backend provides an interactive Swagger UI for testing endpoints and reviewing the API contracts.
+The backend provides an interactive Swagger UI for testing endpoints and reviewing the API contracts for the mobile frontend team.
 
 * **Local Sandbox:** `http://localhost:8000/api/documentation`
-* **Production Sandbox:** `https://your-vercel-domain.vercel.app/api/documentation`
+* **Production Sandbox:** `https://your-production-domain.com/api/documentation`
 
 For detailed technical notes on the initial authentication flow, refer to the [Auth Technical Guide](./README-AUTH.md).
 
