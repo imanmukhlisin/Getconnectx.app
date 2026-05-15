@@ -5,22 +5,62 @@ namespace App\Http\Controllers\Staging;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+/**
+ * Matchmaking Engine: SAW + Profile Matching Edition
+ * Implementation of GAP Analysis and Simple Additive Weighting
+ */
 class AlgorithmTestController extends Controller
 {
+    // GAP Analysis Conversion Table
+    private function getGapWeight($gap)
+    {
+        $map = [
+            '0'  => 5.0, // Ideal
+            '1'  => 4.5, // Over-competent +1
+            '-1' => 4.0, // Under-competent -1
+            '2'  => 3.5, // Over-competent +2
+            '-2' => 3.0, // Under-competent -2
+            '3'  => 2.5, // Over-competent +3
+            '-3' => 2.0, // Under-competent -3
+            '4'  => 1.5, // Over-competent +4
+            '-4' => 1.0, // Under-competent -4
+        ];
+        
+        return $map[$gap] ?? 1.0; // Default to lowest if GAP is extreme
+    }
+
+    private function getFullOptions()
+    {
+        return [
+            'roles' => [
+                'Founders' => ['Founder', 'Co-Founder', 'CEO', 'CTO'],
+                'Builders' => ['Frontend Engineer', 'Backend Engineer', 'Product Manager', 'Designer'],
+                'Team' => ['Team Member', 'Associate', 'Lead']
+            ],
+            'industries' => ['AI', 'SaaS', 'Fintech', 'Ecommerce', 'DeepTech', 'Web3'],
+            'experience' => ['Junior (0-2y)', 'Mid (3-5y)', 'Senior (5-8y)', 'Expert (8y+)'],
+            'stages' => ['Idea', 'MVP', 'Seed', 'Series A+'],
+            'commitments' => ['Full-time', 'Part-time', 'Weekends'],
+            'leadership' => ['Democratic', 'Autocratic', 'Laissez-faire', 'Transformational'],
+            'languages' => ['English', 'Indonesian', 'Mandarin', 'Mixed'],
+            'education' => ['High School', 'Bachelor', 'Master', 'PhD']
+        ];
+    }
+
     public function free(Request $request)
     {
-        return view('staging.matchmaking', [
+        return view('staging.matchmaking', array_merge($this->getFullOptions(), [
             'mode' => 'free',
-            'title' => 'Standard Matchmaking Sandbox'
-        ]);
+            'title' => 'SAW + Profile Matching (FREE)'
+        ]));
     }
 
     public function pro(Request $request)
     {
-        return view('staging.matchmaking', [
+        return view('staging.matchmaking', array_merge($this->getFullOptions(), [
             'mode' => 'pro',
-            'title' => 'Premium PRO Matchmaking Sandbox'
-        ]);
+            'title' => 'SAW + Profile Matching (PRO)'
+        ]));
     }
 
     public function calculate(Request $request)
@@ -29,82 +69,98 @@ class AlgorithmTestController extends Controller
         $userA = $request->input('userA');
         $userB = $request->input('userB');
 
-        // Parse tags from comma separated string
-        $userA['tags'] = array_filter(array_map('trim', explode(',', $userA['tags'] ?? '')));
-        $userB['tags'] = array_filter(array_map('trim', explode(',', $userB['tags'] ?? '')));
-
         if ($mode === 'pro') {
-            return response()->json($this->calculatePro($userA, $userB));
+            return response()->json($this->calculateSAWPro($userA, $userB));
         }
 
-        return response()->json($this->calculateFree($userA, $userB));
+        return response()->json($this->calculateSAWFree($userA, $userB));
     }
 
-    private function calculateFree($userA, $userB)
+    private function calculateSAWFree($userA, $userB)
     {
-        $weights = ['interest' => 0.5, 'role' => 0.3, 'location' => 0.2, 'pro_bonus' => 25];
+        // FREE: 4 Variables (2 CF, 2 SF)
         
-        $sharedTags = array_intersect($userA['tags'], $userB['tags']);
-        $maxTags = max(count($userA['tags'] ?: [1]), count($userB['tags'] ?: [1]));
-        $interestScore = ($sharedTags && $maxTags > 0) ? (count($sharedTags) / $maxTags) * 100 : 0;
+        // --- Core Factors (60%) ---
+        // 1. modeFit (Intent)
+        $gapMode = ($userA['commitment'] === $userB['commitment']) ? 0 : -1;
+        $cf1 = $this->getGapWeight($gapMode);
 
-        $roleScore = ($userA['role'] !== $userB['role']) ? 100 : 50;
+        // 2. skillComp (Role)
+        $gapSkill = ($userA['role'] !== $userB['role']) ? 0 : -2; // Founder vs Builder = 0 Gap (Ideal)
+        $cf2 = $this->getGapWeight($gapSkill);
 
-        $distance = $this->haversine($userA['lat'] ?? 0, $userA['lng'] ?? 0, $userB['lat'] ?? 0, $userB['lng'] ?? 0);
-        $locationScore = max(0, 100 - ($distance / 50 * 100));
+        $ncf = ($cf1 + $cf2) / 2;
 
-        $total = ($interestScore * $weights['interest']) +
-                 ($roleScore * $weights['role']) +
-                 ($locationScore * $weights['location']);
+        // --- Secondary Factors (40%) ---
+        // 3. industryFit
+        $shared = array_intersect((array)($userA['tags'] ?? []), (array)($userB['tags'] ?? []));
+        $gapIndustry = (count($shared) >= 1) ? 0 : -2;
+        $sf1 = $this->getGapWeight($gapIndustry);
 
-        if ($userB['is_pro'] ?? false) $total += $weights['pro_bonus'];
+        // 4. commitmentFit
+        $sf2 = $cf1; // Simplified for Free
+
+        $nsf = ($sf1 + $sf2) / 2;
+
+        // Final Score (60% CF + 40% SF)
+        $finalScoreRaw = (0.6 * $ncf) + (0.4 * $nsf);
+        $scorePercent = ($finalScoreRaw / 5.0) * 100;
 
         return [
-            'score' => min(100, round($total, 2)),
+            'score' => round($scorePercent, 2),
+            'ncf' => round($ncf, 2),
+            'nsf' => round($nsf, 2),
             'breakdown' => [
-                ['label' => 'Vision Overlap', 'value' => round($interestScore, 1) . '%', 'weight' => '50%'],
-                ['label' => 'Role Complement', 'value' => $roleScore . '%', 'weight' => '30%'],
-                ['label' => 'Location Proximity', 'value' => round($locationScore, 1) . '%', 'weight' => '20%'],
-                ['label' => 'Pro Status Bonus', 'value' => ($userB['is_pro'] ?? false) ? '+25' : '0', 'weight' => 'Bonus']
-            ],
-            'distance' => round($distance, 2) . ' km'
-        ];
-    }
-
-    private function calculatePro($userA, $userB)
-    {
-        $weights = ['vision' => 0.4, 'skill' => 0.3, 'commitment' => 0.2, 'active' => 0.1];
-        
-        $sharedTags = array_intersect($userA['tags'], $userB['tags']);
-        $maxTags = max(count($userA['tags'] ?: [1]), count($userB['tags'] ?: [1]));
-        $visionScore = ($sharedTags && $maxTags > 0) ? (count($sharedTags) / $maxTags) * 100 : 0;
-
-        $skillScore = ($userA['role'] !== $userB['role']) ? 100 : 40;
-        $commitmentScore = ($userA['commitment'] === $userB['commitment']) ? 100 : 50;
-        $activeScore = ($userB['active_days'] ?? 30) <= 7 ? 100 : 20;
-
-        $total = ($visionScore * $weights['vision']) +
-                 ($skillScore * $weights['skill']) +
-                 ($commitmentScore * $weights['commitment']) +
-                 ($activeScore * $weights['active']);
-
-        return [
-            'score' => min(100, round($total, 2)),
-            'breakdown' => [
-                ['label' => 'Vision Overlap', 'value' => round($visionScore, 1) . '%', 'weight' => '40%'],
-                ['label' => 'Role Complement', 'value' => $skillScore . '%', 'weight' => '30%'],
-                ['label' => 'Commitment Sync', 'value' => $commitmentScore . '%', 'weight' => '20%'],
-                ['label' => 'Velocity Bonus', 'value' => $activeScore . '%', 'weight' => '10%']
+                ['label' => 'Intent Alignment (CF)', 'value' => $cf1 . '/5.0', 'weight' => '60%'],
+                ['label' => 'Role Synergy (CF)', 'value' => $cf2 . '/5.0', 'weight' => '60%'],
+                ['label' => 'Sector Relevance (SF)', 'value' => $sf1 . '/5.0', 'weight' => '40%'],
+                ['label' => 'Availability (SF)', 'value' => $sf2 . '/5.0', 'weight' => '40%'],
             ]
         ];
     }
 
-    private function haversine($lat1, $lon1, $lat2, $lon2)
+    private function calculateSAWPro($userA, $userB)
     {
-        $earthRadius = 6371;
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLon = deg2rad($lon2 - $lon1);
-        $a = sin($dLat / 2) * sin($dLat / 2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon / 2) * sin($dLon / 2);
-        return $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
+        // PRO: 10 Variables (Detailed Implementation)
+        
+        // --- Core Factors (60%) ---
+        $cf_scores = [];
+        // 1. modeFit & skillComp
+        $cf_scores[] = $this->getGapWeight(($userA['commitment'] === $userB['commitment']) ? 0 : -1);
+        $cf_scores[] = $this->getGapWeight(($userA['role'] !== $userB['role']) ? 0 : -2);
+        // 2. industryFit
+        $shared = array_intersect((array)($userA['tags'] ?? []), (array)($userB['tags'] ?? []));
+        $cf_scores[] = $this->getGapWeight((count($shared) >= 2) ? 0 : (count($shared) == 1 ? -1 : -2));
+        // 3. experienceFit
+        $cf_scores[] = $this->getGapWeight(($userA['experience'] === $userB['experience']) ? 0 : -1);
+        // 4. stageFit
+        $cf_scores[] = $this->getGapWeight(($userA['stage'] === $userB['stage']) ? 0 : 1);
+
+        $ncf = array_sum($cf_scores) / count($cf_scores);
+
+        // --- Secondary Factors (40%) ---
+        $sf_scores = [];
+        $sf_scores[] = $this->getGapWeight(($userA['leadership'] === $userB['leadership']) ? 0 : -1);
+        $sf_scores[] = $this->getGapWeight(($userA['language'] === $userB['language']) ? 0 : -1);
+        $sf_scores[] = $this->getGapWeight(($userA['education'] === $userB['education']) ? 0 : -1);
+        $sf_scores[] = $this->getGapWeight(0); // Location Score (Simulated Ideal)
+        $sf_scores[] = $this->getGapWeight(0); // Readiness (Simulated Ideal)
+
+        $nsf = array_sum($sf_scores) / count($sf_scores);
+
+        $finalScoreRaw = (0.6 * $ncf) + (0.4 * $nsf);
+        $scorePercent = ($finalScoreRaw / 5.0) * 100;
+
+        return [
+            'score' => round($scorePercent, 2),
+            'ncf' => round($ncf, 2),
+            'nsf' => round($nsf, 2),
+            'breakdown' => [
+                ['label' => 'Core Compatibility (NCF)', 'value' => round($ncf, 2) . '/5.0', 'weight' => '60%'],
+                ['label' => 'Secondary Synergy (NSF)', 'value' => round($nsf, 2) . '/5.0', 'weight' => '40%'],
+                ['label' => 'Leadership Fit', 'value' => $sf_scores[0] . '/5.0', 'weight' => 'SF'],
+                ['label' => 'Language Match', 'value' => $sf_scores[1] . '/5.0', 'weight' => 'SF'],
+            ]
+        ];
     }
 }
