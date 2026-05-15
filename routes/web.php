@@ -9,6 +9,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Staging & Testing Routes for Algorithm
+Route::prefix('staging')->group(function () {
+    Route::get('/algoritmfree', [App\Http\Controllers\Staging\AlgorithmTestController::class, 'free'])->name('staging.free');
+    Route::get('/algoritmpro', [App\Http\Controllers\Staging\AlgorithmTestController::class, 'pro'])->name('staging.pro');
+    Route::post('/calculate', [App\Http\Controllers\Staging\AlgorithmTestController::class, 'calculate'])->name('staging.calculate');
+});
+
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
