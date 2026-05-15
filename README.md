@@ -1,85 +1,93 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <h1 align="center">ConnectX Backend API</h1>
 </p>
 
-## 🚀 Setup & Vercel Deployment Guide
+<p align="center">
+  <strong>The official backend service for ConnectX, powering matchmaking, real-time discovery, and seamless networking.</strong>
+</p>
 
-Bagi teman-teman developer Backend tim ConnectX, proyek ini telah dimodifikasi agar **kompatibel 100% dijalankan pada Ekosistem Serverless Vercel**.
-
-Vercel **sangat berbeda dengan VPS Biasa**. Harap membaca file panduan teknis yang telah disusun untuk meminimalisir Error 500 terkait limitasi Read-Only (EROFS), Session, cache, maupun routing conflict.
-
-👉 **PENTING: [BACA PANDUAN ARSITEKTUR & SETUP VERCEL DI SINI (VERCEL_DEPLOYMENT_GUIDE.md)](./VERCEL_DEPLOYMENT_GUIDE.md)** 👈
-
----
-
-## ✨ Key Features (Core)
-
-- **Auth System**: Passwordless Login (OTP WhatsApp & Email), Social Login (Google, Apple, LinkedIn).
-- **Sequential Registration**: Flow pendaftaran 5 tahap yang aman (Onboarding Engine).
-- **Matchmaking & Discovery**: Sistem algoritma *Feed* berbasis lokasi Geo (Haversine), kesesuaian Tag/Skill, dan kecocokan *Role*. Mendukung aksi *Swipe Right* (Connect) & *Swipe Left* (Skip) secara transaksional.
-- **Automated Match Analysis**: Sistem *background queue* yang membuat analisis kecocokan (AI json-based) otomatis tiap ada mutual-match.
-- **Real-time Chat**: 1-on-1 chatting menggunakan **Supabase Realtime Broadcast**, terhubung langsung dengan mutual-matches.
-- **Supabase Integration**: Data tersimpan aman di PostgreSQL (Supabase Cloud).
-- **OpenAPI Docs**: Terintegrasi penuh dengan Swagger (L5-Swagger) melaui PHP 8 Attributes.
-
-Untuk detail teknis endpoint otentikasi awal, silakan baca **[README-AUTH.md](./README-AUTH.md)**.
-Untuk testing API Sandbox interaktif, buka `http://localhost/api/documentation` *(atau URL Vercel kamu `/api/documentation`)*.
+<p align="center">
+  <a href="#-key-features">Key Features</a> •
+  <a href="#-tech-stack">Tech Stack</a> •
+  <a href="#-getting-started">Getting Started</a> •
+  <a href="#-deployment">Deployment</a> •
+  <a href="#-documentation">Documentation</a>
+</p>
 
 ---
 
+## 🚀 Key Features
+
+* **Advanced Authentication:** Secure passwordless login via WhatsApp & Email OTP, alongside standard Social OAuth integrations (Google, Apple, LinkedIn).
+* **Dynamic Onboarding Engine:** A robust, sequential 5-stage registration flow ensuring high-quality profile data collection.
+* **Matchmaking & Discovery:** A highly optimized swipe-based feed algorithm utilizing Geo-location (Haversine formula), deep Tag/Skill matching, and Role compatibility scoring. Supports transactional *Swipe Right (Connect)* and *Swipe Left (Skip)* actions.
+* **AI-Powered Match Analysis:** Automated background queues that generate JSON-based AI compatibility insights whenever a mutual match occurs.
+* **Real-time Chat Integration:** 1-on-1 direct messaging capabilities synchronized directly with **Supabase Realtime Broadcast** for instantaneous mutual-match communication.
+* **Fully Serverless Ready:** Architected specifically to achieve 100% compatibility with the Vercel Serverless ecosystem.
+
+## 🛠 Tech Stack
+
+* **Framework:** [Laravel 11](https://laravel.com/) (PHP)
+* **Database:** PostgreSQL (hosted on [Supabase Cloud](https://supabase.com/))
+* **Real-time Engine:** Supabase Realtime
+* **API Documentation:** OpenAPI 3.0 via [L5-Swagger](https://github.com/DarkaOnLine/L5-Swagger)
+* **Deployment:** Vercel (Serverless Functions)
+
+## 💻 Getting Started
+
+### Prerequisites
+
+Ensure you have the following installed on your local development machine:
+
+* PHP >= 8.2
+* Composer
+* Node.js & NPM
+* A PostgreSQL database (or a local Supabase instance)
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-org/getconnect-x.git
+   cd getconnect-x
+   ```
+
+2. **Install PHP dependencies:**
+   ```bash
+   composer install
+   ```
+
+3. **Configure Environment Variables:**
+   Copy the example environment file and configure your local settings, especially your database credentials and Supabase keys.
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+4. **Run Database Migrations:**
+   ```bash
+   php artisan migrate
+   ```
+
+5. **Serve the Application:**
+   ```bash
+   php artisan serve
+   ```
+
+## ☁️ Deployment (Vercel)
+
+This application has been meticulously modified to bypass traditional VPS limitations and run seamlessly on **Vercel Serverless Functions**. It handles Read-Only File System (EROFS) restrictions, temporary session storage, and routing conflict mitigation.
+
+👉 **IMPORTANT:** Before deploying, please read the [Vercel Architecture & Setup Guide](./VERCEL_DEPLOYMENT_GUIDE.md).
+
+## 📚 Documentation
+
+The backend provides an interactive Swagger UI for testing endpoints and reviewing the API contracts.
+
+* **Local Sandbox:** `http://localhost:8000/api/documentation`
+* **Production Sandbox:** `https://your-vercel-domain.vercel.app/api/documentation`
+
+For detailed technical notes on the initial authentication flow, refer to the [Auth Technical Guide](./README-AUTH.md).
+
 ---
-
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
-```
-
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+*Built with ❤️ by the ConnectX Engineering Team.*
