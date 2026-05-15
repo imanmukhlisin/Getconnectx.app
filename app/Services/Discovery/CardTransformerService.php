@@ -113,10 +113,7 @@ class CardTransformerService
             ],
             'role'         => $user->position ?? 'Developer',
             'experience'   => $this->buildExperience($user),
-            'education'    => [
-                'title' => 'Education',
-                'items' => $this->buildEducation($user),
-            ],
+            'education'    => $this->buildEducation($user),
             'certifications' => [
                 'title' => 'Certifications',
                 'items' => $isPro ? $this->buildCertifications($user) : [],
