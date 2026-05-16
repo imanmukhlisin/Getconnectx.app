@@ -27,34 +27,80 @@ Endpoint `GET /api/v1/me/profile` kini mengembalikan **seluruh kolom database** 
 ```json
 {
   "success": true,
+  "message": "Profile fetched successfully",
   "data": {
     "id": "usr_...",
-    // ... [Field terformat UI-ready bawaan lama tetap ada dan aman] ...
+    "teamId": "team_...",
+    "profileType": "founder",
+    "name": "Amelia Wasti Vira",
+    "headline": "Nutritionist | Health&Food",
+    "photoUrl": "https://media.licdn.com/dms/image/v2/.../profile-displayphoto...",
+    
+    // ── Field UI-Ready (Legacy Contract - Tetap Dipertahankan) ──
+    "location": {
+        "city": "Yogyakarta",
+        "country": "Indonesia",
+        "display": "Yogyakarta, Indonesia"
+    },
+    "stats": {
+        "connections": 0,
+        "teamsJoined": 0,
+        "matches": 0
+    },
+    "badges": [
+        {
+            "id": "startup-founder",
+            "label": "Startup Founder"
+        }
+    ],
+    "tags": [
+        {
+            "id": 126,
+            "name": "Creative",
+            "type": "personality_hobbies",
+            "code": "ph_5"
+        }
+    ],
+    "sections": {
+        "about": {
+            "kind": "startupIdea",
+            "title": "Startup Idea",
+            "value": ""
+        },
+        "highlights": {
+            "items": [
+                "Nutritionist at RSUD Prof. Dr. Margono Soekarjo",
+                "Nutritionist, Universitas Respati Yogyakarta"
+            ]
+        }
+    },
 
+    // ── 🌟 NEW: EXHAUSTIVE RAW DATA (USER) ──
     "userRaw": {
         // Berisi SEMUA kolom dari tabel users
-        "name": "Budi Santoso",
-        "city": "Jakarta",
-        "roleCategory": "Startup",
+        "name": "Amelia Wasti Vira",
+        "city": "Yogyakarta",
+        "roleCategory": "Founder",
         "isOnboarded": true,
         "languages": ["Indonesian", "English"],
 
         // Injeksi Data LinkedIn Penuh
         "linkedinData": {
             "urn": "urn:li:member:123456789",
-            "headline": "CEO at ConnectX",
+            "headline": "Nutritionist | Health&Food",
             "experience": [ ... ],
             "education": [ ... ],
             "certifications": [ ... ]
         }
     },
 
+    // ── 🌟 NEW: EXHAUSTIVE RAW DATA (STARTUP) ──
     "startupRaw": {
         // Berisi SEMUA kolom dari tabel startups
-        "name": "ConnectX",
-        "stage": "Pre Seed",
-        "industry": "Financial Technology",
-        "openRoles": ["Backend Developer", "Chief Technology Officer"],
+        "name": "Amelia Wasti Vira's Startup",
+        "stage": "Idea",
+        "industry": "Technology",
+        "openRoles": ["Backend Developer"],
         
         // Data dari onboarding (Traction & Offering)
         "lookingFor": {

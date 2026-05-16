@@ -286,7 +286,7 @@ class ProfileResource extends JsonResource
 
         $userRawData = $this->resource->toArray();
         if ($this->relationLoaded('credentials')) {
-            $linkedinCred = $this->credentials->where('type', 'linkedin')->first();
+            $linkedinCred = $this->credentials->where('provider', 'linkedin')->first();
             if ($linkedinCred) {
                 $raw = $linkedinCred->raw_data;
                 $userRawData['linkedin_data'] = is_array($raw) ? $raw : (is_string($raw) ? json_decode($raw, true) : []);
