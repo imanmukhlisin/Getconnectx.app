@@ -1114,8 +1114,6 @@ class OnboardingSeeder extends Seeder
             $q('q_last_name', 'step_personal_name', 2, 'text', 'Nama Belakang', 'Last Name', false, ['placeholder' => json_encode(['id' => 'Nama belakang kamu', 'en' => 'Your last name'])]),
             $q('q_dob', 'step_personal_dob', 1, 'date', 'Tanggal Lahir', 'Date of Birth', true, ['placeholder' => json_encode(['id' => 'Tahun-Bulan-tanggal', 'en' => 'YYYY-MM-DD'])]),
             $q('q_location', 'step_personal_location', 1, 'searchable_dropdown', 'Pilih Kota/Negara', 'Select City/Country', true, ['placeholder' => json_encode(['id' => 'Cari kota', 'en' => 'Search a city'])]),
-            $q('q_open_remote', 'step_personal_location', 2, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
-            $q('q_remote_pref', 'step_personal_location', 3, 'dropdown', 'Preferensi remote', 'Remote preference', true, ['depends_on' => json_encode(['question_id' => 'q_open_remote', 'operator' => 'equals', 'value' => 'yes'])]),
             $q('q_gender', 'step_personal_gender', 1, 'single_select_card', '', ''),
             $q('q_use_connectx', 'step_role_selection', 1, 'single_select_card', '', ''),
 
@@ -1165,7 +1163,8 @@ class OnboardingSeeder extends Seeder
             $q('q_cf_salary_amount', 'step_cf_comp', 5, 'number', 'Berapa minimum gaji?', 'Minimum salary amount?', true, ['depends_on' => json_encode(['question_id' => 'q_cf_salary_type', 'operator' => 'in', 'value' => ['strict', 'flexible']]), 'placeholder' => json_encode(['id' => '5000', 'en' => '5000'])]),
             // Remote + LinkedIn
             $q('q_cf_remote', 'step_cf_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
-            $q('q_cf_relocate', 'step_cf_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
+            $q('q_cf_remote_pref', 'step_cf_remote', 2, 'dropdown', 'Pilih jenis remote', 'Select remote type', true, ['depends_on' => json_encode(['question_id' => 'q_cf_remote', 'operator' => 'equals', 'value' => 'yes'])]),
+            $q('q_cf_relocate', 'step_cf_remote', 3, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
             $q('q_cf_linkedin', 'step_cf_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/namamu', 'en' => 'https://linkedin.com/in/your-name']), 'helper_text' => json_encode(['id' => 'Kami akan otomatis ambil pengalaman, skill, dan foto dari LinkedIn. Kamu bisa edit setelahnya.', 'en' => "We'll automatically fetch your experience, skills, and photo from LinkedIn so you can edit them next."])]),
 
             // ── TEAM MEMBER JOINING ──
@@ -1180,7 +1179,8 @@ class OnboardingSeeder extends Seeder
             $q('q_tm_salary_amount', 'step_tm_comp', 5, 'number', 'Berapa minimum gaji?', 'Minimum salary amount?', true, ['depends_on' => json_encode(['question_id' => 'q_tm_salary_type', 'operator' => 'in', 'value' => ['strict', 'flexible']]), 'placeholder' => json_encode(['id' => '5000', 'en' => '5000'])]),
             // Remote + LinkedIn
             $q('q_tm_remote', 'step_tm_remote', 1, 'single_select_card', 'Apakah kamu terbuka untuk kerja remote?', 'Are you open to remote work?'),
-            $q('q_tm_relocate', 'step_tm_remote', 2, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
+            $q('q_tm_remote_pref', 'step_tm_remote', 2, 'dropdown', 'Pilih jenis remote', 'Select remote type', true, ['depends_on' => json_encode(['question_id' => 'q_tm_remote', 'operator' => 'equals', 'value' => 'yes'])]),
+            $q('q_tm_relocate', 'step_tm_remote', 3, 'single_select_card', 'Apakah kamu bersedia relokasi?', 'Are you willing to relocate?'),
             $q('q_tm_linkedin', 'step_tm_linkedin', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/namamu', 'en' => 'https://linkedin.com/in/your-name']), 'helper_text' => json_encode(['id' => 'Kami akan otomatis ambil pengalaman, skill, dan foto dari LinkedIn. Kamu bisa edit setelahnya.', 'en' => "We'll automatically fetch your experience, skills, and photo from LinkedIn so you can edit them next."])]),
 
             // ── STARTUP: About ──
@@ -1297,12 +1297,15 @@ class OnboardingSeeder extends Seeder
         }
 
         // ── Common Simple Options ──
-        $opts[] = $o('opt_rem_yes', 'q_open_remote', 1, 'Ya', 'Yes', 'yes', null, null, 'yes');
-        $opts[] = $o('opt_rem_no', 'q_open_remote', 2, 'Tidak', 'No', 'no', null, null, 'no');
-        $opts[] = $o('opt_rp_1', 'q_remote_pref', 1, 'Hybrid', 'Hybrid', 'hybrid');
-        $opts[] = $o('opt_rp_2', 'q_remote_pref', 2, 'Onsite', 'Onsite', 'onsite');
-        $opts[] = $o('opt_rp_3', 'q_remote_pref', 3, 'Lebih suka remote', 'Remote preferred', 'remote_preferred');
-        $opts[] = $o('opt_rp_4', 'q_remote_pref', 4, 'Hanya remote', 'Remote only', 'remote_only');
+
+        // ── CF & TM Remote Pref Options ──
+        foreach (['q_cf_remote_pref', 'q_tm_remote_pref'] as $qid) {
+            $opts[] = $o('opt_' . $qid . '_1', $qid, 1, 'Hybrid', 'Hybrid', 'hybrid');
+            $opts[] = $o('opt_' . $qid . '_2', $qid, 2, 'Onsite', 'Onsite', 'onsite');
+            $opts[] = $o('opt_' . $qid . '_3', $qid, 3, 'Remote preferred', 'Remote preferred', 'remote_preferred');
+            $opts[] = $o('opt_' . $qid . '_4', $qid, 4, 'Remote only', 'Remote only', 'remote_only');
+        }
+
         $opts[] = $o('opt_gen_m', 'q_gender', 1, 'Pria', 'Male', 'male');
         $opts[] = $o('opt_gen_f', 'q_gender', 2, 'Wanita', 'Female', 'female');
 

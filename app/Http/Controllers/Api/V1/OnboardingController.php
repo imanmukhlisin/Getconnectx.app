@@ -355,4 +355,24 @@ class OnboardingController extends Controller
             'redirect_to' => '/home'
         ]);
     }
+    /**
+     * Search options for searchable_dropdown questions (e.g. Cities).
+     * GET /api/v1/onboarding/options/search?question_id=q_location&q=Jakarta
+     */
+    public function searchOptions(Request $request)
+    {
+        $request->validate([
+            'question_id' => 'required|string',
+            'q' => 'nullable|string|min:2',
+        ]);
+
+        $options = $this->engine->searchOptions(
+            $request->question_id,
+            $request->q ?? ''
+        );
+
+        return response()->json([
+            'options' => $options
+        ]);
+    }
 }

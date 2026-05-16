@@ -58,7 +58,9 @@ class OnboardingEngineService
                 $q->orderBy('order_index');
             },
             'questions.options' => function ($q) {
-                $q->orderBy('order_index');
+                $q->whereHas('question', function($query) {
+                    $query->where('type', '!=', 'searchable_dropdown');
+                })->orderBy('order_index');
             }
         ])->firstOrFail();
 
@@ -771,5 +773,36 @@ class OnboardingEngineService
             return $jsonValue[0] ?? null;
         }
         return $jsonValue;
+    }
+    /**
+     * Search options in database (e.g. for large datasets like Cities).
+     */
+    public function searchOptions(string $questionId, string $query): array
+    {
+        $locale = app()->getLocale();
+        
+        $options = \App\Models\OnboardingOption::where('question_id', $questionId)
+            ->where(function($q) use ($query) {
+                $q->where('label->id', 'like', "%{$query}%")
+                  ->orWhere('label->en', 'like', "%{$query}%")
+                  ->orWhere('value', 'like', "%{$query}%");
+            })
+            ->orderBy('order_index')
+            ->limit(50)
+            ->get();
+
+        return $options->map(function ($opt) use ($locale) {
+            $label = is_array($opt->label) ? ($opt->label[$locale] ?? $opt->label['en'] ?? reset($opt->label)) : $opt->label;
+            $subLabel = is_array($opt->sub_label) ? ($opt->sub_label[$locale] ?? $opt->sub_label['en'] ?? null) : $opt->sub_label;
+
+            return [
+                'id' => $opt->id,
+                'label' => $label,
+                'sub_label' => $subLabel,
+                'value' => $opt->value,
+                'icon' => $opt->icon,
+                'group' => $opt->group_name,
+            ];
+        })->toArray();
     }
 }

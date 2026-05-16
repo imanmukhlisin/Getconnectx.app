@@ -165,6 +165,7 @@ Route::prefix('v1')->group(function () {
         Route::post('role',                     [OnboardingController::class, 'saveRole'])->name('onboarding.role');
         Route::post('builder-type',              [OnboardingController::class, 'saveBuilderType'])->name('onboarding.builder-type');
         Route::post('preferences',              [OnboardingController::class, 'savePreferences'])->name('onboarding.preferences');
+        Route::get('options/search',            [OnboardingController::class, 'searchOptions'])->name('onboarding.options.search');
     });
 
     // ─── Authenticated: Media Upload ──────────────────────────────────────────
