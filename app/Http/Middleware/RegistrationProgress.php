@@ -58,9 +58,13 @@ class RegistrationProgress
             $isDuplicate = User::where('linkedin_url', $user->linkedin_url)->where('id', '!=', $user->id)->exists();
 
             if (!$isValid || $isDuplicate) {
+                $errorMessage = app()->getLocale() === 'id' 
+                    ? 'URL LinkedIn Anda tidak valid atau sudah digunakan oleh akun lain. Silakan perbarui profil Anda.'
+                    : 'Your LinkedIn URL is invalid or already in use by another account. Please update your profile.';
+
                 return response()->json([
                     'status'    => 'error',
-                    'message'   => 'URL LinkedIn Anda tidak valid atau sudah digunakan oleh akun lain. Silakan perbarui profil Anda.',
+                    'message'   => $errorMessage,
                     'next_step' => 'FIX_LINKEDIN',
                     'data'      => [
                         'current_step'  => $user->registration_step,
