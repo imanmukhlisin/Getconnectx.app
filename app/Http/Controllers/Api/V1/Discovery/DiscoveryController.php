@@ -142,7 +142,7 @@ class DiscoveryController extends Controller
         } else {
             $query  = $this->filterBuilder->buildStartupQuery($authUser, $filters, $mode);
             $result = $this->filterBuilder->applyCursorPagination(
-                $query->with('owner'), // eager load founder
+                $query->with(['owner', 'members']), // eager load founder + team members
                 $cursor, $limit
             );
 

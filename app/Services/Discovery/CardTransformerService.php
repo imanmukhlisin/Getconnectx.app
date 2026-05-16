@@ -215,25 +215,88 @@ class CardTransformerService
         // Journey Object (API-MACHMAKING)
         $journeyBlock = $this->buildJourney($startup->stage);
 
+        // --- Founders, Team, Roles ---
+        $members = $startup->relationLoaded('members') ? $startup->members : collect();
+        $founderCount    = $members->where('role_id', 'founder')->count() ?: 1; // at minimum the owner
+        $rolesCovered    = $members->pluck('role_id')->filter()->unique()->values()->toArray();
+        $openRoles       = is_array($startup->open_roles) ? $startup->open_roles : [];
+
+        // Missing skills = open_roles minus already covered roles
+        $missingRoles = array_values(array_diff(
+            array_map('strtolower', $openRoles),
+            array_map('strtolower', $rolesCovered)
+        ));
+
+        // --- Commitment from looking_for data ---
+        $lookingFor = is_array($startup->looking_for) ? $startup->looking_for : [];
+        $commitmentLabel = $lookingFor['commitment'] ?? null;
+        $commitmentBlock = [
+            'value' => $commitmentLabel,
+            'label' => $commitmentLabel
+                ? ucwords(str_replace('_', ' ', $commitmentLabel))
+                : 'Open to discuss',
+        ];
+
+        // --- Offering (equity + paid) ---
+        $offeringBlock = [
+            'equity'  => $lookingFor['equity']    ?? null,   // e.g. "1-5%"
+            'paid'    => $lookingFor['paid']       ?? null,   // true/false/null
+            'label'   => $this->buildOfferingLabel($lookingFor),
+        ];
+
+        // --- Traction (dynamic based on stage) ---
+        $tractionBlock = $this->buildTraction($startup);
+
+        // --- Links (dynamic based on stage) ---
+        $linksBlock = $this->buildStartupLinks($startup, $owner);
+
         return [
-            'entityType'   => 'startup',
-            'id'           => "card_startup_{$startup->id}_{$index}",
-            'startupId'    => $startup->id,
-            'name'         => $startup->name,
-            'logoUrl'      => $startup->logo_url,
-            'badge'        => ['label' => $startup->stage ? strtoupper($startup->stage) : null],
-            'founder'      => $owner ? [
+            'entityType'    => 'startup',
+            'id'            => "card_startup_{$startup->id}_{$index}",
+            'startupId'     => $startup->id,
+            'name'          => $startup->name,
+            'logoUrl'       => $startup->logo_url,
+            'tagline'       => $startup->tagline,
+            'badge'         => ['label' => $startup->stage ? strtoupper($startup->stage) : null],
+            'founder'       => $owner ? [
                 'name'  => $owner->name,
                 'title' => $owner->position ?? 'Founder',
             ] : null,
-            'match'        => $matchBlock,
-            'industry'     => $industryBlock,
-            'team'         => $teamBlock,
-            'summary'      => $startup->description,
-            'openRoles'    => $openRoles,
-            'lookingFor'   => $this->buildLookingFor($startup),
-            'teamStage'    => $teamStageBlock,
-            'journey'      => $journeyBlock,
+            'match'         => $matchBlock,
+            'industry'      => $industryBlock,
+            'team'          => [
+                'memberCount'    => $startup->team_size ?? 1,
+                'founderCount'   => $founderCount,
+                'rolesCovered'   => $rolesCovered,
+                'display'        => ($startup->team_size ?? 1) . ' member' . (($startup->team_size ?? 1) > 1 ? 's' : ''),
+            ],
+            'summary'       => $startup->description,
+            'openRoles'     => $openRoles,
+            'missingRoles'  => $missingRoles,
+            'lookingFor'    => $this->buildLookingFor($startup),
+            'teamStage'     => $teamStageBlock,
+            'journey'       => $journeyBlock,
+            'commitment'    => $commitmentBlock,
+            'offering'      => $offeringBlock,
+            'traction'      => $tractionBlock,
+            'links'         => $linksBlock,
+            'sections'      => [
+                'team' => [
+                    'title' => 'Team & Stage',
+                    'items' => array_map(fn ($r) => ['id' => $r, 'name' => ucwords(str_replace('_', ' ', $r))], $rolesCovered),
+                ],
+                'lookingFor' => [
+                    'title' => 'Looking For',
+                    'items' => array_map(fn ($r) => ['id' => $r, 'name' => ucwords(str_replace('_', ' ', $r))], $openRoles),
+                ],
+                'missingSkills' => [
+                    'title' => 'Skills Needed',
+                    'items' => array_map(fn ($r) => ['id' => $r, 'name' => ucwords(str_replace('_', ' ', $r))], $missingRoles),
+                ],
+                'highlights' => [
+                    'items' => $matchResult['highlights'] ?? [],
+                ],
+            ],
         ];
     }
 
@@ -556,4 +619,112 @@ class CardTransformerService
             'stages' => $stagesList
         ];
     }
+
+    /**
+     * Build traction block — fields shown depend on startup stage.
+     * Idea: no numbers needed. MVP+: prototype link, early testers.
+     * Pre-Seed+: MAU, revenue signals.
+     */
+    private function buildTraction(Startup $startup): array
+    {
+        $stage = strtolower($startup->stage ?? 'idea');
+        $lookingFor = is_array($startup->looking_for) ? $startup->looking_for : [];
+
+        $traction = ['stage' => $stage, 'items' => []];
+
+        // Only show traction data if stage is mvp or beyond
+        if (in_array($stage, ['mvp', 'pre_seed', 'seed', 'series_a'])) {
+            if (!empty($lookingFor['user_count'])) {
+                $traction['items'][] = [
+                    'label' => 'Users',
+                    'value' => $lookingFor['user_count'],
+                    'icon'  => 'users',
+                ];
+            }
+            if (!empty($lookingFor['mau'])) {
+                $traction['items'][] = [
+                    'label' => 'MAU',
+                    'value' => $lookingFor['mau'],
+                    'icon'  => 'chart',
+                ];
+            }
+            if (!empty($lookingFor['revenue'])) {
+                $traction['items'][] = [
+                    'label' => 'Revenue',
+                    'value' => $lookingFor['revenue'],
+                    'icon'  => 'dollar',
+                ];
+            }
+        }
+
+        // Team size always shown
+        if ($startup->team_size) {
+            $traction['items'][] = [
+                'label' => 'Team Size',
+                'value' => $startup->team_size . ' member' . ($startup->team_size > 1 ? 's' : ''),
+                'icon'  => 'team',
+            ];
+        }
+
+        return $traction;
+    }
+
+    /**
+     * Build links block — which links are relevant depends on stage.
+     * Idea stage: no website needed. MVP: prototype link. Seed+: full web + socials.
+     */
+    private function buildStartupLinks(Startup $startup, ?User $owner): array
+    {
+        $stage = strtolower($startup->stage ?? 'idea');
+        $lookingFor = is_array($startup->looking_for) ? $startup->looking_for : [];
+        $links = [];
+
+        // Website — only show if MVP or beyond AND filled
+        if (in_array($stage, ['mvp', 'pre_seed', 'seed', 'series_a'])) {
+            if (!empty($lookingFor['website'])) {
+                $links[] = ['type' => 'website', 'url' => $lookingFor['website'], 'label' => 'Website'];
+            }
+        }
+
+        // Prototype link — show from MVP stage
+        if (in_array($stage, ['mvp', 'pre_seed', 'seed', 'series_a'])) {
+            if (!empty($lookingFor['prototype_url'])) {
+                $links[] = ['type' => 'prototype', 'url' => $lookingFor['prototype_url'], 'label' => 'Try Prototype'];
+            }
+        }
+
+        // Social media — always show if filled
+        foreach (['instagram', 'twitter', 'linkedin', 'tiktok'] as $platform) {
+            if (!empty($lookingFor[$platform])) {
+                $links[] = ['type' => $platform, 'url' => $lookingFor[$platform], 'label' => ucfirst($platform)];
+            }
+        }
+
+        // Founder LinkedIn — always show if available
+        if ($owner && !empty($owner->linkedin_url)) {
+            $links[] = ['type' => 'founder_linkedin', 'url' => $owner->linkedin_url, 'label' => 'Founder LinkedIn'];
+        }
+
+        return $links;
+    }
+
+    /**
+     * Build a human-readable offering label from looking_for data.
+     * e.g. "Equity: 1-5% · Paid"
+     */
+    private function buildOfferingLabel(array $lookingFor): string
+    {
+        $parts = [];
+
+        if (!empty($lookingFor['equity'])) {
+            $parts[] = 'Equity: ' . $lookingFor['equity'];
+        }
+
+        if (isset($lookingFor['paid'])) {
+            $parts[] = $lookingFor['paid'] ? 'Paid' : 'Unpaid';
+        }
+
+        return implode(' · ', $parts) ?: 'Open to discuss';
+    }
 }
+

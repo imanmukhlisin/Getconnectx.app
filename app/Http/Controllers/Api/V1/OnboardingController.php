@@ -287,45 +287,73 @@ class OnboardingController extends Controller
     /**
      * POST /api/v1/onboarding/preferences
      * Save industries, skills, co-founder type, availability, location
+     * + Startup-specific: tagline, stage, traction, links, commitment, offering
      */
     public function savePreferences(Request $request)
     {
         $request->validate([
-            'industries' => 'nullable|array',
-            'skills' => 'nullable|array',
-            'co_founder_type' => 'nullable|string',
-            'availability' => 'nullable|string',
-            'location' => 'nullable|string',
+            // Common fields
+            'industries'        => 'nullable|array',
+            'skills'            => 'nullable|array',
+            'co_founder_type'   => 'nullable|string',
+            'availability'      => 'nullable|string',
+            'location'          => 'nullable|string',
+
+            // Startup-specific fields
+            'startup_name'      => 'nullable|string|max:255',
+            'tagline'           => 'nullable|string|max:255',
+            'stage'             => 'nullable|in:idea,mvp,pre_seed,seed,series_a',
+            'industry'          => 'nullable|string',
+            'secondary_industry'=> 'nullable|string',
+            'description'       => 'nullable|string',
+            'team_size'         => 'nullable|integer|min:1',
+            'looking_for'       => 'nullable|array',
+
+            // Traction (saved inside looking_for)
+            'user_count'        => 'nullable|string',
+            'mau'               => 'nullable|string',
+            'revenue'           => 'nullable|string',
+
+            // Links (saved inside looking_for)
+            'website'           => 'nullable|url',
+            'prototype_url'     => 'nullable|url',
+            'instagram'         => 'nullable|string',
+            'twitter'           => 'nullable|string',
+            'linkedin'          => 'nullable|string',
+            'tiktok'            => 'nullable|string',
+
+            // Offering (saved inside looking_for)
+            'commitment'        => 'nullable|string',
+            'equity'            => 'nullable|string',
+            'paid'              => 'nullable|boolean',
+
+            // Open roles & looking for
+            'open_roles'        => 'nullable|array',
         ]);
 
         $user = $request->user();
 
-        $updateData = [
-            'is_onboarded' => true,
-        ];
+        $updateData = ['is_onboarded' => true];
 
         if ($request->has('co_founder_type')) {
             $updateData['cofounder_type'] = $request->co_founder_type;
         }
-
         if ($request->has('availability')) {
             $updateData['commitment_level'] = $request->availability;
         }
-
         if ($request->has('location')) {
             $locParts = explode(',', $request->location);
-            $updateData['city'] = trim($locParts[0] ?? '');
+            $updateData['city']    = trim($locParts[0] ?? '');
             $updateData['country'] = trim($locParts[1] ?? '');
         }
 
         $user->update($updateData);
 
-        // Sync Tags (Industries & Skills)
+        // ── Sync Tags (Industries & Skills) ───────────────────────────────────────
         $tagNames = array_merge(
             $request->input('industries', []),
             $request->input('skills', [])
         );
-
         if (!empty($tagNames)) {
             $tagIds = Tag::whereIn('name', $tagNames)->pluck('id')->toArray();
             if (!empty($tagIds)) {
@@ -333,26 +361,67 @@ class OnboardingController extends Controller
             }
         }
 
-        // Create/Update Builder or Startup record
+        // ── Create/Update Builder or Startup record ───────────────────────────────
         if ($user->role_category === 'Startup') {
+
+            // Build looking_for JSON — merge incoming nested object + individual fields
+            $existingStartup = Startup::where('owner_id', $user->id)->first();
+            $existingLookingFor = is_array($existingStartup?->looking_for) ? $existingStartup->looking_for : [];
+
+            $newLookingFor = array_merge($existingLookingFor, array_filter([
+                // Traction metrics
+                'user_count'    => $request->user_count,
+                'mau'           => $request->mau,
+                'revenue'       => $request->revenue,
+
+                // Links
+                'website'       => $request->website,
+                'prototype_url' => $request->prototype_url,
+                'instagram'     => $request->instagram,
+                'twitter'       => $request->twitter,
+                'linkedin'      => $request->linkedin,
+                'tiktok'        => $request->tiktok,
+
+                // Offering & commitment
+                'commitment'    => $request->commitment,
+                'equity'        => $request->equity,
+                'paid'          => $request->has('paid') ? (bool) $request->paid : null,
+            ], fn ($v) => $v !== null));
+
+            // If FE sends a whole looking_for object, merge it on top
+            if ($request->has('looking_for') && is_array($request->looking_for)) {
+                $newLookingFor = array_merge($newLookingFor, $request->looking_for);
+            }
+
             Startup::updateOrCreate(
                 ['owner_id' => $user->id],
-                ['name' => $user->startup_name ?? ($user->name . "'s Startup")]
+                array_filter([
+                    'name'               => $request->startup_name ?? ($user->startup_name ?? ($user->name . "'s Startup")),
+                    'tagline'            => $request->tagline,
+                    'stage'              => $request->stage,
+                    'industry'           => $request->industry ?? ($request->input('industries.0')),
+                    'secondary_industry' => $request->secondary_industry,
+                    'description'        => $request->description,
+                    'team_size'          => $request->team_size,
+                    'open_roles'         => $request->open_roles,
+                    'looking_for'        => $newLookingFor,
+                ], fn ($v) => $v !== null)
             );
+
         } else {
             Builder::updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'role_category' => $user->role_category,
-                    'commitment_level' => $user->commitment_level,
+                    'role_category'   => $user->role_category,
+                    'commitment_level'=> $user->commitment_level,
                 ]
             );
         }
 
         return response()->json([
-            'success' => true,
-            'message' => 'Preferences saved successfully. Onboarding complete.',
-            'redirect_to' => '/home'
+            'success'     => true,
+            'message'     => 'Preferences saved successfully. Onboarding complete.',
+            'redirect_to' => '/home',
         ]);
     }
     /**

@@ -251,6 +251,7 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('me/startup')->group(function () {
             Route::get('team-overview', [\App\Http\Controllers\Api\V1\TeamOverviewController::class, 'index']);
+            Route::patch('/', [\App\Http\Controllers\Api\V1\StartupProfileController::class, 'update']);  // POST-onboarding profile update
             Route::get('invitation-options', [\App\Http\Controllers\Api\V1\StartupInvitationController::class, 'options']);
             Route::post('invitations', [\App\Http\Controllers\Api\V1\StartupInvitationController::class, 'store']);
             Route::delete('invitations/{invitationId}', [\App\Http\Controllers\Api\V1\StartupInvitationController::class, 'destroy']);
