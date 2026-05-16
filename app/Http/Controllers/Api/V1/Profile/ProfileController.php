@@ -55,7 +55,7 @@ class ProfileController extends Controller
             'personalityAndHobbyIds' => 'nullable|array',
             'experience'             => 'nullable|array',
             'education'              => 'nullable|array',
-            'linkedin_url'           => 'nullable|string|regex:/^https:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9%_.-]+\/?$/|unique:users,linkedin_url,' . $request->user()->id,
+            'linkedin_url'           => 'nullable|string|regex:/^https:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9%_.-]+\/?(\?.*)?$/|unique:users,linkedin_url,' . $request->user()->id,
             // New fields for full raw editability
             'avatar_url'             => 'nullable|string|url',
             'birthday'               => 'nullable|date',

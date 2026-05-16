@@ -37,7 +37,7 @@ class LinkedInSyncController extends Controller
         // ── Validasi Input ────────────────────────────────────────────
         $validated = $request->validate([
             // URL profil LinkedIn (format harus benar dan unik)
-            'linkedin_url' => 'required|string|regex:/^https:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9%_.-]+\/?$/|unique:users,linkedin_url,' . $request->user()->id . '|max:255',
+            'linkedin_url' => 'required|string|regex:/^https:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9%_.-]+\/?(\?.*)?$/|unique:users,linkedin_url,' . $request->user()->id . '|max:255',
 
             // Token Firebase Cloud Messaging untuk push notification
             'fcm_token' => 'required|string|min:5',

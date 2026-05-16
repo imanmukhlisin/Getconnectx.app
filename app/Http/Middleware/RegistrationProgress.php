@@ -54,7 +54,7 @@ class RegistrationProgress
         $isUpdatingProfile = $request->isMethod('PATCH') && $request->routeIs('profile.update_me');
 
         if ($user->linkedin_url && !$isUpdatingProfile) {
-            $isValid = preg_match('/^https:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9%_.-]+\/?$/', $user->linkedin_url);
+            $isValid = preg_match('/^https:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9%_.-]+\/?(\?.*)?$/', $user->linkedin_url);
             $isDuplicate = User::where('linkedin_url', $user->linkedin_url)->where('id', '!=', $user->id)->exists();
 
             if (!$isValid || $isDuplicate) {
