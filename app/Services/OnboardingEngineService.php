@@ -781,7 +781,7 @@ class OnboardingEngineService
     {
         $locale = app()->getLocale();
         
-        $options = \App\Models\OnboardingOption::where('question_id', $questionId)
+        $options = \App\Models\Onboarding\OnboardingOption::where('question_id', $questionId)
             ->where(function($q) use ($query) {
                 $q->where('label->id', 'like', "%{$query}%")
                   ->orWhere('label->en', 'like', "%{$query}%")
