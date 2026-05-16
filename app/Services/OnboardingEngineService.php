@@ -226,6 +226,16 @@ class OnboardingEngineService
                     if (!is_array($value)) {
                         // Jika input tipe biasa (Teks/Nomor) → Cek panjang string
                         $strValue = (string) $value;
+                        
+                        // New: Regex Pattern Validation (e.g. for LinkedIn URL)
+                        if (isset($rules['pattern'])) {
+                            if (!preg_match($rules['pattern'], $strValue)) {
+                                $errors[$question->id][] = $locale === 'id'
+                                    ? "Format '{$labelText}' tidak valid. Pastikan dimulai dengan https://linkedin.com/in/..."
+                                    : "Invalid '{$labelText}' format. Must start with https://linkedin.com/in/...";
+                            }
+                        }
+
                         if (isset($rules['min_length']) && mb_strlen($strValue) < $rules['min_length']) {
                             $errors[$question->id][] = $locale === 'id'
                                 ? "'{$labelText}' terlalu pendek (Minimum {$rules['min_length']} huruf)."
