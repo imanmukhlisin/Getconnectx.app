@@ -116,7 +116,7 @@ class CardTransformerService
             'education'    => $this->buildEducation($user),
             'certifications' => [
                 'title' => 'Certifications',
-                'items' => $isPro ? $this->buildCertifications($user) : [],
+                'items' => $this->buildCertifications($user),
             ],
             'languages'    => [
                 'title' => 'Languages',
@@ -360,19 +360,28 @@ class CardTransformerService
             return $user->languages;
         }
 
-        // 2. Fallback: dari raw_data LinkedIn scrape
-        if (!$user->relationLoaded('credentials')) return [];
+        // 2. Cek dari Tags (tipe language)
+        if ($user->relationLoaded('tags')) {
+            $tagLangs = $user->tags->where('type', 'language')->pluck('name')->toArray();
+            if (!empty($tagLangs)) {
+                return array_values($tagLangs);
+            }
+        }
 
-        foreach ($user->credentials as $cred) {
-            $data  = is_array($cred->raw_data) ? $cred->raw_data : [];
-            $langs = $data['languages'] ?? [];
+        // 3. Fallback: dari raw_data LinkedIn scrape
+        if ($user->relationLoaded('credentials')) {
+            foreach ($user->credentials as $cred) {
+                $raw = $cred->raw_data;
+                $data = is_array($raw) ? $raw : (is_string($raw) ? json_decode($raw, true) : []);
+                $langs = $data['languages'] ?? [];
 
-            if (!empty($langs) && is_array($langs)) {
-                // Format LinkedIn: [{name, proficiency}] → ambil nama saja
-                return array_values(array_filter(array_map(
-                    fn($l) => $l['name'] ?? null,
-                    $langs
-                )));
+                if (!empty($langs) && is_array($langs)) {
+                    // Format LinkedIn: [{name, proficiency}] → ambil nama saja
+                    return array_values(array_filter(array_map(
+                        fn($l) => $l['name'] ?? null,
+                        $langs
+                    )));
+                }
             }
         }
 
