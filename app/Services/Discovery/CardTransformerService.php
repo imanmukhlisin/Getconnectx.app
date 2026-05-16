@@ -95,7 +95,7 @@ class CardTransformerService
             'location'     => $locationBlock,
             'match'        => $matchBlock,
             'matchmaking'  => $matchBlock,       // Legacy FE fallback
-            'badges'       => [], // Placeholder for badges
+            'badges'       => $this->buildBadges($user),
             'bio'          => $user->bio,
             'about'        => $user->bio,        // Legacy FE fallback
             'startupIdea'  => $user->startup_idea ?? null,
@@ -234,6 +234,74 @@ class CardTransformerService
     }
 
     // ─── Sub-builders ─────────────────────────────────────────────────────────
+
+    /**
+     * Build badge pills for the profile card.
+     * Each badge: { id, label, color, icon }
+     */
+    private function buildBadges(User $user): array
+    {
+        $badges = [];
+
+        // 1. ConnectX Pro badge
+        if ($user->is_pro) {
+            $badges[] = [
+                'id'    => 'pro',
+                'label' => 'ConnectX Pro',
+                'color' => '#F59E0B', // amber
+                'icon'  => 'star',
+            ];
+        }
+
+        // 2. LinkedIn Verified — has credentials synced from LinkedIn
+        if ($user->relationLoaded('credentials') && $user->credentials->isNotEmpty()) {
+            $badges[] = [
+                'id'    => 'linkedin_verified',
+                'label' => 'LinkedIn Verified',
+                'color' => '#0A66C2', // LinkedIn blue
+                'icon'  => 'linkedin',
+            ];
+        }
+
+        // 3. New Member — joined within the last 14 days
+        if ($user->created_at && \Carbon\Carbon::parse($user->created_at)->diffInDays(now()) <= 14) {
+            $badges[] = [
+                'id'    => 'new_member',
+                'label' => 'New Member',
+                'color' => '#10B981', // emerald
+                'icon'  => 'sparkle',
+            ];
+        }
+
+        // 4. Active Today — last seen within the last 24 hours
+        if ($user->last_active_at && \Carbon\Carbon::parse($user->last_active_at)->diffInHours(now()) <= 24) {
+            $badges[] = [
+                'id'    => 'active_today',
+                'label' => 'Active Today',
+                'color' => '#6366F1', // indigo
+                'icon'  => 'bolt',
+            ];
+        }
+
+        // 5. Top Builder — has 5+ skills OR 3+ work experiences
+        $skillCount = $user->relationLoaded('tags')
+            ? $user->tags->where('type', 'skill')->count()
+            : 0;
+        $expCount = ($user->relationLoaded('credentials') && $user->credentials->isNotEmpty())
+            ? count($user->credentials->first()?->experience ?? [])
+            : 0;
+
+        if ($skillCount >= 5 || $expCount >= 3) {
+            $badges[] = [
+                'id'    => 'top_builder',
+                'label' => 'Top Builder',
+                'color' => '#EC4899', // pink
+                'icon'  => 'trophy',
+            ];
+        }
+
+        return $badges;
+    }
 
     private function buildSkills(User $user): array
     {

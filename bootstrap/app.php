@@ -15,6 +15,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->append(\App\Http\Middleware\LocaleMiddleware::class);
         $middleware->append(\App\Http\Middleware\CheckBlocked::class);
+        $middleware->append(\App\Http\Middleware\UpdateLastActive::class);
         $middleware->alias([
             'registration.progress' => \App\Http\Middleware\RegistrationProgress::class,
         ]);
