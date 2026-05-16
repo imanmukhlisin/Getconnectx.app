@@ -64,11 +64,12 @@ class MessageController extends Controller
                 'id'         => $conv->id,
                 'match_id'   => null, // enriched via UserMatch if needed later
                 'other_user' => [
-                    'user_id'   => $other->id,
-                    'name'      => $other->name,
+                    'user_id'    => $other->id,
+                    'name'       => $other->name,
+                    'email'      => $other->email,
                     'avatar_url' => $other->avatar_url,
-                    'headline'  => $other->position,
-                    'is_online' => $isOnline,
+                    'headline'   => $other->position,
+                    'is_online'  => $isOnline,
                 ],
                 'last_message'  => $lastMsg ? [
                     'id'      => $lastMsg->id,
