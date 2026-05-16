@@ -81,7 +81,15 @@ class FilterBuilderService
             ->leftJoin('builders', 'builders.user_id', '=', 'users.id')
             ->whereNotIn('users.id', $excludedIds)
             ->where('users.is_active', true)
-            ->where('users.is_onboarded', true);
+            ->where('users.is_onboarded', true)
+            // ── Only show users who have LinkedIn data connected ──────────
+            // Users without a user_credentials entry have incomplete profiles
+            // and should not appear in the Discovery feed.
+            ->whereExists(function ($sub) {
+                $sub->selectRaw(1)
+                    ->from('user_credentials')
+                    ->whereColumn('user_credentials.user_id', 'users.id');
+            });
 
         // ── Industry filter (via user_tags + tags join) ───────────────────
         if (!empty($filters['industryIds'])) {
