@@ -281,11 +281,24 @@ class ProfileResource extends JsonResource
                 'teamsJoined' => $this->teams_joined_count ?? 0,
                 'matches'     => $this->matches_count ?? 0,
             ],
-            'badges' => $badges
+            'badges' => $badges,
         ];
+
+        $userRawData = $this->resource->toArray();
+        if ($this->relationLoaded('credentials')) {
+            $linkedinCred = $this->credentials->where('type', 'linkedin')->first();
+            if ($linkedinCred) {
+                $raw = $linkedinCred->raw_data;
+                $userRawData['linkedin_data'] = is_array($raw) ? $raw : (is_string($raw) ? json_decode($raw, true) : []);
+            }
+        }
+
+        // --- NEW: Expose all raw DB data for FE flexibility, formatted to camelCase ---
+        $response['userRaw'] = $this->keysToCamelCase($this->formatSlugValues($userRawData));
 
         if ($hasStartup) {
             $response['startup'] = $startupData;
+            $response['startupRaw'] = $this->keysToCamelCase($this->formatSlugValues($this->startup->toArray()));
         }
 
         $response['sections'] = [
@@ -383,5 +396,49 @@ class ProfileResource extends JsonResource
             }
         }
         return [];
+    }
+
+    /**
+     * Helper method to format known slug fields (e.g. software_engineer -> Software Engineer)
+     * without touching URLs, emails, or free-text descriptions.
+     */
+    private function formatSlugValues($data)
+    {
+        $targetFields = ['role_category', 'industry', 'secondary_industry', 'stage', 'open_roles'];
+
+        foreach ($targetFields as $field) {
+            if (isset($data[$field])) {
+                if (is_array($data[$field])) {
+                    $data[$field] = array_map(function ($val) {
+                        return is_string($val) ? \Illuminate\Support\Str::title(str_replace('_', ' ', $val)) : $val;
+                    }, $data[$field]);
+                } elseif (is_string($data[$field])) {
+                    $data[$field] = \Illuminate\Support\Str::title(str_replace('_', ' ', $data[$field]));
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Helper method to recursively convert array keys to camelCase.
+     */
+    private function keysToCamelCase($array)
+    {
+        if (!is_array($array)) {
+            return $array;
+        }
+
+        $result = [];
+        foreach ($array as $key => $value) {
+            $camelKey = \Illuminate\Support\Str::camel($key);
+            if (is_array($value)) {
+                $result[$camelKey] = $this->keysToCamelCase($value);
+            } else {
+                $result[$camelKey] = $value;
+            }
+        }
+        return $result;
     }
 }

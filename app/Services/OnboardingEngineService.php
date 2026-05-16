@@ -36,10 +36,21 @@ class OnboardingEngineService
             throw new \RuntimeException('Entry flow has no steps configured.');
         }
 
+        // --- NEW: Fast-Forward Logic for Re-Onboarding ---
+        // Jika user sudah onboarded sebelumnya (misal mau switch mode), kita skip slide personal info
+        // dan langsung melempar mereka ke pertanyaan cabang / role selection
+        $initialStepId = $firstStep->id;
+        if ($user->is_onboarded) {
+            $roleSelectionStep = OnboardingStep::where('id', 'step_role_selection')->first();
+            if ($roleSelectionStep) {
+                $initialStepId = $roleSelectionStep->id;
+            }
+        }
+
         $session = OnboardingSession::create([
             'id' => 'ses_' . Str::random(10),
             'user_id' => $user->id,
-            'current_step_id' => $firstStep->id,
+            'current_step_id' => $initialStepId,
             'status' => 'in_progress',
             'started_at' => now(),
         ]);

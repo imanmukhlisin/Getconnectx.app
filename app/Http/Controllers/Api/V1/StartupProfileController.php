@@ -23,6 +23,7 @@ class StartupProfileController extends Controller
             'name'               => 'nullable|string|max:255',
             'tagline'            => 'nullable|string|max:255',
             'description'        => 'nullable|string',
+            'logo_url'           => 'nullable|string|url',
             'stage'              => 'nullable|in:idea,mvp,pre_seed,seed,series_a',
             'industry'           => 'nullable|string',
             'secondary_industry' => 'nullable|string',
@@ -88,16 +89,25 @@ class StartupProfileController extends Controller
 
         $merged = array_merge($existing, $patch);
 
+        // ── Convert slug fields back to seeder's format (snake_case) ───────────────
+        $formatSlug = fn($val) => is_string($val) ? \Illuminate\Support\Str::slug($val, '_') : $val;
+        
+        $openRoles = null;
+        if ($request->has('open_roles') && is_array($request->open_roles)) {
+            $openRoles = array_map($formatSlug, $request->open_roles);
+        }
+
         // ── Update startup record ──────────────────────────────────────────────────
         $startup->update(array_filter([
             'name'               => $request->name,
             'tagline'            => $request->tagline,
             'description'        => $request->description,
-            'stage'              => $request->stage,
-            'industry'           => $request->industry,
-            'secondary_industry' => $request->secondary_industry,
+            'logo_url'           => $request->logo_url,
+            'stage'              => $request->stage ? $formatSlug($request->stage) : null,
+            'industry'           => $request->industry ? $formatSlug($request->industry) : null,
+            'secondary_industry' => $request->secondary_industry ? $formatSlug($request->secondary_industry) : null,
             'team_size'          => $request->team_size,
-            'open_roles'         => $request->open_roles,
+            'open_roles'         => $openRoles,
             'looking_for'        => !empty($merged) ? $merged : null,
         ], fn ($v) => $v !== null));
 
@@ -112,6 +122,7 @@ class StartupProfileController extends Controller
                 'industry'           => $startup->industry,
                 'secondary_industry' => $startup->secondary_industry,
                 'description'        => $startup->description,
+                'logo_url'           => $startup->logo_url,
                 'team_size'          => $startup->team_size,
                 'open_roles'         => $startup->open_roles,
                 'looking_for'        => $startup->looking_for,

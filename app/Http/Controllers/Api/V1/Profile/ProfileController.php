@@ -56,6 +56,14 @@ class ProfileController extends Controller
             'experience'             => 'nullable|array',
             'education'              => 'nullable|array',
             'linkedin_url'           => 'nullable|string|regex:/^https:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9%_.-]+\/?$/|unique:users,linkedin_url,' . $request->user()->id,
+            // New fields for full raw editability
+            'avatar_url'             => 'nullable|string|url',
+            'birthday'               => 'nullable|date',
+            'gender'                 => 'nullable|in:male,female,other,prefer_not_to_say',
+            'languages'              => 'nullable|array',
+            'languages.*'            => 'string',
+            'city'                   => 'nullable|string|max:255',
+            'country'                => 'nullable|string|max:255',
         ]);
 
         $user = $request->user();
@@ -86,6 +94,30 @@ class ProfileController extends Controller
 
         if (array_key_exists('education', $validated)) {
             $updateData['education'] = $validated['education'];
+        }
+
+        if (array_key_exists('avatar_url', $validated)) {
+            $updateData['avatar_url'] = $validated['avatar_url'];
+        }
+
+        if (array_key_exists('birthday', $validated)) {
+            $updateData['birthday'] = $validated['birthday'];
+        }
+
+        if (array_key_exists('gender', $validated)) {
+            $updateData['gender'] = $validated['gender'];
+        }
+
+        if (array_key_exists('languages', $validated)) {
+            $updateData['languages'] = $validated['languages'];
+        }
+
+        if (array_key_exists('city', $validated)) {
+            $updateData['city'] = $validated['city'];
+        }
+
+        if (array_key_exists('country', $validated)) {
+            $updateData['country'] = $validated['country'];
         }
 
         if (isset($validated['about'])) {
