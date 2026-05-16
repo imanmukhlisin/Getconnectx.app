@@ -7,6 +7,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
 use App\Services\PushNotificationService;
+use App\Services\ViewerContextService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -15,7 +16,10 @@ class MessageController extends Controller
 {
     private const ONLINE_THRESHOLD_MINUTES = 3;
 
-    public function __construct(private PushNotificationService $pushNotificationService) {}
+    public function __construct(
+        private PushNotificationService $pushNotificationService,
+        private ViewerContextService $viewerContextService
+    ) {}
 
     // ─── 1. GET /conversations ───────────────────────────────────────────────
     /**
@@ -27,6 +31,13 @@ class MessageController extends Controller
         $authUser = $request->user();
         $limit    = min((int) $request->query('limit', 20), 50);
         $page     = max((int) $request->query('page', 1), 1);
+
+        // CON-72: Resolve and validate viewer_context
+        $ctxResult = $this->viewerContextService->resolve($authUser, $request->query('viewer_context'));
+        if ($ctxResult instanceof \Illuminate\Http\JsonResponse) {
+            return $ctxResult; // 409 DISCOVERY_ONBOARDING_REQUIRED
+        }
+        $viewerContext = $ctxResult['context'];
 
         $conversations = $authUser->conversations()
             ->with([
@@ -84,8 +95,9 @@ class MessageController extends Controller
         })->filter()->values();
 
         return response()->json([
-            'conversations' => $mapped,
-            'total'         => $conversations->total(),
+            'viewer_context' => $viewerContext,
+            'conversations'  => $mapped,
+            'total'          => $conversations->total(),
         ]);
     }
 

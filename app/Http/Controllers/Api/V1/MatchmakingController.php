@@ -6,25 +6,32 @@ use App\Http\Controllers\Controller;
 use App\Models\Like;
 use App\Models\UserMatch;
 use App\Services\MatchmakingService;
+use App\Services\ViewerContextService;
 use Illuminate\Http\Request;
 
 class MatchmakingController extends Controller
 {
-    protected MatchmakingService $matchmakingService;
-
-    public function __construct(MatchmakingService $matchmakingService)
-    {
-        $this->matchmakingService = $matchmakingService;
-    }
+    public function __construct(
+        protected MatchmakingService $matchmakingService,
+        protected ViewerContextService $viewerContextService
+    ) {}
 
     /**
      * Get list of matches for authenticated user
      */
     public function index(Request $request)
     {
-        $userId = $request->user()->id;
-        $limit  = (int) $request->query('limit', 10);
-        $page   = (int) $request->query('page', 1);
+        $authUser = $request->user();
+        $userId   = $authUser->id;
+        $limit    = (int) $request->query('limit', 10);
+        $page     = (int) $request->query('page', 1);
+
+        // CON-71 + CON-72: Resolve and validate viewer_context
+        $ctxResult = $this->viewerContextService->resolve($authUser, $request->query('viewer_context'));
+        if ($ctxResult instanceof \Illuminate\Http\JsonResponse) {
+            return $ctxResult; // 409 DISCOVERY_ONBOARDING_REQUIRED
+        }
+        $viewerContext = $ctxResult['context'];
 
         $paginator = UserMatch::with(['scores', 'user', 'matchedUser'])
             ->where(function($query) use ($userId) {
@@ -100,6 +107,7 @@ class MatchmakingController extends Controller
             'success' => true,
             'message' => 'Matches fetched successfully',
             'data'    => [
+                'viewer_context' => $viewerContext,
                 'likesYou' => [
                     'locked'   => !$request->user()->is_pro,
                     'items'    => $topLikes,
@@ -199,7 +207,15 @@ class MatchmakingController extends Controller
      */
     public function analysis(Request $request, $matchId)
     {
-        $userId = $request->user()->id;
+        $authUser = $request->user();
+        $userId   = $authUser->id;
+
+        // CON-72: Resolve viewer_context
+        $ctxResult = $this->viewerContextService->resolve($authUser, $request->query('viewer_context'));
+        if ($ctxResult instanceof \Illuminate\Http\JsonResponse) {
+            return $ctxResult;
+        }
+        $viewerContext = $ctxResult['context'];
 
         $match = UserMatch::with(['analysis', 'user', 'matchedUser'])->findOrFail($matchId);
 
@@ -219,6 +235,7 @@ class MatchmakingController extends Controller
             'success' => true,
             'message' => 'Match analysis fetched successfully',
             'data'    => [
+                'viewer_context'  => $viewerContext,
                 'matchId'        => $match->id,
                 'conversationId' => $match->conversation_id,
                 'status'         => $match->status,
