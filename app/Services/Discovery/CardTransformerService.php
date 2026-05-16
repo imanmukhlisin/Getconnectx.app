@@ -136,8 +136,12 @@ class CardTransformerService
                     'title' => 'Personality & Hobbies',
                     'items' => [],
                 ],
+                'languages' => [
+                    'title' => 'Languages',
+                    'items' => $this->buildLanguages($user),
+                ],
                 'highlights' => [
-                    'items' => [],
+                    'items' => $matchResult['highlights'] ?? [],
                 ],
             ],
         ];
