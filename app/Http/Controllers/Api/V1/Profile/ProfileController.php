@@ -55,6 +55,7 @@ class ProfileController extends Controller
             'personalityAndHobbyIds' => 'nullable|array',
             'experience'             => 'nullable|array',
             'education'              => 'nullable|array',
+            'linkedin_url'           => 'nullable|string|regex:/^https:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9%_.-]+\/?$/|unique:users,linkedin_url,' . $request->user()->id,
         ]);
 
         $user = $request->user();
@@ -73,6 +74,10 @@ class ProfileController extends Controller
                 $updateData['city'] = $cityOption['label'] ?? '';
                 $updateData['country'] = $cityOption['group'] ?? 'Indonesia';
             }
+        }
+
+        if (array_key_exists('linkedin_url', $validated)) {
+            $updateData['linkedin_url'] = $validated['linkedin_url'];
         }
 
         if (array_key_exists('experience', $validated)) {

@@ -48,6 +48,29 @@ class RegistrationProgress
             ], 403);
         }
 
+        // --- NEW: Validasi LinkedIn Wajib (Khusus user yang sudah isi linkedin_url) ---
+        // Jika linkedin_url ada, pastikan formatnya benar dan unik.
+        // Pengecualian: Bolehkan jika request ini bertujuan untuk FIX_LINKEDIN (mengupdate profil)
+        $isUpdatingProfile = $request->isMethod('PATCH') && $request->routeIs('profile.update_me');
+
+        if ($user->linkedin_url && !$isUpdatingProfile) {
+            $isValid = preg_match('/^https:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9%_.-]+\/?$/', $user->linkedin_url);
+            $isDuplicate = User::where('linkedin_url', $user->linkedin_url)->where('id', '!=', $user->id)->exists();
+
+            if (!$isValid || $isDuplicate) {
+                return response()->json([
+                    'status'    => 'error',
+                    'message'   => 'URL LinkedIn Anda tidak valid atau sudah digunakan oleh akun lain. Silakan perbarui profil Anda.',
+                    'next_step' => 'FIX_LINKEDIN',
+                    'data'      => [
+                        'current_step'  => $user->registration_step,
+                        'required_step' => $requiredStep,
+                        'error_reason'  => $isDuplicate ? 'DUPLICATE' : 'INVALID_FORMAT'
+                    ],
+                ], 403);
+            }
+        }
+
         return $next($request);
     }
 
