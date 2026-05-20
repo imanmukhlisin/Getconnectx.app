@@ -94,6 +94,23 @@ class DiscoveryController extends Controller
         $limit   = $validated['pagination']['limit'] ?? 10;
         $cursor  = $validated['pagination']['cursor'] ?? null;
 
+        // ── Prerequisite Validation for Mode Switching ────────────────
+        $authUser->loadMissing(['startup', 'builder']);
+
+        if (in_array($mode, self::P2P_MODES) && !$authUser->startup) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You must have a Startup profile to use this mode.',
+                'error'   => ['code' => 'STARTUP_PROFILE_REQUIRED']
+            ], 403);
+        } elseif (in_array($mode, self::P2B_MODES) && !$authUser->builder) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You must have a Talent/Builder profile to use this mode.',
+                'error'   => ['code' => 'BUILDER_PROFILE_REQUIRED']
+            ], 403);
+        }
+
         // ── Premium validation ────────────────────────────────────────
         try {
             $this->filterBuilder->validatePremiumFilters($authUser, $filters, $mode);

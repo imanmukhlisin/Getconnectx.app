@@ -362,7 +362,9 @@ class OnboardingController extends Controller
         }
 
         // ── Create/Update Builder or Startup record ───────────────────────────────
-        if ($user->role_category === 'Startup') {
+        $isStartupContext = in_array($user->role_category, ['Startup', 'Founder']);
+
+        if ($isStartupContext) {
 
             // Build looking_for JSON — merge incoming nested object + individual fields
             $existingStartup = Startup::where('owner_id', $user->id)->first();
@@ -407,16 +409,17 @@ class OnboardingController extends Controller
                     'looking_for'        => $newLookingFor,
                 ], fn ($v) => $v !== null)
             );
-
-        } else {
-            Builder::updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'role_category'   => $user->role_category,
-                    'commitment_level'=> $user->commitment_level,
-                ]
-            );
         }
+
+        // Always create a Builder profile for everyone (including Founder/Startup) 
+        // so they have a talent profile and can context-switch seamlessly.
+        Builder::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'role_category'   => $user->role_category,
+                'commitment_level'=> $user->commitment_level,
+            ]
+        );
 
         return response()->json([
             'success'     => true,
@@ -426,7 +429,7 @@ class OnboardingController extends Controller
     }
     /**
      * Search options for searchable_dropdown questions (e.g. Cities).
-     * GET /api/v1/onboarding/options/search?question_id=q_location&q=Jakarta
+     * GET /api/v1/onboarding/options/search?question_id=q_city&q=Jakarta
      */
     public function searchOptions(Request $request)
     {

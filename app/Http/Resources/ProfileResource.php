@@ -125,10 +125,10 @@ class ProfileResource extends JsonResource
             
             // Fallback for location from onboarding if DB columns are empty
             if (empty($locationDisplay) || $locationDisplay === 'Location not set') {
-                $locVal = $getVal('q_location');
+                $locVal = $getVal('q_city') ?? $getVal('q_location');
                 if ($locVal) {
                     $option = \Illuminate\Support\Facades\DB::table('onboarding_options')
-                        ->where('question_id', 'q_location')
+                        ->whereIn('question_id', ['q_city', 'q_location'])
                         ->where('value', $locVal)
                         ->first();
                     if ($option) {

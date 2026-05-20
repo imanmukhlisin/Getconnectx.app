@@ -548,16 +548,18 @@ class OnboardingEngineService
         }
 
         // ── Tanggal Lahir ──
-        if ($responses->has('q_dob')) {
+        if ($responses->has('q_date_of_birth')) {
+            $updateData['date_of_birth'] = $this->getValue($responses['q_date_of_birth']->value);
+        } elseif ($responses->has('q_dob')) {
             $updateData['date_of_birth'] = $this->getValue($responses['q_dob']->value);
         }
 
         // ── Lokasi ──
-        if ($responses->has('q_location')) {
-            $val = $this->getValue($responses['q_location']->value);
+        if ($responses->has('q_city')) {
+            $val = $this->getValue($responses['q_city']->value);
             // Ambil label dari onboarding_options jika memungkinkan untuk parsing city, country
             $option = \Illuminate\Support\Facades\DB::table('onboarding_options')
-                ->where('question_id', 'q_location')
+                ->where('question_id', 'q_city')
                 ->where('value', $val)
                 ->first();
             
@@ -585,29 +587,34 @@ class OnboardingEngineService
             $action = $this->getValue($responses['q_use_connectx']->value);
             if ($action === 'startup') {
                 $updateData['role_category'] = 'Startup';
-            } elseif ($action === 'builder' && $responses->has('q_bld_type')) {
-                $subType = $this->getValue($responses['q_bld_type']->value);
+            } elseif ($action === 'builder' && ($responses->has('q_bld_type') || $responses->has('q_builder_type'))) {
+                $subType = $responses->has('q_builder_type') ? $this->getValue($responses['q_builder_type']->value) : $this->getValue($responses['q_bld_type']->value);
                 $updateData['role_category'] = match ($subType) {
-                    'founder'   => 'Founder',
-                    'cofounder' => 'Co-Founder',
-                    'team'      => 'Team Member',
-                    default     => null,
+                    'founder'     => 'Founder',
+                    'cofounder'   => 'Co-Founder',
+                    'team'        => 'Team Member',
+                    'team_member' => 'Team Member',
+                    default       => null,
                 };
             }
         }
 
         // ── Primary Role (Builder paths) ──
-        if ($responses->has('q_bld_role')) {
+        if ($responses->has('q_primary_role')) {
+            $updateData['primary_role'] = $this->getValue($responses['q_primary_role']->value);
+        } elseif ($responses->has('q_bld_role')) {
             $updateData['primary_role'] = $this->getValue($responses['q_bld_role']->value);
         }
 
         // ── Years of Experience ──
-        if ($responses->has('q_bld_years')) {
+        if ($responses->has('q_years_experience')) {
+            $updateData['years_experience'] = $this->getValue($responses['q_years_experience']->value);
+        } elseif ($responses->has('q_bld_years')) {
             $updateData['years_experience'] = $this->getValue($responses['q_bld_years']->value);
         }
 
-        // ── Startup Experience Level (Checking q_fdr_exp, q_cf_exp, q_tm_exp) ──
-        $expQuestions = ['q_fdr_exp', 'q_cf_exp', 'q_tm_exp'];
+        // ── Startup Experience Level (Checking q_startup_experience, q_fdr_exp, q_cf_exp, q_tm_exp) ──
+        $expQuestions = ['q_startup_experience', 'q_fdr_exp', 'q_cf_exp', 'q_tm_exp'];
         foreach ($expQuestions as $qid) {
             if ($responses->has($qid)) {
                 $updateData['startup_experience'] = $this->getValue($responses[$qid]->value);
@@ -621,7 +628,7 @@ class OnboardingEngineService
         }
 
         // ── Commitment Level (multiple possible question IDs dari berbagai flow) ──
-        $availQuestions = ['q_fdr_cf_avail','q_fdr_tm_avail','q_fdr_bt_avail','q_cf_avail','q_tm_avail'];
+        $availQuestions = ['q_availability','q_fdr_cf_avail','q_fdr_tm_avail','q_fdr_bt_avail','q_cf_avail','q_tm_avail'];
         foreach ($availQuestions as $qid) {
             if ($responses->has($qid)) {
                 $updateData['commitment_level'] = $this->getValue($responses[$qid]->value);
@@ -636,7 +643,7 @@ class OnboardingEngineService
 
         // ── LinkedIn (multiple possible question IDs) ──
         $linkedinUrlToSync = null;
-        $linkedinQuestions = ['q_fdr_cf_linkedin','q_fdr_tm_linkedin','q_fdr_bt_linkedin','q_cf_linkedin','q_tm_linkedin','q_su_linkedin'];
+        $linkedinQuestions = ['q_linkedin_url','q_fdr_cf_linkedin','q_fdr_tm_linkedin','q_fdr_bt_linkedin','q_cf_linkedin','q_tm_linkedin','q_su_linkedin'];
         foreach ($linkedinQuestions as $qid) {
             if ($responses->has($qid)) {
                 $val = $this->getValue($responses[$qid]->value);
@@ -660,14 +667,14 @@ class OnboardingEngineService
         }
 
         // ── Remote & Relocate preferences ──
-        $remoteQuestions = ['q_open_remote','q_fdr_cf_remote','q_fdr_tm_remote','q_fdr_bt_remote','q_cf_remote','q_tm_remote'];
+        $remoteQuestions = ['q_open_to_remote','q_open_remote','q_fdr_cf_remote','q_fdr_tm_remote','q_fdr_bt_remote','q_cf_remote','q_tm_remote'];
         foreach ($remoteQuestions as $qid) {
             if ($responses->has($qid)) {
                 $updateData['open_to_remote'] = $this->getValue($responses[$qid]->value) === 'yes';
                 break;
             }
         }
-        $relocateQuestions = ['q_fdr_cf_relocate','q_fdr_tm_relocate','q_fdr_bt_relocate','q_cf_relocate','q_tm_relocate'];
+        $relocateQuestions = ['q_willing_to_relocate','q_fdr_cf_relocate','q_fdr_tm_relocate','q_fdr_bt_relocate','q_cf_relocate','q_tm_relocate'];
         foreach ($relocateQuestions as $qid) {
             if ($responses->has($qid)) {
                 $updateData['willing_to_relocate'] = $this->getValue($responses[$qid]->value) === 'yes';
@@ -741,7 +748,7 @@ class OnboardingEngineService
         $tagNames = [];
 
         // Semua kemungkinan industry question IDs
-        $industryQids = ['q_fdr_industry','q_cf_industry','q_tm_industry','q_su_industry'];
+        $industryQids = ['q_industries_interest','q_fdr_industry','q_cf_industry','q_tm_industry','q_su_industry'];
         foreach ($industryQids as $qid) {
             if ($responses->has($qid)) {
                 $names = $responses[$qid]->value;
@@ -750,7 +757,7 @@ class OnboardingEngineService
         }
 
         // Semua kemungkinan skill question IDs
-        $skillQids = ['q_tm_skills','q_su_need_tm_skills','q_su_need_bt_tm'];
+        $skillQids = ['q_skills','q_tm_skills','q_su_need_tm_skills','q_su_need_bt_tm'];
         foreach ($skillQids as $qid) {
             if ($responses->has($qid)) {
                 $names = $responses[$qid]->value;
