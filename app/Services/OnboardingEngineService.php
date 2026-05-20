@@ -689,7 +689,7 @@ class OnboardingEngineService
         }
 
         // ── Buat atau Update Data di Tabel Startups ──
-        if (isset($updateData['role_category']) && $updateData['role_category'] === 'Startup') {
+        if (isset($updateData['role_category']) && in_array($updateData['role_category'], ['Startup', 'Founder'])) {
             $startupData = [];
             
             if ($responses->has('q_su_name')) {
@@ -718,13 +718,13 @@ class OnboardingEngineService
             $startupData['latitude'] = $user->latitude;
             $startupData['longitude'] = $user->longitude;
 
-            // Pastikan startup_name wajib ada sebelum masuk tabel startups
-            if (!empty($startupData['name'])) {
-                \App\Models\Startup::updateOrCreate(
-                    ['owner_id' => $user->id],
-                    $startupData
-                );
-            }
+            $startupName = $startupData['name'] ?? $user->startup_name ?? ($user->name . "'s Startup");
+            $startupData['name'] = $startupName;
+
+            \App\Models\Startup::updateOrCreate(
+                ['owner_id' => $user->id],
+                $startupData
+            );
         }
 
         // ── Buat atau Update Data di Tabel Builders (P2P Discovery) ──
