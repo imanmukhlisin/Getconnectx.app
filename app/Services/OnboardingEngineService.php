@@ -96,11 +96,36 @@ class OnboardingEngineService
             ->pluck('value', 'question_id')
             ->toArray();
 
-        $mappedQuestions = $step->questions->map(function ($q) use ($gT, $existingAnswers) {
+        $mappedQuestions = $step->questions->map(function ($q) use ($gT, $existingAnswers, $allResponses) {
+            $label = $gT($q->label);
+            $type = $q->type;
+
+            if ($q->id === 'q_open_to_remote') {
+                $bldTypeResponse = $allResponses->where('question_id', 'q_builder_type')->first();
+                $bldType = $bldTypeResponse ? $this->getValue($bldTypeResponse->value) : null;
+                
+                if ($bldType === 'founder') {
+                    $label = app()->getLocale() === 'id' ? 'Apakah terbuka untuk posisi remote?' : 'Is it open for remote position?';
+                } else {
+                    $label = app()->getLocale() === 'id' ? 'Apakah kamu terbuka untuk kerja remote?' : 'Are you open to remote work?';
+                }
+            }
+
+            if ($q->id === 'q_willing_to_relocate') {
+                $bldTypeResponse = $allResponses->where('question_id', 'q_builder_type')->first();
+                $bldType = $bldTypeResponse ? $this->getValue($bldTypeResponse->value) : null;
+                
+                if ($bldType === 'founder') {
+                    $label = app()->getLocale() === 'id' ? 'Apakah Anda mencari kandidat yang mau relokasi?' : 'Are you looking for someone willing to relocate?';
+                } else {
+                    $label = app()->getLocale() === 'id' ? 'Apakah Anda bersedia relokasi?' : 'Are you willing to relocate?';
+                }
+            }
+
             $qArr = [
                 'id' => $q->id,
-                'type' => $q->type,
-                'label' => $gT($q->label),
+                'type' => $type,
+                'label' => $label,
                 'sub_label' => $gT($q->sub_label),
                 'helper_text' => $gT($q->helper_text),
                 'placeholder' => $gT($q->placeholder),
@@ -136,7 +161,55 @@ class OnboardingEngineService
                 $qArr['options'] = [];
             }
             return $qArr;
+        })->values();
+
+        // ── RESTORE DYNAMIC QUESTION TYPE OVERRIDE UNTUK FOUNDER ──
+        $mappedQuestions = $mappedQuestions->map(function ($q) use ($allResponses) {
+            if ($q['id'] === 'q_willing_to_relocate') {
+                $bldTypeResponse = $allResponses->where('question_id', 'q_builder_type')->first();
+                $bldType = $bldTypeResponse ? $this->getValue($bldTypeResponse->value) : null;
+                
+                if ($bldType === 'founder') {
+                    $q['label'] = app()->getLocale() === 'id' ? 'Lokasi mana yang Anda harapkan dari kandidat?' : 'Which location do you expect from candidate?';
+                    $q['type'] = 'searchable_multi_select';
+                    $q['options'] = []; // Clear options so it fetches from API
+                } else {
+                    $q['label'] = app()->getLocale() === 'id' ? 'Apakah Anda bersedia relokasi?' : 'Are you willing to relocate?';
+                }
+            }
+            return $q;
         });
+
+        $subtitle = $gT($step->subtitle);
+
+        if ($step->id === 'step_availability') {
+            $bldTypeResponse = $allResponses->where('question_id', 'q_builder_type')->first();
+            $bldType = $bldTypeResponse ? $this->getValue($bldTypeResponse->value) : null;
+            
+            if ($bldType === 'founder') {
+                $subtitle = app()->getLocale() === 'id' ? 'Tingkat komitmen apa yang seharusnya dimiliki kandidat?' : 'What commitment level should candidates have?';
+            } else {
+                $subtitle = app()->getLocale() === 'id' ? 'Availability seperti apa yang kamu miliki?' : 'What availability do you have?';
+            }
+        } elseif ($step->id === 'step_open_to_remote') {
+            $bldTypeResponse = $allResponses->where('question_id', 'q_builder_type')->first();
+            $bldType = $bldTypeResponse ? $this->getValue($bldTypeResponse->value) : null;
+            
+            if ($bldType === 'founder') {
+                $subtitle = app()->getLocale() === 'id' ? 'Apakah terbuka untuk posisi remote?' : 'Is it open for remote position?';
+            } else {
+                $subtitle = app()->getLocale() === 'id' ? 'Apakah kamu terbuka untuk kerja remote?' : 'Are you open to remote work?';
+            }
+        } elseif ($step->id === 'step_willing_to_relocate') {
+            $bldTypeResponse = $allResponses->where('question_id', 'q_builder_type')->first();
+            $bldType = $bldTypeResponse ? $this->getValue($bldTypeResponse->value) : null;
+            
+            if ($bldType === 'founder') {
+                $subtitle = app()->getLocale() === 'id' ? 'Lokasi mana yang Anda harapkan dari kandidat?' : 'Which location do you expect from candidate?';
+            } else {
+                $subtitle = app()->getLocale() === 'id' ? 'Apakah Anda bersedia relokasi?' : 'Are you willing to relocate?';
+            }
+        }
 
         return [
             'id' => $step->id,
@@ -145,7 +218,7 @@ class OnboardingEngineService
             'section_progress' => $sectionProgress,
             'overall_progress' => $progress,
             'title' => $gT($step->title),
-            'subtitle' => $gT($step->subtitle),
+            'subtitle' => $subtitle,
             'questions' => $mappedQuestions,
             'cta' => [
                 'label' => (function ($v) { return !empty($v) ? $v : 'Continue'; })($gT($step->cta_label)),
@@ -721,6 +794,21 @@ class OnboardingEngineService
             $startupName = $startupData['name'] ?? $user->startup_name ?? ($user->name . "'s Startup");
             $startupData['name'] = $startupName;
 
+            // Jika Founder memilih kota untuk kandidat (q_willing_to_relocate), simpan di looking_for
+            if ($responses->has('q_willing_to_relocate')) {
+                $candidateLoc = $responses['q_willing_to_relocate']->value; // Ambil array utuh
+                
+                // Pastikan bukan array yes/no/maybe
+                $firstVal = is_array($candidateLoc) ? ($candidateLoc[0] ?? '') : $candidateLoc;
+                
+                if ($firstVal && $firstVal !== 'yes' && $firstVal !== 'no' && $firstVal !== 'maybe') {
+                    $existingStartup = \App\Models\Startup::where('owner_id', $user->id)->first();
+                    $lookingFor = is_array($existingStartup?->looking_for) ? $existingStartup->looking_for : [];
+                    $lookingFor['candidate_locations'] = is_array($candidateLoc) ? $candidateLoc : [$candidateLoc]; // Selalu simpan sebagai array
+                    $startupData['looking_for'] = $lookingFor;
+                }
+            }
+
             \App\Models\Startup::updateOrCreate(
                 ['owner_id' => $user->id],
                 $startupData
@@ -799,6 +887,11 @@ class OnboardingEngineService
     {
         $locale = app()->getLocale();
         
+        // Redirect q_willing_to_relocate to q_city to fetch city list dynamically
+        if ($questionId === 'q_willing_to_relocate') {
+            $questionId = 'q_city';
+        }
+
         $options = \App\Models\Onboarding\OnboardingOption::where('question_id', $questionId)
             ->where(function($q) use ($query) {
                 $q->where('label->id', 'like', "%{$query}%")
