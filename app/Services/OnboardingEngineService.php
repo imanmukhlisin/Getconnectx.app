@@ -41,7 +41,7 @@ class OnboardingEngineService
         // dan langsung melempar mereka ke pertanyaan cabang / role selection
         $initialStepId = $firstStep->id;
         if ($user->is_onboarded) {
-            $roleSelectionStep = OnboardingStep::where('id', 'step_role_selection')->first();
+            $roleSelectionStep = OnboardingStep::where('id', 'step_use_connectx')->first();
             if ($roleSelectionStep) {
                 $initialStepId = $roleSelectionStep->id;
             }
