@@ -14,7 +14,7 @@ class OnboardingEngineService
     /**
      * Memulai sesi onboarding baru untuk pengguna.
      */
-    public function startSession(User $user): OnboardingSession
+    public function startSession(User $user, ?string $goal = null): OnboardingSession
     {
         // Cek apakah ada sesi yang masih in_progress → kembalikan saja
         $existingSession = OnboardingSession::where('user_id', $user->id)
@@ -38,12 +38,21 @@ class OnboardingEngineService
 
         // --- NEW: Fast-Forward Logic for Re-Onboarding ---
         // Jika user sudah onboarded sebelumnya (misal mau switch mode), kita skip slide personal info
-        // dan langsung melempar mereka ke pertanyaan cabang / role selection
+        // dan langsung melempar mereka ke pertanyaan cabang / role selection (atau spesifik goal)
         $initialStepId = $firstStep->id;
         if ($user->is_onboarded) {
-            $roleSelectionStep = OnboardingStep::where('id', 'step_role_selection')->first();
-            if ($roleSelectionStep) {
-                $initialStepId = $roleSelectionStep->id;
+            $targetStepId = 'step_role_selection';
+
+            // Jika FE mengirim parameter goal, langsung skip role selection ke spesifik flow
+            if (in_array($goal, ['startup', 'founder', 'building_team'])) {
+                $targetStepId = 'step_su_about';
+            } elseif (in_array($goal, ['cofounder', 'team_members', 'joining_startup', 'talent'])) {
+                $targetStepId = 'step_bld_type';
+            }
+
+            $skipStep = OnboardingStep::where('id', $targetStepId)->first();
+            if ($skipStep) {
+                $initialStepId = $skipStep->id;
             }
         }
 

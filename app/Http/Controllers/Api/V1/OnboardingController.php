@@ -87,7 +87,8 @@ class OnboardingController extends Controller
      */
     public function start(Request $request)
     {
-        $session = $this->engine->startSession($request->user());
+        $goal = $request->input('goal') ?? $request->query('goal');
+        $session = $this->engine->startSession($request->user(), $goal);
 
         return response()->json([
             'session_id' => $session->id,
