@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\V1\Discovery;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FeedRequest;
 use App\Services\FeedService;
+use App\Services\ViewerContextService;
+use Illuminate\Http\JsonResponse;
 use OpenApi\Attributes as OA;
 
 #[OA\Get(
@@ -58,14 +60,34 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'compatibility_score', type: 'number', format: 'float', example: 78.5),
     ]
 )]
+#[OA\Tag(name: 'Discovery', description: 'Endpoints for the matching feed.')]
 class FeedController extends Controller
 {
-    public function __construct(private FeedService $feedService) {}
+    public function __construct(
+        private FeedService $feedService,
+        private ViewerContextService $viewerContextService
+    ) {}
 
     public function index(FeedRequest $request)
     {
         $authUser = $request->user();
         $filters  = $request->validated();
+
+        // ── Validasi Viewer Context / Goal ──
+        $goalParam = $request->query('goal');
+        if (in_array($goalParam, ['startup', 'founder', 'building_team'])) {
+            $goalParam = 'startup';
+        } elseif (in_array($goalParam, ['cofounder', 'team_members', 'joining_startup'])) {
+            $goalParam = 'talent';
+        }
+
+        $rawContext = $request->query('viewer_context') ?? $goalParam ?? $request->header('X-Viewer-Context');
+        
+        $ctxResult = $this->viewerContextService->resolve($authUser, $rawContext);
+        if ($ctxResult instanceof JsonResponse) {
+            return $ctxResult; // Me-return 409 DISCOVERY_ONBOARDING_REQUIRED jika profil tidak ada
+        }
+        $viewerContext = $ctxResult['context'];
 
         $paginator = $this->feedService->getDiscoveryFeed($authUser, $filters);
 
@@ -86,6 +108,7 @@ class FeedController extends Controller
             'success' => true,
             'message' => 'Feed fetched successfully',
             'data'    => [
+                'viewer_context' => $viewerContext,
                 'items'   => $items,
                 'total'   => $paginator->total(),
                 'page'    => $paginator->currentPage(),

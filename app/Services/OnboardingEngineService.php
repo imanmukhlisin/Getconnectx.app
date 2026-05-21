@@ -823,20 +823,20 @@ class OnboardingEngineService
         }
 
         // ── Buat atau Update Data di Tabel Builders (P2P Discovery) ──
-        if (isset($updateData['role_category']) && $updateData['role_category'] !== 'Startup') {
-            \App\Models\Builder::updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'role_category'      => $updateData['role_category'] ?? null,
-                    'primary_role'       => $updateData['primary_role'] ?? null,
-                    'commitment_level'   => $updateData['commitment_level'] ?? null,
-                    'work_arrangement'   => $user->work_arrangement ?? null,
-                    'remote_ready'       => $updateData['open_to_remote'] ?? false,
-                    'open_to_remote'     => $updateData['open_to_remote'] ?? false,
-                    'willing_to_relocate' => $updateData['willing_to_relocate'] ?? false,
-                ]
-            );
-        }
+        // Always create a Builder profile for everyone (including Founder/Startup)
+        // so they have a talent profile and can context-switch seamlessly.
+        \App\Models\Builder::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'role_category'      => $updateData['role_category'] ?? null,
+                'primary_role'       => $updateData['primary_role'] ?? null,
+                'commitment_level'   => $updateData['commitment_level'] ?? null,
+                'work_arrangement'   => $user->work_arrangement ?? null,
+                'remote_ready'       => $updateData['open_to_remote'] ?? false,
+                'open_to_remote'     => $updateData['open_to_remote'] ?? false,
+                'willing_to_relocate' => $updateData['willing_to_relocate'] ?? false,
+            ]
+        );
 
 
         // ── Sinkronisasi Many-to-Many Tags (Industri + Skill) ──
