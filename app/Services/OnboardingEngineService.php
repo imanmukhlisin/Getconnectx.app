@@ -799,6 +799,9 @@ class OnboardingEngineService
                     }
                 }
             }
+            if ($responses->has('q_su_logo')) {
+                $startupData['logo_url'] = $this->getValue($responses['q_su_logo']->value);
+            }
 
             if (isset($updateData['location'])) {
                 $startupData['city'] = $updateData['location'];
