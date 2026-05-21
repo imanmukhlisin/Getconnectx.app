@@ -479,8 +479,8 @@ class AuthController extends Controller
                     'default_discovery_mode' => $discoveryMode,
                 ],
                 'premium' => [
-                    'boost'     => 3,
-                    'spotlight' => 1,
+                    'boost'     => 0,
+                    'spotlight' => 0,
                     'isPremium' => (bool) $user->is_pro,
                 ],
             ]

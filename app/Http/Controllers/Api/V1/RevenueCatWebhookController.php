@@ -44,12 +44,15 @@ class RevenueCatWebhookController extends Controller
             return response()->json(['message' => 'Ignored, missing app_user_id'], 200);
         }
 
-        if (!\Illuminate\Support\Str::isUuid($appUserId)) {
-            Log::warning('RevenueCat Webhook: Invalid UUID format', ['app_user_id' => $appUserId]);
+        // Clean RevenueCat prefix if present
+        $cleanUserId = str_replace('connectx_', '', $appUserId);
+
+        if (!\Illuminate\Support\Str::isUuid($cleanUserId)) {
+            Log::warning('RevenueCat Webhook: Invalid UUID format', ['app_user_id' => $appUserId, 'clean' => $cleanUserId]);
             return response()->json(['message' => 'Invalid app_user_id format'], 400);
         }
 
-        $user = User::find($appUserId);
+        $user = User::find($cleanUserId);
 
         if (!$user) {
             Log::warning('RevenueCat Webhook: User not found', ['app_user_id' => $appUserId]);
