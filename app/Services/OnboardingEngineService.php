@@ -41,7 +41,7 @@ class OnboardingEngineService
         // dan langsung melempar mereka ke pertanyaan cabang / role selection
         $initialStepId = $firstStep->id;
         if ($user->is_onboarded) {
-            $roleSelectionStep = OnboardingStep::where('id', 'step_use_connectx')->first();
+            $roleSelectionStep = OnboardingStep::where('id', 'step_role_selection')->first();
             if ($roleSelectionStep) {
                 $initialStepId = $roleSelectionStep->id;
             }
@@ -628,11 +628,18 @@ class OnboardingEngineService
         }
 
         // ── Lokasi ──
+        $locationQuestion = null;
         if ($responses->has('q_city')) {
-            $val = $this->getValue($responses['q_city']->value);
+            $locationQuestion = 'q_city';
+        } elseif ($responses->has('q_location')) {
+            $locationQuestion = 'q_location';
+        }
+
+        if ($locationQuestion) {
+            $val = $this->getValue($responses[$locationQuestion]->value);
             // Ambil label dari onboarding_options jika memungkinkan untuk parsing city, country
             $option = \Illuminate\Support\Facades\DB::table('onboarding_options')
-                ->where('question_id', 'q_city')
+                ->where('question_id', $locationQuestion)
                 ->where('value', $val)
                 ->first();
             
@@ -887,9 +894,9 @@ class OnboardingEngineService
     {
         $locale = app()->getLocale();
         
-        // Redirect q_willing_to_relocate to q_city to fetch city list dynamically
-        if ($questionId === 'q_willing_to_relocate') {
-            $questionId = 'q_city';
+        // Redirect q_willing_to_relocate to q_location to fetch city list dynamically
+        if (in_array($questionId, ['q_candidate_location', 'q_willing_to_relocate', 'q_city'])) {
+            $questionId = 'q_location'; // fall back to old question ID so options map properly
         }
 
         $options = \App\Models\Onboarding\OnboardingOption::where('question_id', $questionId)
