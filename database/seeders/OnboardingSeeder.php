@@ -956,8 +956,6 @@ class OnboardingSeeder extends Seeder
         DB::table('onboarding_flows')->insert([
             // Common → Data Diri (Entry Point)
             ['id' => 'flow_common', 'name' => 'Data Diri', 'description' => 'Informasi dasar pengguna', 'is_entry' => true, 'created_at' => $now, 'updated_at' => $now],
-            // Builder Streamlined
-            ['id' => 'flow_builder', 'name' => 'Builder Streamlined', 'description' => 'Alur builder baru', 'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
             // Builder Common (Role + Experience)
             ['id' => 'flow_builder_common', 'name' => 'Builder - Profil', 'description' => 'Peran dan pengalaman Builder', 'is_entry' => false, 'created_at' => $now, 'updated_at' => $now],
             // Founder (Looking for? + Industries)
@@ -1008,18 +1006,11 @@ class OnboardingSeeder extends Seeder
 
         DB::table('onboarding_steps')->insert([
             // ── COMMON: Data Diri (5 steps) ──
-            $s('step_data_diri', 'flow_common', 1, 'Data Diri', 'Ceritakan tentang dirimu', 'Tell us about yourself', false, 'Data dasar yang kami butuhkan untuk mempersonalisasi koneksi kamu.', 'The basics we need to personalize your connections'),
-            $s('step_use_connectx', 'flow_common', 2, 'Tipe Akun', 'Kamu mau pakai ConnectX buat apa?', 'How do you want to use ConnectX?', true, 'Ini bakal nentuin pengalaman kamu di sini.', 'This shapes your entire experience'),
-
-            // ── STREAMLINED BUILDER ──
-            $s('step_identity_details', 'flow_builder', 1, 'Profil Builder', 'Tolong deskripsikan dirimu', 'What best describes you?', false, 'ini akan menentukan apa yang akan muncul di feed-mu', 'This determines what you\'ll see in your feed'),
-            $s('step_experience', 'flow_builder', 2, 'Pengalaman', 'Apakah kamu memiliki pengalaman startup sebelumnya?', 'Do you have any prior startup experience?', true, 'Mari bangun profil talentamu', 'Let\'s build your talent profile'),
-            $s('step_founder_goal', 'flow_builder', 3, 'Tujuan Founder', 'Apa tujuan utamamu?', 'What is your main goal?', true),
-            $s('step_industries_interest', 'flow_builder', 4, 'Minat & Keahlian', 'Industri & Keahlian', 'Industries & Skills', false),
-            $s('step_availability', 'flow_builder', 5, 'Ketersediaan', 'Ketersediaan Waktu', 'Availability', true),
-            $s('step_open_to_remote', 'flow_builder', 6, 'Preferensi Kerja', 'Terbuka untuk remote?', 'Open to remote?', true),
-            $s('step_willing_to_relocate', 'flow_builder', 7, 'Preferensi Kerja', 'Bersedia relokasi?', 'Willing to relocate?', true),
-            $s('step_credibility', 'flow_builder', 8, 'Profil Online', 'Koneksikan LinkedIn-mu', 'Connect your LinkedIn', false),
+            $s('step_personal_name', 'flow_common', 1, 'Data Diri', 'Ceritakan tentang dirimu', 'Tell us about yourself', false, 'Data dasar yang kami butuhkan untuk mempersonalisasi koneksi kamu.', 'The basics we need to personalize your connections'),
+            $s('step_personal_dob', 'flow_common', 2, 'Data Diri', 'Kapan tanggal lahir Anda?', 'When is your date of birth?', false, 'Biar kami bisa menyesuaikan koneksi yang paling relevan buat kamu.', 'Helps us match you with the most relevant connections.'),
+            $s('step_personal_location', 'flow_common', 3, 'Data Diri', 'Kamu sedang tinggal dimana?', 'Where are you based?', false, 'Biar kami bisa tampilkan koneksi yang dekat atau relevan secara lokasi.', 'So we can show you nearby or location-relevant connections.'),
+            $s('step_personal_gender', 'flow_common', 4, 'Data Diri', 'Bagaimana kamu mengidentifikasi diri?', 'How do you identify?', true, 'Biar kami bisa menyesuaikan pengalamanmu.', 'To help us personalize your experience.'),
+            $s('step_role_selection', 'flow_common', 5, 'Tipe Akun', 'Kamu mau pakai ConnectX buat apa?', 'How do you want to use ConnectX?', true, 'Ini bakal nentuin pengalaman kamu di sini.', 'This shapes your entire experience'),
 
             // ── BUILDER COMMON (2 steps) ──
             $s('step_bld_type', 'flow_builder_common', 1, 'Profil Builder', 'Tolong deskripsikan dirimu', 'What best describes you?', true, 'ini akan menentukan apa yang akan muncul di feed-mu', 'This determines what you\'ll see in your feed'),
@@ -1119,26 +1110,12 @@ class OnboardingSeeder extends Seeder
 
         DB::table('onboarding_questions')->insert([
             // ── COMMON: Data Diri ──
-            $q('q_first_name', 'step_data_diri', 1, 'text', 'Nama Depan', 'First Name', true, ['validation' => json_encode(['min_length' => 1, 'max_length' => 50]), 'placeholder' => json_encode(['id' => 'Nama depan kamu', 'en' => 'Your first name'])]),
-            $q('q_last_name', 'step_data_diri', 2, 'text', 'Nama Belakang', 'Last Name', false, ['placeholder' => json_encode(['id' => 'Nama belakang kamu', 'en' => 'Your last name'])]),
-            $q('q_date_of_birth', 'step_data_diri', 3, 'date', 'Tanggal Lahir', 'Date of Birth', true, ['placeholder' => json_encode(['id' => 'Tahun-Bulan-tanggal', 'en' => 'YYYY-MM-DD'])]),
-            $q('q_city', 'step_data_diri', 4, 'searchable_dropdown', 'Pilih Kota/Negara', 'Select City/Country', true, ['placeholder' => json_encode(['id' => 'Cari kota', 'en' => 'Search a city'])]),
-            $q('q_gender', 'step_data_diri', 5, 'single_select_card', '', ''),
-            
-            $q('q_use_connectx', 'step_use_connectx', 1, 'single_select_card', '', ''),
-
-            // ── STREAMLINED BUILDER ──
-            $q('q_builder_type', 'step_identity_details', 1, 'single_select_card', '', ''),
-            $q('q_primary_role', 'step_identity_details', 2, 'searchable_dropdown', 'Pilih peran utama Anda*', 'Select your primary role*', true, ['placeholder' => json_encode(['id' => 'Cari peran utama kamu', 'en' => 'Search your primary role'])]),
-            $q('q_years_experience', 'step_identity_details', 3, 'number', 'Tahun Pengalaman', 'Years of Experience', true, ['placeholder' => json_encode(['id' => '3', 'en' => '3'])]),
-            $q('q_startup_experience', 'step_experience', 1, 'single_select_card', '', ''),
-            $q('q_founder_goal', 'step_founder_goal', 1, 'single_select_card', '', ''),
-            $q('q_industries_interest', 'step_industries_interest', 1, 'multi_select_chip', 'Pilih Industri (Maks 5)', 'Select Industries (Max 5)', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 5]), 'placeholder' => json_encode(['id' => 'Cari industri', 'en' => 'Search industries'])]),
-            $q('q_skills', 'step_industries_interest', 2, 'multi_select_chip', 'Skill', 'Skills', true, ['validation' => json_encode(['min_selections' => 1, 'max_selections' => 10]), 'placeholder' => json_encode(['id' => 'Cari skill', 'en' => 'Search skills'])]),
-            $q('q_availability', 'step_availability', 1, 'single_select_card', '', ''),
-            $q('q_open_to_remote', 'step_open_to_remote', 1, 'single_select_card', 'Terbuka untuk kerja remote?', 'Open to remote?'),
-            $q('q_willing_to_relocate', 'step_willing_to_relocate', 1, 'single_select_card', 'Bersedia relokasi?', 'Willing to relocate?'),
-            $q('q_linkedin_url', 'step_credibility', 1, 'url', 'LinkedIn URL', 'LinkedIn URL', false, ['placeholder' => json_encode(['id' => 'https://linkedin.com/in/namamu', 'en' => 'https://linkedin.com/in/your-name'])]),
+            $q('q_first_name', 'step_personal_name', 1, 'text', 'Nama Depan', 'First Name', true, ['validation' => json_encode(['min_length' => 1, 'max_length' => 50]), 'placeholder' => json_encode(['id' => 'Nama depan kamu', 'en' => 'Your first name'])]),
+            $q('q_last_name', 'step_personal_name', 2, 'text', 'Nama Belakang', 'Last Name', false, ['placeholder' => json_encode(['id' => 'Nama belakang kamu', 'en' => 'Your last name'])]),
+            $q('q_dob', 'step_personal_dob', 1, 'date', 'Tanggal Lahir', 'Date of Birth', true, ['placeholder' => json_encode(['id' => 'Tahun-Bulan-tanggal', 'en' => 'YYYY-MM-DD'])]),
+            $q('q_location', 'step_personal_location', 1, 'searchable_dropdown', 'Pilih Kota/Negara', 'Select City/Country', true, ['placeholder' => json_encode(['id' => 'Cari kota', 'en' => 'Search a city'])]),
+            $q('q_gender', 'step_personal_gender', 1, 'single_select_card', '', ''),
+            $q('q_use_connectx', 'step_role_selection', 1, 'single_select_card', '', ''),
 
             // ── BUILDER COMMON ──
             $q('q_bld_type', 'step_bld_type', 1, 'single_select_card', '', ''),
@@ -1292,7 +1269,7 @@ class OnboardingSeeder extends Seeder
             foreach ($jsonLocations as $i => $loc) {
                 $opts[] = [
                     'id' => 'opt_loc_' . ($i + 1),
-                    'question_id' => 'q_city',
+                    'question_id' => 'q_location',
                     'order_index' => $i + 1,
                     'label' => json_encode(['id' => $loc['label'], 'en' => $loc['label']]),
                     'value' => $loc['value'],
@@ -1307,7 +1284,7 @@ class OnboardingSeeder extends Seeder
             // Fallback (jika file JSON belum di-download)
             $opts[] = [
                 'id' => 'opt_loc_1',
-                'question_id' => 'q_city',
+                'question_id' => 'q_location',
                 'order_index' => 1,
                 'label' => json_encode(['id' => 'Jakarta, Indonesia', 'en' => 'Jakarta, Indonesia']),
                 'value' => 'jakarta_indonesia',
@@ -1341,13 +1318,8 @@ class OnboardingSeeder extends Seeder
         $opts[] = $o('opt_bt_2', 'q_bld_type', 2, 'Co-Founder', 'Co-Founder', 'cofounder', 'Aku ingin bergabung ke startup sebagai co-founder', 'I want to join a startup as a co-founder', 'cofounder_handshake');
         $opts[] = $o('opt_bt_3', 'q_bld_type', 3, 'Anggota Tim', 'Team Member', 'team', 'Aku ingin bergabung ke tim startup', 'I want to join a startup team', 'team_member_group');
 
-        $opts[] = $o('opt_bt_1_new', 'q_builder_type', 1, 'Founder', 'Founder', 'founder', 'Aku sedang membangun sesuatu dan mencari orang', 'I\'m building something and looking for people', 'founder_rocket');
-        $opts[] = $o('opt_bt_2_new', 'q_builder_type', 2, 'Co-Founder', 'Co-Founder', 'cofounder', 'Aku ingin bergabung ke startup sebagai co-founder', 'I want to join a startup as a co-founder', 'cofounder_handshake');
-        $opts[] = $o('opt_bt_3_new', 'q_builder_type', 3, 'Anggota Tim', 'Team Member', 'team_member', 'Aku ingin bergabung ke tim startup', 'I want to join a startup team', 'team_member_group');
-
-        // ── Primary Roles (grouped, for q_bld_role & q_primary_role) ──
+        // ── Primary Roles (grouped, for q_bld_role) ──
         $opts = array_merge($opts, $genGroupedOpts('opt_role', 'q_bld_role', $masterRoles));
-        $opts = array_merge($opts, $genGroupedOpts('opt_role_new', 'q_primary_role', $masterRoles));
 
         // ── Experience Level (Dynamic per Role) ──
         // Founder Experience
@@ -1370,24 +1342,13 @@ class OnboardingSeeder extends Seeder
         $opts[] = $o('opt_tm_exp_3', 'q_tm_exp', 3, 'Pernah launching produk startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
         $opts[] = $o('opt_tm_exp_4', 'q_tm_exp', 4, 'Belum ada pengalaman startup', 'No Prior startup experience', 'none', null, null, 'exp_none');
 
-        // Streamlined Startup Experience
-        $opts[] = $o('opt_exp_1_new', 'q_startup_experience', 1, 'Mendirikan / co-founded sebuah perusahaan', 'Founder / co-founded a company', 'founded', null, null, 'exp_founded');
-        $opts[] = $o('opt_exp_2_new', 'q_startup_experience', 2, 'Pernah jual startup', 'Sold a startup', 'sold', null, null, 'exp_sold');
-        $opts[] = $o('opt_exp_3_new', 'q_startup_experience', 3, 'Pernah kerja di startup', 'Worked in a startup', 'worked', null, null, 'exp_worked');
-        $opts[] = $o('opt_exp_4_new', 'q_startup_experience', 4, 'Pernah launching produk startup', 'Built a product at a startup', 'built', null, null, 'exp_built');
-        $opts[] = $o('opt_exp_5_new', 'q_startup_experience', 5, 'Belum ada pengalaman startup', 'No Prior startup experience', 'none', null, null, 'exp_none');
-
         // ── Founder: Looking For ──
         $opts[] = $o('opt_fdr_look_1', 'q_fdr_looking', 1, 'Co-Founder', 'Co-Founder', 'cofounder', 'Cari orang buat bangun bareng startupmu dari hari pertama', 'Looking for a partner to build together', 'goal_cofounder');
         $opts[] = $o('opt_fdr_look_2', 'q_fdr_looking', 2, 'Anggota Tim', 'Team Members', 'team', 'Rekrut tim awal untuk startup kamu', 'Looking for team members for my startup', 'goal_team_members');
         $opts[] = $o('opt_fdr_look_3', 'q_fdr_looking', 3, 'Keduanya', 'Both', 'both', 'Terbuka untuk co-founder dan anggota tim', 'Looking for both co-founder and team members', 'goal_both');
 
-        $opts[] = $o('opt_goal_1_new', 'q_founder_goal', 1, 'Co-Founder', 'Co-Founder', 'cofounder', 'Cari orang buat bangun bareng startupmu dari hari pertama', 'Looking for a partner to build together', 'goal_cofounder');
-        $opts[] = $o('opt_goal_2_new', 'q_founder_goal', 2, 'Anggota Tim', 'Team Members', 'team_members', 'Rekrut tim awal untuk startup kamu', 'Looking for team members for my startup', 'goal_team_members');
-        $opts[] = $o('opt_goal_3_new', 'q_founder_goal', 3, 'Keduanya', 'Both', 'both', 'Terbuka untuk co-founder dan anggota tim', 'Looking for both co-founder and team members', 'goal_both');
-
         // ── Industries (for all industry questions) ──
-        $industryQuestions = ['q_fdr_industry', 'q_cf_industry', 'q_tm_industry', 'q_su_industry', 'q_industries_interest'];
+        $industryQuestions = ['q_fdr_industry', 'q_cf_industry', 'q_tm_industry', 'q_su_industry'];
         foreach ($industryQuestions as $qid) {
             $opts = array_merge($opts, $genGroupedOpts('opt_ind_' . str_replace('q_', '', $qid), $qid, $masterIndustries));
         }
@@ -1405,13 +1366,13 @@ class OnboardingSeeder extends Seeder
         }
 
         // ── Skills (for team member + startup needs) ──
-        $skillQuestions = ['q_tm_skills', 'q_su_need_tm_skills', 'q_su_need_bt_tm', 'q_skills'];
+        $skillQuestions = ['q_tm_skills', 'q_su_need_tm_skills', 'q_su_need_bt_tm'];
         foreach ($skillQuestions as $qid) {
             $opts = array_merge($opts, $genGroupedOpts('opt_sk_' . str_replace('q_', '', $qid), $qid, $masterSkills));
         }
 
         // ── Availability Options (reused for multiple questions) ──
-        $availQuestions = ['q_fdr_cf_avail', 'q_fdr_tm_avail', 'q_fdr_bt_avail', 'q_cf_avail', 'q_tm_avail', 'q_availability'];
+        $availQuestions = ['q_fdr_cf_avail', 'q_fdr_tm_avail', 'q_fdr_bt_avail', 'q_cf_avail', 'q_tm_avail'];
         foreach ($availQuestions as $qid) {
             $p = str_replace('q_', 'opt_av_', $qid);
             $opts[] = $o($p . '_1', $qid, 1, 'Full-time', 'Full-time', 'full_time', 'Kandidat harus komitmen penuh', 'Candidates must be fully committed', 'availability_full_time');
@@ -1429,7 +1390,7 @@ class OnboardingSeeder extends Seeder
         }
 
         // ── Remote Options (Co-Founder & Team Side) ──
-        $builderRemoteQuestions = ['q_cf_remote', 'q_tm_remote', 'q_open_to_remote'];
+        $builderRemoteQuestions = ['q_cf_remote', 'q_tm_remote'];
         foreach ($builderRemoteQuestions as $qid) {
             $p = str_replace('q_', 'opt_rm_', $qid);
             $opts[] = $o($p . '_1', $qid, 1, 'Ya', 'Yes', 'yes', null, null, 'yes');
@@ -1446,7 +1407,7 @@ class OnboardingSeeder extends Seeder
         }
 
         // ── Relocate Options (Co-Founder & Team Side) ──
-        $builderRelocateQuestions = ['q_cf_relocate', 'q_tm_relocate', 'q_willing_to_relocate'];
+        $builderRelocateQuestions = ['q_cf_relocate', 'q_tm_relocate'];
         foreach ($builderRelocateQuestions as $qid) {
             $p = str_replace('q_', 'opt_rl_', $qid);
             $opts[] = $o($p . '_1', $qid, 1, 'Ya, jika cocok', 'Yes, if the fit is right', 'yes_if_fit', null, null, 'relocate_yes');
@@ -1583,13 +1544,9 @@ class OnboardingSeeder extends Seeder
         };
 
         DB::table('onboarding_transitions')->insert([
-            // ── step_use_connectx: startup → flow_startup, builder → flow_builder ──
-            $t('step_use_connectx', ['question_id' => 'q_use_connectx', 'operator' => 'equals', 'value' => 'startup'], null, 'flow_startup', 10),
-            $t('step_use_connectx', null, null, 'flow_builder', 0),
-
-            // ── Streamlined Builder Branching ──
-            $t('step_experience', ['question_id' => 'q_builder_type', 'operator' => 'equals', 'value' => 'founder'], 'step_founder_goal', null, 10),
-            $t('step_experience', null, 'step_industries_interest', null, 0),
+            // ── step_role_selection: startup → flow_startup, else → flow_builder_common ──
+            $t('step_role_selection', ['question_id' => 'q_use_connectx', 'operator' => 'equals', 'value' => 'startup'], null, 'flow_startup', 10),
+            $t('step_role_selection', null, null, 'flow_builder_common', 0),  // default: founder/cofounder/team all go to builder common
 
             // ── step_bld_role: branch by original role selection ──
             $t('step_bld_role', ['question_id' => 'q_bld_type', 'operator' => 'equals', 'value' => 'founder'], null, 'flow_founder', 10),
