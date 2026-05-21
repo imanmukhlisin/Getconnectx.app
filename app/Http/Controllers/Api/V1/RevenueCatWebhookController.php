@@ -44,6 +44,11 @@ class RevenueCatWebhookController extends Controller
             return response()->json(['message' => 'Ignored, missing app_user_id'], 200);
         }
 
+        if (!\Illuminate\Support\Str::isUuid($appUserId)) {
+            Log::warning('RevenueCat Webhook: Invalid UUID format', ['app_user_id' => $appUserId]);
+            return response()->json(['message' => 'Invalid app_user_id format'], 400);
+        }
+
         $user = User::find($appUserId);
 
         if (!$user) {
@@ -52,6 +57,7 @@ class RevenueCatWebhookController extends Controller
         }
 
         // We specifically check for the "connectx_pro" entitlement
+        $entitlementIds = is_array($entitlementIds) ? $entitlementIds : [];
         $hasProEntitlement = in_array('connectx_pro', $entitlementIds);
 
         switch ($eventType) {
