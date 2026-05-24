@@ -20,30 +20,7 @@ class FilterBuilderService
         'joining_startups'  => ['founderQuality', 'leadershipStrength', 'startupReadiness', 'equityAndCommitment'],
     ];
 
-    // ─── Catalog ID → DB value mapping ────────────────────────────────────────
-    private const INDUSTRY_MAP = [
-        'ind_ai' => 'AI', 'ind_fintech' => 'Fintech', 'ind_healthtech' => 'Healthtech',
-        'ind_edtech' => 'Edtech', 'ind_web3' => 'Web3', 'ind_saas' => 'SaaS',
-    ];
-
-    private const COMMITMENT_MAP = [
-        'commitment_full_time'    => 'full-time',
-        'commitment_part_time'    => 'part-time',
-        'commitment_side_project' => 'side-project',
-    ];
-
-    private const WORK_ARRANGEMENT_MAP = [
-        'wa_onsite' => 'onsite',
-        'wa_hybrid' => 'hybrid',
-        'wa_remote' => 'remote',
-    ];
-
-    private const STAGE_MAP = [
-        'stage_idea'     => 'idea',
-        'stage_mvp'      => 'mvp',
-        'stage_pre_seed' => 'pre-seed',
-        'stage_seed'     => 'seed',
-    ];
+    // ─── Constants ────────────────────────────────────────────────────────────
 
     // ═══════════════════════════════════════════════════════════════════
     //  Premium Validation
@@ -91,9 +68,9 @@ class FilterBuilderService
                     ->whereColumn('user_credentials.user_id', 'users.id');
             });
 
-        // ── Industry filter (via user_tags + tags join) ───────────────────
+        // ── Industry filter (via user_tags + tags join) ──────────────────────
         if (!empty($filters['industryIds'])) {
-            $industryNames = $this->mapIds($filters['industryIds'], self::INDUSTRY_MAP);
+            $industryNames = $filters['industryIds'];
             $query->whereExists(function ($sub) use ($industryNames) {
                 $sub->selectRaw(1)
                     ->from('user_tags')
@@ -106,7 +83,7 @@ class FilterBuilderService
 
         // ── Skill filter (via user_tags + tags join) ──────────────────────
         if (!empty($filters['skillIds'])) {
-            $skillLabels = $this->mapIds($filters['skillIds'], $this->buildSkillMap());
+            $skillLabels = $filters['skillIds'];
             $query->whereExists(function ($sub) use ($skillLabels) {
                 $sub->selectRaw(1)
                     ->from('user_tags')
@@ -119,19 +96,19 @@ class FilterBuilderService
 
         // ── Role filter ──────────────────────────────────────────────────
         if (!empty($filters['roleNeededIds'])) {
-            $roles = $this->mapIds($filters['roleNeededIds'], $this->buildRoleMap());
+            $roles = $filters['roleNeededIds'];
             $query->whereIn('builders.role_category', $roles);
         }
 
         // ── Skill strength filter ────────────────────────────────────────
         if (!empty($filters['skillStrengthIds'])) {
-            $strengths = $this->mapIds($filters['skillStrengthIds'], $this->buildSkillStrengthMap());
+            $strengths = $filters['skillStrengthIds'];
             $query->whereIn('builders.role_category', $strengths);
         }
 
         // ── Commitment filter ────────────────────────────────────────────
         if (!empty($filters['commitmentIds'])) {
-            $commitments = $this->mapIds($filters['commitmentIds'], self::COMMITMENT_MAP);
+            $commitments = $filters['commitmentIds'];
             $query->whereIn('builders.commitment_level', $commitments);
         }
 
@@ -140,10 +117,7 @@ class FilterBuilderService
 
         // ── Work arrangement filter ──────────────────────────────────────
         if (!empty($filters['locationAvailability']['workArrangementIds'] ?? null)) {
-            $arrangements = $this->mapIds(
-                $filters['locationAvailability']['workArrangementIds'],
-                self::WORK_ARRANGEMENT_MAP
-            );
+            $arrangements = $filters['locationAvailability']['workArrangementIds'];
             $query->whereIn('builders.work_arrangement', $arrangements);
         }
 
@@ -170,7 +144,7 @@ class FilterBuilderService
 
         // ── Industry filter ───────────────────────────────────────────────
         if (!empty($filters['industryIds'])) {
-            $industries = $this->mapIds($filters['industryIds'], self::INDUSTRY_MAP);
+            $industries = $filters['industryIds'];
             $query->where(function ($q) use ($industries) {
                 $q->whereIn('startups.industry', $industries)
                   ->orWhereIn('startups.secondary_industry', $industries);
@@ -179,7 +153,7 @@ class FilterBuilderService
 
         // ── Startup stage filter ──────────────────────────────────────────
         if (!empty($filters['startupStageIds'])) {
-            $stages = $this->mapIds($filters['startupStageIds'], self::STAGE_MAP);
+            $stages = $filters['startupStageIds'];
             $query->whereIn('startups.stage', $stages);
         }
 
@@ -273,47 +247,17 @@ class FilterBuilderService
             );
 
             $query->select($table . '.*')
-                  ->whereNotNull("{$table}.latitude")
-                  ->whereNotNull("{$table}.longitude")
                   ->selectRaw("{$haversine} AS distance_km");
 
             if ($radiusKm) {
-                $query->whereRaw("{$haversine} <= ?", [(float)$radiusKm]);
+                $query->where(function ($q) use ($haversine, $radiusKm, $table) {
+                    $q->whereRaw("{$haversine} <= ?", [(float)$radiusKm])
+                      ->orWhereNull("{$table}.latitude")
+                      ->orWhereNull("{$table}.longitude");
+                });
             }
         }
     }
 
-    /**
-     * Map canonical IDs to database values.
-     */
-    private function mapIds(array $ids, array $map): array
-    {
-        return array_values(array_filter(array_map(fn($id) => $map[$id] ?? null, $ids)));
-    }
 
-    private function buildSkillMap(): array
-    {
-        return [
-            'skill_react' => 'React', 'skill_python' => 'Python', 'skill_figma' => 'Figma',
-            'skill_growth' => 'Growth', 'skill_seo' => 'SEO', 'skill_salesforce' => 'Salesforce',
-        ];
-    }
-
-    private function buildRoleMap(): array
-    {
-        return [
-            'role_engineer' => 'engineer', 'role_product' => 'product', 'role_designer' => 'designer',
-            'role_sales' => 'sales', 'role_marketing' => 'marketing', 'role_operations' => 'operations',
-            'role_finance' => 'finance', 'role_growth' => 'growth', 'role_ai_ml' => 'ai-ml',
-        ];
-    }
-
-    private function buildSkillStrengthMap(): array
-    {
-        return [
-            'ss_technical' => 'engineer', 'ss_product' => 'product', 'ss_business' => 'business',
-            'ss_sales' => 'sales', 'ss_marketing' => 'marketing', 'ss_design' => 'designer',
-            'ss_operations' => 'operations', 'ss_finance' => 'finance',
-        ];
-    }
 }

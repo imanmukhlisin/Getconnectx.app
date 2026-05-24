@@ -1187,7 +1187,6 @@ class OnboardingSeeder extends Seeder
             $q('q_su_name', 'step_su_about', 1, 'text', 'Nama Startup', 'Startup Name', true, ['validation' => json_encode(['min_length' => 2, 'max_length' => 100]), 'placeholder' => json_encode(['id' => 'Nama startup', 'en' => 'Startup name'])]),
             $q('q_su_tagline', 'step_su_about', 2, 'text', 'Tagline (1 kalimat)', 'Tagline (1 sentence)', true, ['validation' => json_encode(['max_length' => 150]), 'placeholder' => json_encode(['id' => 'cont: Cara paling cepat buat cari co-founder', 'en' => 'e.g. The fastest way to find co-founders'])]),
             $q('q_su_stage', 'step_su_about', 3, 'dropdown', 'Tahap Startup', 'Startup Stage'),
-            $q('q_su_logo', 'step_su_about', 4, 'file_upload', 'Logo Startup (Opsional)', 'Startup Logo (Optional)', false, ['meta' => json_encode(['accept' => 'image/*', 'max_size' => 5242880])]),
 
             // ── STARTUP: Problem & Solution ──
             $q('q_su_problem', 'step_su_problem', 1, 'textarea', 'Masalah yang kamu selesaikan', 'Problem you\'re solving', true, ['placeholder' => json_encode(['id' => 'Siapa yang merasakan kesusahannya dan kenapa?', 'en' => 'Who hurts, and why?'])]),
