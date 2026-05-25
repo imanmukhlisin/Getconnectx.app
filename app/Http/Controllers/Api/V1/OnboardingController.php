@@ -299,6 +299,8 @@ class OnboardingController extends Controller
             'co_founder_type'   => 'nullable|string',
             'availability'      => 'nullable|string',
             'location'          => 'nullable|string',
+            'latitude'          => 'nullable|numeric',
+            'longitude'         => 'nullable|numeric',
 
             // Startup-specific fields
             'startup_name'      => 'nullable|string|max:255',
@@ -344,8 +346,33 @@ class OnboardingController extends Controller
         }
         if ($request->has('location')) {
             $locParts = explode(',', $request->location);
-            $updateData['city']    = trim($locParts[0] ?? '');
-            $updateData['country'] = trim($locParts[1] ?? '');
+            $cityName = trim($locParts[0] ?? '');
+            $countryName = trim($locParts[1] ?? '');
+            
+            $updateData['city']    = $cityName;
+            $updateData['country'] = $countryName;
+
+            if ($request->filled('latitude') && $request->filled('longitude')) {
+                // Gunakan GPS dari frontend jika user accept
+                $updateData['latitude']  = $request->latitude;
+                $updateData['longitude'] = $request->longitude;
+            } else {
+                // HACK: Auto-Geocoding Gratis Pakai OpenStreetMap (Fallback)
+                try {
+                    $searchQuery = urlencode($cityName . ($countryName ? ', ' . $countryName : ''));
+                    $response = \Illuminate\Support\Facades\Http::withHeaders([
+                        'User-Agent' => 'ConnectX-App/1.0' // Wajib diisi agar tidak diblokir Nominatim
+                    ])->timeout(5)->get("https://nominatim.openstreetmap.org/search?q={$searchQuery}&format=json&limit=1");
+
+                    if ($response->successful() && !empty($response->json())) {
+                        $data = $response->json()[0];
+                        $updateData['latitude']  = $data['lat'] ?? null;
+                        $updateData['longitude'] = $data['lon'] ?? null;
+                    }
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning("Gagal ambil koordinat OSM untuk kota: " . $cityName);
+                }
+            }
         }
 
         $user->update($updateData);
@@ -408,6 +435,10 @@ class OnboardingController extends Controller
                     'team_size'          => $request->team_size,
                     'open_roles'         => $request->open_roles,
                     'looking_for'        => $newLookingFor,
+                    'city'               => $updateData['city'] ?? null,
+                    'country'            => $updateData['country'] ?? null,
+                    'latitude'           => $updateData['latitude'] ?? null,
+                    'longitude'          => $updateData['longitude'] ?? null,
                 ], fn ($v) => $v !== null)
             );
         }
