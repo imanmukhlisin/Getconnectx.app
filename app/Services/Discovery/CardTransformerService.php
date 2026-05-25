@@ -208,10 +208,19 @@ class CardTransformerService
 
         // TeamStage Object (API-MACHMAKING)
         $openRoles = is_array($startup->open_roles) ? $startup->open_roles : [];
+        $stageMap = [
+            'idea'     => 'Idea',
+            'mvp'      => 'MVP',
+            'pre_seed' => 'Pre-Seed',
+            'seed'     => 'Seed',
+            'series_a' => 'Series A'
+        ];
+        $stageLabel = $startup->stage ? ($stageMap[strtolower($startup->stage)] ?? ucwords(str_replace('_', ' ', $startup->stage))) : null;
+
         $teamStageBlock = [
             'teamSize'    => $startup->team_size ?? 1,
-            'stage'       => $startup->stage ? strtoupper($startup->stage) : null,
-            'industry'    => $startup->industry,
+            'stage'       => $stageLabel,
+            'industry'    => $primaryLabel,
             'hiringCount' => count($openRoles)
         ];
 
