@@ -190,7 +190,10 @@ class CardTransformerService
         }
 
         // Industry Object (CON-60)
-        $industryDisplay = collect([$startup->industry, $startup->secondary_industry ?? null])->filter()->implode(' · ');
+        $primaryLabel = $this->resolveLabel($startup->industry);
+        $secondaryLabel = $this->resolveLabel($startup->secondary_industry);
+        
+        $industryDisplay = collect([$primaryLabel, $secondaryLabel])->filter()->implode(' · ');
         $industryBlock = [
             'primary'   => $startup->industry,
             'secondary' => $startup->secondary_industry ?? null,
@@ -369,6 +372,30 @@ class CardTransformerService
 
         return $badges;
     }
+
+    /**
+     * Helper to resolve a single slug value to its human-readable label using OnboardingOption.
+     */
+    private function resolveLabel(?string $slug): ?string
+    {
+        if (!$slug) return null;
+
+        if (isset($this->optionLabelCache[$slug])) {
+            return $this->optionLabelCache[$slug];
+        }
+
+        $opt = OnboardingOption::where('value', $slug)->first(['value', 'label']);
+        if ($opt) {
+            $labelArray = is_array($opt->label) ? $opt->label : json_decode($opt->label, true);
+            $labelStr = $labelArray['en'] ?? $labelArray['id'] ?? $opt->value;
+            $this->optionLabelCache[$slug] = $labelStr;
+            return $labelStr;
+        }
+
+        // Fallback: hapus underscore dan kapitalisasi
+        return ucwords(str_replace('_', ' ', $slug));
+    }
+
 
     private function buildSkills(User $user): array
     {
