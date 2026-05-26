@@ -14,7 +14,8 @@ class SwipeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'to_user_id' => 'required|uuid|exists:users,id',
+            'to_user_id'     => 'required|uuid|exists:users,id',
+            'viewer_context' => 'nullable|in:talent,startup',
         ];
     }
 

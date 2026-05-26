@@ -12,6 +12,7 @@ use OpenApi\Attributes as OA;
     required: ['to_user_id'],
     properties: [
         new OA\Property(property: 'to_user_id', type: 'string', format: 'uuid', example: '550e8400-e29b-41d4-a716-446655440000', description: 'UUID of the user to swipe on'),
+        new OA\Property(property: 'viewer_context', type: 'string', enum: ['talent', 'startup'], example: 'talent', description: 'The context mode of the swiping user. Defaults to talent.', nullable: true),
     ]
 )]
 #[OA\Post(
@@ -79,9 +80,10 @@ class SwipeController extends Controller
     public function connect(SwipeRequest $request)
     {
         try {
-            $result  = $this->swipeService->connect(
+            $result = $this->swipeService->connect(
                 $request->user()->id,
-                $request->validated('to_user_id')
+                $request->validated('to_user_id'),
+                $request->validated('viewer_context', 'talent') // Default: talent mode
             );
 
             return response()->json([
@@ -102,7 +104,8 @@ class SwipeController extends Controller
         try {
             $result = $this->swipeService->skip(
                 $request->user()->id,
-                $request->validated('to_user_id')
+                $request->validated('to_user_id'),
+                $request->validated('viewer_context', 'talent')
             );
 
             return response()->json([

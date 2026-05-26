@@ -38,12 +38,12 @@ class SwipeService
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      */
-    public function connect(string $fromUserId, string $targetUserId): array
+    public function connect(string $fromUserId, string $targetUserId, string $viewerContext = 'talent'): array
     {
         $this->guardSelfSwipe($fromUserId, $targetUserId);
 
         // Run DB operations in transaction (excluding job dispatch — see below)
-        $result = DB::transaction(function () use ($fromUserId, $targetUserId) {
+        $result = DB::transaction(function () use ($fromUserId, $targetUserId, $viewerContext) {
 
             // 1. Prevent duplicate — if already swiped, return existing result
             $existing = Like::where('from_user_id', $fromUserId)
@@ -51,7 +51,7 @@ class SwipeService
                             ->first();
 
             if ($existing) {
-                return $this->buildConnectResult($existing->is_mutual, $fromUserId, $targetUserId);
+                return $this->buildConnectResult($existing->is_mutual, $fromUserId, $targetUserId, $viewerContext);
             }
 
             // 2. Check if target already connected to us (mutual)
@@ -62,12 +62,13 @@ class SwipeService
 
             $isMutual = $reverseLike !== null;
 
-            // 3. Persist the new like
+            // 3. Persist the new like (with context)
             Like::create([
-                'from_user_id' => $fromUserId,
-                'to_user_id'   => $targetUserId,
-                'type'         => Like::TYPE_CONNECT,
-                'is_mutual'    => $isMutual,
+                'from_user_id'   => $fromUserId,
+                'to_user_id'     => $targetUserId,
+                'type'           => Like::TYPE_CONNECT,
+                'is_mutual'      => $isMutual,
+                'viewer_context' => $viewerContext,
             ]);
 
             $match = null;
@@ -76,8 +77,8 @@ class SwipeService
                 // 4a. Mark the reverse like as mutual too
                 $reverseLike->update(['is_mutual' => true]);
 
-                // 4b. Create match + conversation atomically
-                $match = $this->createMatchAndConversation($fromUserId, $targetUserId);
+                // 4b. Create match + conversation atomically (pass context)
+                $match = $this->createMatchAndConversation($fromUserId, $targetUserId, $viewerContext);
 
                 // 4c. Invalidate feed cache for both users
                 app(FeedService::class)->invalidateUserFeedCache($fromUserId);
@@ -143,14 +144,14 @@ class SwipeService
      *
      * @throws \InvalidArgumentException
      */
-    public function skip(string $fromUserId, string $targetUserId): array
+    public function skip(string $fromUserId, string $targetUserId, string $viewerContext = 'talent'): array
     {
         $this->guardSelfSwipe($fromUserId, $targetUserId);
 
         // Idempotent — if already skipped/connected, do nothing
         Like::firstOrCreate(
             ['from_user_id' => $fromUserId, 'to_user_id' => $targetUserId],
-            ['type' => Like::TYPE_SKIP, 'is_mutual' => false]
+            ['type' => Like::TYPE_SKIP, 'is_mutual' => false, 'viewer_context' => $viewerContext]
         );
 
         // Remove target from feed cache
@@ -205,7 +206,7 @@ class SwipeService
     /**
      * Create the UserMatch record and its associated Conversation.
      */
-    private function createMatchAndConversation(string $userA, string $userB): UserMatch
+    private function createMatchAndConversation(string $userA, string $userB, string $viewerContext = 'talent'): UserMatch
     {
         $conversation = Conversation::create(['last_message_at' => now()]);
         $conversation->participants()->attach([$userA, $userB]);
@@ -216,6 +217,7 @@ class SwipeService
             'status'          => 'active',
             'matched_at'      => now(),
             'conversation_id' => $conversation->id,
+            'viewer_context'  => $viewerContext, // Store the context that triggered this match
         ]);
     }
 
@@ -223,7 +225,7 @@ class SwipeService
      * Build the connect response when a duplicate swipe is detected.
      * We look up whether a match already exists for them.
      */
-    private function buildConnectResult(bool $isMutual, string $fromUserId, string $targetUserId): array
+    private function buildConnectResult(bool $isMutual, string $fromUserId, string $targetUserId, string $viewerContext = 'talent'): array
     {
         $match = null;
 

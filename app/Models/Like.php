@@ -21,16 +21,22 @@ class Like extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
+    // Context constants
+    public const CONTEXT_TALENT  = 'talent';
+    public const CONTEXT_STARTUP = 'startup';
+
     protected $fillable = [
         'from_user_id',
         'to_user_id',
         'is_mutual',
         'type',
+        'viewer_context',
     ];
 
     protected $casts = [
-        'is_mutual' => 'boolean',
-        'type'      => 'string',
+        'is_mutual'      => 'boolean',
+        'type'           => 'string',
+        'viewer_context' => 'string',
     ];
 
     // ─── Relationships ────────────────────────────────────────────────────────

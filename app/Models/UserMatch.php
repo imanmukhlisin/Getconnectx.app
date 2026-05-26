@@ -21,6 +21,7 @@ class UserMatch extends Model
         'matched_at',
         'expires_at',
         'conversation_id',
+        'viewer_context',
     ];
 
     protected $casts = [

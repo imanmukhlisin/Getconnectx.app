@@ -234,10 +234,7 @@ class FilterBuilderService
         $city = $locFilter['city'] ?? null;
 
         if ($city) {
-            if (!in_array($city, CityCatalog::values())) {
-                throw new \InvalidArgumentException("Unknown city: {$city}");
-            }
-            $query->where("{$table}.city", $city);
+            $query->where("{$table}.city", 'ILIKE', "%{$city}%"); // Pencarian fleksibel tanpa validasi kaku
         }
 
         if ($lat && $lng) {

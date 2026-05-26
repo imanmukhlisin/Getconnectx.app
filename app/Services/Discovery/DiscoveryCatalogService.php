@@ -78,11 +78,11 @@ class DiscoveryCatalogService
                 'mode' => $mode,
                 'city' => [
                     'id'          => 'q_city',
-                    'type'        => 'searchable_dropdown',
+                    'type'        => 'searchable_dropdown', // Sama persis kayak tipe di onboarding
                     'placeholder' => 'Search a city',
                     'required'    => true,
                     'meta'        => ['searchable' => true],
-                    'options'     => CityCatalog::all(),
+                    'options'     => [], // DIKOSONGIN BIAR FE PAKE LIBRARY 23 RIBU MEREKA!
                 ],
                 'industries'   => $fetchOnboardingOptions($industryQ, 'Industries'),
                 'roles'        => $fetchOnboardingOptions($roleQ, 'Co-Founder Type / Skill Strength'),
@@ -121,11 +121,7 @@ class DiscoveryCatalogService
         }
 
         if ($type === 'city') {
-            $validIds = collect(\App\Services\Discovery\CityCatalog::all())->pluck('value')->toArray();
-            $invalid = array_diff($ids, $validIds);
-            if (!empty($invalid)) {
-                throw new \InvalidArgumentException("Unknown {$type} IDs: " . implode(', ', $invalid));
-            }
+            // Validasi DIMATIKAN! FE bebas kirim kota apapun dari Library 23ribu mereka!
             return;
         }
 

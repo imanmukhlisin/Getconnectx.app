@@ -39,16 +39,30 @@ class MessageController extends Controller
         }
         $viewerContext = $ctxResult['context'];
 
+        // ── CON-72 Extension: Filter conversations by context ────────────────
+        // Get only conversation_ids from matches with the correct viewer_context.
+        // This FULLY SEPARATES "Talent tab" chats from "Startup tab" chats.
+        $contextConversationIds = \App\Models\UserMatch::where(function ($q) use ($authUser) {
+                $q->where('user_id', $authUser->id)
+                  ->orWhere('matched_user_id', $authUser->id);
+            })
+            ->where('viewer_context', $viewerContext)
+            ->whereNotNull('conversation_id')
+            ->pluck('conversation_id')
+            ->toArray();
+
         $conversations = $authUser->conversations()
+            ->whereIn('conversations.id', $contextConversationIds) // ONLY chats from this context
             ->with([
-                'participants' => fn ($q) => $q->where('users.id', '!=', $authUser->id)->with('tokens'),
+                'participants' => fn ($q) => $q->where('users.id', '!=', $authUser->id)
+                                               ->with(['tokens', 'startup']),
                 'lastMessage.sender:id,name',
                 'participantPivot' => fn ($q) => $q->where('user_id', $authUser->id),
             ])
             ->orderBy('last_message_at', 'desc')
             ->paginate($limit, ['*'], 'page', $page);
 
-        $mapped = $conversations->map(function ($conv) use ($authUser) {
+        $mapped = $conversations->map(function ($conv) use ($authUser, $viewerContext) {
             $other = $conv->participants->first(); // the non-auth participant
 
             if (!$other) {
@@ -71,15 +85,26 @@ class MessageController extends Controller
 
             $lastMsg = $conv->lastMessage;
 
+            // Context-aware display: talent → show Startup entity, startup → show Talent/Builder
+            $displayName     = $other->name;
+            $displayAvatar   = $other->avatar_url;
+            $displayHeadline = $other->position;
+
+            if ($viewerContext === 'talent' && $other->startup) {
+                $displayName     = $other->startup->name;
+                $displayAvatar   = $other->startup->logo_url ?? $other->avatar_url;
+                $displayHeadline = $other->startup->tagline ?? $other->position;
+            }
+
             return [
                 'id'         => $conv->id,
                 'match_id'   => null, // enriched via UserMatch if needed later
                 'other_user' => [
                     'user_id'    => $other->id,
-                    'name'       => $other->name,
+                    'name'       => $displayName,
                     'email'      => $other->email,
-                    'avatar_url' => $other->avatar_url,
-                    'headline'   => $other->position,
+                    'avatar_url' => $displayAvatar,
+                    'headline'   => $displayHeadline,
                     'is_online'  => $isOnline,
                 ],
                 'last_message'  => $lastMsg ? [
