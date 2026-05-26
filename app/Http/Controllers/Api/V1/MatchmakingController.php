@@ -38,6 +38,7 @@ class MatchmakingController extends Controller
                 $query->where('user_id', $userId)
                       ->orWhere('matched_user_id', $userId);
             })
+            ->where('viewer_context', $viewerContext) // CON-72: Filter active matches list by context
             ->where('status', 'active')
             ->orderBy('matched_at', 'desc')
             ->paginate($limit, ['*'], 'page', $page);
@@ -80,11 +81,21 @@ class MatchmakingController extends Controller
             ];
         });
 
-        // Resolve "likesYou" data
-        $totalNewLikes = Like::connects()->where('to_user_id', $userId)->where('is_mutual', false)->count();
+        // Resolve "likesYou" context mapping
+        // Startup mode expects likes sent from Talent mode ('talent')
+        // Talent mode expects likes sent from Startup mode ('startup') or co-founder swipes ('talent')
+        $incomingContexts = $viewerContext === 'startup' ? ['talent'] : ['startup', 'talent'];
+
+        $totalNewLikes = Like::connects()
+            ->where('to_user_id', $userId)
+            ->whereIn('viewer_context', $incomingContexts)
+            ->where('is_mutual', false)
+            ->count();
+
         $topLikes      = Like::with('fromUser')
                             ->connects()
                             ->where('to_user_id', $userId)
+                            ->whereIn('viewer_context', $incomingContexts)
                             ->where('is_mutual', false)
                             ->latest()
                             ->take(3)
@@ -127,15 +138,25 @@ class MatchmakingController extends Controller
      */
     public function likesYouList(Request $request)
     {
-        $userId = $request->user()->id;
-        $limit  = (int) $request->query('limit', 10);
-        $page   = (int) $request->query('page', 1);
+        $authUser = $request->user();
+        $userId   = $authUser->id;
+        $limit    = (int) $request->query('limit', 10);
+        $page     = (int) $request->query('page', 1);
 
-        $isLocked = !$request->user()->is_pro;
+        // Resolve viewer_context to separate incoming likes
+        $ctxResult = $this->viewerContextService->resolve($authUser, $request->query('viewer_context'));
+        if ($ctxResult instanceof \Illuminate\Http\JsonResponse) {
+            return $ctxResult; // 409 DISCOVERY_ONBOARDING_REQUIRED
+        }
+        $viewerContext = $ctxResult['context'];
+        $incomingContexts = $viewerContext === 'startup' ? ['talent'] : ['startup', 'talent'];
+
+        $isLocked = !$authUser->is_pro;
 
         $paginator = Like::with('fromUser')
             ->connects()
             ->where('to_user_id', $userId)
+            ->whereIn('viewer_context', $incomingContexts)
             ->where('is_mutual', false)
             ->latest()
             ->paginate($limit, ['*'], 'page', $page);
