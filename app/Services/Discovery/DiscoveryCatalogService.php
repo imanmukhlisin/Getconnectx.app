@@ -38,25 +38,34 @@ class DiscoveryCatalogService
 
                     $result = [];
                     foreach ($grouped as $groupName => $items) {
+                        $optionsMapped = $items->unique('value')->map(function ($opt) {
+                            $labelStr = $opt->label ?? '';
+                            $labels = json_decode($labelStr, true);
+                            
+                            $displayName = $opt->value;
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($labels)) {
+                                $displayName = $labels['id'] ?? $labels['en'] ?? $opt->value;
+                            }
+
+                            return [
+                                'id'    => $opt->value,
+                                'label' => $displayName,
+                            ];
+                        })->values()->toArray();
+
+                        // Sort options inside group alphabetically by label
+                        usort($optionsMapped, fn($a, $b) => strcasecmp($a['label'], $b['label']));
+
                         $result[] = [
                             'id'      => 'grp_' . \Illuminate\Support\Str::slug($groupName, '_'),
                             'label'   => $groupName,
-                            'options' => $items->unique('value')->map(function ($opt) {
-                                $labelStr = $opt->label ?? '';
-                                $labels = json_decode($labelStr, true);
-                                
-                                $displayName = $opt->value;
-                                if (json_last_error() === JSON_ERROR_NONE && is_array($labels)) {
-                                    $displayName = $labels['id'] ?? $labels['en'] ?? $opt->value;
-                                }
-
-                                return [
-                                    'id'    => $opt->value,
-                                    'label' => $displayName,
-                                ];
-                            })->values()->toArray(),
+                            'options' => $optionsMapped,
                         ];
                     }
+
+                    // Sort catalog groups alphabetically by group label
+                    usort($result, fn($a, $b) => strcasecmp($a['label'], $b['label']));
+
                     return $result;
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error("Discovery Filter Error: " . $e->getMessage());
@@ -78,11 +87,11 @@ class DiscoveryCatalogService
                 'mode' => $mode,
                 'city' => [
                     'id'          => 'q_city',
-                    'type'        => 'searchable_dropdown', // Sama persis kayak tipe di onboarding
+                    'type'        => 'searchable_dropdown', // Same as onboarding
                     'placeholder' => 'Search a city',
                     'required'    => true,
                     'meta'        => ['searchable' => true],
-                    'options'     => [], // DIKOSONGIN BIAR FE PAKE LIBRARY 23 RIBU MEREKA!
+                    'options'     => [], // Leave empty so FE uses their 23,000+ local global city search dataset!
                 ],
                 'industries'   => $fetchOnboardingOptions($industryQ, 'Industries'),
                 'roles'        => $fetchOnboardingOptions($roleQ, 'Co-Founder Type / Skill Strength'),

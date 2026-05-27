@@ -15,12 +15,17 @@ class CityCatalog
     public static function all(): array
     {
         $raw = self::raw();
-        return array_map(fn($r) => [
+        $cities = array_map(fn($r) => [
             'id'    => 'opt_city_' . $r[1],
             'label' => $r[0],
             'value' => $r[1],
             'group' => $r[2],
         ], $raw);
+
+        // Sort alphabetically by city name (label)
+        usort($cities, fn($a, $b) => strcasecmp($a['label'], $b['label']));
+
+        return $cities;
     }
 
     /**
