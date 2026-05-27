@@ -317,7 +317,92 @@ Route::prefix('v1')->group(function () {
     Route::get('public-test-analysis/{matchId}', function ($matchId) {
         $match = \App\Models\UserMatch::with(['analysis', 'user', 'matchedUser'])->findOrFail($matchId);
         $otherUser = $match->user;
+        $authUser = $match->matchedUser; // mock auth user
         
+        $rawAnalysis = $match->analysis ? collect($match->analysis->analysis_json)->toArray() : [];
+        $isUserA = $match->user_id === $authUser->id;
+        $compatibilityScore = (int) ($rawAnalysis['compatibilityScore'] ?? 0);
+        $label = $rawAnalysis['gradeLabel'] ?? 'Good Fit';
+        $subtitle = "You & " . $otherUser->name;
+
+        // 1. Skill Complementarity
+        $skills = $rawAnalysis['skillComplementarity'] ?? [];
+        $youBring = $isUserA ? ($skills['youBring'] ?? []) : ($skills['theyBring'] ?? []);
+        $theyBring = $isUserA ? ($skills['theyBring'] ?? []) : ($skills['youBring'] ?? []);
+        
+        $skillComplementarity = [
+            'title'     => 'Skill Complementarity',
+            'youBring'  => $youBring,
+            'theyBring' => $theyBring,
+            'summary'   => $rawAnalysis['insight'] ?? 'Your skills complement each other well.'
+        ];
+
+        // 2. Startup Vision Alignment
+        $vision = $rawAnalysis['startupVisionAlignment'] ?? [];
+        $startupVisionAlignment = [
+            'title'           => 'Startup Vision Alignment',
+            'sharedInterests' => $vision['overlappingInterests'] ?? []
+        ];
+
+        // 3. Commitment Compatibility
+        $commitment = $rawAnalysis['commitmentCompatibility'] ?? [];
+        $youCommitment = $isUserA ? ($commitment['userA'] ?? null) : ($commitment['userB'] ?? null);
+        $themCommitment = $isUserA ? ($commitment['userB'] ?? null) : ($commitment['userA'] ?? null);
+        
+        $commitmentCompatibility = [
+            'title' => 'Commitment Compatibility',
+            'you'   => $youCommitment ? ucfirst(str_replace('_', ' ', $youCommitment)) : 'Flexible',
+            'them'  => $themCommitment ? ucfirst(str_replace('_', ' ', $themCommitment)) : 'Flexible'
+        ];
+
+        // 4. Work Style
+        $workStyleRaw = $rawAnalysis['workStyle'] ?? [];
+        $traits = $workStyleRaw['sharedTraits'] ?? [];
+        if (empty($traits)) {
+            $traits = ['Experimental', 'Fast Builder'];
+        }
+        $workStyle = [
+            'title'  => 'Work Style',
+            'traits' => $traits
+        ];
+
+        // 5. Potential Risks
+        $risksRaw = $rawAnalysis['potentialRisks'] ?? [];
+        $potentialRisks = [
+            'title' => 'Potential Risks',
+            'items' => is_array($risksRaw) && !empty($risksRaw) ? $risksRaw : ['Different commitment stages possible']
+        ];
+
+        // 6. Suggested Roles
+        $roles = $rawAnalysis['suggestedRoles'] ?? [];
+        $youRole = $isUserA ? ($roles['userA'] ?? '') : ($roles['userB'] ?? '');
+        $themRole = $isUserA ? ($roles['userB'] ?? '') : ($roles['userA'] ?? '');
+        
+        $suggestedRoles = [
+            'title' => 'Suggested Roles',
+            'you'   => $youRole ? strtoupper($youRole) : 'CEO',
+            'them'  => $themRole ? strtoupper($themRole) : 'CTO'
+        ];
+
+        // 7. Suggested Team Structure
+        $suggestedTeamStructure = [
+            'title' => 'Suggested Team Structure',
+            'roles' => ['CEO', 'CTO', 'Product Designer', 'Growth Marketer']
+        ];
+
+        $transformedAnalysis = [
+            'compatibilityScore'      => $compatibilityScore,
+            'label'                   => $label,
+            'subtitle'                => $subtitle,
+            'skillComplementarity'    => $skillComplementarity,
+            'startupVisionAlignment'  => $startupVisionAlignment,
+            'commitmentCompatibility' => $commitmentCompatibility,
+            'workStyle'               => $workStyle,
+            'potentialRisks'          => $potentialRisks,
+            'suggestedRoles'          => $suggestedRoles,
+            'suggestedTeamStructure'  => $suggestedTeamStructure
+        ];
+
         return response()->json([
             'success' => true,
             'message' => 'Match analysis fetched successfully',
@@ -334,7 +419,7 @@ Route::prefix('v1')->group(function () {
                     'headline' => $otherUser->position,
                     'location' => 'Indonesia',
                 ],
-                'analysis' => $match->analysis ? collect($match->analysis->analysis_json)->toArray() : null
+                'analysis' => $transformedAnalysis
             ]
         ]);
     })->name('public-test-analysis');
