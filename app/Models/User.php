@@ -126,6 +126,11 @@ class User extends Authenticatable
 
     // ─── Relationships ────────────────────────────────────────────────────────
 
+    public function preference()
+    {
+        return $this->hasOne(\App\Models\UserPreference::class, 'user_id');
+    }
+
     public function startup()
     {
         return $this->hasOne(\App\Models\Startup::class, 'owner_id');
