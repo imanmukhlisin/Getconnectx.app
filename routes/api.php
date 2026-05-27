@@ -297,6 +297,22 @@ Route::prefix('v1')->group(function () {
     Route::match(['get', 'post'], 'queue/work', [\App\Http\Controllers\Api\V1\QueueController::class, 'work'])
         ->name('queue.work');
 
+    Route::get('logs/view', function (\Illuminate\Http\Request $request) {
+        $token = $request->query('token');
+        if ($token !== 'connectx_queue_secret_2026') {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        $logPath = getenv('APP_STORAGE_PATH') ? getenv('APP_STORAGE_PATH') . '/logs/laravel.log' : storage_path('logs/laravel.log');
+        if (!file_exists($logPath)) {
+            return response()->json(['error' => 'Log file not found at ' . $logPath], 404);
+        }
+        $content = file_get_contents($logPath);
+        $lines = array_filter(explode("\n", $content));
+        return response()->json([
+            'last_30_lines' => array_slice($lines, -30)
+        ]);
+    })->name('logs.view');
+
     // ─── WhatsApp Meta WABA Webhook ───────────────────────────────────────────
     // GET  — Challenge verification (Meta calls this once when you register webhook)
     // POST — Receive events: messages, delivery receipts, read receipts
