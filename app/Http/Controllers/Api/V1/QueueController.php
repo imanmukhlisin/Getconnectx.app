@@ -31,7 +31,6 @@ class QueueController extends Controller
             Artisan::call('queue:work', [
                 '--stop-when-empty' => true,
                 '--max-jobs'        => 30, // Processes up to 30 jobs
-                '--time-limit'      => 20, // Stop after 20 seconds to prevent Vercel timeout (default max 60s)
             ]);
             $output = Artisan::output();
 
