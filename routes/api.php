@@ -293,6 +293,10 @@ Route::prefix('v1')->group(function () {
             ->name('webhooks.revenuecat');
     });
 
+    // ─── Queue Serverless Webhook (Vercel) ────────────────────────────────────
+    Route::post('queue/work', [\App\Http\Controllers\Api\V1\QueueController::class, 'work'])
+        ->name('queue.work');
+
     // ─── WhatsApp Meta WABA Webhook ───────────────────────────────────────────
     // GET  — Challenge verification (Meta calls this once when you register webhook)
     // POST — Receive events: messages, delivery receipts, read receipts

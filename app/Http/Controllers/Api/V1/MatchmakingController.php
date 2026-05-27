@@ -38,7 +38,14 @@ class MatchmakingController extends Controller
                 $query->where('user_id', $userId)
                       ->orWhere('matched_user_id', $userId);
             })
-            ->where('viewer_context', $viewerContext) // CON-72: Filter active matches list by context
+            ->where(function($q) use ($viewerContext) {
+                if ($viewerContext === 'talent') {
+                    $q->where('viewer_context', 'talent')
+                      ->orWhereNull('viewer_context'); // Legacy fallback
+                } else {
+                    $q->where('viewer_context', 'startup');
+                }
+            })
             ->where('status', 'active')
             ->orderBy('matched_at', 'desc')
             ->paginate($limit, ['*'], 'page', $page);
@@ -88,14 +95,24 @@ class MatchmakingController extends Controller
 
         $totalNewLikes = Like::connects()
             ->where('to_user_id', $userId)
-            ->whereIn('viewer_context', $incomingContexts)
+            ->where(function($q) use ($incomingContexts) {
+                $q->whereIn('viewer_context', $incomingContexts);
+                if (in_array('talent', $incomingContexts)) {
+                    $q->orWhereNull('viewer_context'); // Legacy fallback
+                }
+            })
             ->where('is_mutual', false)
             ->count();
 
         $topLikes      = Like::with('fromUser')
                             ->connects()
                             ->where('to_user_id', $userId)
-                            ->whereIn('viewer_context', $incomingContexts)
+                            ->where(function($q) use ($incomingContexts) {
+                                $q->whereIn('viewer_context', $incomingContexts);
+                                if (in_array('talent', $incomingContexts)) {
+                                    $q->orWhereNull('viewer_context'); // Legacy fallback
+                                }
+                            })
                             ->where('is_mutual', false)
                             ->latest()
                             ->take(3)
@@ -156,7 +173,12 @@ class MatchmakingController extends Controller
         $paginator = Like::with('fromUser')
             ->connects()
             ->where('to_user_id', $userId)
-            ->whereIn('viewer_context', $incomingContexts)
+            ->where(function($q) use ($incomingContexts) {
+                $q->whereIn('viewer_context', $incomingContexts);
+                if (in_array('talent', $incomingContexts)) {
+                    $q->orWhereNull('viewer_context'); // Legacy fallback
+                }
+            })
             ->where('is_mutual', false)
             ->latest()
             ->paginate($limit, ['*'], 'page', $page);
@@ -243,6 +265,17 @@ class MatchmakingController extends Controller
         // Security Validation Ownership
         if ($match->user_id !== $userId && $match->matched_user_id !== $userId) {
             return response()->json(['success' => false, 'message' => 'Unauthorized access to this match.'], 403);
+        }
+
+        // ── CON-72 Fallback: If analysis is missing (e.g., queue worker not running), generate it inline ──
+        if (!$match->analysis) {
+            try {
+                $job = new \App\Jobs\GenerateMatchAnalysisJob($match->id, $match->user_id, $match->matched_user_id);
+                $job->handle();
+                $match->refresh(); // Load newly generated analysis
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to generate match analysis inline: " . $e->getMessage());
+            }
         }
 
         if (!$match->analysis) {

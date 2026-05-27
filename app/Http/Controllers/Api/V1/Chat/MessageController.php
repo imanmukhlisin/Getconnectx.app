@@ -46,7 +46,14 @@ class MessageController extends Controller
                 $q->where('user_id', $authUser->id)
                   ->orWhere('matched_user_id', $authUser->id);
             })
-            ->where('viewer_context', $viewerContext)
+            ->where(function ($q) use ($viewerContext) {
+                if ($viewerContext === 'talent') {
+                    $q->where('viewer_context', 'talent')
+                      ->orWhereNull('viewer_context'); // Legacy fallback
+                } else {
+                    $q->where('viewer_context', 'startup');
+                }
+            })
             ->whereNotNull('conversation_id')
             ->pluck('conversation_id')
             ->toArray();

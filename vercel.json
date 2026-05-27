@@ -55,5 +55,11 @@
       "src": "/(.*)",
       "dest": "/api/index.php"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/v1/queue/work?token=connectx_queue_secret_2026",
+      "schedule": "* * * * *"
+    }
   ]
 }
