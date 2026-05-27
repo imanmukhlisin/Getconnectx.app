@@ -313,6 +313,32 @@ Route::prefix('v1')->group(function () {
         ]);
     })->name('logs.view');
 
+    // ─── Temporary Public Debug Endpoint for Mobile Team JSON Inspection ──────
+    Route::get('public-test-analysis/{matchId}', function ($matchId) {
+        $match = \App\Models\UserMatch::with(['analysis', 'user', 'matchedUser'])->findOrFail($matchId);
+        $otherUser = $match->user;
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Match analysis fetched successfully',
+            'data'    => [
+                'viewer_context'  => $match->viewer_context ?? 'talent',
+                'matchId'        => $match->id,
+                'conversationId' => $match->conversation_id,
+                'status'         => $match->status,
+                'generatedAt'    => $match->analysis->generated_at ?? $match->analysis->created_at ?? null,
+                'user'           => [
+                    'userId'   => $otherUser->id,
+                    'name'     => $otherUser->name,
+                    'photoUrl' => $otherUser->avatar_url,
+                    'headline' => $otherUser->position,
+                    'location' => 'Indonesia',
+                ],
+                'analysis' => $match->analysis ? collect($match->analysis->analysis_json)->toArray() : null
+            ]
+        ]);
+    })->name('public-test-analysis');
+
     // ─── WhatsApp Meta WABA Webhook ───────────────────────────────────────────
     // GET  — Challenge verification (Meta calls this once when you register webhook)
     // POST — Receive events: messages, delivery receipts, read receipts

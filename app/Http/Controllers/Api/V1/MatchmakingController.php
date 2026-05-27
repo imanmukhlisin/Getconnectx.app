@@ -77,9 +77,9 @@ class MatchmakingController extends Controller
                     'location' => 'Indonesia',
                 ],
                 'fitSummary' => $fitScore ? [
-                    'score'   => $fitScore->overall_score ?? 0,
-                    'label'   => $fitScore->grade_label ?? 'Good Match',
-                    'insight' => $fitScore->summary_insight ?? 'Great team alignment.'
+                    'score'   => $fitScore->score ?? 0,
+                    'label'   => $fitScore->label ?? 'Good Match',
+                    'insight' => $fitScore->insight ?? 'Great team alignment.'
                 ] : null,
                 'actions' => [
                     'canChat'         => true,
