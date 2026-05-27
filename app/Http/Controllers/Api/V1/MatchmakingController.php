@@ -33,7 +33,7 @@ class MatchmakingController extends Controller
         }
         $viewerContext = $ctxResult['context'];
 
-        $paginator = UserMatch::with(['scores', 'user', 'matchedUser'])
+        $paginator = UserMatch::with(['scores', 'user.startup', 'matchedUser.startup'])
             ->where(function($query) use ($userId) {
                 $query->where('user_id', $userId)
                       ->orWhere('matched_user_id', $userId);
@@ -51,7 +51,7 @@ class MatchmakingController extends Controller
             ->paginate($limit, ['*'], 'page', $page);
 
         // Map to standard output
-        $items = $paginator->getCollection()->map(function ($match) use ($userId) {
+        $items = $paginator->getCollection()->map(function ($match) use ($userId, $viewerContext) {
             $otherUser = $match->user_id === $userId ? $match->matchedUser : $match->user;
             
             // Calculate expiry dynamically
@@ -59,6 +59,27 @@ class MatchmakingController extends Controller
             $expiresInDays = max(0, (int) now()->diffInDays($expiresAt, false));
 
             $fitScore = $match->scores->first();
+
+            $displayName     = $otherUser->name;
+            $displayAvatar   = $otherUser->avatar_url;
+            $displayHeadline = $otherUser->position;
+            
+            $location = 'Location not set';
+            if ($viewerContext === 'talent' && $otherUser->startup) {
+                $displayName     = $otherUser->startup->name;
+                $displayAvatar   = $otherUser->startup->logo_url ?? $otherUser->avatar_url;
+                $displayHeadline = $otherUser->startup->tagline ?? $otherUser->position;
+                if ($otherUser->startup->city) {
+                    $location = trim($otherUser->startup->city . ', ' . $otherUser->startup->country, ', ');
+                }
+            } else {
+                if ($otherUser->city) {
+                    $location = trim($otherUser->city . ', ' . $otherUser->country, ', ');
+                }
+            }
+            if (empty($location) || $location === 'Location not set') {
+                $location = 'Indonesia';
+            }
 
             return [
                 'matchId'        => $match->id,
@@ -71,10 +92,10 @@ class MatchmakingController extends Controller
                 'conversationId' => $match->conversation_id,
                 'user' => [
                     'userId'   => $otherUser->id,
-                    'name'     => $otherUser->name,
-                    'photoUrl' => $otherUser->avatar_url,
-                    'headline' => $otherUser->position,
-                    'location' => 'Indonesia',
+                    'name'     => $displayName,
+                    'photoUrl' => $displayAvatar,
+                    'headline' => $displayHeadline,
+                    'location' => $location,
                 ],
                 'fitSummary' => $fitScore ? [
                     'score'   => $fitScore->score ?? 0,
@@ -170,7 +191,7 @@ class MatchmakingController extends Controller
 
         $isLocked = !$authUser->is_pro;
 
-        $paginator = Like::with('fromUser')
+        $paginator = Like::with('fromUser.startup')
             ->connects()
             ->where('to_user_id', $userId)
             ->where(function($q) use ($incomingContexts) {
@@ -183,20 +204,38 @@ class MatchmakingController extends Controller
             ->latest()
             ->paginate($limit, ['*'], 'page', $page);
 
-        $items = $paginator->getCollection()->map(function ($like) {
+        $items = $paginator->getCollection()->map(function ($like) use ($viewerContext) {
+            $otherUser = $like->fromUser;
+            
+            $displayName     = $otherUser->name;
+            $displayAvatar   = $otherUser->avatar_url;
+            $displayHeadline = $otherUser->position;
+            
             $location = 'Location not set';
-            if ($like->fromUser->city) {
-                $location = trim($like->fromUser->city . ', ' . $like->fromUser->country, ', ');
+            if ($viewerContext === 'talent' && $otherUser->startup) {
+                $displayName     = $otherUser->startup->name;
+                $displayAvatar   = $otherUser->startup->logo_url ?? $otherUser->avatar_url;
+                $displayHeadline = $otherUser->startup->tagline ?? $otherUser->position;
+                if ($otherUser->startup->city) {
+                    $location = trim($otherUser->startup->city . ', ' . $otherUser->startup->country, ', ');
+                }
+            } else {
+                if ($otherUser->city) {
+                    $location = trim($otherUser->city . ', ' . $otherUser->country, ', ');
+                }
+            }
+            if (empty($location) || $location === 'Location not set') {
+                $location = 'Indonesia';
             }
 
             return [
                 'likeId'  => $like->id,
                 'likedAt' => $like->created_at,
                 'user'    => [
-                    'userId'   => $like->fromUser->id,
-                    'name'     => $like->fromUser->name,
-                    'photoUrl' => $like->fromUser->avatar_url,
-                    'headline' => $like->fromUser->position,
+                    'userId'   => $otherUser->id,
+                    'name'     => $displayName,
+                    'photoUrl' => $displayAvatar,
+                    'headline' => $displayHeadline,
                     'location' => $location,
                 ]
             ];
@@ -260,7 +299,7 @@ class MatchmakingController extends Controller
         }
         $viewerContext = $ctxResult['context'];
 
-        $match = UserMatch::with(['analysis', 'user', 'matchedUser'])->findOrFail($matchId);
+        $match = UserMatch::with(['analysis', 'user.startup', 'matchedUser.startup'])->findOrFail($matchId);
 
         // Security Validation Ownership
         if ($match->user_id !== $userId && $match->matched_user_id !== $userId) {
@@ -284,6 +323,27 @@ class MatchmakingController extends Controller
 
         $otherUser = $match->user_id === $userId ? $match->matchedUser : $match->user;
 
+        $displayName     = $otherUser->name;
+        $displayAvatar   = $otherUser->avatar_url;
+        $displayHeadline = $otherUser->position;
+        
+        $location = 'Location not set';
+        if ($viewerContext === 'talent' && $otherUser->startup) {
+            $displayName     = $otherUser->startup->name;
+            $displayAvatar   = $otherUser->startup->logo_url ?? $otherUser->avatar_url;
+            $displayHeadline = $otherUser->startup->tagline ?? $otherUser->position;
+            if ($otherUser->startup->city) {
+                $location = trim($otherUser->startup->city . ', ' . $otherUser->startup->country, ', ');
+            }
+        } else {
+            if ($otherUser->city) {
+                $location = trim($otherUser->city . ', ' . $otherUser->country, ', ');
+            }
+        }
+        if (empty($location) || $location === 'Location not set') {
+            $location = 'Indonesia';
+        }
+
         // Return pure JSON structure as requested (UI-Ready)
         return response()->json([
             'success' => true,
@@ -296,10 +356,10 @@ class MatchmakingController extends Controller
                 'generatedAt'    => $match->analysis->generated_at ?? $match->analysis->created_at,
                 'user'           => [
                     'userId'   => $otherUser->id,
-                    'name'     => $otherUser->name,
-                    'photoUrl' => $otherUser->avatar_url,
-                    'headline' => $otherUser->position,
-                    'location' => 'Indonesia',
+                    'name'     => $displayName,
+                    'photoUrl' => $displayAvatar,
+                    'headline' => $displayHeadline,
+                    'location' => $location,
                 ],
                 'analysis' => $this->transformAnalysis(collect($match->analysis->analysis_json)->toArray(), $match, $authUser, $otherUser)
             ]

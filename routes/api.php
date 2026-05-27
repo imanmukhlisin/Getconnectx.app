@@ -315,7 +315,8 @@ Route::prefix('v1')->group(function () {
 
     // ─── Temporary Public Debug Endpoint for Mobile Team JSON Inspection ──────
     Route::get('public-test-analysis/{matchId}', function ($matchId) {
-        $match = \App\Models\UserMatch::with(['analysis', 'user', 'matchedUser'])->findOrFail($matchId);
+        $match = \App\Models\UserMatch::with(['analysis', 'user.startup', 'matchedUser.startup'])->findOrFail($matchId);
+        $viewerContext = $match->viewer_context ?? 'talent';
         $otherUser = $match->user;
         $authUser = $match->matchedUser; // mock auth user
         
@@ -323,7 +324,29 @@ Route::prefix('v1')->group(function () {
         $isUserA = $match->user_id === $authUser->id;
         $compatibilityScore = (int) ($rawAnalysis['compatibilityScore'] ?? 0);
         $label = $rawAnalysis['gradeLabel'] ?? 'Good Fit';
-        $subtitle = "You & " . $otherUser->name;
+        
+        $displayName     = $otherUser->name;
+        $displayAvatar   = $otherUser->avatar_url;
+        $displayHeadline = $otherUser->position;
+        
+        $location = 'Location not set';
+        if ($viewerContext === 'talent' && $otherUser->startup) {
+            $displayName     = $otherUser->startup->name;
+            $displayAvatar   = $otherUser->startup->logo_url ?? $otherUser->avatar_url;
+            $displayHeadline = $otherUser->startup->tagline ?? $otherUser->position;
+            if ($otherUser->startup->city) {
+                $location = trim($otherUser->startup->city . ', ' . $otherUser->startup->country, ', ');
+            }
+        } else {
+            if ($otherUser->city) {
+                $location = trim($otherUser->city . ', ' . $otherUser->country, ', ');
+            }
+        }
+        if (empty($location) || $location === 'Location not set') {
+            $location = 'Indonesia';
+        }
+        
+        $subtitle = "You & " . $displayName;
 
         // 1. Skill Complementarity
         $skills = $rawAnalysis['skillComplementarity'] ?? [];
@@ -407,17 +430,17 @@ Route::prefix('v1')->group(function () {
             'success' => true,
             'message' => 'Match analysis fetched successfully',
             'data'    => [
-                'viewer_context'  => $match->viewer_context ?? 'talent',
+                'viewer_context'  => $viewerContext,
                 'matchId'        => $match->id,
                 'conversationId' => $match->conversation_id,
                 'status'         => $match->status,
                 'generatedAt'    => $match->analysis->generated_at ?? $match->analysis->created_at ?? null,
                 'user'           => [
                     'userId'   => $otherUser->id,
-                    'name'     => $otherUser->name,
-                    'photoUrl' => $otherUser->avatar_url,
-                    'headline' => $otherUser->position,
-                    'location' => 'Indonesia',
+                    'name'     => $displayName,
+                    'photoUrl' => $displayAvatar,
+                    'headline' => $displayHeadline,
+                    'location' => $location,
                 ],
                 'analysis' => $transformedAnalysis
             ]
