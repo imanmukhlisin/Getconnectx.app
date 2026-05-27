@@ -54,7 +54,7 @@ class GenerateMatchAnalysisJob implements ShouldQueue
         MatchScore::updateOrCreate(
             ['match_id' => $this->matchId],
             [
-                'score'   => $result['finalScore'],
+                'score'   => (int) round($result['finalScore']),
                 'label'   => $result['gradeLabel'],
                 'insight' => $result['insight'],
             ]
