@@ -294,7 +294,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // ─── Queue Serverless Webhook (Vercel) ────────────────────────────────────
-    Route::post('queue/work', [\App\Http\Controllers\Api\V1\QueueController::class, 'work'])
+    Route::match(['get', 'post'], 'queue/work', [\App\Http\Controllers\Api\V1\QueueController::class, 'work'])
         ->name('queue.work');
 
     // ─── WhatsApp Meta WABA Webhook ───────────────────────────────────────────
