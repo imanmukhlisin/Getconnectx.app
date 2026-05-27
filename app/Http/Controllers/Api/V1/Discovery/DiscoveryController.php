@@ -212,6 +212,7 @@ class DiscoveryController extends Controller
     {
         $request->validate([
             'action' => 'required|string|in:like,pass,super_like',
+            'viewer_context' => 'nullable|string|in:talent,startup',
         ]);
 
         // Guard: targetId must be a valid UUID — not a card display ID like "card_xxxx"
@@ -248,10 +249,16 @@ class DiscoveryController extends Controller
             $resolvedUserId = $startup->owner_id;
         }
 
+        // Resolve viewer_context: if passed in body, use it; otherwise infer dynamically.
+        $viewerContext = $request->input('viewer_context');
+        if (!$viewerContext) {
+            $viewerContext = $isStartup ? 'talent' : 'startup';
+        }
+
         try {
             if ($action === 'pass') {
                 // Record skip
-                $this->swipeService->skip($authUser->id, $resolvedUserId);
+                $this->swipeService->skip($authUser->id, $resolvedUserId, $viewerContext);
 
                 return response()->json([
                     'success' => true,
@@ -269,7 +276,7 @@ class DiscoveryController extends Controller
             }
 
             // like or super_like → use connect logic
-            $result = $this->swipeService->connect($authUser->id, $resolvedUserId);
+            $result = $this->swipeService->connect($authUser->id, $resolvedUserId, $viewerContext);
             $isMatch = $result['isMatch'] ?? false;
 
             return response()->json([
