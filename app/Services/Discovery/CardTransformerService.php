@@ -176,7 +176,7 @@ class CardTransformerService
             }
         }
 
-        // Match Block (CON-60)
+        // Match Block
         $matchBlock = null;
         if ($matchResult) {
             $matchBlock = [
@@ -189,24 +189,18 @@ class CardTransformerService
             }
         }
 
-        // Industry Object (CON-60)
+        // Industry Object
         $primaryLabel = $this->resolveLabel($startup->industry);
         $secondaryLabel = $this->resolveLabel($startup->secondary_industry);
         
         $industryDisplay = collect([$primaryLabel, $secondaryLabel])->filter()->implode(' · ');
         $industryBlock = [
-            'primary'   => $startup->industry,
-            'secondary' => $startup->secondary_industry ?? null,
+            'primary'   => $primaryLabel ?? $startup->industry,
+            'secondary' => $secondaryLabel ?? $startup->secondary_industry ?? null,
             'display'   => $industryDisplay ?: null,
         ];
 
-        // Team Object (CON-60)
-        $teamBlock = [
-            'memberCount' => $startup->team_size ?? 1,
-            'display'     => $startup->team_size ? "{$startup->team_size} members" : "1 member",
-        ];
-
-        // TeamStage Object (API-MACHMAKING)
+        // TeamStage Object
         $openRoles = is_array($startup->open_roles) ? $startup->open_roles : [];
         $stageMap = [
             'idea'     => 'Idea',
@@ -215,52 +209,129 @@ class CardTransformerService
             'seed'     => 'Seed',
             'series_a' => 'Series A'
         ];
-        $stageLabel = $startup->stage ? ($stageMap[strtolower($startup->stage)] ?? ucwords(str_replace('_', ' ', $startup->stage))) : null;
+        $stageValue = $startup->stage ? strtolower($startup->stage) : 'idea';
+        $stageLabel = $stageMap[$stageValue] ?? ucwords(str_replace('_', ' ', $startup->stage ?? 'Idea'));
 
         $teamStageBlock = [
             'teamSize'    => $startup->team_size ?? 1,
             'stage'       => $stageLabel,
-            'industry'    => $primaryLabel,
+            'industry'    => $industryDisplay,
             'hiringCount' => count($openRoles)
         ];
 
-        // Journey Object (API-MACHMAKING)
+        // Journey Object
         $journeyBlock = $this->buildJourney($startup->stage);
 
         // --- Founders, Team, Roles ---
         $members = $startup->relationLoaded('members') ? $startup->members : collect();
-        $founderCount    = $members->where('role_id', 'founder')->count() ?: 1; // at minimum the owner
+        $founderCount    = $members->where('role_id', 'founder')->count() ?: 1;
         $rolesCovered    = $members->pluck('role_id')->filter()->unique()->values()->toArray();
-        $openRoles       = is_array($startup->open_roles) ? $startup->open_roles : [];
 
-        // Missing skills = open_roles minus already covered roles
         $missingRoles = array_values(array_diff(
             array_map('strtolower', $openRoles),
             array_map('strtolower', $rolesCovered)
         ));
 
-        // --- Commitment from looking_for data ---
+        // --- CON-75 Specific Fields ---
+        $problem = $owner ? $this->getOnboardingValue($owner, 'q_problem') : null;
+        $solution = $owner ? $this->getOnboardingValue($owner, 'q_solution') : null;
+        $targetUsers = $owner ? $this->getOnboardingValue($owner, 'q_target_users') : null;
+
+        $descriptionBlock = [
+            'intro' => $startup->tagline ?? $startup->description,
+            'problem' => is_array($problem) ? implode(', ', $problem) : $problem,
+            'solution' => is_array($solution) ? implode(', ', $solution) : $solution,
+            'targetUsers' => is_array($targetUsers) ? implode(', ', $targetUsers) : $targetUsers,
+        ];
+
+        $interests = $owner ? $this->getOnboardingValuesAsLabels($owner, ['q_industries_interest']) : [];
+        
+        $workArrangementRaw = $owner ? $this->getOnboardingValue($owner, 'q_work_arrangement') : null;
+        $workArrangement = [];
+        if (is_array($workArrangementRaw)) {
+             foreach($workArrangementRaw as $wa) {
+                 $workArrangement[] = ['id' => $wa, 'label' => ucwords(str_replace('_', ' ', $wa))];
+             }
+        } elseif (is_string($workArrangementRaw)) {
+             $workArrangement[] = ['id' => $workArrangementRaw, 'label' => ucwords(str_replace('_', ' ', $workArrangementRaw))];
+        } else {
+             $workArrangement = [
+                ['id' => 'remote', 'label' => 'Remote'],
+                ['id' => 'hybrid', 'label' => 'Hybrid']
+             ];
+        }
+
+        $openRolesList = [];
+        foreach ($openRoles as $idx => $role) {
+             $openRolesList[] = [
+                 'id' => "startup_{$startup->id}_{$idx}",
+                 'title' => ucwords(str_replace('_', ' ', $role)),
+             ];
+        }
+
         $lookingFor = is_array($startup->looking_for) ? $startup->looking_for : [];
+        $lookingForDisplay = [];
+        if (!empty($lookingFor['commitment'])) {
+            $lookingForDisplay[] = ucwords(str_replace('_', ' ', $lookingFor['commitment']));
+        }
+        if (empty($lookingForDisplay)) {
+             $lookingForDisplay = ["Co-Founder", "Team members"];
+        }
+
+        // --- Premium Block ---
+        $premiumBlock = [
+            'locked' => !$isPro,
+            'unlockMessage' => 'Upgrade to premium to see all information.',
+            'fields' => [
+                'traction' => [
+                    'locked' => !$isPro,
+                    'label' => 'Traction',
+                    'preview' => !$isPro ? 'User metrics and growth details' : null,
+                ],
+                'links' => [
+                    'locked' => !$isPro,
+                    'label' => 'Website & social links',
+                    'preview' => !$isPro ? 'Website, LinkedIn, X, Instagram, pitch deck' : null,
+                ],
+                'teamComposition' => [
+                    'locked' => !$isPro,
+                    'label' => 'Team composition',
+                    'preview' => !$isPro ? 'Founder setup and joined team details' : null,
+                ],
+                'compensation' => [
+                    'locked' => !$isPro,
+                    'label' => 'Equity & salary',
+                    'preview' => !$isPro ? 'Compensation expectations and offer details' : null,
+                ],
+            ],
+        ];
+
+        if ($isPro) {
+            unset($premiumBlock['fields']['traction']['preview']);
+            $premiumBlock['fields']['traction']['value'] = $this->buildPremiumTraction($startup, $owner);
+
+            unset($premiumBlock['fields']['links']['preview']);
+            $premiumBlock['fields']['links']['value'] = $this->buildPremiumLinks($startup, $owner);
+
+            unset($premiumBlock['fields']['teamComposition']['preview']);
+            $premiumBlock['fields']['teamComposition']['value'] = $this->buildPremiumTeamComposition($startup, $owner, $founderCount, $rolesCovered);
+
+            unset($premiumBlock['fields']['compensation']['preview']);
+            $premiumBlock['fields']['compensation']['value'] = $this->buildPremiumCompensation($lookingFor);
+        }
+
+        // For backward compatibility
         $commitmentLabel = $lookingFor['commitment'] ?? null;
         $commitmentBlock = [
             'value' => $commitmentLabel,
-            'label' => $commitmentLabel
-                ? ucwords(str_replace('_', ' ', $commitmentLabel))
-                : 'Open to discuss',
+            'label' => $commitmentLabel ? ucwords(str_replace('_', ' ', $commitmentLabel)) : 'Open to discuss',
         ];
 
-        // --- Offering (equity + paid) ---
         $offeringBlock = [
-            'equity'  => $lookingFor['equity']    ?? null,   // e.g. "1-5%"
-            'paid'    => $lookingFor['paid']       ?? null,   // true/false/null
+            'equity'  => $lookingFor['equity'] ?? null,
+            'paid'    => $lookingFor['paid'] ?? null,
             'label'   => $this->buildOfferingLabel($lookingFor),
         ];
-
-        // --- Traction (dynamic based on stage) ---
-        $tractionBlock = $this->buildTraction($startup);
-
-        // --- Links (dynamic based on stage) ---
-        $linksBlock = $this->buildStartupLinks($startup, $owner);
 
         return [
             'entityType'    => 'startup',
@@ -268,30 +339,38 @@ class CardTransformerService
             'startupId'     => $startup->id,
             'name'          => $startup->name,
             'logoUrl'       => $startup->logo_url,
-            'tagline'       => $startup->tagline,
             'badge'         => ['label' => $startup->stage ? strtoupper($startup->stage) : null],
+            'businessStage' => [
+                'value' => $stageValue,
+                'label' => $stageLabel
+            ],
+            'description'   => $descriptionBlock,
+            'industry'      => $industryBlock,
+            'interests'     => $interests,
+            'workArrangement' => $workArrangement,
             'founder'       => $owner ? [
                 'name'  => $owner->name,
                 'title' => $owner->position ?? 'Founder',
             ] : null,
             'match'         => $matchBlock,
-            'industry'      => $industryBlock,
             'team'          => [
                 'memberCount'    => $startup->team_size ?? 1,
-                'founderCount'   => $founderCount,
-                'rolesCovered'   => $rolesCovered,
                 'display'        => ($startup->team_size ?? 1) . ' member' . (($startup->team_size ?? 1) > 1 ? 's' : ''),
             ],
-            'summary'       => $startup->description,
-            'openRoles'     => $openRoles,
-            'missingRoles'  => $missingRoles,
-            'lookingFor'    => $this->buildLookingFor($startup),
+            'summary'       => $startup->description ?? $startup->tagline ?? '',
+            'openRoles'     => $openRolesList,
+            'lookingFor'    => $lookingForDisplay,
+            'premium'       => $premiumBlock,
             'teamStage'     => $teamStageBlock,
             'journey'       => $journeyBlock,
+
+            // Legacy compatibility fields
+            'tagline'       => $startup->tagline,
+            'missingRoles'  => $missingRoles,
             'commitment'    => $commitmentBlock,
             'offering'      => $offeringBlock,
-            'traction'      => $tractionBlock,
-            'links'         => $linksBlock,
+            'traction'      => $this->buildTraction($startup),
+            'links'         => $this->buildStartupLinks($startup, $owner),
             'sections'      => [
                 'team' => [
                     'title' => 'Team & Stage',
@@ -762,5 +841,133 @@ class CardTransformerService
 
         return implode(' · ', $parts) ?: 'Open to discuss';
     }
-}
 
+    private function getOnboardingValue(User $user, string $questionId)
+    {
+        if (!$user->relationLoaded('onboardingSession') || !$user->onboardingSession) {
+            return null;
+        }
+
+        $session = $user->onboardingSession;
+        if (!$session->relationLoaded('responses')) {
+            return null;
+        }
+
+        foreach ($session->responses as $response) {
+            if ($response->question_id === $questionId) {
+                return $response->value;
+            }
+        }
+
+        return null;
+    }
+
+    private function buildPremiumTraction(Startup $startup, ?User $owner): array
+    {
+        $stage = strtolower($startup->stage ?? 'idea');
+        $items = [];
+
+        if ($stage === 'idea') {
+            $hasProto = $owner ? $this->getOnboardingValue($owner, 'q_has_prototype') : null;
+            $items[] = ['id' => 'q_has_prototype', 'label' => 'Has Prototype', 'value' => $hasProto ? 'Yes' : 'No'];
+            $items[] = ['id' => 'q_waitlist_size', 'label' => 'Waitlist', 'value' => $owner ? $this->getOnboardingValue($owner, 'q_waitlist_size') : null];
+            $items[] = ['id' => 'q_validation_methods', 'label' => 'Validation', 'value' => $owner ? $this->getOnboardingValue($owner, 'q_validation_methods') : null];
+        } elseif ($stage === 'mvp') {
+            $items[] = ['id' => 'q_user_count', 'label' => 'Users', 'value' => $owner ? $this->getOnboardingValue($owner, 'q_user_count') : null];
+            $items[] = ['id' => 'q_mau', 'label' => 'MAU', 'value' => $owner ? $this->getOnboardingValue($owner, 'q_mau') : null];
+            $items[] = ['id' => 'q_mvp_revenue', 'label' => 'Revenue', 'value' => $owner ? $this->getOnboardingValue($owner, 'q_mvp_revenue') : null];
+            $items[] = ['id' => 'q_growth_rate', 'label' => 'Growth Rate', 'value' => $owner ? $this->getOnboardingValue($owner, 'q_growth_rate') : null];
+        } elseif ($stage === 'live' || $stage === 'seed') {
+            $items[] = ['id' => 'q_mrr', 'label' => 'MRR', 'value' => $owner ? $this->getOnboardingValue($owner, 'q_mrr') : null];
+            $items[] = ['id' => 'q_live_users', 'label' => 'Active Users', 'value' => $owner ? $this->getOnboardingValue($owner, 'q_live_users') : null];
+            $items[] = ['id' => 'q_retention', 'label' => 'Retention', 'value' => $owner ? $this->getOnboardingValue($owner, 'q_retention') : null];
+            $items[] = ['id' => 'q_funding_raised', 'label' => 'Funding', 'value' => $owner ? $this->getOnboardingValue($owner, 'q_funding_raised') : null];
+        } else {
+            $items[] = ['id' => 'team_size', 'label' => 'Team Size', 'value' => $startup->team_size];
+        }
+
+        // Clean up nulls
+        $items = array_filter($items, fn($item) => $item['value'] !== null);
+
+        return [
+            'stage' => $stage,
+            'items' => array_values($items)
+        ];
+    }
+
+    private function buildPremiumLinks(Startup $startup, ?User $owner): array
+    {
+        $links = [];
+        
+        $website = $owner ? $this->getOnboardingValue($owner, 'q_website') : null;
+        if ($website) $links[] = ['label' => 'Website', 'url' => is_array($website) ? $website[0] : $website];
+
+        $linkedin = $owner ? $this->getOnboardingValue($owner, 'q_startup_linkedin') : null;
+        if ($linkedin) $links[] = ['label' => 'LinkedIn', 'url' => is_array($linkedin) ? $linkedin[0] : $linkedin];
+
+        $twitter = $owner ? $this->getOnboardingValue($owner, 'q_twitter') : null;
+        if ($twitter) $links[] = ['label' => 'X', 'url' => is_array($twitter) ? $twitter[0] : $twitter];
+
+        $instagram = $owner ? $this->getOnboardingValue($owner, 'q_instagram') : null;
+        if ($instagram) $links[] = ['label' => 'Instagram', 'url' => is_array($instagram) ? $instagram[0] : $instagram];
+
+        $pitch = $owner ? $this->getOnboardingValue($owner, 'q_pitch_deck') : null;
+        if ($pitch) $links[] = ['label' => 'Pitch deck', 'url' => is_array($pitch) ? $pitch[0] : $pitch];
+
+        return $links;
+    }
+
+    private function buildPremiumTeamComposition(Startup $startup, ?User $owner, int $founderCount, array $rolesCovered): array
+    {
+        $fCount = $owner ? $this->getOnboardingValue($owner, 'q_founder_count') : null;
+        if (is_array($fCount)) $fCount = $fCount[0];
+        
+        $fCountLabel = $fCount;
+        if ($fCount === 'solo') $fCountLabel = 'Solo Founder';
+        if ($fCount === 'two') $fCountLabel = '2 Founders';
+        if ($fCount === 'three_plus') $fCountLabel = '3+ Founders';
+
+        $hasTeamRaw = $owner ? $this->getOnboardingValue($owner, 'q_has_team') : null;
+        $hasTeam = false;
+        if ($hasTeamRaw === 'yes' || $hasTeamRaw === true || $startup->team_size > 1) {
+             $hasTeam = true;
+        }
+
+        $teamSize = $owner ? $this->getOnboardingValue($owner, 'q_team_size') : $startup->team_size;
+        $teamRolesRaw = $owner ? $this->getOnboardingValue($owner, 'q_team_roles') : $rolesCovered;
+
+        $teamRoles = [];
+        if (is_array($teamRolesRaw)) {
+             foreach ($teamRolesRaw as $tr) {
+                  $teamRoles[] = ucwords(str_replace('_', ' ', $tr));
+             }
+        } elseif (is_string($teamRolesRaw)) {
+             $teamRoles[] = ucwords(str_replace('_', ' ', $teamRolesRaw));
+        }
+
+        return [
+            'founderCount' => $fCount ?? 'solo',
+            'founderCountLabel' => $fCountLabel ?? '1 Founder',
+            'coveredRoles' => array_map(fn($r) => ucwords(str_replace('_', ' ', $r)), $rolesCovered),
+            'hasTeam' => $hasTeam,
+            'teamSize' => is_array($teamSize) ? ($teamSize[0] ?? null) : $teamSize,
+            'teamRoles' => $teamRoles,
+            'joinedMemberCount' => $startup->team_size ?? 1,
+        ];
+    }
+
+    private function buildPremiumCompensation(array $lookingFor): array
+    {
+        $equityRange = $lookingFor['equity'] ?? null;
+        $salaryAvailable = $lookingFor['paid'] ?? false;
+        $salaryRange = $lookingFor['salary_range'] ?? null;
+
+        return [
+            'equityAvailable' => !empty($equityRange),
+            'equityRange' => $equityRange,
+            'salaryAvailable' => (bool) $salaryAvailable,
+            'salaryRange' => $salaryRange,
+            'notes' => $lookingFor['compensation_notes'] ?? null,
+        ];
+    }
+}
